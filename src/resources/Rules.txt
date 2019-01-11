@@ -1,0 +1,7 @@
+1024 byte = 1 kilobyte
+2 bar = 12 ring
+16.8 ring = 2 pyramid
+4 hare = 1 cat
+5 cat = 0.5 giraffe
+1 byte = 8 bit
+15 ring = 2.5 bar

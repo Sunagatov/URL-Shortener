@@ -1,0 +1,4 @@
+1 pyramid = ? bar
+1 giraffe = ? hare
+2 kilobyte = ? bit
+0.5 byte = ? cat
