@@ -1,14 +1,15 @@
-package zufar.com.thirdTask;
+package zufar.com.thirdTask.handlers;
+
+import zufar.com.thirdTask.Statement;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class StatementHandler {
-
+public class RulesHandler {
     private static Map<RuleKey, Double> rules = new HashMap<>();
 
-    static Map<RuleKey, Double> createRulesByStatements(List<Statement> statements) {
+    public static Map<RuleKey, Double> createRulesByStatements(List<Statement> statements) {
         for (Statement statement : statements) {
             createRuleByStatement(statement);
         }
@@ -16,7 +17,7 @@ class StatementHandler {
     }
 
     private static void createRuleByStatement(Statement statement) throws IllegalArgumentException {
-        if (!isStatementCorrect(statement))
+        if (!StatementHandler.isStatementCorrect(statement))
             throw new IllegalArgumentException("Error! Adding new statement is impossible! Statement is incorrect!");
         String firstUnit = statement.firstUnit;
         String secondUnit = statement.secondUnit;
@@ -33,12 +34,8 @@ class StatementHandler {
         createNewRulesByStatement(statement);
     }
 
-    private static boolean isStatementCorrect(Statement statement) {
-        String firstValue = statement.firstUnit;
-        String secondValue = statement.secondUnit;
-        Double value = statement.value;
-        return value == null || value != 0 || firstValue == null || !firstValue.isEmpty()
-                || secondValue == null || !secondValue.isEmpty();
+    private static boolean isAbleToCreateNewRule(String firstUnit1, String firstUnit2, String secondUnit1, String secondUnit2) {
+        return firstUnit1.equals(firstUnit2) && !secondUnit1.equals(secondUnit2);
     }
 
     private static void createNewRulesByStatement(Statement statement) {
@@ -64,23 +61,9 @@ class StatementHandler {
         rules.putAll(newRules);
     }
 
-    private static boolean isAbleToCreateNewRule(String firstUnit1, String firstUnit2, String secondUnit1, String secondUnit2) {
-        return firstUnit1.equals(firstUnit2) && !secondUnit1.equals(secondUnit2);
-    }
-
-    static String handleStatement(Statement statement) {
-        RuleKey key = new RuleKey(statement.firstUnit, statement.secondUnit);
-        for (Map.Entry<RuleKey, Double> current : rules.entrySet()) {
-            if (current.getKey().firstUnit.equals(key.firstUnit) && current.getKey().secondUnit.equals(key.secondUnit)) {
-                Double neededValue = current.getValue();
-                return key + " - " + neededValue;
-            }
-        }
-        return "Conversion is impossible!";
-    }
-
-    static class RuleKey {
+    public static class RuleKey {
         final String firstUnit;
+
         final String secondUnit;
 
         RuleKey(String firstUnit, String secondUnit) {
@@ -119,20 +102,21 @@ class StatementHandler {
             }
             return this.secondUnit.equals(other.secondUnit);
         }
+
     }
 
     private static boolean isRuleKeyInRules(RuleKey pairKey) {
         return rules.containsKey(pairKey);
     }
 
-    static void printRules() {
+    public static void printRules() {
         if (rules.isEmpty()) {
             System.out.println("Rules are absent!");
             return;
         }
         System.out.println("All rules:");
         System.out.println("---------------------------------------");
-        for (Map.Entry<StatementHandler.RuleKey, Double> current : rules.entrySet()) {
+        for (Map.Entry<RuleKey, Double> current : rules.entrySet()) {
             System.out.println(current.getKey() + " - " + current.getValue());
         }
         System.out.println("---------------------------------------");

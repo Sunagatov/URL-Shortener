@@ -1,13 +1,13 @@
 package zufar.com.thirdTask;
 
-class Statement {
-    final String firstUnit;
-    final String secondUnit;
-    final Double value;
+public class Statement {
+    public final String firstUnit;
+    public final String secondUnit;
+    public final Double value;
     private final Double firstDigit;
     private final Double secondDigit;
 
-    Statement(Double firstDigit, String firstUnit, Double secondDigit, String secondUnit) {
+    public Statement(Double firstDigit, String firstUnit, Double secondDigit, String secondUnit) {
         this.firstDigit = firstDigit;
         this.secondDigit = secondDigit;
         this.firstUnit = firstUnit;
