@@ -1,4 +1,4 @@
-package zufar.com;
+package com.zufar;
 
 import static org.junit.Assert.assertTrue;
 

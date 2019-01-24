@@ -1,4 +1,4 @@
-package zufar.com.thirdTask.exceptions;
+package com.zufar.thirdTask.exceptions;
 
 public class InvalidDataException extends Exception {
 

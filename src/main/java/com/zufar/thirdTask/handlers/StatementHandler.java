@@ -1,6 +1,6 @@
-package zufar.com.thirdTask.handlers;
+package com.zufar.thirdTask.handlers;
 
-import zufar.com.thirdTask.Statement;
+import com.zufar.thirdTask.Statement;
 
 import java.util.List;
 import java.util.Map;

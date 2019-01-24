@@ -1,4 +1,4 @@
-package zufar.com.firstTask;
+package com.zufar.firstTask;
 
 public class FirstSolution {
     public static void main(String[] args) {

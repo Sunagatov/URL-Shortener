@@ -1,7 +1,7 @@
-package zufar.com.thirdTask.handlers.dataHandlers;
+package com.zufar.thirdTask.handlers.dataHandlers;
 
-import zufar.com.thirdTask.Statement;
-import zufar.com.thirdTask.exceptions.InvalidDataException;
+import com.zufar.thirdTask.exceptions.InvalidDataException;
+import com.zufar.thirdTask.Statement;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -66,26 +66,5 @@ public abstract class DataHandler {
             throw new InvalidDataException("Error! A statement can not have two digits as '?'.");
         }
         return new Statement(firstDigit, firstUnit, secondDigit, secondUnit);
-    }
-
-    public static List<Statement> getDefaultStatements() {
-        List<Statement> statements = new ArrayList<>();
-        statements.add(new Statement(1024.0, "byte", 1.0, "kilobyte"));
-        statements.add(new Statement(2.0, "bar", 12.0, "ring"));
-        statements.add(new Statement(16.8, "ring", 2.0, "pyramid"));
-        statements.add(new Statement(1.0, "byte", 8.0, "bit"));
-        statements.add(new Statement(15.0, "ring", 2.5, "bar"));
-        statements.add(new Statement(4.0, "hare", 1.0, "cat"));
-        statements.add(new Statement(5.0, "cat", 0.5, "giraffe"));
-        return statements;
-    }
-
-    public static List<Statement> getInputStatements() {
-        List<Statement> inputStatements = new ArrayList<>();
-        inputStatements.add(new Statement(1.0, "pyramid", null, "bar"));
-        inputStatements.add(new Statement(1.0, "giraffe", null, "hare"));
-        inputStatements.add(new Statement(0.5, "byte", null, "cat"));
-        inputStatements.add(new Statement(2.0, "kilobyte", null, "bit"));
-        return inputStatements;
     }
 }

@@ -1,4 +1,4 @@
-package zufar.com.secondTask;
+package com.zufar.secondTask;
 
 import java.io.FileWriter;
 import java.io.IOException;

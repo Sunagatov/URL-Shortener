@@ -1,4 +1,4 @@
-package zufar.com.thirdTask;
+package com.zufar.thirdTask;
 
 public class Statement {
     public final String firstUnit;

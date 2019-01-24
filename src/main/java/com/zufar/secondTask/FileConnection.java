@@ -1,4 +1,4 @@
-package zufar.com.secondTask;
+package com.zufar.secondTask;
 
 import java.io.File;
 import java.io.FileWriter;

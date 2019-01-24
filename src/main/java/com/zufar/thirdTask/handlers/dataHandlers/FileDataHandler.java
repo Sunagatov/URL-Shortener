@@ -1,7 +1,7 @@
-package zufar.com.thirdTask.handlers.dataHandlers;
+package com.zufar.thirdTask.handlers.dataHandlers;
 
-import zufar.com.thirdTask.Statement;
-import zufar.com.thirdTask.exceptions.InvalidDataException;
+import com.zufar.thirdTask.exceptions.InvalidDataException;
+import com.zufar.thirdTask.Statement;
 
 import java.util.*;
 
