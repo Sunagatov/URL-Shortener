@@ -1,11 +1,8 @@
-import org.springframework.cloud.contract.verifier.config.TestMode
-
 plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
     id("org.springframework.boot") version "3.3.3"
     id("io.spring.dependency-management") version "1.1.6"
-    id("org.springframework.cloud.contract") version "4.1.4"
 }
 
 group = "com.zufar"
@@ -14,12 +11,6 @@ version = "0.0.1-SNAPSHOT"
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
-    }
-}
-
-configurations {
-    compileOnly {
-        extendsFrom(configurations.annotationProcessor.get())
     }
 }
 
@@ -59,7 +50,6 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.springframework.ai:spring-ai-spring-boot-testcontainers")
     testImplementation("org.springframework.batch:spring-batch-test")
-    testImplementation("org.springframework.cloud:spring-cloud-starter-contract-verifier")
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:mongodb")
@@ -79,14 +69,6 @@ kotlin {
     }
 }
 
-contracts {
-    testMode = TestMode.WEBTESTCLIENT
-}
-
 tasks.withType<Test> {
-    useJUnitPlatform()
-}
-
-tasks.contractTest {
     useJUnitPlatform()
 }
