@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.service
+package com.zufar.urlshortener.shortener
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

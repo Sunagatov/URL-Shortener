@@ -1,8 +1,8 @@
 package com.zufar.urlshortener.controller
 
-import com.zufar.urlshortener.service.InMemoryUrlRetriever
+import com.zufar.urlshortener.shortener.InMemoryUrlRetriever
 import com.zufar.urlshortener.dto.UrlRequest
-import com.zufar.urlshortener.service.InMemoryUrlShortener
+import com.zufar.urlshortener.shortener.ReactiveUrlShortener
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,7 +16,7 @@ import reactor.core.publisher.Mono
 class UrlShortenerControllerTests(@Autowired val webTestClient: WebTestClient) {
 
     @MockBean
-    private lateinit var urlShortener: InMemoryUrlShortener
+    private lateinit var urlShortener: ReactiveUrlShortener
 
     @MockBean
     private lateinit var urlRetriever: InMemoryUrlRetriever

@@ -1,9 +1,9 @@
 package com.zufar.urlshortener.controller
 
-import com.zufar.urlshortener.service.InMemoryUrlRetriever
+import com.zufar.urlshortener.shortener.InMemoryUrlRetriever
 import com.zufar.urlshortener.dto.UrlRequest
 import com.zufar.urlshortener.dto.UrlResponse
-import com.zufar.urlshortener.service.InMemoryUrlShortener
+import com.zufar.urlshortener.shortener.UrlShortener
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -16,12 +16,13 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/api")
-class UrlShortenerController(val urlShortenerService: InMemoryUrlShortener,
-                             val inMemoryUrlRetriever: InMemoryUrlRetriever) {
+class UrlShortenerController(val urlShortener: UrlShortener,
+                             val inMemoryUrlRetriever: InMemoryUrlRetriever
+) {
 
     @PostMapping("/shorten")
     fun shortenUrl(@RequestBody request: UrlRequest): Mono<ResponseEntity<UrlResponse>> {
-        return urlShortenerService.shortenUrl(request.url)
+        return urlShortener.shortenUrl(request.url)
             .map { shortUrl -> ResponseEntity.ok(UrlResponse(shortUrl)) }
             .onErrorResume { Mono.just(ResponseEntity.badRequest().build()) }
     }

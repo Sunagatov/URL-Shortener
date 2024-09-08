@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.service
+package com.zufar.urlshortener.shortener
 
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
