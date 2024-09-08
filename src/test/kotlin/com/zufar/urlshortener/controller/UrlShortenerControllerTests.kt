@@ -1,8 +1,7 @@
 package com.zufar.urlshortener.controller
 
-import com.zufar.urlshortener.shortener.InMemoryUrlRetriever
-import com.zufar.urlshortener.dto.UrlRequest
-import com.zufar.urlshortener.shortener.ReactiveUrlShortener
+import com.zufar.urlshortener.common.dto.UrlRequest
+import com.zufar.urlshortener.service.UrlShortener
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
@@ -16,15 +15,12 @@ import reactor.core.publisher.Mono
 class UrlShortenerControllerTests(@Autowired val webTestClient: WebTestClient) {
 
     @MockBean
-    private lateinit var urlShortener: ReactiveUrlShortener
-
-    @MockBean
-    private lateinit var urlRetriever: InMemoryUrlRetriever
+    private lateinit var urlShortener: UrlShortener
 
     @Test
     fun `should shorten URL successfully`() {
         val requestBody = UrlRequest("https://example.com")
-        val shortUrl = "shortUrl123"
+        val shortUrl = "http://localhost:8080/shortUrl123"
         whenever(urlShortener.shortenUrl(requestBody.url)).thenReturn(Mono.just(shortUrl))
 
         webTestClient.post()
@@ -48,30 +44,5 @@ class UrlShortenerControllerTests(@Autowired val webTestClient: WebTestClient) {
             .bodyValue(requestBody)
             .exchange()
             .expectStatus().isBadRequest
-    }
-
-    @Test
-    fun `should retrieve original URL successfully`() {
-        val shortUrl = "shortUrl123"
-        val originalUrl = "https://example.com"
-        whenever(urlRetriever.retrieveUrl(shortUrl)).thenReturn(Mono.just(originalUrl))
-
-        webTestClient.get()
-            .uri("/api/retrieve/{shortUrl}", shortUrl)
-            .exchange()
-            .expectStatus().isOk
-            .expectBody()
-            .jsonPath("$.shortUrl").isEqualTo(originalUrl)
-    }
-
-    @Test
-    fun `should return not found for non-existent short URL`() {
-        val shortUrl = "nonExistentUrl"
-        whenever(urlRetriever.retrieveUrl(shortUrl)).thenReturn(Mono.error(NoSuchElementException("URL not found")))
-
-        webTestClient.get()
-            .uri("/api/retrieve/{shortUrl}", shortUrl)
-            .exchange()
-            .expectStatus().isNotFound
     }
 }

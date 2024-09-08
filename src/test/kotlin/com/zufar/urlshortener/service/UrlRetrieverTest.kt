@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.shortener
+package com.zufar.urlshortener.service
 
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -8,13 +8,13 @@ import org.mockito.kotlin.whenever
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 
-class InMemoryUrlRetrieverTest {
+class UrlRetrieverTest {
 
-    private lateinit var inMemoryUrlRetriever: InMemoryUrlRetriever
+    private lateinit var urlRetriever: UrlRetriever
 
     @BeforeEach
     fun setUp() {
-        inMemoryUrlRetriever = mock()
+        urlRetriever = mock()
     }
 
     @Test
@@ -22,31 +22,31 @@ class InMemoryUrlRetrieverTest {
         val shortUrl = "shortUrl123"
         val originalUrl = "https://example.com"
 
-        whenever(inMemoryUrlRetriever.retrieveUrl(shortUrl))
+        whenever(urlRetriever.retrieveUrl(shortUrl))
             .thenReturn(Mono.just(originalUrl))
 
-        val result = inMemoryUrlRetriever.retrieveUrl(shortUrl)
+        val result = urlRetriever.retrieveUrl(shortUrl)
 
         StepVerifier.create(result)
             .expectNext(originalUrl)
             .verifyComplete()
 
-        verify(inMemoryUrlRetriever).retrieveUrl(shortUrl)
+        verify(urlRetriever).retrieveUrl(shortUrl)
     }
 
     @Test
     fun `should return error when short URL does not exist`() {
         val shortUrl = "nonExistentUrl"
 
-        whenever(inMemoryUrlRetriever.retrieveUrl(shortUrl))
+        whenever(urlRetriever.retrieveUrl(shortUrl))
             .thenReturn(Mono.error(NoSuchElementException("URL not found")))
 
-        val result = inMemoryUrlRetriever.retrieveUrl(shortUrl)
+        val result = urlRetriever.retrieveUrl(shortUrl)
 
         StepVerifier.create(result)
             .expectError(NoSuchElementException::class.java)
             .verify()
 
-        verify(inMemoryUrlRetriever).retrieveUrl(shortUrl)
+        verify(urlRetriever).retrieveUrl(shortUrl)
     }
 }

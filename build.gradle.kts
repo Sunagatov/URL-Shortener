@@ -29,6 +29,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
 
     // Kotlin and Reactor
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -51,6 +52,7 @@ dependencies {
     testImplementation("org.mockito:mockito-core:${property("mockitoVersion")}")
     testImplementation("org.mockito.kotlin:mockito-kotlin:${property("mockitoKotlinVersion")}")
     testImplementation("org.mockito:mockito-inline:${property("mockitoInlineVersion")}")
+    testImplementation("org.jetbrains.kotlin:kotlin-test") // Add this line
 }
 
 dependencyManagement {

@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.encoder
+package com.zufar.urlshortener.service
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test

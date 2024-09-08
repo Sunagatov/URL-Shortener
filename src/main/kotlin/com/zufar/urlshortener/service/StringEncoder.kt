@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.encoder
+package com.zufar.urlshortener.service
 
 import java.nio.charset.StandardCharsets
 import java.util.zip.CRC32
