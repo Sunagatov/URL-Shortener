@@ -41,10 +41,6 @@ dependencies {
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
-    // Development Tools
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
-    developmentOnly("org.springframework.boot:spring-boot-docker-compose")
-
     // Testing dependencies
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webflux")
@@ -52,7 +48,7 @@ dependencies {
     testImplementation("org.mockito:mockito-core:${property("mockitoVersion")}")
     testImplementation("org.mockito.kotlin:mockito-kotlin:${property("mockitoKotlinVersion")}")
     testImplementation("org.mockito:mockito-inline:${property("mockitoInlineVersion")}")
-    testImplementation("org.jetbrains.kotlin:kotlin-test") // Add this line
+    testImplementation("org.jetbrains.kotlin:kotlin-test")
 }
 
 dependencyManagement {
