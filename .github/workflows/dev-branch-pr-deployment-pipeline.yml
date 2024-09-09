@@ -40,5 +40,6 @@ jobs:
           password: ${{ secrets.DEV_SSH_PASSWORD }}
           script: |
             echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u ${{ vars.DOCKER_HUB_ACCOUNT_NAME }} --password-stdin
+            cd /home/ec2-user/url-shortener
             docker-compose pull
             docker-compose up -d
