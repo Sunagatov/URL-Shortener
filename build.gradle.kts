@@ -19,10 +19,11 @@ repositories {
     maven { url = uri("https://repo.spring.io/milestone") }
 }
 
-extra["springCloudVersion"] = "2023.0.3"
-extra["mockitoVersion"] = "5.13.0"
-extra["mockitoKotlinVersion"] = "5.4.0"
-extra["mockitoInlineVersion"] = "5.2.0"
+val springCloudVersion = "2023.0.3"
+val mockitoVersion = "5.13.0"
+val mockitoKotlinVersion = "5.4.0"
+val mockitoInlineVersion = "5.2.0"
+val springdocVersion = "2.1.0"
 
 dependencies {
     // Spring Boot Starters
@@ -45,15 +46,15 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webflux")
     testImplementation("io.projectreactor:reactor-test")
-    testImplementation("org.mockito:mockito-core:${property("mockitoVersion")}")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:${property("mockitoKotlinVersion")}")
-    testImplementation("org.mockito:mockito-inline:${property("mockitoInlineVersion")}")
+    testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
+    testImplementation("org.mockito:mockito-inline:$mockitoInlineVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 }
 
 dependencyManagement {
     imports {
-        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
     }
 }
 
