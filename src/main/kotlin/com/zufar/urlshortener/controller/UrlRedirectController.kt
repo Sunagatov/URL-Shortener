@@ -14,13 +14,13 @@ import java.net.URI
 @RequestMapping
 class UrlRedirectController(val urlRetriever: UrlRetriever) {
 
-    @GetMapping("/{shortUrl}")
-    fun redirect(@PathVariable shortUrl: String): Mono<ResponseEntity<Void>> {
+    @GetMapping("/url/{shortUrl}")
+    fun redirect(@PathVariable shortUrl: String): Mono<ResponseEntity<Unit>> {
         return urlRetriever.retrieveUrl(shortUrl)
             .map { originalUrl ->
                 ResponseEntity.status(HttpStatus.FOUND)
                     .location(URI.create(originalUrl))
-                    .build<Void>()
+                    .build<Unit>()
             }
             .onErrorResume { Mono.just(ResponseEntity.notFound().build()) }
     }

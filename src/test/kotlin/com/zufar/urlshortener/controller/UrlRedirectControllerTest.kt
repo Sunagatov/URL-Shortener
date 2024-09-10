@@ -22,7 +22,7 @@ class UrlRedirectControllerTest(@Autowired val webTestClient: WebTestClient) {
         whenever(urlRetriever.retrieveUrl(shortUrl)).thenReturn(Mono.just(originalUrl))
 
         webTestClient.get()
-            .uri("/{shortUrl}", shortUrl)
+            .uri("/url/{shortUrl}", shortUrl)
             .exchange()
             .expectStatus().isFound
             .expectHeader().location(originalUrl)
@@ -34,7 +34,7 @@ class UrlRedirectControllerTest(@Autowired val webTestClient: WebTestClient) {
         whenever(urlRetriever.retrieveUrl(shortUrl)).thenReturn(Mono.error(NoSuchElementException("URL not found")))
 
         webTestClient.get()
-            .uri("/{shortUrl}", shortUrl)
+            .uri("/url/{shortUrl}", shortUrl)
             .exchange()
             .expectStatus().isNotFound
     }

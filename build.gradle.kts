@@ -3,6 +3,7 @@ plugins {
     kotlin("plugin.spring") version "1.9.25"
     id("org.springframework.boot") version "3.3.3"
     id("io.spring.dependency-management") version "1.1.6"
+    id("org.openapi.generator") version "7.8.0"
 }
 
 group = "com.zufar"
@@ -17,13 +18,14 @@ java {
 repositories {
     mavenCentral()
     maven { url = uri("https://repo.spring.io/milestone") }
+    maven { url = uri("https://jitpack.io") }
 }
 
 val springCloudVersion = "2023.0.3"
 val mockitoVersion = "5.13.0"
 val mockitoKotlinVersion = "5.4.0"
 val mockitoInlineVersion = "5.2.0"
-val springdocVersion = "2.1.0"
+val springdocVersion = "2.6.0"
 
 dependencies {
     // Spring Boot Starters
@@ -37,6 +39,10 @@ dependencies {
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
+
+    // OpenAPI dependencies for WebFlux
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:$springdocVersion")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-api:$springdocVersion")
 
     // Lombok
     compileOnly("org.projectlombok:lombok")
@@ -66,4 +72,27 @@ kotlin {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+openApiGenerate {
+    generatorName.set("kotlin")
+    inputSpec.set("$projectDir/src/main/resources/openapi/shorten-url-api.yaml")
+    outputDir.set("$buildDir/generated/api")
+    apiPackage.set("com.zufar.urlshortener.api")
+    modelPackage.set("com.zufar.urlshortener.dto")
+    configOptions.put("useJakartaEe", "true")
+    configOptions.put("interfaceOnly", "true")
+    configOptions.put("useTags", "true")
+}
+
+sourceSets {
+    main {
+        kotlin {
+            srcDirs("${layout.buildDirectory}/generated/api/src/main/kotlin")
+        }
+    }
+}
+
+tasks.named("compileKotlin") {
+    dependsOn(tasks.named("openApiGenerate"))
 }

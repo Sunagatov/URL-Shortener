@@ -32,7 +32,7 @@ class UrlShortener(
 
         val shortUrl = urlRepository.save(urlMapping)
             .map { savedMapping ->
-                val shortenedUrl = "$baseUrl${savedMapping.shortUrl}"
+                val shortenedUrl = "$baseUrl/url/${savedMapping.shortUrl}"
                 log.info("Shortened URL created: {}", shortenedUrl)
                 shortenedUrl
             }
