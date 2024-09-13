@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.zufar"
-version = "0.0.1-SNAPSHOT"
+version = "0.0.1"
 
 java {
     toolchain {
@@ -26,6 +26,8 @@ val mockitoVersion = "5.13.0"
 val mockitoKotlinVersion = "5.4.0"
 val mockitoInlineVersion = "5.2.0"
 val springdocVersion = "2.6.0"
+val javaxValidationApiVersion = "2.0.1.Final"
+
 
 dependencies {
     // Spring Boot Starters
@@ -33,6 +35,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("javax.validation:validation-api:$javaxValidationApiVersion")
 
     // Kotlin and Reactor
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -77,7 +81,7 @@ tasks.withType<Test> {
 openApiGenerate {
     generatorName.set("kotlin")
     inputSpec.set("$projectDir/src/main/resources/openapi/shorten-url-api.yaml")
-    outputDir.set("$buildDir/generated/api")
+    outputDir.set("${layout.buildDirectory}/generated/api")
     apiPackage.set("com.zufar.urlshortener.api")
     modelPackage.set("com.zufar.urlshortener.dto")
     configOptions.put("useJakartaEe", "true")
