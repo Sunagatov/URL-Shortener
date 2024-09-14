@@ -19,7 +19,7 @@ class UrlShortenerControllerTests(@Autowired val webTestClient: WebTestClient) {
 
     @Test
     fun `should shorten URL successfully`() {
-        val requestBody = UrlRequest("https://example.com")
+        val requestBody = UrlRequest("https://iced-latte.uk")
         val shortUrl = "http://localhost:8080/shortUrl123"
         whenever(urlShortener.shortenUrl(requestBody.url)).thenReturn(Mono.just(shortUrl))
 
@@ -45,4 +45,5 @@ class UrlShortenerControllerTests(@Autowired val webTestClient: WebTestClient) {
             .exchange()
             .expectStatus().isBadRequest
     }
+
 }

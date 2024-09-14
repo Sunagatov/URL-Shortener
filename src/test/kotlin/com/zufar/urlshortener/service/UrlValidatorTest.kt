@@ -1,51 +1,52 @@
 package com.zufar.urlshortener.service
 
 import org.junit.jupiter.api.Test
-import kotlin.test.assertFailsWith
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
 
 class UrlValidatorTest {
 
     private val urlValidator = UrlValidator()
 
     @Test
-    fun `should throw exception for invalid protocol`() {
-        val invalidUrl = "ftp://example.com"
-        val exception = assertFailsWith<IllegalArgumentException> {
-            urlValidator.validateUrl(invalidUrl)
-        }
-        assert(exception.message?.contains("URL must use HTTP or HTTPS protocol") == true)
+    fun `should not throw exception for valid URL`() {
+        val validUrl = "https://example.com"
+        assertDoesNotThrow { urlValidator.validateUrl(validUrl) }
     }
 
     @Test
-    fun `should throw exception for missing host`() {
-        val invalidUrl = "http:///path"
-        val exception = assertFailsWith<IllegalArgumentException> {
-            urlValidator.validateUrl(invalidUrl)
+    fun `should throw exception for URL with spaces`() {
+        val urlWithSpaces = "https://example .com"
+        val exception = assertThrows(IllegalArgumentException::class.java) {
+            urlValidator.validateUrl(urlWithSpaces)
         }
-        assert(exception.message?.contains("URL must have a valid host") == true)
+        assert(exception.message == "URL must not contain spaces")
     }
 
     @Test
-    fun `should throw exception for loopback address`() {
-        val invalidUrl = "http://localhost/"
-        val exception = assertFailsWith<IllegalArgumentException> {
-            urlValidator.validateUrl(invalidUrl)
+    fun `should throw exception for URL with invalid protocol`() {
+        val urlWithInvalidProtocol = "ftp://example.com"
+        val exception = assertThrows(IllegalArgumentException::class.java) {
+            urlValidator.validateUrl(urlWithInvalidProtocol)
         }
-        assert(exception.message?.contains("URL cannot point to a loopback address") == true)
+        assert(exception.message == "URL must use HTTP or HTTPS protocol")
+    }
+
+    @Test
+    fun `should throw exception for URL with loopback address`() {
+        val urlWithLoopbackAddress = "http://localhost/api/shorten"
+        val exception = assertThrows(IllegalArgumentException::class.java) {
+            urlValidator.validateUrl(urlWithLoopbackAddress)
+        }
+        assert(exception.message == "URL cannot point to a loopback address")
     }
 
     @Test
     fun `should throw exception for URL that is too long`() {
         val longUrl = "http://" + "a".repeat(2001)
-        val exception = assertFailsWith<IllegalArgumentException> {
+        val exception = assertThrows(IllegalArgumentException::class.java) {
             urlValidator.validateUrl(longUrl)
         }
-        assert(exception.message?.contains("URL is too long") == true)
-    }
-
-    @Test
-    fun `should validate URL successfully`() {
-        val validUrl = "https://example.com"
-        urlValidator.validateUrl(validUrl) // No exception should be thrown
+        assert(exception.message == "URL is too long")
     }
 }
