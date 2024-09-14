@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.media.Schema
+import org.springframework.http.ResponseEntity
 
 @RestController
 @RequestMapping("/api/v1")
@@ -105,7 +106,7 @@ class UrlShortenerController(private val urlShortener: UrlShortener) {
             )]
         )
         @RequestBody urlRequest: UrlRequest
-    ): Mono<UrlResponse> {
+    ): Mono<ResponseEntity<UrlResponse>> {
         val originalUrl = urlRequest.originalUrl
         log.info("Received request to shorten URL='{}'", originalUrl)
 
@@ -113,7 +114,8 @@ class UrlShortenerController(private val urlShortener: UrlShortener) {
             .shortenUrl(originalUrl)
             .map { shortUrl ->
                 log.info("Successfully shortened originalUrl='{}' to shortUrl='{}'", originalUrl, shortUrl)
-                UrlResponse(shortUrl)
+                ResponseEntity.ok()
+                    .body(UrlResponse(shortUrl))
             }
             .doOnError { ex ->
                 log.error("Failed to shorten originalUrl='{}' to shortUrl", originalUrl, ex)

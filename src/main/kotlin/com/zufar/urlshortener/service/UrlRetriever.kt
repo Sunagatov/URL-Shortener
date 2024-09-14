@@ -13,6 +13,6 @@ class UrlRetriever(
     fun retrieveUrl(shortUrl: String): Mono<String> {
         return urlRepository.findByShortUrl(shortUrl)
             .map { it.originalUrl }
-            .switchIfEmpty(Mono.error(UrlNotFoundException("Short URL $shortUrl not found")))
+            .switchIfEmpty(Mono.error(UrlNotFoundException("Short URL='$shortUrl' not found")))
     }
 }
