@@ -27,19 +27,20 @@ class GlobalExceptionHandler {
         )
     }
 
-    @ExceptionHandler(Exception::class)
-    fun handleException(ex: Exception): Mono<ResponseEntity<ErrorResponse>> {
-        val errorResponse = ErrorResponse(errorMessage = "An unexpected error occurred")
-        return Mono.just(
-            ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
-        )
-    }
-
     @ExceptionHandler(UrlNotFoundException::class)
     fun handleUrlNotFound(ex: UrlNotFoundException): Mono<ResponseEntity<ErrorResponse>> {
         val errorResponse = ErrorResponse(errorMessage = ex.message ?: "URL not found")
         return Mono.just(
             ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
+        )
+    }
+
+    @ExceptionHandler(Exception::class)
+    fun handleException(ex: Exception): Mono<ResponseEntity<ErrorResponse>> {
+        val errorMessage = "An unexpected error occurred: ${ex.message ?: "No additional details provided"}"
+        val errorResponse = ErrorResponse(errorMessage = errorMessage)
+        return Mono.just(
+            ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
         )
     }
 }
