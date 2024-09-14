@@ -98,7 +98,6 @@ class UrlRedirectController(private val urlRetriever: UrlRetriever) {
         return urlRetriever
             .retrieveUrl(shortUrl)
             .map { originalUrl ->
-                log.info("Successfully found originalUrl='{}' for shortUrl='{}'", originalUrl, shortUrl)
                 log.info("Redirecting to original URL='{}'", originalUrl)
                 ResponseEntity.status(HttpStatus.FOUND)
                     .location(URI(originalUrl))

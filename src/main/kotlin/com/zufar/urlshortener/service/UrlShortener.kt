@@ -20,21 +20,21 @@ class UrlShortener(
     private lateinit var baseUrl: String
 
     fun shortenUrl(originalUrl: String): Mono<String> {
-        log.info("Received request to shorten URL: {}", originalUrl)
+        log.info("Received request to shorten originalURL='{}'", originalUrl)
 
         urlValidator.validateUrl(originalUrl)
-        log.debug("URL validation passed for: {}", originalUrl)
+        log.debug("OriginalURL='{}' was passed validation", originalUrl)
 
         val encodedUrl = StringEncoder.encode(originalUrl)
-        log.debug("Encoded URL: {}", encodedUrl)
+        log.debug("OriginalURL='{}' was encoded", encodedUrl)
 
         val urlMapping = UrlMapping(encodedUrl, originalUrl)
 
         val shortUrl = urlRepository.save(urlMapping)
             .map { savedMapping ->
-                val shortenedUrl = "$baseUrl/url/${savedMapping.shortUrl}"
-                log.info("Shortened URL created: {}", shortenedUrl)
-                shortenedUrl
+                val newShortURL = "$baseUrl/url/${savedMapping.shortUrl}"
+                log.info("New shortURL='{}' was created", newShortURL)
+                newShortURL
             }
 
         return shortUrl
