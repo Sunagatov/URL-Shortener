@@ -27,16 +27,16 @@ val mockitoKotlinVersion = "5.4.0"
 val mockitoInlineVersion = "5.2.0"
 val springdocVersion = "2.6.0"
 val javaxValidationApiVersion = "2.0.1.Final"
+val apacheReactorKafkaVersion = "1.3.23"
 
 
 dependencies {
-    // Spring Boot Starters
+    // Spring Boot
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("javax.validation:validation-api:$javaxValidationApiVersion")
 
     // Kotlin and Reactor
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
@@ -44,15 +44,27 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 
-    // OpenAPI dependencies for WebFlux
+    // Apache Kafka
+    implementation("org.springframework.kafka:spring-kafka")
+    implementation("io.projectreactor.kafka:reactor-kafka:$apacheReactorKafkaVersion")
+
+    // Redis
+    implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
+    implementation("io.lettuce.core:lettuce-core")
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+
+    // OpenAPI
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:$springdocVersion")
     implementation("org.springdoc:springdoc-openapi-starter-webflux-api:$springdocVersion")
+
+    // Validation
+    implementation("javax.validation:validation-api:$javaxValidationApiVersion")
 
     // Lombok
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
-    // Testing dependencies
+    // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webflux")
     testImplementation("io.projectreactor:reactor-test")

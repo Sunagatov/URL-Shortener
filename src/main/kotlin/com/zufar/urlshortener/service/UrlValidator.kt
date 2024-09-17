@@ -4,6 +4,9 @@ import org.springframework.stereotype.Service
 import java.net.URI
 import java.net.URL
 
+private const val MAX_ALLOWED_URL_LENGTH = 2000
+private const val URL_SPACE = " "
+
 @Service
 class UrlValidator {
 
@@ -15,7 +18,7 @@ class UrlValidator {
             "URL must not be empty or blank"
         }
 
-        require(!url.contains(" ")) {
+        require(!url.contains(URL_SPACE)) {
             "URL must not contain spaces"
         }
 
@@ -33,7 +36,7 @@ class UrlValidator {
             "URL cannot point to a loopback address"
         }
 
-        require(url.length <= 2000) {
+        require(url.length <= MAX_ALLOWED_URL_LENGTH) {
             "URL is too long"
         }
     }

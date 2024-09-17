@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.controller
 
 import com.zufar.urlshortener.common.dto.ErrorResponse
+import com.zufar.urlshortener.exception.UrlNotFoundException
 import com.zufar.urlshortener.service.UrlRetriever
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
 import java.net.URI
 
 @RestController
@@ -97,6 +99,10 @@ class UrlRedirectController(private val urlRetriever: UrlRetriever) {
 
         return urlRetriever
             .retrieveUrl(shortUrl)
+            .switchIfEmpty {
+                log.warn("Short URL='{}' not found", shortUrl)
+                Mono.error(UrlNotFoundException("Short URL='$shortUrl' not found"))
+            }
             .map { originalUrl ->
                 log.info("Redirecting to original URL='{}'", originalUrl)
                 ResponseEntity.status(HttpStatus.FOUND)

@@ -3,6 +3,7 @@ package com.zufar.urlshortener.controller
 import com.zufar.urlshortener.common.dto.ErrorResponse
 import com.zufar.urlshortener.common.dto.UrlRequest
 import com.zufar.urlshortener.common.dto.UrlResponse
+import com.zufar.urlshortener.service.UrlRetriever
 import com.zufar.urlshortener.service.UrlShortener
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -22,7 +23,10 @@ import org.springframework.http.ResponseEntity
 
 @RestController
 @RequestMapping("/api/v1")
-class UrlShortenerController(private val urlShortener: UrlShortener) {
+class UrlShortenerController(
+    private val urlShortener: UrlShortener,
+    private val urlRetriever: UrlRetriever
+) {
 
     private val log = LoggerFactory.getLogger(UrlShortenerController::class.java)
 
@@ -110,15 +114,20 @@ class UrlShortenerController(private val urlShortener: UrlShortener) {
         val originalUrl = urlRequest.originalUrl
         log.info("Received request to shorten URL='{}'", originalUrl)
 
-        return urlShortener
-            .shortenUrl(originalUrl)
+        return urlRetriever.retrieveUrl(originalUrl)
             .map { shortUrl ->
-                log.info("Successfully shortened originalUrl='{}' to shortUrl='{}'", originalUrl, shortUrl)
-                ResponseEntity.ok()
-                    .body(UrlResponse(shortUrl))
+                log.info("Found existing shortUrl='{}' for originalUrl='{}'", shortUrl, originalUrl)
+                ResponseEntity.ok(UrlResponse(shortUrl))
             }
+            .switchIfEmpty(
+                urlShortener.shortenUrl(originalUrl)
+                    .map { shortUrl ->
+                        log.info("Successfully shortened originalUrl='{}' to shortUrl='{}'", originalUrl, shortUrl)
+                        ResponseEntity.ok(UrlResponse(shortUrl))
+                    }
+            )
             .doOnError { ex ->
-                log.error("Failed to shorten originalUrl='{}' to shortUrl", originalUrl, ex)
+                log.error("Failed to shorten originalUrl='{}'", originalUrl, ex)
             }
     }
 }
