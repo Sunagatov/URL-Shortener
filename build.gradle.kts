@@ -17,45 +17,28 @@ java {
 
 repositories {
     mavenCentral()
-    maven { url = uri("https://repo.spring.io/milestone") }
-    maven { url = uri("https://jitpack.io") }
 }
 
 val springCloudVersion = "2023.0.3"
 val mockitoVersion = "5.13.0"
 val mockitoKotlinVersion = "5.4.0"
-val mockitoInlineVersion = "5.2.0"
 val springdocVersion = "2.6.0"
 val javaxValidationApiVersion = "2.0.1.Final"
-val apacheReactorKafkaVersion = "1.3.23"
-
 
 dependencies {
-    // Spring Boot
+    // Spring Boot MVC
+    implementation("org.springframework.boot:spring-boot-starter-web") // Spring MVC instead of WebFlux
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
-    implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
 
-    // Kotlin and Reactor
+    // Jackson
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-
-    // Apache Kafka
-    implementation("org.springframework.kafka:spring-kafka")
-    implementation("io.projectreactor.kafka:reactor-kafka:$apacheReactorKafkaVersion")
-
-    // Redis
-    implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
-    implementation("io.lettuce.core:lettuce-core")
-    implementation("org.springframework.boot:spring-boot-starter-cache")
 
     // OpenAPI
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:$springdocVersion")
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-api:$springdocVersion")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion") // Updated for MVC
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-api:$springdocVersion")
 
     // Validation
     implementation("javax.validation:validation-api:$javaxValidationApiVersion")
@@ -66,11 +49,8 @@ dependencies {
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-webflux")
-    testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
-    testImplementation("org.mockito:mockito-inline:$mockitoInlineVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 }
 

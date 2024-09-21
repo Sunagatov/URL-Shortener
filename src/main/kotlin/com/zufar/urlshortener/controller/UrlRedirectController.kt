@@ -1,7 +1,6 @@
 package com.zufar.urlshortener.controller
 
 import com.zufar.urlshortener.common.dto.ErrorResponse
-import com.zufar.urlshortener.exception.UrlNotFoundException
 import com.zufar.urlshortener.service.UrlRetriever
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -18,8 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.switchIfEmpty
 import java.net.URI
 
 @RestController
@@ -67,6 +64,21 @@ class UrlRedirectController(private val urlRetriever: UrlRetriever) {
                 )]
             ),
             ApiResponse(
+                responseCode = "400",
+                description = "Original URL is absent",
+                content = [Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = Schema(implementation = ErrorResponse::class),
+                    examples = [ExampleObject(
+                        name = "Missing Original URL",
+                        summary = "The original URL could not be found.",
+                        value = """{
+                            "errorMessage": "Original URL is absent for short URL='abcd1234'"
+                        }"""
+                    )]
+                )]
+            ),
+            ApiResponse(
                 responseCode = "500",
                 description = "Internal server error",
                 content = [Content(
@@ -94,20 +106,19 @@ class UrlRedirectController(private val urlRetriever: UrlRetriever) {
             schema = Schema(type = "string", maxLength = 15)
         )
         @PathVariable shortUrl: String
-    ): Mono<ResponseEntity<Unit>> {
+    ): ResponseEntity<Unit> {
         log.info("Received request to redirect shortUrl='{}'", shortUrl)
 
-        return urlRetriever
-            .retrieveUrl(shortUrl)
-            .switchIfEmpty {
-                log.warn("Short URL='{}' not found", shortUrl)
-                Mono.error(UrlNotFoundException("Short URL='$shortUrl' not found"))
-            }
-            .map { originalUrl ->
-                log.info("Redirecting to original URL='{}'", originalUrl)
-                ResponseEntity.status(HttpStatus.FOUND)
-                    .location(URI(originalUrl))
-                    .build()
-            }
+        val originalUrl = urlRetriever.retrieveUrl(shortUrl)
+
+        if (originalUrl.isNullOrEmpty()) {
+            log.error("Original URL is absent for short URL='{}'", shortUrl)
+            throw IllegalArgumentException("Original URL is absent for short URL='$shortUrl'")
+        }
+
+        log.info("Redirecting to original URL='{}'", originalUrl)
+        return ResponseEntity.status(HttpStatus.FOUND)
+            .location(URI(originalUrl))
+            .build()
     }
 }

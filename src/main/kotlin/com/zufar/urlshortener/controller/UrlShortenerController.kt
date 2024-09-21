@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import reactor.core.publisher.Mono
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.parameters.RequestBody as SwaggerRequestBody
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -27,7 +26,6 @@ class UrlShortenerController(
     private val urlShortener: UrlShortener,
     private val urlRetriever: UrlRetriever
 ) {
-
     private val log = LoggerFactory.getLogger(UrlShortenerController::class.java)
 
     @Operation(
@@ -110,24 +108,18 @@ class UrlShortenerController(
             )]
         )
         @RequestBody urlRequest: UrlRequest
-    ): Mono<ResponseEntity<UrlResponse>> {
+    ): ResponseEntity<UrlResponse> {
         val originalUrl = urlRequest.originalUrl
         log.info("Received request to shorten URL='{}'", originalUrl)
 
-        return urlRetriever.retrieveUrl(originalUrl)
-            .map { shortUrl ->
-                log.info("Found existing shortUrl='{}' for originalUrl='{}'", shortUrl, originalUrl)
-                ResponseEntity.ok(UrlResponse(shortUrl))
-            }
-            .switchIfEmpty(
-                urlShortener.shortenUrl(originalUrl)
-                    .map { shortUrl ->
-                        log.info("Successfully shortened originalUrl='{}' to shortUrl='{}'", originalUrl, shortUrl)
-                        ResponseEntity.ok(UrlResponse(shortUrl))
-                    }
-            )
-            .doOnError { ex ->
-                log.error("Failed to shorten originalUrl='{}'", originalUrl, ex)
-            }
+        var shortUrl = urlRetriever.retrieveUrl(originalUrl)
+        if (shortUrl == null) {
+            log.info("No existing short URL found for originalUrl='{}'. Creating a new one.", originalUrl)
+            shortUrl = urlShortener.shortenUrl(originalUrl)
+        } else {
+            log.info("Existing short URL found for originalUrl='{}': '{}'", originalUrl, shortUrl)
+        }
+
+        return ResponseEntity.ok(UrlResponse(shortUrl))
     }
 }

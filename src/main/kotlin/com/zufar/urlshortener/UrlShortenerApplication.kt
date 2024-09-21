@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.info.Info
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
-@SpringBootApplication
 @OpenAPIDefinition(
     info = Info(
         title = "URL Shortener API",
@@ -13,6 +12,7 @@ import org.springframework.boot.runApplication
         description = "API documentation for URL Shortener"
     )
 )
+@SpringBootApplication
 class UrlShortenerApplication
 
 fun main(args: Array<String>) {
