@@ -119,8 +119,7 @@ Recognize our top contributors who make this project better:
 
 #### ⚙️ Backend Developers
 - [@annstriganova](https://github.com/annstriganova)
-- [@M437A](https://github.com/M437A)
-- [@vitaliibredun](https://github.com/vitaliibredun)
+
 
 ## 👩‍💼 License
 
