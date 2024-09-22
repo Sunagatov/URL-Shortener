@@ -1,7 +1,7 @@
 package com.zufar.urlshortener.controller
 
 import com.zufar.urlshortener.common.dto.ErrorResponse
-import com.zufar.urlshortener.service.UrlRetriever
+import com.zufar.urlshortener.repository.UrlRepository
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -21,7 +21,7 @@ import java.net.URI
 
 @RestController
 @RequestMapping
-class UrlRedirectController(private val urlRetriever: UrlRetriever) {
+class UrlRedirectController(private val urlRepository: UrlRepository) {
 
     private val log = LoggerFactory.getLogger(UrlRedirectController::class.java)
 
@@ -96,7 +96,7 @@ class UrlRedirectController(private val urlRetriever: UrlRetriever) {
         ]
     )
     @GetMapping(
-        "/url/{shortUrl}",
+        "/url/{urlHash}",
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     fun redirect(
@@ -105,20 +105,20 @@ class UrlRedirectController(private val urlRetriever: UrlRetriever) {
             required = true,
             schema = Schema(type = "string", maxLength = 15)
         )
-        @PathVariable shortUrl: String
+        @PathVariable urlHash: String
     ): ResponseEntity<Unit> {
-        log.info("Received request to redirect shortUrl='{}'", shortUrl)
+        log.info("Received redirect request")
 
-        val originalUrl = urlRetriever.retrieveUrl(shortUrl)
+        val urlMapping = urlRepository.findByUrlHash(urlHash)
 
-        if (originalUrl.isNullOrEmpty()) {
-            log.error("Original URL is absent for short URL='{}'", shortUrl)
-            throw IllegalArgumentException("Original URL is absent for short URL='$shortUrl'")
+        if (urlMapping.isEmpty) {
+            log.error("Original URL is absent for urlHash='{}'", urlHash)
+            throw IllegalArgumentException("Original URL is absent for urlHash='$urlHash'")
         }
 
-        log.info("Redirecting to original URL='{}'", originalUrl)
+        log.info("Redirecting to the originalUrl='{}'", urlMapping.get().originalUrl)
         return ResponseEntity.status(HttpStatus.FOUND)
-            .location(URI(originalUrl))
+            .location(URI(urlMapping.get().originalUrl))
             .build()
     }
 }

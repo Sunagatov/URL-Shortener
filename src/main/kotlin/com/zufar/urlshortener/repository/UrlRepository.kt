@@ -6,5 +6,5 @@ import java.util.Optional
 
 interface UrlRepository : MongoRepository<UrlMapping, String> {
 
-    fun findByShortUrl(shortUrl: String): Optional<UrlMapping>
+    fun findByUrlHash(urlHash: String): Optional<UrlMapping>
 }

@@ -27,17 +27,20 @@ val javaxValidationApiVersion = "2.0.1.Final"
 
 dependencies {
     // Spring Boot MVC
-    implementation("org.springframework.boot:spring-boot-starter-web") // Spring MVC instead of WebFlux
+    implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+
+    // Logging
+    implementation("org.springframework.boot:spring-boot-starter-logging")
 
     // Jackson
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     // OpenAPI
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion") // Updated for MVC
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-api:$springdocVersion")
 
     // Validation

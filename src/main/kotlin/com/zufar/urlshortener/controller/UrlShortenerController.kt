@@ -3,7 +3,8 @@ package com.zufar.urlshortener.controller
 import com.zufar.urlshortener.common.dto.ErrorResponse
 import com.zufar.urlshortener.common.dto.UrlRequest
 import com.zufar.urlshortener.common.dto.UrlResponse
-import com.zufar.urlshortener.service.UrlRetriever
+import com.zufar.urlshortener.repository.UrlRepository
+import com.zufar.urlshortener.service.StringEncoder
 import com.zufar.urlshortener.service.UrlShortener
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -25,7 +26,7 @@ import org.springframework.http.ResponseEntity
 @RequestMapping("/api/v1")
 class UrlShortenerController(
     private val urlShortener: UrlShortener,
-    private val urlRetriever: UrlRetriever
+    private val urlRepository: UrlRepository
 ) {
     private val log = LoggerFactory.getLogger(UrlShortenerController::class.java)
 
@@ -111,16 +112,25 @@ class UrlShortenerController(
         @RequestBody urlRequest: UrlRequest,
         httpServletRequest: HttpServletRequest
     ): ResponseEntity<UrlResponse> {
-        val userIp = httpServletRequest.remoteAddr
+        val clientIp = httpServletRequest.remoteAddr
+        val userAgent = httpServletRequest.getHeader("User-Agent")
         val originalUrl = urlRequest.originalUrl
-        log.info("Received request to shorten URL='{}' from IP='{}'", originalUrl, userIp)
+        log.info("Received request to shorten the originalUrl='{}' from IP='{}', User-Agent='{}'", originalUrl, clientIp, userAgent)
 
-        var shortUrl = urlRetriever.retrieveUrl(originalUrl)
-        if (shortUrl == null) {
-            log.info("No existing short URL found for originalUrl='{}'. Creating a new one.", originalUrl)
+        log.debug("Trying to encode the originalUrl='{}'", originalUrl)
+        val urlHash = StringEncoder.encode(originalUrl)
+        log.debug("Encoded the originalUrl='{}' to the urlHash='{}' for checking if originalUrl is added to DB", originalUrl, urlHash)
+
+        log.debug("Attempting to retrieve shortUrl for the urlHash='{}' in the DB", urlHash)
+        val urlMapping = urlRepository.findByUrlHash(urlHash)
+        var shortUrl = ""
+        if (urlMapping.isEmpty) {
+            log.info("No existing shortUrl found for the urlHash='{}'. Creating a new one.", urlHash)
             shortUrl = urlShortener.shortenUrl(urlRequest, httpServletRequest)
+            log.info("Created a new shortUrl='{}' for originalUrl='{}' and urlHash='{}' successfully.", shortUrl, originalUrl, urlHash)
         } else {
-            log.info("Existing short URL found for originalUrl='{}': '{}'", originalUrl, shortUrl)
+            log.info("Found an existing shortUrl='{}' for urlHash='{}' in the DB", shortUrl, urlHash)
+            shortUrl = urlMapping.get().shortUrl
         }
 
         return ResponseEntity.ok(UrlResponse(shortUrl))

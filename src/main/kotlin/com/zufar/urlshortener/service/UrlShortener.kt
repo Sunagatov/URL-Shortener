@@ -1,67 +1,45 @@
 package com.zufar.urlshortener.service
 
 import com.zufar.urlshortener.common.dto.UrlRequest
-import com.zufar.urlshortener.common.entity.UrlMapping
 import com.zufar.urlshortener.repository.UrlRepository
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 
-private const val DEFAULT_LINK_EXPIRATION_DAYS_COUNT = 365L
 
 @Service
 class UrlShortener(
     private val urlRepository: UrlRepository,
     private val urlValidator: UrlValidator,
-    private val urlCreator: UrlCreator
+    private val urlMappingEntityCreator: UrlMappingEntityCreator
 ) {
     private val log = LoggerFactory.getLogger(UrlShortener::class.java)
+
+    @Value("\${app.base-url}")
+    private lateinit var baseUrl: String
 
     fun shortenUrl(urlRequest: UrlRequest,
                    httpServletRequest: HttpServletRequest): String {
         val originalUrl = urlRequest.originalUrl
-        log.info("Received request to shorten originalURL='{}'", originalUrl)
+        val clientIp = httpServletRequest.remoteAddr
+        val userAgent = httpServletRequest.getHeader("User-Agent")
+
+        log.info("Trying to shorten originalURL='{}' from IP='{}', User-Agent='{}'", originalUrl, clientIp, userAgent)
 
         urlValidator.validateUrl(originalUrl)
+        log.debug("URL validation passed for originalURL='{}'", originalUrl)
 
-        val encodedUrl = StringEncoder.encode(originalUrl)
-        log.debug("OriginalURL='{}' was encoded to '{}'", originalUrl, encodedUrl)
+        val urlHash = StringEncoder.encode(originalUrl)
+        log.debug("Encoded originalURL='{}' to urlHash='{}'", originalUrl, urlHash)
 
-        val urlMapping = buildUrlMappingEntity(urlRequest, httpServletRequest, encodedUrl)
-        val savedMapping = urlRepository.save(urlMapping)
+        val newShortURL = "$baseUrl/url/$urlHash"
+        log.info("Generated new shortURL='{}' for originalURL='{}'", newShortURL, originalUrl)
 
-        val shortUrl = savedMapping.shortUrl
-        val newShortURL = urlCreator.create(shortUrl)
-        log.info("New shortURL='{}' was created for originalURL='{}'", newShortURL, originalUrl)
+        val urlMapping = urlMappingEntityCreator.create(urlRequest, httpServletRequest, urlHash, newShortURL)
+        urlRepository.save(urlMapping)
+        log.info("Saved URL mapping for urlHash='{}' in MongoDB", urlHash)
 
         return newShortURL
-    }
-
-    private fun buildUrlMappingEntity(
-        urlRequest: UrlRequest,
-        httpServletRequest: HttpServletRequest,
-        encodedUrl: String
-    ): UrlMapping {
-        val originalUrl = urlRequest.originalUrl
-        val requestIp = httpServletRequest.remoteAddr
-        val userAgent = httpServletRequest.getHeader("User-Agent")
-        val referer = httpServletRequest.getHeader("Referer")
-        val acceptLanguage = httpServletRequest.getHeader("Accept-Language")
-        val httpMethod = httpServletRequest.method
-
-        val urlMapping = UrlMapping(
-            shortUrl = encodedUrl,
-            originalUrl = originalUrl,
-            createdAt = LocalDateTime.now(),
-            expirationDate = LocalDateTime.now().plusDays(DEFAULT_LINK_EXPIRATION_DAYS_COUNT),
-
-            requestIp = requestIp,
-            userAgent = userAgent,
-            referer = referer,
-            acceptLanguage = acceptLanguage,
-            httpMethod = httpMethod
-        )
-        return urlMapping
     }
 }

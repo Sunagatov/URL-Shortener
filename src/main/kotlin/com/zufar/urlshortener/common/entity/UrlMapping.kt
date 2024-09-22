@@ -4,10 +4,11 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 
-@Document(collection = "urls-mapping")
+@Document(collection = "url_mappings")
 data class UrlMapping(
 
     @Id
+    val urlHash: String,
     val shortUrl: String,
     val originalUrl: String,
 
