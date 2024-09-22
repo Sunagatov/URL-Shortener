@@ -114,10 +114,8 @@ Recognize our top contributors who make this project better:
 #### 😎 Project Creator / Tech Lead
 - [@Sunagatov](https://github.com/Sunagatov)
 
-#### 😇 Project Manager
-- [@oonovikova](https://github.com/oonovikova)
-
 #### ⚙️ Backend Developers
+- [@Sunagatov](https://github.com/Sunagatov)
 - [@annstriganova](https://github.com/annstriganova)
 
 
