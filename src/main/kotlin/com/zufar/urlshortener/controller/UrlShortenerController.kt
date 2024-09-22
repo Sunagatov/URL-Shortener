@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.ResponseEntity
 
 @RestController
@@ -107,15 +108,17 @@ class UrlShortenerController(
                 schema = Schema(implementation = UrlRequest::class)
             )]
         )
-        @RequestBody urlRequest: UrlRequest
+        @RequestBody urlRequest: UrlRequest,
+        httpServletRequest: HttpServletRequest
     ): ResponseEntity<UrlResponse> {
+        val userIp = httpServletRequest.remoteAddr
         val originalUrl = urlRequest.originalUrl
-        log.info("Received request to shorten URL='{}'", originalUrl)
+        log.info("Received request to shorten URL='{}' from IP='{}'", originalUrl, userIp)
 
         var shortUrl = urlRetriever.retrieveUrl(originalUrl)
         if (shortUrl == null) {
             log.info("No existing short URL found for originalUrl='{}'. Creating a new one.", originalUrl)
-            shortUrl = urlShortener.shortenUrl(originalUrl)
+            shortUrl = urlShortener.shortenUrl(urlRequest, httpServletRequest)
         } else {
             log.info("Existing short URL found for originalUrl='{}': '{}'", originalUrl, shortUrl)
         }
