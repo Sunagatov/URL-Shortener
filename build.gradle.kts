@@ -4,6 +4,8 @@ plugins {
     id("org.springframework.boot") version "3.3.3"
     id("io.spring.dependency-management") version "1.1.6"
     id("org.openapi.generator") version "7.8.0"
+    id("org.sonarqube") version "5.0.0.4638"
+    jacoco
 }
 
 group = "com.zufar"
@@ -17,6 +19,13 @@ java {
 
 repositories {
     mavenCentral()
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "shorty-url")
+        property("sonar.projectName", "ShortyURL")
+    }
 }
 
 val springCloudVersion = "2023.0.3"
@@ -75,6 +84,24 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+sonarqube {
+    properties {
+        property("sonar.projectKey", "Sunagatov_URL-Shortener")
+        property("sonar.organization", "zufar")
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.login", System.getenv("SHORTY_URL_SONAR_TOKEN"))
+        property("sonar.sources", "src/main/kotlin")
+        property("sonar.tests", "src/test/kotlin")
+        property("sonar.language", "kotlin")
+        property("sonar.kotlin.detekt.reportPaths", "build/reports/detekt")
+        property("sonar.jacoco.reportPaths", "${layout.buildDirectory}/jacoco/test.exec")
+    }
+}
+
+tasks.named("sonarqube") {
+    dependsOn("jacocoTestReport") // Ensure JaCoCo report is generated before SonarCloud analysis
+}
+
 openApiGenerate {
     generatorName.set("kotlin")
     inputSpec.set("$projectDir/src/main/resources/openapi/shorten-url-api.yaml")
@@ -96,4 +123,14 @@ sourceSets {
 
 tasks.named("compileKotlin") {
     dependsOn(tasks.named("openApiGenerate"))
+}
+
+jacoco {
+    toolVersion = "0.8.10"
+}
+tasks.jacocoTestReport {
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
 }
