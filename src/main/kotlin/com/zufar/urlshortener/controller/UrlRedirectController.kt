@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import jakarta.servlet.http.HttpServletRequest
+import org.springframework.beans.factory.annotation.Value
 import java.net.URI
 
 @RestController
@@ -24,6 +26,9 @@ import java.net.URI
 class UrlRedirectController(private val urlRepository: UrlRepository) {
 
     private val log = LoggerFactory.getLogger(UrlRedirectController::class.java)
+
+    @Value("\${app.base-url}")
+    private lateinit var baseUrl: String
 
     @Operation(
         summary = "Redirect to the original URL",
@@ -105,14 +110,18 @@ class UrlRedirectController(private val urlRepository: UrlRepository) {
             required = true,
             schema = Schema(type = "string", maxLength = 15)
         )
-        @PathVariable urlHash: String
+        @PathVariable urlHash: String,
+        httpServletRequest: HttpServletRequest
     ): ResponseEntity<Unit> {
-        log.info("Received redirect request")
+        val clientIp = httpServletRequest.remoteAddr
+        val userAgent = httpServletRequest.getHeader("User-Agent")
+
+        log.info("Received redirect request for shortUrl='{}}/{}' from IP='{}', User-Agent='{}'", baseUrl, urlHash, clientIp, userAgent)
 
         val urlMapping = urlRepository.findByUrlHash(urlHash)
 
         if (urlMapping.isEmpty) {
-            log.error("Original URL is absent for urlHash='{}'", urlHash)
+            log.error("Original URL not found for urlHash='{}'", urlHash)
             throw IllegalArgumentException("Original URL is absent for urlHash='$urlHash'")
         }
 
