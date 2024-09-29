@@ -24,6 +24,7 @@ val mockitoVersion = "5.13.0"
 val mockitoKotlinVersion = "5.4.0"
 val springdocVersion = "2.6.0"
 val javaxValidationApiVersion = "2.0.1.Final"
+val commonsValidatorVersion = "1.9.0"
 
 dependencies {
     // Spring Boot MVC
@@ -45,6 +46,7 @@ dependencies {
 
     // Validation
     implementation("javax.validation:validation-api:$javaxValidationApiVersion")
+    implementation("commons-validator:commons-validator:$commonsValidatorVersion")
 
     // Lombok
     compileOnly("org.projectlombok:lombok")
