@@ -7,5 +7,9 @@ data class UrlRequest(
 
     @Schema(description = "The original URL to be shortened",
         example = "https://iced-latte.uk/")
-    val originalUrl: String
+    val originalUrl: String,
+
+    @Schema(description = "Optional expiration time in days for the shortened URL (min 1, max 365)",
+        example = "30")
+    val daysCount: Long?
 )

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service
 class UrlShortener(
     private val urlRepository: UrlRepository,
     private val urlValidator: UrlValidator,
+    private val daysCountValidator: DaysCountValidator,
     private val urlMappingEntityCreator: UrlMappingEntityCreator
 ) {
     private val log = LoggerFactory.getLogger(UrlShortener::class.java)
@@ -28,18 +29,19 @@ class UrlShortener(
         log.info("Trying to shorten originalURL='{}' from IP='{}', User-Agent='{}'", originalUrl, clientIp, userAgent)
 
         urlValidator.validateUrl(originalUrl)
+        daysCountValidator.validateDaysCount(urlRequest.daysCount)
         log.debug("URL validation passed for originalURL='{}'", originalUrl)
 
         val urlHash = StringEncoder.encode(originalUrl)
         log.debug("Encoded originalURL='{}' to urlHash='{}'", originalUrl, urlHash)
 
-        val newShortURL = "$baseUrl/url/$urlHash"
-        log.info("Generated new shortURL='{}' for originalURL='{}'", newShortURL, originalUrl)
+        val newShortUrl = "$baseUrl/url/$urlHash"
+        log.info("Generated new shortURL='{}' for originalURL='{}'", newShortUrl, originalUrl)
 
-        val urlMapping = urlMappingEntityCreator.create(urlRequest, httpServletRequest, urlHash, newShortURL)
+        val urlMapping = urlMappingEntityCreator.create(urlRequest, httpServletRequest, urlHash, newShortUrl)
         urlRepository.save(urlMapping)
         log.info("Saved URL mapping for urlHash='{}' in MongoDB", urlHash)
 
-        return newShortURL
+        return newShortUrl
     }
 }

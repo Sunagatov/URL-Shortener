@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
-private const val DEFAULT_LINK_EXPIRATION_DAYS_COUNT = 365L
+private const val DEFAULT_EXPIRATION_URL_DAYS = 365L
 
 @Service
 class UrlMappingEntityCreator {
@@ -18,14 +18,14 @@ class UrlMappingEntityCreator {
         urlRequest: UrlRequest,
         httpServletRequest: HttpServletRequest,
         urlHash: String,
-        shortUrl: String
+        shortUrl: String,
     ): UrlMapping {
         val urlMapping = UrlMapping(
             urlHash = urlHash,
             shortUrl = shortUrl,
             originalUrl = urlRequest.originalUrl,
             createdAt = LocalDateTime.now(),
-            expirationDate = LocalDateTime.now().plusDays(DEFAULT_LINK_EXPIRATION_DAYS_COUNT),
+            expirationDate = LocalDateTime.now().plusDays(urlRequest.daysCount ?: DEFAULT_EXPIRATION_URL_DAYS),
             requestIp = httpServletRequest.remoteAddr,
             userAgent = httpServletRequest.getHeader("User-Agent"),
             referer = httpServletRequest.getHeader("Referer"),
@@ -36,8 +36,16 @@ class UrlMappingEntityCreator {
         log.debug(
             "Created URL mapping: urlHash='{}', shortUrl='{}', originalUrl='{}', createdAt='{}', expirationDate='{}', " +
                     "requestIp='{}', userAgent='{}', referer='{}', acceptLanguage='{}', httpMethod='{}'",
-            urlHash, shortUrl, urlRequest.originalUrl, urlMapping.createdAt, urlMapping.expirationDate,
-            urlMapping.requestIp, urlMapping.userAgent, urlMapping.referer, urlMapping.acceptLanguage, urlMapping.httpMethod
+            urlHash,
+            shortUrl,
+            urlRequest.originalUrl,
+            urlMapping.createdAt,
+            urlMapping.expirationDate,
+            urlMapping.requestIp,
+            urlMapping.userAgent,
+            urlMapping.referer,
+            urlMapping.acceptLanguage,
+            urlMapping.httpMethod
         )
 
         return urlMapping
