@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.controller
 
 import com.zufar.urlshortener.common.dto.ErrorResponse
+import com.zufar.urlshortener.exception.UrlNotFoundException
 import com.zufar.urlshortener.repository.UrlRepository
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -122,7 +123,7 @@ class UrlRedirectController(private val urlRepository: UrlRepository) {
 
         if (urlMapping.isEmpty) {
             log.error("Original URL not found for urlHash='{}'", urlHash)
-            throw IllegalArgumentException("Original URL is absent for urlHash='$urlHash'")
+            throw UrlNotFoundException("Original URL is absent for urlHash='$urlHash'")
         }
 
         log.info("Redirecting to the originalUrl='{}'", urlMapping.get().originalUrl)

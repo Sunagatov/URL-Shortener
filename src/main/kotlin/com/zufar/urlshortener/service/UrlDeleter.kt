@@ -1,5 +1,6 @@
 package com.zufar.urlshortener.service
 
+import com.zufar.urlshortener.exception.UrlNotFoundException
 import com.zufar.urlshortener.repository.UrlRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -18,7 +19,7 @@ class UrlDeleter(
             log.info("Successfully deleted URL mapping for urlHash='{}'", urlHash)
         } else {
             log.warn("No URL mapping found for urlHash='{}'. Deletion failed.", urlHash)
-            throw IllegalArgumentException("No URL mapping found for urlHash='$urlHash'. Deletion failed.")
+            throw UrlNotFoundException("No URL mapping found for urlHash='$urlHash'. Deletion failed.")
         }
     }
 }
