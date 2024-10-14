@@ -39,8 +39,20 @@ dependencies {
     // Spring Boot MVC
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
+
+    // Database
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+
+    // Security
+    implementation("org.springframework.boot:spring-boot-starter-security")
+
+    // JWT
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+
+    // Password Encoding
+    implementation("org.springframework.security:spring-security-crypto")
 
     // Logging
     implementation("org.springframework.boot:spring-boot-starter-logging")
@@ -54,6 +66,7 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-api:$springdocVersion")
 
     // Validation
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("javax.validation:validation-api:$javaxValidationApiVersion")
     implementation("commons-validator:commons-validator:$commonsValidatorVersion")
 
