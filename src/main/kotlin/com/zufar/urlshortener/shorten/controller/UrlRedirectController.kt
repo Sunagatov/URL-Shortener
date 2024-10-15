@@ -1,8 +1,8 @@
-package com.zufar.urlshortener.controller
+package com.zufar.urlshortener.shorten.controller
 
-import com.zufar.urlshortener.common.dto.ErrorResponse
-import com.zufar.urlshortener.exception.UrlNotFoundException
-import com.zufar.urlshortener.repository.UrlRepository
+import com.zufar.urlshortener.common.exception.ErrorResponse
+import com.zufar.urlshortener.shorten.exception.UrlNotFoundException
+import com.zufar.urlshortener.shorten.repository.UrlRepository
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -117,7 +117,7 @@ class UrlRedirectController(private val urlRepository: UrlRepository) {
         val clientIp = httpServletRequest.remoteAddr
         val userAgent = httpServletRequest.getHeader("User-Agent")
 
-        log.info("Received redirect request for shortUrl='{}}/{}' from IP='{}', User-Agent='{}'", baseUrl, urlHash, clientIp, userAgent)
+        log.info("Received redirect request for shortUrl='{}/{}' from IP='{}', User-Agent='{}'", baseUrl, urlHash, clientIp, userAgent)
 
         val urlMapping = urlRepository.findByUrlHash(urlHash)
 

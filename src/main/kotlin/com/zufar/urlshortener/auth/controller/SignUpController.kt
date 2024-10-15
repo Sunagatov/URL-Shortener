@@ -2,7 +2,7 @@ package com.zufar.urlshortener.auth.controller
 
 import com.zufar.urlshortener.auth.dto.AuthResponse
 import com.zufar.urlshortener.auth.dto.SignUpRequest
-import com.zufar.urlshortener.common.dto.ErrorResponse
+import com.zufar.urlshortener.common.exception.ErrorResponse
 import com.zufar.urlshortener.auth.entity.UserDetails
 import com.zufar.urlshortener.auth.repository.UserRepository
 import com.zufar.urlshortener.auth.service.JwtTokenProvider

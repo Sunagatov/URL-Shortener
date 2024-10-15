@@ -1,6 +1,6 @@
-package com.zufar.urlshortener.repository
+package com.zufar.urlshortener.shorten.repository
 
-import com.zufar.urlshortener.common.entity.UrlMapping
+import com.zufar.urlshortener.shorten.entity.UrlMapping
 import org.springframework.data.mongodb.repository.MongoRepository
 import java.util.Optional
 

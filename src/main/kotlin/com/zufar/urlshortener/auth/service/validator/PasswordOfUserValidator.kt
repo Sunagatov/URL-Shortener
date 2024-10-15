@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.auth.service.validator
 
-import com.zufar.urlshortener.exception.InvalidRequestException
+import com.zufar.urlshortener.common.exception.InvalidRequestException
 import org.springframework.stereotype.Service
 import com.zufar.urlshortener.auth.dto.*
 

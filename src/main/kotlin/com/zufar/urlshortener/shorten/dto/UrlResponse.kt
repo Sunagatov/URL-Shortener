@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.common.dto
+package com.zufar.urlshortener.shorten.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
 

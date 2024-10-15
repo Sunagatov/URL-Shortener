@@ -1,7 +1,7 @@
-package com.zufar.urlshortener.service
+package com.zufar.urlshortener.shorten.service
 
-import com.zufar.urlshortener.exception.UrlNotFoundException
-import com.zufar.urlshortener.repository.UrlRepository
+import com.zufar.urlshortener.shorten.exception.UrlNotFoundException
+import com.zufar.urlshortener.shorten.repository.UrlRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

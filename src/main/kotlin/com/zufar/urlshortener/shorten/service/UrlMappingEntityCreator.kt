@@ -1,7 +1,7 @@
-package com.zufar.urlshortener.service
+package com.zufar.urlshortener.shorten.service
 
-import com.zufar.urlshortener.common.dto.UrlRequest
-import com.zufar.urlshortener.common.entity.UrlMapping
+import com.zufar.urlshortener.shorten.dto.ShortenUrlRequest
+import com.zufar.urlshortener.shorten.entity.UrlMapping
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -15,7 +15,7 @@ class UrlMappingEntityCreator {
     private val log = LoggerFactory.getLogger(UrlMappingEntityCreator::class.java)
 
     fun create(
-        urlRequest: UrlRequest,
+        shortenUrlRequest: ShortenUrlRequest,
         httpServletRequest: HttpServletRequest,
         urlHash: String,
         shortUrl: String,
@@ -23,9 +23,9 @@ class UrlMappingEntityCreator {
         val urlMapping = UrlMapping(
             urlHash = urlHash,
             shortUrl = shortUrl,
-            originalUrl = urlRequest.originalUrl,
+            originalUrl = shortenUrlRequest.originalUrl,
             createdAt = LocalDateTime.now(),
-            expirationDate = LocalDateTime.now().plusDays(urlRequest.daysCount ?: DEFAULT_EXPIRATION_URL_DAYS),
+            expirationDate = LocalDateTime.now().plusDays(shortenUrlRequest.daysCount ?: DEFAULT_EXPIRATION_URL_DAYS),
             requestIp = httpServletRequest.remoteAddr,
             userAgent = httpServletRequest.getHeader("User-Agent"),
             referer = httpServletRequest.getHeader("Referer"),
@@ -38,7 +38,7 @@ class UrlMappingEntityCreator {
                     "requestIp='{}', userAgent='{}', referer='{}', acceptLanguage='{}', httpMethod='{}'",
             urlHash,
             shortUrl,
-            urlRequest.originalUrl,
+            shortenUrlRequest.originalUrl,
             urlMapping.createdAt,
             urlMapping.expirationDate,
             urlMapping.requestIp,

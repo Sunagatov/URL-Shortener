@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.service
+package com.zufar.urlshortener.shorten.service
 
 import org.springframework.stereotype.Service
 

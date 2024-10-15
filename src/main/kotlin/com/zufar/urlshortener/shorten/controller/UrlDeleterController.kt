@@ -1,7 +1,7 @@
-package com.zufar.urlshortener.controller
+package com.zufar.urlshortener.shorten.controller
 
-import com.zufar.urlshortener.common.dto.ErrorResponse
-import com.zufar.urlshortener.service.UrlDeleter
+import com.zufar.urlshortener.common.exception.ErrorResponse
+import com.zufar.urlshortener.shorten.service.UrlDeleter
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses

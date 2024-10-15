@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.auth.controller
 
-import com.zufar.urlshortener.common.dto.ErrorResponse
+import com.zufar.urlshortener.common.exception.ErrorResponse
 import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
 import com.zufar.urlshortener.auth.dto.RefreshTokenResponse
 import com.zufar.urlshortener.auth.repository.UserRepository

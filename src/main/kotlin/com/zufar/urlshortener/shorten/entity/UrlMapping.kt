@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.common.entity
+package com.zufar.urlshortener.shorten.entity
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
