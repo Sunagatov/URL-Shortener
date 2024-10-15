@@ -1,10 +1,12 @@
 package com.zufar.urlshortener.shorten.service
 
+import com.zufar.urlshortener.auth.repository.UserRepository
 import com.zufar.urlshortener.shorten.dto.ShortenUrlRequest
 import com.zufar.urlshortener.shorten.repository.UrlRepository
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 
 @Service
@@ -12,7 +14,8 @@ class UrlShortener(
     private val urlRepository: UrlRepository,
     private val urlValidator: UrlValidator,
     private val daysCountValidator: DaysCountValidator,
-    private val urlMappingEntityCreator: UrlMappingEntityCreator
+    private val urlMappingEntityCreator: UrlMappingEntityCreator,
+    private val userRepository: UserRepository
 ) {
     private val log = LoggerFactory.getLogger(UrlShortener::class.java)
 
@@ -20,8 +23,8 @@ class UrlShortener(
     private lateinit var baseUrl: String
 
     fun shortenUrl(shortenUrlRequest: ShortenUrlRequest,
-                   httpServletRequest: HttpServletRequest
-    ): String {
+                   httpServletRequest: HttpServletRequest): String {
+
         val originalUrl = shortenUrlRequest.originalUrl
         val clientIp = httpServletRequest.remoteAddr
         val userAgent = httpServletRequest.getHeader("User-Agent")

@@ -21,5 +21,8 @@ data class UrlMapping(
     val userAgent: String?,
     val referer: String?,
     val acceptLanguage: String?,
-    val httpMethod: String
+    val httpMethod: String,
+
+    // Reference to the user who created this mapping
+    val userId: String?
 )

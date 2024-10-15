@@ -6,26 +6,28 @@ import com.zufar.urlshortener.shorten.dto.UrlResponse
 import com.zufar.urlshortener.shorten.repository.UrlRepository
 import com.zufar.urlshortener.shorten.service.StringEncoder
 import com.zufar.urlshortener.shorten.service.UrlShortener
-import org.slf4j.LoggerFactory
-import org.springframework.http.MediaType
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.parameters.RequestBody as SwaggerRequestBody
-import io.swagger.v3.oas.annotations.responses.ApiResponse
-import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import jakarta.servlet.http.HttpServletRequest
+import org.slf4j.LoggerFactory
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.core.userdetails.User
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+import io.swagger.v3.oas.annotations.parameters.RequestBody as SwaggerRequestBody
 
 @RestController
-@RequestMapping("/api/v1")
-@CrossOrigin(origins = ["http://localhost:3000", "http://localhost:8080"], allowedHeaders = ["*"])
-class UrlShortenerController(
-    private val urlShortener: UrlShortener,
-    private val urlRepository: UrlRepository
-) {
+@RequestMapping("/api/v1/urls")
+class UrlShortenerController(private val urlShortener: UrlShortener,
+                             private val urlRepository: UrlRepository) {
     private val log = LoggerFactory.getLogger(UrlShortenerController::class.java)
 
     @Operation(
@@ -55,25 +57,15 @@ class UrlShortenerController(
                         value = """{
                             "errorMessage": "URL must not contain spaces"
                         }"""
-                    ), ExampleObject(
-                        name = "Invalid Protocol",
-                        summary = "The URL uses an unsupported protocol.",
-                        value = """{
-                            "errorMessage": "URL must use HTTP or HTTPS protocol"
-                        }"""
-                    ), ExampleObject(
-                        name = "Loopback Address",
-                        summary = "The URL points to a loopback address.",
-                        value = """{
-                            "errorMessage": "URL cannot point to a loopback address"
-                        }"""
-                    ), ExampleObject(
-                        name = "URL Too Long",
-                        summary = "The URL exceeds the maximum length.",
-                        value = """{
-                            "errorMessage": "URL is too long"
-                        }"""
                     )]
+                )]
+            ),
+            ApiResponse(
+                responseCode = "401",
+                description = "Unauthorized access.",
+                content = [Content(
+                    mediaType = "application/json",
+                    schema = Schema(implementation = ErrorResponse::class)
                 )]
             ),
             ApiResponse(
@@ -94,7 +86,6 @@ class UrlShortenerController(
         ]
     )
     @PostMapping(
-        "/shorten",
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
@@ -108,26 +99,22 @@ class UrlShortenerController(
             )]
         )
         @RequestBody shortenUrlRequest: ShortenUrlRequest,
-        httpServletRequest: HttpServletRequest
+        httpServletRequest: HttpServletRequest,
+        @AuthenticationPrincipal userDetails: User
     ): ResponseEntity<UrlResponse> {
-        val clientIp = httpServletRequest.remoteAddr
-        val userAgent = httpServletRequest.getHeader("User-Agent")
         val originalUrl = shortenUrlRequest.originalUrl
-        log.info("Received request to shorten the originalUrl='{}' from IP='{}', User-Agent='{}'", originalUrl, clientIp, userAgent)
 
-        log.debug("Trying to encode the originalUrl='{}'", originalUrl)
+        log.info("Received request to shorten the originalUrl='{}' from IP='{}', User-Agent='{}'",
+            originalUrl, httpServletRequest.remoteAddr, httpServletRequest.getHeader("User-Agent"))
+
         val urlHash = StringEncoder.encode(originalUrl)
-        log.debug("Encoded the originalUrl='{}' to the urlHash='{}' for checking if originalUrl is added to DB", originalUrl, urlHash)
-
-        log.debug("Attempting to retrieve shortUrl for the urlHash='{}' in the DB", urlHash)
         val urlMapping = urlRepository.findByUrlHash(urlHash)
-        var shortUrl = ""
+        val shortUrl: String
+
         if (urlMapping.isEmpty) {
             log.info("No existing shortUrl found for the urlHash='{}'. Creating a new one.", urlHash)
             shortUrl = urlShortener.shortenUrl(shortenUrlRequest, httpServletRequest)
-            log.info("Created a new shortUrl='{}' for originalUrl='{}' and urlHash='{}' successfully.", shortUrl, originalUrl, urlHash)
         } else {
-            log.info("Found an existing shortUrl='{}' for urlHash='{}' in the DB", shortUrl, urlHash)
             shortUrl = urlMapping.get().shortUrl
         }
 
