@@ -9,12 +9,12 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 
 @Service
-class UserUrlMappingService(
+class PageableUrlMappingsProvider(
     private val urlRepository: UrlRepository,
     private val userRepository: UserRepository
 ) {
 
-    fun getUrlMappingsByUserId(page: Int, size: Int): UrlMappingPageDto {
+    fun getUrlMappingsPage(page: Int, size: Int): UrlMappingPageDto {
         val pageable = PageRequest.of(page, size)
 
         // Retrieve the authenticated user from SecurityContextHolder

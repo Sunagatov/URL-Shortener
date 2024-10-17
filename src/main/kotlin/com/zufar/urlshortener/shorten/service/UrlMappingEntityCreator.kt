@@ -21,11 +21,6 @@ class UrlMappingEntityCreator(private val userRepository: UserRepository) {
                urlHash: String,
                shortUrl: String): UrlMapping {
 
-        val authentication = SecurityContextHolder.getContext().authentication
-        val email = authentication?.name ?: throw IllegalStateException("User is not authenticated")
-        val user = userRepository.findByEmail(email) ?: throw IllegalStateException("User not found")
-        val userId = user.id ?: throw IllegalStateException("User ID is missing")
-
         val urlMapping = UrlMapping(
             urlHash = urlHash,
             shortUrl = shortUrl,
@@ -37,7 +32,7 @@ class UrlMappingEntityCreator(private val userRepository: UserRepository) {
             referer = httpServletRequest.getHeader("Referer"),
             acceptLanguage = httpServletRequest.getHeader("Accept-Language"),
             httpMethod = httpServletRequest.method,
-            userId = userId
+            userId = getUserId()
         )
 
         log.debug(
@@ -57,5 +52,16 @@ class UrlMappingEntityCreator(private val userRepository: UserRepository) {
         )
 
         return urlMapping
+    }
+
+    private fun getUserId(): String? {
+        val authentication = SecurityContextHolder.getContext().authentication
+        val email = authentication?.name ?: throw IllegalStateException("User is not authenticated")
+        var userId: String? = null
+        if ("anonymousUser" != email) {
+            val user = userRepository.findByEmail(email) ?: throw IllegalStateException("User not found")
+            userId = user.id
+        }
+        return userId
     }
 }

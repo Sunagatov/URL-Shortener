@@ -16,8 +16,6 @@ import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.security.core.userdetails.User
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -99,8 +97,7 @@ class UrlShortenerController(private val urlShortener: UrlShortener,
             )]
         )
         @RequestBody shortenUrlRequest: ShortenUrlRequest,
-        httpServletRequest: HttpServletRequest,
-        @AuthenticationPrincipal userDetails: User
+        httpServletRequest: HttpServletRequest
     ): ResponseEntity<UrlResponse> {
         val originalUrl = shortenUrlRequest.originalUrl
 
