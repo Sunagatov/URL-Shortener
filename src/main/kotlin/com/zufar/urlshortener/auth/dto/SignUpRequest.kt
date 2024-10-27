@@ -6,20 +6,20 @@ import io.swagger.v3.oas.annotations.media.Schema
 data class SignUpRequest(
 
     @Schema(description = "User's first name.", example = "John", required = true, maxLength = 50)
-    val firstName: String,
+    val firstName: String = "",
 
     @Schema(description = "User's last name.", example = "Doe", required = true, maxLength = 50)
-    val lastName: String,
+    val lastName: String = "",
 
     @Schema(description = "User's country.", example = "USA", required = true, maxLength = 50)
-    val country: String,
+    val country: String = "",
 
     @Schema(description = "User's age.", example = "30", required = true, minimum = "1", maximum = "150")
-    val age: Int,
+    val age: Int = 0,
 
     @Schema(description = "User's email address.", example = "john.doe@example.com", required = true, maxLength = 100)
-    val email: String,
+    val email: String = "",
 
     @Schema(description = "User's password.", example = "password123", required = true, minLength = 8, maxLength = 50)
-    val password: String
+    val password: String = ""
 )
