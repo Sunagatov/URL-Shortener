@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.common.exception
 
 import org.slf4j.LoggerFactory
+import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 
 private const val LOG_ERROR_MESSAGE = "An unexpected error occurred"
 
+@Order(3)
 @ControllerAdvice
 class GlobalExceptionHandler {
 
