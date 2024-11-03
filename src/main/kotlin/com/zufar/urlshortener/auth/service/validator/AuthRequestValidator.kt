@@ -92,8 +92,14 @@ class AuthRequestValidator(
         }
     }
 
-    private fun validateAge(age: Int) {
-        if (age < MIN_AGE || age > MAX_AGE) {
+    private fun validateAge(age: String) {
+        if (age.isBlank()) {
+            throw InvalidRequestException(AGE_MUST_NOT_BE_EMPTY)
+        }
+
+        val ageInt = age.toIntOrNull() ?: throw InvalidRequestException(AGE_MUST_BE_VALID_INT)
+
+        if (ageInt < MIN_AGE || ageInt > MAX_AGE) {
             throw InvalidRequestException(AGE_MUST_BE_BETWEEN_13_AND_120)
         }
     }

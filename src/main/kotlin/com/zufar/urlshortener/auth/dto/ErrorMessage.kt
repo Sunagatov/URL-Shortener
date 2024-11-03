@@ -9,6 +9,8 @@ const val LAST_NAME_CONTAINS_INVALID_CHARACTERS = "Last name contains invalid ch
 const val COUNTRY_MUST_NOT_BE_EMPTY = "Country name must not be empty"
 const val COUNTRY_NAME_IS_TOO_LONG = "Country name is too long"
 const val COUNTRY_NAME_CONTAINS_INVALID_CHARACTERS = "Country name contains invalid characters"
+const val AGE_MUST_NOT_BE_EMPTY = "Age must not be empty"
+const val AGE_MUST_BE_VALID_INT = "Age must be a valid integer"
 const val AGE_MUST_BE_BETWEEN_13_AND_120 = "Age must be between 13 and 120"
 
 const val EMAIL_MUST_NOT_BE_EMPTY = "Email must not be empty"
