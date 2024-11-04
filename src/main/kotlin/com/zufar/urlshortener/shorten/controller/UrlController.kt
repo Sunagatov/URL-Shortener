@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.shorten.controller
 
 import com.zufar.urlshortener.common.exception.ErrorResponse
+import com.zufar.urlshortener.common.exception.InvalidRequestException
 import com.zufar.urlshortener.shorten.dto.*
 import com.zufar.urlshortener.shorten.repository.UrlRepository
 import com.zufar.urlshortener.shorten.service.*
@@ -163,6 +164,12 @@ class UrlController(
             httpServletRequest.remoteAddr,
             httpServletRequest.getHeader("User-Agent")
         )
+
+        val existingMapping = urlRepository.findByShortUrl(originalUrl)
+        if (existingMapping.isPresent) {
+            log.warn("Loop detected: originalUrl='{}' points to another short URL.", originalUrl)
+            throw InvalidRequestException("URL cannot point to a loop back address")
+        }
 
         val urlHash = StringEncoder.encode(originalUrl)
         val urlMapping = urlRepository.findByUrlHash(urlHash)

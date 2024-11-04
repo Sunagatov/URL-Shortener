@@ -11,4 +11,6 @@ interface UrlRepository : MongoRepository<UrlMapping, String> {
     fun findByUrlHash(urlHash: String): Optional<UrlMapping>
 
     fun findAllByUserId(userId: String, pageable: Pageable): Page<UrlMapping>
+
+    fun findByShortUrl(shortUrl: String): Optional<UrlMapping>
 }
