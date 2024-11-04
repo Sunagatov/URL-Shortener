@@ -26,6 +26,7 @@ class PasswordOfUserValidator {
         val uppercaseRegex = Regex("[A-Z]")
         val lowercaseRegex = Regex("[a-z]")
         val digitRegex = Regex("[0-9]")
+        val specialCharRegex = Regex("[!@#\$%^&*()\\-_=+\\[\\]{}|;:'\",.<>?]")
 
         if (!password.contains(uppercaseRegex)) {
             throw InvalidRequestException(PASSWORD_MUST_CONTAIN_AT_LEAST_ONE_UPPERCASE_LETTER)
@@ -35,6 +36,9 @@ class PasswordOfUserValidator {
         }
         if (!password.contains(digitRegex)) {
             throw InvalidRequestException(PASSWORD_MUST_CONTAIN_AT_LEAST_ONE_DIGIT)
+        }
+        if (!password.contains(specialCharRegex)) {
+            throw InvalidRequestException(PASSWORD_MUST_CONTAIN_AT_LEAST_ONE_SPECIAL_CHARACTER)
         }
     }
 }
