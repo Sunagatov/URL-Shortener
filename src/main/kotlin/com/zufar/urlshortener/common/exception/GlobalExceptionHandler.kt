@@ -1,5 +1,6 @@
 package com.zufar.urlshortener.common.exception
 
+import com.zufar.urlshortener.shorten.exception.UrlNotFoundException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -33,5 +34,12 @@ class GlobalExceptionHandler {
         val errorMessage = "An unexpected error occurred: ${ex.message ?: "No additional details provided"}"
         val errorResponse = ErrorResponse(errorMessage = errorMessage)
         return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    @ExceptionHandler(UrlNotFoundException::class)
+    fun handleUrlNotFound(ex: UrlNotFoundException): ResponseEntity<ErrorResponse> {
+        log.error(LOG_ERROR_MESSAGE, ex)
+        val errorResponse = ErrorResponse(errorMessage = ex.message ?: "URL not found")
+        return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
     }
 }
