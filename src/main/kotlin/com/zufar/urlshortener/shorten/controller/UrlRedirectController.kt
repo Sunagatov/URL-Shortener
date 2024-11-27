@@ -1,8 +1,7 @@
 package com.zufar.urlshortener.shorten.controller
 
 import com.zufar.urlshortener.common.exception.ErrorResponse
-import com.zufar.urlshortener.shorten.exception.UrlNotFoundException
-import com.zufar.urlshortener.shorten.repository.UrlRepository
+import com.zufar.urlshortener.shorten.service.RedirectUrlService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.headers.Header
@@ -25,7 +24,9 @@ import java.net.URI
     name = "URL Redirection",
     description = "Operations related to redirecting shortened URLs to their original destinations."
 )
-class UrlRedirectController(private val urlRepository: UrlRepository) {
+class UrlRedirectController(
+    private val redirectUrlProvider: RedirectUrlService
+) {
 
     private val log = LoggerFactory.getLogger(UrlRedirectController::class.java)
 
@@ -108,24 +109,14 @@ class UrlRedirectController(private val urlRepository: UrlRepository) {
         val clientIp = httpServletRequest.remoteAddr
         val userAgent = httpServletRequest.getHeader("User-Agent")
 
-        log.info(
-            "Received redirect request for shortUrl='{}/{}' from IP='{}', User-Agent='{}'",
-            baseUrl,
-            urlHash,
-            clientIp,
-            userAgent
-        )
+        log.info("Received redirect request for shortUrl='{}/{}' from IP='{}', User-Agent='{}'", baseUrl, urlHash, clientIp, userAgent)
 
-        val urlMapping = urlRepository.findByUrlHash(urlHash)
+        val originalUrl = redirectUrlProvider.get(urlHash)
 
-        if (urlMapping.isEmpty) {
-            log.error("Original URL not found for urlHash='{}'", urlHash)
-            throw UrlNotFoundException("Original URL is absent for urlHash='$urlHash'")
-        }
-
-        log.info("Redirecting to the originalUrl='{}'", urlMapping.get().originalUrl)
-        return ResponseEntity.status(HttpStatus.FOUND)
-            .location(URI(urlMapping.get().originalUrl))
+        log.info("Redirecting to the originalUrl='{}'", originalUrl)
+        return ResponseEntity
+            .status(HttpStatus.FOUND)
+            .location(URI(originalUrl))
             .build()
     }
 }

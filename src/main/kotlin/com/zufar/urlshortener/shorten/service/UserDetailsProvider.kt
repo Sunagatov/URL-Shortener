@@ -1,5 +1,6 @@
 package com.zufar.urlshortener.shorten.service
 
+import com.zufar.urlshortener.auth.entity.UserDetails
 import com.zufar.urlshortener.auth.repository.UserRepository
 import com.zufar.urlshortener.shorten.dto.UserDetailsDto
 import org.springframework.security.core.context.SecurityContextHolder
@@ -9,9 +10,7 @@ import org.springframework.stereotype.Service
 class UserDetailsProvider(private val userRepository: UserRepository) {
 
     fun getUserDetails(): UserDetailsDto {
-        val authentication = SecurityContextHolder.getContext().authentication
-        val email = authentication?.name ?: throw IllegalStateException("User is not authenticated")
-        val user = userRepository.findByEmail(email) ?: throw IllegalStateException("User not found")
+        val user = getUserEntity()
 
         return UserDetailsDto(
             firstName = user.firstName,
@@ -20,5 +19,11 @@ class UserDetailsProvider(private val userRepository: UserRepository) {
             country = user.country,
             age = user.age
         )
+    }
+
+    fun getUserEntity(): UserDetails {
+        val authentication = SecurityContextHolder.getContext().authentication
+        val email = authentication?.name ?: throw IllegalStateException("User is not authenticated")
+        return userRepository.findByEmail(email) ?: throw IllegalStateException("User not found")
     }
 }

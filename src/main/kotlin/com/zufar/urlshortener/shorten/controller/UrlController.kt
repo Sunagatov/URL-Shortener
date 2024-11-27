@@ -164,16 +164,7 @@ class UrlController(
             httpServletRequest.getHeader("User-Agent")
         )
 
-        val urlHash = StringEncoder.encode(originalUrl)
-        val urlMapping = urlRepository.findByUrlHash(urlHash)
-        val shortUrl: String
-
-        if (urlMapping.isEmpty) {
-            log.info("No existing shortUrl found for the urlHash='{}'. Creating a new one.", urlHash)
-            shortUrl = urlShortener.shortenUrl(shortenUrlRequest, httpServletRequest)
-        } else {
-            shortUrl = urlMapping.get().shortUrl
-        }
+        val shortUrl = urlShortener.shortenUrl(shortenUrlRequest, httpServletRequest)
 
         return ResponseEntity.ok(UrlResponse(shortUrl))
     }
