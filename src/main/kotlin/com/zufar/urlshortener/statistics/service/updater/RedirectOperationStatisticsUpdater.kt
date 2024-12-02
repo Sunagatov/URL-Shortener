@@ -3,12 +3,16 @@ package com.zufar.urlshortener.statistics.service.updater
 import com.zufar.urlshortener.shorten.repository.UrlRepository
 import com.zufar.urlshortener.statistics.entity.Statistics
 import com.zufar.urlshortener.statistics.entity.UrlStatistics
-import com.zufar.urlshortener.statistics.repository.StatisticsRepository
+import org.springframework.data.mongodb.core.MongoOperations
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class RedirectOperationStatisticsUpdater(
-    private val statisticsRepository: StatisticsRepository,
+    private val mongoOperations: MongoOperations,
     private val urlRepository: UrlRepository
 ) {
 
@@ -18,37 +22,44 @@ class RedirectOperationStatisticsUpdater(
         shortenedUrl: String,
         originalUrl: String
     ) {
-        val statistics = statisticsRepository.findByUserId(userId)
+        val now = LocalDateTime.now()
 
-        if (statistics == null) {
-            // Statistics data is absent, create new record
-            val totalShortLinksCount = urlRepository.countByUserId(userId)
-            val newStatistics = Statistics(
+        val query = Query(Criteria.where("userId").`is`(userId))
+
+        val update = Update()
+            .inc("totalVisitsCount", 1)
+            .set("modifiedDateTime", now)
+
+        val updateResult = mongoOperations.upsert(query, update, Statistics::class.java)
+
+        if (updateResult.upsertedId != null) {
+            val initialStatistics = Statistics(
                 userId = userId,
-                totalShortLinksCount = totalShortLinksCount,
+                totalShortLinksCount = urlRepository.countByUserId(userId),
                 totalVisitsCount = 1,
-                urlStatistics = mutableListOf(
-                    UrlStatistics(urlHash, shortenedUrl, originalUrl, totalVisitsCount = 1)
+                createdAt = now,
+                updatedAt = now,
+                urlStatistics = listOf(
+                    UrlStatistics(urlHash = urlHash, shortenedUrl = shortenedUrl, originalUrl = originalUrl, totalVisitsCount = 1)
                 )
             )
-            statisticsRepository.save(newStatistics)
+            mongoOperations.save(initialStatistics)
         } else {
-            // Update existing statistics
-            statistics.totalVisitsCount += 1
-            val urlStat = statistics.urlStatistics.find { it.urlHash == urlHash }
-            if (urlStat != null) {
-                urlStat.totalVisitsCount += 1
-            } else {
-                statistics.urlStatistics.add(
-                    UrlStatistics(
-                        urlHash = urlHash,
-                        shortenedUrl = shortenedUrl,
-                        originalUrl = originalUrl,
-                        totalVisitsCount = 1
-                    )
-                )
+            val urlStat = mongoOperations.findOne(query, Statistics::class.java)?.urlStatistics?.find {
+                it.urlHash == urlHash
             }
-            statisticsRepository.save(statistics)
+            if (urlStat != null) {
+                val urlUpdate = Update().inc("urlStatistics.$[elem].totalVisitsCount", 1)
+                    .filterArray(Criteria.where("elem.urlHash").`is`(urlHash))
+                    .set("modifiedDateTime", now)
+
+                mongoOperations.updateFirst(query, urlUpdate, Statistics::class.java)
+            } else {
+                val addUrlStat = Update().push("urlStatistics", UrlStatistics(urlHash = urlHash, shortenedUrl = shortenedUrl, originalUrl = originalUrl, totalVisitsCount = 1))
+                    .set("modifiedDateTime", now)
+
+                mongoOperations.updateFirst(query, addUrlStat, Statistics::class.java)
+            }
         }
     }
 }

@@ -28,7 +28,7 @@ class UrlDeleter(
         log.info("Deleted URL mapping for urlHash='{}' successfully", urlHash)
 
         val userDetails: UserDetails = userDetailsProvider.getUserEntity()
-        val userId = userDetails.id
+        val userId = userDetails.id ?: "anonymous"
 
         statisticsUpdater.update(userId, urlHash)
         log.info("Statistics was updated for 'DeleteUrl' operation with url={}", urlHash)
