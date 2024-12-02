@@ -15,7 +15,7 @@ class StatisticsProvider(
 
     fun get(): UserStatisticsDto {
         val user = userDetailsProvider.getUserEntity()
-        val userId = user.id
+        val userId = user.id ?: "anonymous"
         val statistics = statisticsRepository.findByUserId(userId)
 
         return if (statistics != null) {

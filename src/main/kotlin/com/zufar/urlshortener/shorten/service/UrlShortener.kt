@@ -28,11 +28,11 @@ class UrlShortener(
         val originalUrl = shortenUrlRequest.originalUrl
 
         var urlHash = StringEncoder.encode(originalUrl)
-        var urlMapping = urlRepository.findByUrlHash(urlHash)
+        val urlMappingOptional = urlRepository.findByUrlHash(urlHash)
 
-        if (!urlMapping.isEmpty) {
+        if (urlMappingOptional.isPresent) {
             log.info("ShortUrl found for the urlHash='{}' in database", urlHash)
-            return urlMapping.get().shortUrl
+            return urlMappingOptional.get().shortUrl
         }
 
         log.info("No existing shortUrl found for the urlHash='{}'. Creating a new one.", urlHash)
@@ -52,11 +52,11 @@ class UrlShortener(
         val newShortUrl = "$baseUrl/url/$urlHash"
         log.info("Generated new shortURL='{}' for originalURL='{}'", newShortUrl, originalUrl)
 
-        urlMapping = urlMappingEntityCreator.create(shortenUrlRequest, httpServletRequest, urlHash, newShortUrl)
-        urlRepository.save(urlMapping)
+        val createdUrl = urlMappingEntityCreator.create(shortenUrlRequest, httpServletRequest, urlHash, newShortUrl)
+        urlRepository.save(createdUrl)
         log.info("Saved URL mapping for urlHash='{}' in MongoDB", urlHash)
 
-        val userId = urlMapping.userId ?: "anonymous"
+        val userId = createdUrl.userId ?: "anonymous"
 
         statisticsUpdater.updateStatistics(userId, urlHash, newShortUrl, originalUrl)
         log.info("Statistics was updated for 'ShortenUrl' operation with url={}", urlHash)
