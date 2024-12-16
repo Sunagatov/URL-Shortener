@@ -19,4 +19,10 @@ class CustomUserDetailsService(private val userRepository: UserRepository) : Use
             .authorities(emptyList())
             .build()
     }
+
+    fun getEmailByUserId(userId: String): String {
+        val user = userRepository.findById(userId)
+            .orElseThrow { UsernameNotFoundException("User with ID='$userId' is not found") }
+        return user.email
+    }
 }
