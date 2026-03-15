@@ -4,13 +4,16 @@
   <p><strong>A Kotlin + Spring Boot backend for URL shortening — fast, secure, and scalable.</strong></p>
   <p>
     <a href="https://t.me/zufarexplained">💬 Community</a> ·
+    <a href="http://116.203.197.65:3000/">🚀 Live Demo</a> ·
     <a href="https://github.com/Sunagatov/URL-Shortener/issues?q=is%3Aopen+label%3A%22good+first+issue%22">🟢 Good First Issues</a> ·
     <a href="https://github.com/Sunagatov/URL-Shortener/issues">🐛 Issues</a>
   </p>
 
   [![License: CC BY-NC 4.0](https://img.shields.io/badge/license-CC%20BY--NC%204.0-lightgrey.svg)](LICENSE)
   [![GitHub Stars](https://img.shields.io/github/stars/Sunagatov/URL-Shortener)](https://github.com/Sunagatov/URL-Shortener/stargazers)
+  [![GitHub Forks](https://img.shields.io/github/forks/Sunagatov/URL-Shortener?style=social)](https://github.com/Sunagatov/URL-Shortener/network/members)
   [![Contributors](https://img.shields.io/github/contributors/Sunagatov/URL-Shortener)](https://github.com/Sunagatov/URL-Shortener/graphs/contributors)
+  [![Docker Pulls](https://img.shields.io/docker/pulls/zufarexplainedit/url-shortener.svg)](https://hub.docker.com/r/zufarexplainedit/url-shortener/)
 </div>
 
 ---
