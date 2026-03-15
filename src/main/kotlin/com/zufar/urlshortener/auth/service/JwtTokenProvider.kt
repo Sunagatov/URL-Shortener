@@ -20,10 +20,10 @@ class JwtTokenProvider(
         val now = Date()
         val expiryDate = Date(now.time + jwtExpirationInMs)
         return Jwts.builder()
-            .setSubject(userDetails.username)
-            .setIssuedAt(now)
-            .setExpiration(expiryDate)
-            .signWith(secretKey, SignatureAlgorithm.HS256)
+            .subject(userDetails.username)
+            .issuedAt(now)
+            .expiration(expiryDate)
+            .signWith(secretKey)
             .compact()
     }
 
@@ -31,28 +31,28 @@ class JwtTokenProvider(
         val now = Date()
         val expiryDate = Date(now.time + jwtRefreshExpirationInMs)
         return Jwts.builder()
-            .setSubject(userDetails.username)
-            .setIssuedAt(now)
-            .setExpiration(expiryDate)
-            .signWith(secretKey, SignatureAlgorithm.HS256)
+            .subject(userDetails.username)
+            .issuedAt(now)
+            .expiration(expiryDate)
+            .signWith(secretKey)
             .compact()
     }
 
     fun getUsernameFromJWT(token: String): String {
-        val claims = Jwts.parserBuilder()
-            .setSigningKey(secretKey)
+        val claims = Jwts.parser()
+            .verifyWith(secretKey)
             .build()
-            .parseClaimsJws(token)
-            .body
+            .parseSignedClaims(token)
+            .payload
         return claims.subject
     }
 
     fun validateToken(authToken: String): Boolean {
         try {
-            Jwts.parserBuilder()
-                .setSigningKey(secretKey)
+            Jwts.parser()
+                .verifyWith(secretKey)
                 .build()
-                .parseClaimsJws(authToken)
+                .parseSignedClaims(authToken)
             return true
         } catch (ex: Exception) {
             // Log the exception or handle it accordingly

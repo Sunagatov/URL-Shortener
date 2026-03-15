@@ -1,9 +1,9 @@
 plugins {
-    kotlin("jvm") version "1.9.25"
-    kotlin("plugin.spring") version "1.9.25"
-    id("org.springframework.boot") version "3.3.3"
-    id("io.spring.dependency-management") version "1.1.6"
-    id("org.sonarqube") version "5.0.0.4638"
+    kotlin("jvm") version "2.1.21"
+    kotlin("plugin.spring") version "2.1.21"
+    id("org.springframework.boot") version "3.5.3"
+    id("io.spring.dependency-management") version "1.1.7"
+    id("org.sonarqube") version "6.0.1.5171"
     jacoco
 }
 
@@ -27,14 +27,14 @@ sonar {
     }
 }
 
-val springCloudVersion = "2023.0.3"
-val mockitoVersion = "5.13.0"
+val springCloudVersion = "2025.0.0"
+val mockitoVersion = "5.18.0"
 val mockitoKotlinVersion = "5.4.0"
-val springdocVersion = "2.6.0"
-val javaxValidationApiVersion = "2.0.1.Final"
+val springdocVersion = "2.8.9"
 val commonsValidatorVersion = "1.9.0"
-
-val jjwtApiVersion = "0.11.5"
+val caffeineVersion = "3.2.0"
+val bucket4jVersion = "8.7.0"
+val jjwtApiVersion = "0.12.6"
 
 
 dependencies {
@@ -69,8 +69,17 @@ dependencies {
 
     // Validation
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("javax.validation:validation-api:$javaxValidationApiVersion")
     implementation("commons-validator:commons-validator:$commonsValidatorVersion")
+
+    // Caching
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("com.github.ben-manes.caffeine:caffeine:$caffeineVersion")
+
+    // Rate Limiting
+    implementation("com.bucket4j:bucket4j-core:$bucket4jVersion")
+
+    // Monitoring
+    implementation("io.micrometer:micrometer-registry-prometheus")
 
     // Lombok
     compileOnly("org.projectlombok:lombok")
@@ -97,6 +106,10 @@ kotlin {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.named<Jar>("jar") {
+    enabled = false
 }
 
 sonarqube {
@@ -126,7 +139,7 @@ sourceSets {
 }
 
 jacoco {
-    toolVersion = "0.8.10"
+    toolVersion = "0.8.13"
 }
 tasks.jacocoTestReport {
     reports {

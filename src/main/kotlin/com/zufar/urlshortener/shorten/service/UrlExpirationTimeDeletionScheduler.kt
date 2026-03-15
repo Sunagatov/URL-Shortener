@@ -12,7 +12,7 @@ class UrlExpirationTimeDeletionScheduler(
 ) {
     private val log = LoggerFactory.getLogger(UrlExpirationTimeDeletionScheduler::class.java)
 
-    @Scheduled(cron = "0 0 0 * * *")// Run once every 24 hours at midnight
+    @Scheduled(cron = "\${scheduler.url.expiration.cron:0 0 0 * * *}") // Run once every 24 hours at midnight by default
     fun deleteExpiredUrls() {
         log.info("Checking for expired URLs")
 

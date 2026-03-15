@@ -5,6 +5,7 @@ import com.zufar.urlshortener.shorten.repository.UrlRepository
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 
 @Service
@@ -19,6 +20,7 @@ class UrlShortener(
     @Value("\${app.base-url}")
     private lateinit var baseUrl: String
 
+    @Cacheable(value = ["urlMappings"], key = "#shortenUrlRequest.originalUrl")
     fun shortenUrl(shortenUrlRequest: ShortenUrlRequest,
                    httpServletRequest: HttpServletRequest): String {
 

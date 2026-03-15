@@ -5,6 +5,8 @@ import com.zufar.urlshortener.shorten.dto.*
 import com.zufar.urlshortener.shorten.repository.UrlRepository
 import com.zufar.urlshortener.shorten.service.*
 import io.swagger.v3.oas.annotations.Operation
+import org.springframework.cache.annotation.CacheEvict
+import jakarta.validation.Valid
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.*
 import io.swagger.v3.oas.annotations.parameters.RequestBody as SwaggerRequestBody
@@ -152,10 +154,14 @@ class UrlController(
                 )
             ]
         )
-        @RequestBody shortenUrlRequest: ShortenUrlRequest,
+        @Valid @RequestBody shortenUrlRequest: ShortenUrlRequest,
         httpServletRequest: HttpServletRequest
     ): ResponseEntity<UrlResponse> {
-        val originalUrl = shortenUrlRequest.originalUrl
+        val originalUrl = shortenUrlRequest.originalUrl.trim()
+        
+        if (originalUrl.length > 2048) {
+            throw IllegalArgumentException("URL too long")
+        }
 
         log.info(
             "Received request to shorten the originalUrl='{}' from IP='{}', User-Agent='{}'",
@@ -255,6 +261,7 @@ class UrlController(
         ]
     )
     @DeleteMapping("/{urlHash}")
+    @CacheEvict(value = ["urlMappings"], key = "#urlHash")
     fun deleteUrlMapping(
         @Parameter(
             description = "The unique hash identifier of the URL mapping to be deleted.",
