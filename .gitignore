@@ -38,3 +38,22 @@ out/
 
 ### Kotlin ###
 .kotlin
+
+### Production ###
+.env.prod
+docker-compose.prod.yml
+
+### Environment & Deployment ###
+.env
+*.sh
+logs/
+prometheus.yml
+docker-compose.yml
+docker-compose.local-with-prod-db.yml
+
+### Amazon Q ###
+.amazonq/
+ENVIRONMENT_VARIABLES.md
+docs/ANALYSIS_SUMMARY.md
+docs/BUG_ANALYSIS.md
+docs/QUICK_FIX.md

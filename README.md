@@ -41,8 +41,9 @@ Please support the URL Shortener project by giving stars 🌟 on GitHub reposito
 ## Tech Stack
 
 - **Architecture:** Monolith.
-- **Programming Language:** Kotlin.
-- **Framework:** Spring Boot 3, Spring Data MongoDB, Spring Security, Spring Actuator, Spring Quartz, Spring Batch.
+- **Programming Language:** Kotlin 2.1 (LTS).
+- **JVM:** Java 21 (LTS).
+- **Framework:** Spring Boot 3.5, Spring Data MongoDB, Spring Security, Spring Actuator, Spring Quartz, Spring Batch.
 - **Database:** MongoDB.
 - **Caching:** Caffeine.
 - **Email:** SMTP.
