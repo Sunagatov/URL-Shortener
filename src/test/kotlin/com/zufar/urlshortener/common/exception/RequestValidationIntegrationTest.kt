@@ -38,4 +38,26 @@ class RequestValidationIntegrationTest {
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.errorMessage").value("Required request field is missing"))
     }
+
+    @Test
+    fun `wrong type refresh token field returns 400 with invalid type message`() {
+        mockMvc.perform(
+            post("/api/v1/auth/refresh-token")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"refreshToken":{}}""")
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.errorMessage").value("Request field has an invalid value or type"))
+    }
+
+    @Test
+    fun `wrong type days count field returns 400 with invalid type message`() {
+        mockMvc.perform(
+            post("/api/v1/urls")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""{"originalUrl":"https://a.com","daysCount":"abc"}""")
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.errorMessage").value("Request field has an invalid value or type"))
+    }
 }

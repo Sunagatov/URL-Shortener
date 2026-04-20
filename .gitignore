@@ -45,10 +45,10 @@ docker-compose.prod.yml
 
 ### Environment & Deployment ###
 .env
+.env.local
 *.sh
 logs/
 prometheus.yml
-docker-compose.yml
 docker-compose.local-with-prod-db.yml
 
 ### Amazon Q ###

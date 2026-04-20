@@ -1,5 +1,6 @@
 package com.zufar.urlshortener.common.exception
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.zufar.urlshortener.auth.exception.EmailAlreadyExistsException
 import com.zufar.urlshortener.auth.exception.InvalidTokenException
@@ -91,8 +92,11 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleHttpMessageNotReadableException(ex: HttpMessageNotReadableException): ResponseEntity<ErrorResponse> {
-        val message = when (ex.mostSpecificCause) {
-            is MismatchedInputException -> "Required request field is missing"
+        val cause = ex.mostSpecificCause
+        val message = when {
+            cause is InvalidFormatException -> "Request field has an invalid value or type"
+            cause is MismatchedInputException && cause.isMissingRequiredField() -> "Required request field is missing"
+            cause is MismatchedInputException -> "Request field has an invalid value or type"
             else -> "Malformed JSON request"
         }
 
@@ -105,5 +109,11 @@ class GlobalExceptionHandler {
         log.error(LOG_ERROR_MESSAGE, ex)
         val errorResponse = ErrorResponse(errorMessage = "An unexpected error occurred")
         return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    private fun MismatchedInputException.isMissingRequiredField(): Boolean {
+        val detail = message ?: return false
+        return detail.contains("missing", ignoreCase = true) ||
+            detail.contains("creator parameter", ignoreCase = true)
     }
 }

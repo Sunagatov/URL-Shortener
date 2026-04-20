@@ -26,11 +26,12 @@
 # 1. 📥 Clone
 git clone https://github.com/Sunagatov/URL-Shortener.git && cd URL-Shortener
 
-# 2. 🔧 Fill in your credentials
-# edit JWT_SECRET and MONGODB_URI in .env
+# 2. 🔧 Fill in your local credentials
+cp .env.example .env.local
+# edit JWT_SECRET and MONGODB_URI in .env.local
 ```
 
-> ⚠️ **Never commit real credentials.** The checked-in `.env` is a local sample and is auto-imported for local startup.
+> ⚠️ **Never commit real credentials.** `.env.example` is a tracked sample. `.env.local` is ignored and auto-imported for local startup.
 
 ---
 
@@ -47,7 +48,7 @@ Then run the app from IntelliJ or terminal:
 ./gradlew bootRun
 ```
 
-Spring Boot auto-imports `.env` for local startup, so exporting those variables manually is not required.
+Spring Boot auto-imports `.env.local` for local startup, so exporting those variables manually is not required.
 
 ---
 
@@ -137,7 +138,7 @@ src/main/kotlin/com/zufar/urlshortener/
 | `CORS_ALLOWED_ORIGINS` | ❌ | Defaults to `http://localhost:3000` |
 | `RATE_LIMIT_REQUESTS` | ❌ | Defaults to `100` (per minute per IP) |
 
-See `.env` for local defaults and `.env.prod` for the production template.
+See `.env.example` for local defaults and `.env.prod` for the production template.
 
 ---
 

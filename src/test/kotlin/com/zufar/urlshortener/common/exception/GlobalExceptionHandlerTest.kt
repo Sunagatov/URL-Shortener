@@ -70,6 +70,19 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    fun `wrong type request body exception returns 400 with invalid type message`() {
+        val cause = assertThrows<MismatchedInputException> {
+            jacksonObjectMapper().readValue<RefreshTokenRequest>("""{"refreshToken":{}}""")
+        }
+        val ex = HttpMessageNotReadableException("Unreadable JSON", cause, MockHttpInputMessage(ByteArray(0)))
+
+        val response = handler.handleHttpMessageNotReadableException(ex)
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
+        assertEquals("Request field has an invalid value or type", response.body!!.errorMessage)
+    }
+
+    @Test
     fun `malformed json request body exception returns 400`() {
         val ex = HttpMessageNotReadableException("Malformed JSON", MockHttpInputMessage(ByteArray(0)))
 
