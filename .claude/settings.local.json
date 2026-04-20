@@ -6,7 +6,9 @@
       "Bash(java -version)",
       "Bash(./gradlew --version)",
       "Bash(git *)",
-      "Bash(grep -E \"\\\\.\\(sh|yml\\)$\")"
+      "Bash(grep -E \"\\\\.\\(sh|yml\\)$\")",
+      "Bash(rm /Users/zufar/IdeaProjects/URL-Shortener/docs/BUG_ANALYSIS.md /Users/zufar/IdeaProjects/URL-Shortener/docs/QUICK_FIX.md /Users/zufar/IdeaProjects/URL-Shortener/docs/ANALYSIS_SUMMARY.md /Users/zufar/IdeaProjects/URL-Shortener/deploy-hetzner.sh /Users/zufar/IdeaProjects/URL-Shortener/docker-compose.prod.yml /Users/zufar/IdeaProjects/URL-Shortener/docker-compose.local-with-prod-db.yml)",
+      "Bash(rm -rf /Users/zufar/IdeaProjects/URL-Shortener/src/test/kotlin/com/zufar/urlshortener /Users/zufar/IdeaProjects/URL-Shortener/db/mongo-init.js)"
     ]
   }
 }
