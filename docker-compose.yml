@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVER_BASE_URL=http://localhost:8080
+      - JWT_SECRET=mySecretKey123456789012345678901234567890
+      - MONGODB_URI=mongodb://mongo:27017
+      - MONGODB_DATABASE=urlshortener
+    depends_on:
+      - mongo
+    networks:
+      - url-shortener-network
+
+  mongo:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - url-shortener-network
+
+volumes:
+  mongo-data:
+
+networks:
+  url-shortener-network:
+    driver: bridge

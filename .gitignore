@@ -53,7 +53,7 @@ docker-compose.local-with-prod-db.yml
 
 ### Amazon Q ###
 .amazonq/
-ENVIRONMENT_VARIABLES.md
+docs/ENVIRONMENT_VARIABLES.md
 docs/ANALYSIS_SUMMARY.md
 docs/BUG_ANALYSIS.md
 docs/QUICK_FIX.md
