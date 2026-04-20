@@ -37,8 +37,8 @@ class RateLimitFilter(
 
     private fun resolveClientIp(request: HttpServletRequest): String {
         val forwarded = request.getHeader("X-Forwarded-For")
-        return if (!forwarded.isNullOrBlank()) {
-            forwarded.split(",").first().trim()
+        return if (!forwarded.isNullOrBlank() && rateLimitConfig.isTrustedProxy(request.remoteAddr)) {
+            forwarded.split(",").firstNotNullOfOrNull { it.trim().takeIf(String::isNotEmpty) } ?: request.remoteAddr
         } else {
             request.remoteAddr
         }

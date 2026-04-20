@@ -36,7 +36,6 @@ Location: https://www.example.com/original-page
 #### 404 Not Found - URL Not Found
 ```json
 {
-  "errorCode": "URL_NOT_FOUND",
   "errorMessage": "Original URL is absent for urlHash='abc123'"
 }
 ```
@@ -70,6 +69,7 @@ Browser redirects to https://www.example.com
 
 - No authentication required (public endpoint)
 - Rate limiting applied (100 req/min per IP)
+- `X-Forwarded-For` is trusted only when the direct peer matches `RATE_LIMIT_TRUSTED_PROXIES`
 - URL validation on creation prevents malicious URLs
 - Logging of IP and User-Agent for analytics
 
@@ -161,7 +161,7 @@ Location: https://www.example.com/original-page
 
 - Database lookup: O(1) with index on `urlHash`
 - Average response time: 10-50ms
-- Caching: URL mappings cached for 1 hour
+- Caching: URL mappings cached by configured cache TTL
 - Cache hit response time: ~1ms
 
 ## Logging
@@ -183,5 +183,3 @@ INFO: Redirecting to the originalUrl='https://www.example.com'
 
 ## Related Features
 - [Shorten URL](url-shorten.md)
-- [Delete URL](url-delete.md)
-- [URL Analytics](url-analytics.md) (future)

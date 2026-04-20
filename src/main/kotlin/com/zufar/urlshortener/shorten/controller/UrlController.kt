@@ -91,27 +91,6 @@ class UrlController(
                 ]
             ),
             ApiResponse(
-                responseCode = "401",
-                description = "Unauthorized access.",
-                content = [
-                    Content(
-                        mediaType = MediaType.APPLICATION_JSON_VALUE,
-                        schema = Schema(implementation = ErrorResponse::class),
-                        examples = [
-                            ExampleObject(
-                                name = "UnauthorizedError",
-                                summary = "Authentication is required",
-                                value = """
-                                    {
-                                      "errorMessage": "Unauthorized access."
-                                    }
-                                """
-                            )
-                        ]
-                    )
-                ]
-            ),
-            ApiResponse(
                 responseCode = "500",
                 description = "Unexpected server error.",
                 content = [

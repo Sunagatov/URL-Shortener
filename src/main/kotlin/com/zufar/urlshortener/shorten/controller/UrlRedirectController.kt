@@ -58,7 +58,6 @@ class UrlRedirectController(private val urlMappingProvider: UrlMappingProvider) 
                         summary = "The shortened URL does not exist.",
                         value = """
                             {
-                              "errorCode": "URL_NOT_FOUND",
                               "errorMessage": "Original URL is absent for urlHash='abcd1234'"
                             }
                         """
@@ -80,7 +79,6 @@ class UrlRedirectController(private val urlMappingProvider: UrlMappingProvider) 
                         summary = "An unexpected error occurred.",
                         value = """
                             {
-                              "errorCode": "INTERNAL_SERVER_ERROR",
                               "errorMessage": "An unexpected error occurred."
                             }
                         """

@@ -6,10 +6,10 @@
 - Public endpoint
 - Expected outcome: HTTP 302 with `Location` header when hash exists
 
-## Authenticated endpoints
+## URL endpoints
 ### Create short URL
 - `POST /api/v1/urls`
-- Requires bearer access token
+- Public endpoint; bearer access token is optional and associates the mapping with the user when present
 - Request contains `originalUrl` and optional `daysCount`
 
 ## Auth endpoints

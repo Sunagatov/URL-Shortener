@@ -18,7 +18,7 @@ POST /api/v1/urls
 ### Headers
 ```
 Content-Type: application/json
-Authorization: Bearer {accessToken}
+Authorization: Bearer {accessToken}  # optional
 ```
 
 ### Body
@@ -58,38 +58,19 @@ Authorization: Bearer {accessToken}
 }
 ```
 
-#### 401 Unauthorized
-```json
-{
-  "errorMessage": "Unauthorized access."
-}
-```
-
 ## Business Logic
 
 1. **Validate URL**: Check format, length, and no spaces
 2. **Trim URL**: Remove leading/trailing whitespace
-3. **Generate Hash**: Create SHA-256 hash of original URL
-4. **Check Existing**: Look for existing mapping with same hash
-5. **Return Existing or Create New**:
-   - If exists: Return existing short URL
-   - If new: Create mapping and return new short URL
-6. **Set Expiration**: Calculate expiration date (now + daysCount)
-7. **Save to Database**: Store URL mapping
-8. **Return Response**: Send short URL to client
+3. **Generate Hash**: Generate a random short code
+4. **Create Mapping**: Build a URL mapping and associate it with the authenticated user when a valid bearer token is present
+5. **Set Expiration**: Calculate expiration date (now + daysCount, or the service default)
+6. **Save to Database**: Store URL mapping, retrying on short-code collision
+7. **Return Response**: Send short URL to client
 
 ## URL Hash Generation
 
-```kotlin
-fun encode(originalUrl: String): String {
-    val messageDigest = MessageDigest.getInstance("SHA-256")
-    val hashBytes = messageDigest.digest(originalUrl.toByteArray())
-    return Base64.getUrlEncoder()
-        .withoutPadding()
-        .encodeToString(hashBytes)
-        .substring(0, 8)
-}
-```
+The service generates a random URL-safe code and retries insertion if the generated code collides with an existing mapping.
 
 ## Database Schema
 
@@ -120,7 +101,7 @@ URLS: {
 ### API Service
 ```typescript
 // src/services/ApiService.ts
-static async createUrl(data: CreateUrlRequest): Promise<UrlMapping> {
+async function createUrl(data: CreateUrlRequest): Promise<UrlMapping> {
   const response = await axiosInstance.post(API_ENDPOINTS.URLS.CREATE, data);
   return response.data;
 }
@@ -135,13 +116,14 @@ http://116.203.197.65/api/v1/urls
 
 - URL mappings are cached using Caffeine
 - Cache key: `urlHash`
-- Cache expiration: 1 hour
+- Cache expiration: configured by `CACHE_EXPIRE_MINUTES` (default: 30 minutes)
 - Cache is invalidated on URL deletion
 
 ## Rate Limiting
 
 - Rate limit: 100 requests per minute per IP
 - Implemented using custom RateLimitFilter
+- `X-Forwarded-For` is only used when the direct remote address matches `RATE_LIMIT_TRUSTED_PROXIES`
 - Returns 429 Too Many Requests when exceeded
 
 ## Testing
@@ -150,7 +132,6 @@ http://116.203.197.65/api/v1/urls
 ```bash
 curl -X POST http://116.203.197.65/api/v1/urls \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
   -d '{
     "originalUrl": "https://www.example.com/long/url",
     "daysCount": 30
@@ -166,23 +147,23 @@ curl -X POST http://116.203.197.65/api/v1/urls \
 
 ## Edge Cases
 
-1. **Duplicate URL**: Returns existing short URL (idempotent)
+1. **Duplicate URL**: Can create a new short URL for the same original URL
 2. **URL with Spaces**: Returns 400 error
 3. **URL Too Long (>2048)**: Returns 400 error
 4. **Invalid URL Format**: Returns 400 error
-5. **Expired Token**: Returns 401 error
+5. **Expired Token**: Request can still proceed as anonymous because authentication is optional for creation
 
 ## Performance
 
 - Hash generation: O(1)
 - Database lookup: O(1) with index on `urlHash`
-- Cache hit: ~1ms
-- Cache miss: ~10-50ms (database query)
+- Cache hit for lookup flows: ~1ms
+- Cache miss for lookup flows: ~10-50ms (database query)
 
 ## Acceptance Criteria
 
 - [x] User can shorten a valid URL
-- [x] Duplicate URLs return same short URL
+- [x] Duplicate original URLs can be shortened independently
 - [x] Invalid URLs return 400 error
 - [x] URLs with spaces are rejected
 - [x] URLs over 2048 chars are rejected
@@ -192,6 +173,3 @@ curl -X POST http://116.203.197.65/api/v1/urls \
 
 ## Related Features
 - [URL Redirect](url-redirect.md)
-- [Get URL Mappings](url-list.md)
-- [Delete URL](url-delete.md)
-- [Get URL Details](url-details.md)

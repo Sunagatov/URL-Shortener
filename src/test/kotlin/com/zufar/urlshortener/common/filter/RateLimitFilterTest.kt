@@ -100,8 +100,24 @@ class RateLimitFilterTest {
     }
 
     @Test
-    fun `X-Forwarded-For header is used as client IP when present`() {
+    fun `X-Forwarded-For header is ignored when remote address is not trusted proxy`() {
         whenever(rateLimitConfig.createBucket()).thenReturn(bucketWithCapacity(100))
+
+        val request = MockHttpServletRequest().apply {
+            remoteAddr = "10.0.0.99"
+            addHeader("X-Forwarded-For", "203.0.113.5, 10.0.0.1")
+        }
+        val response = MockHttpServletResponse()
+
+        filter.doFilter(request, response, filterChain)
+
+        assertTrue(buckets.getIfPresent("10.0.0.99") != null, "Bucket should be keyed on remote address")
+    }
+
+    @Test
+    fun `X-Forwarded-For header is used when remote address is trusted proxy`() {
+        whenever(rateLimitConfig.createBucket()).thenReturn(bucketWithCapacity(100))
+        whenever(rateLimitConfig.isTrustedProxy("10.0.0.99")).thenReturn(true)
 
         val request = MockHttpServletRequest().apply {
             remoteAddr = "10.0.0.99"
