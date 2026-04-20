@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 
 private const val LOG_ERROR_MESSAGE = "An unexpected error occurred"
 
-@Suppress("unused")
 @ControllerAdvice
 class GlobalExceptionHandler {
 

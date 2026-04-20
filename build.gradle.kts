@@ -133,7 +133,7 @@ tasks.named("sonarqube") {
 sourceSets {
     main {
         kotlin {
-            srcDirs("${layout.buildDirectory}/generated/api/src/main/kotlin")
+            srcDir(layout.buildDirectory.dir("generated/api/src/main/kotlin"))
         }
     }
 }
