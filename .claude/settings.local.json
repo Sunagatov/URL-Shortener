@@ -5,7 +5,8 @@
       "Bash(./gradlew compileKotlin --stacktrace)",
       "Bash(java -version)",
       "Bash(./gradlew --version)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "Bash(grep -E \"\\\\.\\(sh|yml\\)$\")"
     ]
   }
 }
