@@ -1,23 +1,28 @@
 package com.zufar.urlshortener.shorten.controller
 
 import com.zufar.urlshortener.common.exception.ErrorResponse
-import com.zufar.urlshortener.shorten.dto.*
-import com.zufar.urlshortener.shorten.repository.UrlRepository
-import com.zufar.urlshortener.shorten.service.*
+import com.zufar.urlshortener.shorten.dto.ShortenUrlRequest
+import com.zufar.urlshortener.shorten.dto.UrlMappingDto
+import com.zufar.urlshortener.shorten.dto.UrlMappingPageDto
+import com.zufar.urlshortener.shorten.dto.UrlResponse
+import com.zufar.urlshortener.shorten.service.PageableUrlMappingsProvider
+import com.zufar.urlshortener.shorten.service.UrlDeleter
+import com.zufar.urlshortener.shorten.service.UrlMappingProvider
+import com.zufar.urlshortener.shorten.service.UrlShortener
 import io.swagger.v3.oas.annotations.Operation
-import org.springframework.cache.annotation.CacheEvict
-import jakarta.validation.Valid
 import io.swagger.v3.oas.annotations.Parameter
-import io.swagger.v3.oas.annotations.media.*
-import io.swagger.v3.oas.annotations.parameters.RequestBody as SwaggerRequestBody
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.ExampleObject
+import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
-import org.slf4j.LoggerFactory
+import jakarta.validation.Valid
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import io.swagger.v3.oas.annotations.parameters.RequestBody as SwaggerRequestBody
 
 @RestController
 @RequestMapping("/api/v1/urls")
@@ -27,13 +32,10 @@ import org.springframework.web.bind.annotation.*
 )
 class UrlController(
     private val urlShortener: UrlShortener,
-    private val urlRepository: UrlRepository,
     private val urlDeleter: UrlDeleter,
     private val pageableUrlMappingsProvider: PageableUrlMappingsProvider,
     private val urlMappingProvider: UrlMappingProvider
 ) {
-    private val log = LoggerFactory.getLogger(UrlController::class.java)
-
     @Operation(
         summary = "Shorten a URL",
         description = "Generates a shortened URL from a given long URL. Returns a shorter unique URL that redirects to the original URL.",
@@ -157,30 +159,7 @@ class UrlController(
         @Valid @RequestBody shortenUrlRequest: ShortenUrlRequest,
         httpServletRequest: HttpServletRequest
     ): ResponseEntity<UrlResponse> {
-        val originalUrl = shortenUrlRequest.originalUrl.trim()
-        
-        if (originalUrl.length > 2048) {
-            throw IllegalArgumentException("URL too long")
-        }
-
-        log.info(
-            "Received request to shorten the originalUrl='{}' from IP='{}', User-Agent='{}'",
-            originalUrl,
-            httpServletRequest.remoteAddr,
-            httpServletRequest.getHeader("User-Agent")
-        )
-
-        val urlHash = StringEncoder.encode(originalUrl)
-        val urlMapping = urlRepository.findByUrlHash(urlHash)
-        val shortUrl: String
-
-        if (urlMapping.isEmpty) {
-            log.info("No existing shortUrl found for the urlHash='{}'. Creating a new one.", urlHash)
-            shortUrl = urlShortener.shortenUrl(shortenUrlRequest, httpServletRequest)
-        } else {
-            shortUrl = urlMapping.get().shortUrl
-        }
-
+        val shortUrl = urlShortener.shortenUrl(shortenUrlRequest, httpServletRequest)
         return ResponseEntity.ok(UrlResponse(shortUrl))
     }
 
@@ -261,7 +240,6 @@ class UrlController(
         ]
     )
     @DeleteMapping("/{urlHash}")
-    @CacheEvict(value = ["urlMappings"], key = "#urlHash")
     fun deleteUrlMapping(
         @Parameter(
             description = "The unique hash identifier of the URL mapping to be deleted.",
@@ -270,9 +248,7 @@ class UrlController(
         )
         @PathVariable urlHash: String
     ): ResponseEntity<Any> {
-        log.info("Received request to delete URL mapping for urlHash='{}'", urlHash)
         urlDeleter.deleteUrl(urlHash)
-        log.info("Successfully deleted URL mapping for urlHash='{}'", urlHash)
         return ResponseEntity.noContent().build()
     }
 

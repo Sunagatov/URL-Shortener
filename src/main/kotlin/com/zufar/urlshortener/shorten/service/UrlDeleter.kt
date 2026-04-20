@@ -3,6 +3,7 @@ package com.zufar.urlshortener.shorten.service
 import com.zufar.urlshortener.shorten.exception.UrlNotFoundException
 import com.zufar.urlshortener.shorten.repository.UrlRepository
 import org.slf4j.LoggerFactory
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.stereotype.Service
 
 @Service
@@ -11,15 +12,13 @@ class UrlDeleter(
 ) {
     private val log = LoggerFactory.getLogger(UrlDeleter::class.java)
 
+    @CacheEvict(value = ["urlMappings"], allEntries = true)
     fun deleteUrl(urlHash: String) {
-        log.info("Attempting to delete URL mapping for urlHash='{}'", urlHash)
-        if (urlRepository.existsById(urlHash)) {
-            log.info("Found URL mapping for urlHash='{}'. Deleting...", urlHash)
-            urlRepository.deleteById(urlHash)
-            log.info("Successfully deleted URL mapping for urlHash='{}'", urlHash)
-        } else {
-            log.warn("No URL mapping found for urlHash='{}'. Deletion failed.", urlHash)
-            throw UrlNotFoundException("No URL mapping found for urlHash='$urlHash'. Deletion failed.")
+        if (!urlRepository.existsById(urlHash)) {
+            log.warn("URL mapping not found for urlHash='{}'", urlHash)
+            throw UrlNotFoundException("No URL mapping found for urlHash='$urlHash'")
         }
+        urlRepository.deleteById(urlHash)
+        log.info("Deleted URL mapping for urlHash='{}'", urlHash)
     }
 }

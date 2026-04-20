@@ -1,8 +1,7 @@
 package com.zufar.urlshortener.shorten.controller
 
 import com.zufar.urlshortener.common.exception.ErrorResponse
-import com.zufar.urlshortener.shorten.exception.UrlNotFoundException
-import com.zufar.urlshortener.shorten.repository.UrlRepository
+import com.zufar.urlshortener.shorten.service.UrlMappingProvider
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.headers.Header
@@ -13,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -25,12 +23,9 @@ import java.net.URI
     name = "URL Redirection",
     description = "Operations related to redirecting shortened URLs to their original destinations."
 )
-class UrlRedirectController(private val urlRepository: UrlRepository) {
+class UrlRedirectController(private val urlMappingProvider: UrlMappingProvider) {
 
     private val log = LoggerFactory.getLogger(UrlRedirectController::class.java)
-
-    @Value("\${app.base-url}")
-    private lateinit var baseUrl: String
 
     @Operation(
         summary = "Redirect to the Original URL",
@@ -105,27 +100,11 @@ class UrlRedirectController(private val urlRepository: UrlRepository) {
         @PathVariable urlHash: String,
         httpServletRequest: HttpServletRequest
     ): ResponseEntity<Unit> {
-        val clientIp = httpServletRequest.remoteAddr
-        val userAgent = httpServletRequest.getHeader("User-Agent")
-
-        log.info(
-            "Received redirect request for shortUrl='{}/{}' from IP='{}', User-Agent='{}'",
-            baseUrl,
-            urlHash,
-            clientIp,
-            userAgent
-        )
-
-        val urlMapping = urlRepository.findByUrlHash(urlHash)
-
-        if (urlMapping.isEmpty) {
-            log.error("Original URL not found for urlHash='{}'", urlHash)
-            throw UrlNotFoundException("Original URL is absent for urlHash='$urlHash'")
-        }
-
-        log.info("Redirecting to the originalUrl='{}'", urlMapping.get().originalUrl)
+        log.info("Redirect request for urlHash='{}' from IP='{}'", urlHash, httpServletRequest.remoteAddr)
+        val urlMapping = urlMappingProvider.getUrlMappingByHash(urlHash)
+        log.info("Redirecting to originalUrl='{}'", urlMapping.originalUrl)
         return ResponseEntity.status(HttpStatus.FOUND)
-            .location(URI(urlMapping.get().originalUrl))
+            .location(URI(urlMapping.originalUrl))
             .build()
     }
 }

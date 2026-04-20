@@ -24,26 +24,25 @@ class UrlShortener(
     fun shortenUrl(shortenUrlRequest: ShortenUrlRequest,
                    httpServletRequest: HttpServletRequest): String {
 
-        val originalUrl = shortenUrlRequest.originalUrl
-        val clientIp = httpServletRequest.remoteAddr
-        val userAgent = httpServletRequest.getHeader("User-Agent")
-
-        log.info("Trying to shorten originalURL='{}' from IP='{}', User-Agent='{}'", originalUrl, clientIp, userAgent)
+        val originalUrl = shortenUrlRequest.originalUrl.trim()
+        log.info("Shortening originalURL='{}' from IP='{}'", originalUrl, httpServletRequest.remoteAddr)
 
         urlValidator.validateUrl(originalUrl)
         daysCountValidator.validateDaysCount(shortenUrlRequest.daysCount)
-        log.debug("URL validation passed for originalURL='{}'", originalUrl)
 
         val urlHash = StringEncoder.encode(originalUrl)
-        log.debug("Encoded originalURL='{}' to urlHash='{}'", originalUrl, urlHash)
 
-        val newShortUrl = "$baseUrl/url/$urlHash"
-        log.info("Generated new shortURL='{}' for originalURL='{}'", newShortUrl, originalUrl)
+        val existing = urlRepository.findByUrlHash(urlHash)
+        if (existing.isPresent) {
+            log.debug("Returning existing shortUrl for urlHash='{}'", urlHash)
+            return existing.get().shortUrl
+        }
 
-        val urlMapping = urlMappingEntityCreator.create(shortenUrlRequest, httpServletRequest, urlHash, newShortUrl)
+        val shortUrl = "$baseUrl/url/$urlHash"
+        val urlMapping = urlMappingEntityCreator.create(shortenUrlRequest, httpServletRequest, urlHash, shortUrl)
         urlRepository.save(urlMapping)
-        log.info("Saved URL mapping for urlHash='{}' in MongoDB", urlHash)
+        log.info("Created shortUrl='{}' for originalURL='{}'", shortUrl, originalUrl)
 
-        return newShortUrl
+        return shortUrl
     }
 }
