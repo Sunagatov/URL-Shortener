@@ -9,7 +9,7 @@ services:
       - SERVER_BASE_URL=http://localhost:8080
       - JWT_SECRET=mySecretKey123456789012345678901234567890
       - MONGODB_URI=mongodb://mongo:27017
-      - MONGODB_DATABASE=urlshortener
+      - MONGODB_DATABASE_NAME=urlshortener
     depends_on:
       - mongo
     networks:

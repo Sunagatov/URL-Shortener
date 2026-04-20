@@ -1,4 +1,4 @@
-<div align="center">
+<div style="text-align: center;">
   <br>
   <h1>🔗 URL Shortener Backend</h1>
   <p><strong>A Kotlin + Spring Boot backend for URL shortening — fast, secure, and scalable.</strong></p>
@@ -9,7 +9,7 @@
     <a href="https://github.com/Sunagatov/URL-Shortener/issues">🐛 Issues</a>
   </p>
 
-  [![License: CC BY-NC 4.0](https://img.shields.io/badge/license-CC%20BY--NC%204.0-lightgrey.svg)](LICENSE)
+  [![License: CC BY-NC 4.0](https://img.shields.io/badge/license-CC%20BY--NC%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc/4.0/)
   [![GitHub Stars](https://img.shields.io/github/stars/Sunagatov/URL-Shortener)](https://github.com/Sunagatov/URL-Shortener/stargazers)
   [![GitHub Forks](https://img.shields.io/github/forks/Sunagatov/URL-Shortener?style=social)](https://github.com/Sunagatov/URL-Shortener/network/members)
   [![Contributors](https://img.shields.io/github/contributors/Sunagatov/URL-Shortener)](https://github.com/Sunagatov/URL-Shortener/graphs/contributors)
@@ -30,7 +30,7 @@ git clone https://github.com/Sunagatov/URL-Shortener.git && cd URL-Shortener
 # edit JWT_SECRET and MONGODB_URI in .env
 ```
 
-> ⚠️ **Never commit `.env` with real credentials.** It is listed in `.gitignore` — keep it that way.
+> ⚠️ **Never commit real credentials.** The checked-in `.env` is a local sample and is auto-imported for local startup.
 
 ---
 
@@ -46,6 +46,8 @@ Then run the app from IntelliJ or terminal:
 ```bash
 ./gradlew bootRun
 ```
+
+Spring Boot auto-imports `.env` for local startup, so exporting those variables manually is not required.
 
 ---
 
@@ -67,7 +69,6 @@ docker compose -f docker-compose.prod.yml up -d --build
 ```bash
 ./gradlew test
 ```
-✅ Tests use Testcontainers — Docker must be running.
 
 ---
 
@@ -88,7 +89,7 @@ URL Shortener Backend is a REST API that generates short URLs from long ones, ha
 | 🔐 Auth | JWT (access + refresh tokens) |
 | ⚡ Caching | Caffeine (1 hour TTL) |
 | 🚦 Rate Limiting | Custom filter (100 req/min per IP) |
-| 🧪 Testing | JUnit 5, Testcontainers, Rest Assured |
+| 🧪 Testing | JUnit 5, Spring Boot Test, Mockito |
 | 📝 API Docs | OpenAPI 3 (Swagger UI) |
 | 🚢 Deployment | Docker (multi-stage build) |
 
@@ -130,7 +131,7 @@ src/main/kotlin/com/zufar/urlshortener/
 |---|---|---|
 | `JWT_SECRET` | ✅ | Secret key for JWT signing (min 256 bits) |
 | `MONGODB_URI` | ✅ | MongoDB connection string |
-| `MONGODB_DATABASE_NAME` | ❌ | Defaults to `url_shortener` |
+| `MONGODB_DATABASE_NAME` | ❌ | Optional. Defaults to `urlshortener`. Legacy `MONGODB_DATABASE` is also supported. |
 | `SERVER_BASE_URL` | ❌ | Defaults to `http://localhost:8080` |
 | `SERVER_PORT` | ❌ | Defaults to `8080` |
 | `CORS_ALLOWED_ORIGINS` | ❌ | Defaults to `http://localhost:3000` |
@@ -155,7 +156,7 @@ See `.env` for local defaults and `.env.prod` for the production template.
 
 ## 📄 License
 
-📜 [CC BY-NC 4.0](LICENSE) — free for educational and personal use with author attribution. Commercial use requires explicit written permission from the author ([zufar.sunagatov@gmail.com](mailto:zufar.sunagatov@gmail.com)).
+📜 CC BY-NC 4.0 — free for educational and personal use with author attribution. Commercial use requires explicit written permission from the author ([zufar.sunagatov@gmail.com](mailto:zufar.sunagatov@gmail.com)).
 
 ---
 

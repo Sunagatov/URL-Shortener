@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
@@ -26,13 +27,20 @@ class JwtAuthenticationFilter(
     ) {
         val jwt = getJwtFromRequest(request)
 
-        if (jwt != null && jwtTokenProvider.validateAccessToken(jwt)) {
-            val username = jwtTokenProvider.getUsernameFromJWT(jwt)
-
-            val userDetails: UserDetails = customUserDetailsService.loadUserByUsername(username)
-            val authentication = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
-            authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
-            SecurityContextHolder.getContext().authentication = authentication
+        if (
+            jwt != null &&
+            jwtTokenProvider.validateAccessToken(jwt) &&
+            SecurityContextHolder.getContext().authentication == null
+        ) {
+            try {
+                val username = jwtTokenProvider.getUsernameFromJWT(jwt)
+                val userDetails: UserDetails = customUserDetailsService.loadUserByUsername(username)
+                val authentication = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
+                authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
+                SecurityContextHolder.getContext().authentication = authentication
+            } catch (_: AuthenticationException) {
+                SecurityContextHolder.clearContext()
+            }
         }
 
         filterChain.doFilter(request, response)

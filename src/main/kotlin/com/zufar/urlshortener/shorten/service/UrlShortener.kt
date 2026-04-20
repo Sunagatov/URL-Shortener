@@ -5,6 +5,7 @@ import com.zufar.urlshortener.shorten.repository.UrlRepository
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.dao.DuplicateKeyException
 import org.springframework.stereotype.Service
 
 private const val MAX_CODE_GENERATION_ATTEMPTS = 10
@@ -25,28 +26,35 @@ class UrlShortener(
         shortenUrlRequest: ShortenUrlRequest,
         httpServletRequest: HttpServletRequest
     ): String {
-        val originalUrl = shortenUrlRequest.originalUrl.trim()
-        log.info("Shortening originalURL='{}' from IP='{}'", originalUrl, httpServletRequest.remoteAddr)
+        val normalizedOriginalUrl = shortenUrlRequest.originalUrl.trim()
+        val normalizedBaseUrl = baseUrl.trimEnd('/')
 
-        urlValidator.validateUrl(originalUrl)
+        log.info("Shortening originalURL='{}' from IP='{}'", normalizedOriginalUrl, httpServletRequest.remoteAddr)
+
+        urlValidator.validateUrl(normalizedOriginalUrl)
         daysCountValidator.validateDaysCount(shortenUrlRequest.daysCount)
 
-        val urlHash = generateUniqueCode()
-        val shortUrl = "$baseUrl/url/$urlHash"
-        val urlMapping = urlMappingEntityCreator.create(shortenUrlRequest, httpServletRequest, urlHash, shortUrl)
-        urlRepository.save(urlMapping)
-        log.info("Created shortUrl='{}' for originalURL='{}'", shortUrl, originalUrl)
+        val normalizedRequest =
+            if (normalizedOriginalUrl == shortenUrlRequest.originalUrl) {
+                shortenUrlRequest
+            } else {
+                shortenUrlRequest.copy(originalUrl = normalizedOriginalUrl)
+            }
 
-        return shortUrl
-    }
+        repeat(MAX_CODE_GENERATION_ATTEMPTS) { attempt ->
+            val urlHash = StringEncoder.generate()
+            val shortUrl = "$normalizedBaseUrl/url/$urlHash"
+            val urlMapping = urlMappingEntityCreator.create(normalizedRequest, httpServletRequest, urlHash, shortUrl)
 
-    private fun generateUniqueCode(): String {
-        repeat(MAX_CODE_GENERATION_ATTEMPTS) {
-            val candidate = StringEncoder.generate()
-            if (!urlRepository.findByUrlHash(candidate).isPresent) {
-                return candidate
+            try {
+                urlRepository.insert(urlMapping)
+                log.info("Created shortUrl='{}' for originalURL='{}'", shortUrl, normalizedOriginalUrl)
+                return shortUrl
+            } catch (_: DuplicateKeyException) {
+                log.warn("Short code collision for urlHash='{}' on attempt {}", urlHash, attempt + 1)
             }
         }
+
         throw IllegalStateException("Failed to generate a unique short code after $MAX_CODE_GENERATION_ATTEMPTS attempts")
     }
 }

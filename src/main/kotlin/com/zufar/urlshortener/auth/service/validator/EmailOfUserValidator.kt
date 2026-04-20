@@ -5,7 +5,7 @@ import com.zufar.urlshortener.common.exception.InvalidRequestException
 import org.apache.commons.validator.routines.EmailValidator
 import org.springframework.stereotype.Service
 
-private const val MAX_EMAIL_LENGTH = 64
+private const val MAX_EMAIL_LENGTH = 254
 
 @Service
 class EmailOfUserValidator {

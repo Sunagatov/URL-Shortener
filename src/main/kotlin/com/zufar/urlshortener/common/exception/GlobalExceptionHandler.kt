@@ -1,14 +1,18 @@
 package com.zufar.urlshortener.common.exception
 
+import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.zufar.urlshortener.auth.exception.EmailAlreadyExistsException
 import com.zufar.urlshortener.auth.exception.InvalidTokenException
 import com.zufar.urlshortener.shorten.exception.UrlNotFoundException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.AuthenticationException
+import org.springframework.validation.FieldError
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 
@@ -70,6 +74,30 @@ class GlobalExceptionHandler {
     fun handleEmailAlreadyExistsException(ex: EmailAlreadyExistsException): ResponseEntity<ErrorResponse> {
         val errorResponse = ErrorResponse(errorMessage = ex.message ?: "Email already in use")
         return ResponseEntity(errorResponse, HttpStatus.CONFLICT)
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handleMethodArgumentNotValidException(ex: MethodArgumentNotValidException): ResponseEntity<ErrorResponse> {
+        val message = ex.bindingResult.allErrors.firstOrNull()?.let { error ->
+            when (error) {
+                is FieldError -> error.defaultMessage ?: "${error.field} is invalid"
+                else -> error.defaultMessage ?: "Request validation failed"
+            }
+        } ?: "Request validation failed"
+
+        val errorResponse = ErrorResponse(errorMessage = message)
+        return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleHttpMessageNotReadableException(ex: HttpMessageNotReadableException): ResponseEntity<ErrorResponse> {
+        val message = when (ex.mostSpecificCause) {
+            is MismatchedInputException -> "Required request field is missing"
+            else -> "Malformed JSON request"
+        }
+
+        val errorResponse = ErrorResponse(errorMessage = message)
+        return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
     }
 
     @ExceptionHandler(Exception::class)

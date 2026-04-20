@@ -2,6 +2,8 @@ package com.zufar.urlshortener.common.config
 
 import com.zufar.urlshortener.auth.service.CustomUserDetailsService
 import com.zufar.urlshortener.auth.service.JwtAuthenticationFilter
+import com.zufar.urlshortener.common.security.RestAccessDeniedHandler
+import com.zufar.urlshortener.common.security.RestAuthenticationEntryPoint
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -20,7 +22,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 class SecurityConfig(
     private val customUserDetailsService: CustomUserDetailsService,
-    private val jwtAuthenticationFilter: JwtAuthenticationFilter
+    private val jwtAuthenticationFilter: JwtAuthenticationFilter,
+    private val restAuthenticationEntryPoint: RestAuthenticationEntryPoint,
+    private val restAccessDeniedHandler: RestAccessDeniedHandler
 ) {
 
     @Bean
@@ -46,6 +50,10 @@ class SecurityConfig(
         http
             .csrf { it.disable() }
             .cors { }
+            .exceptionHandling {
+                it.authenticationEntryPoint(restAuthenticationEntryPoint)
+                it.accessDeniedHandler(restAccessDeniedHandler)
+            }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
                 auth

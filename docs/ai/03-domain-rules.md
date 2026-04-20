@@ -36,8 +36,8 @@ Feature docs mention access token lifetime as 15 minutes, but runtime config def
 ### Cache lifetime drift
 Feature docs mention a 1 hour cache TTL, but runtime config default is `30` minutes.
 
-### MongoDB env name drift
-README prose mentions `MONGODB_DATABASE_NAME`, while runtime config uses `MONGODB_DATABASE`.
+### MongoDB env name compatibility
+Runtime config uses `MONGODB_DATABASE_NAME` as the canonical key and still supports legacy `MONGODB_DATABASE`.
 
 ## Safe change rules
 - Do not “fix” behavior to match prose docs unless the task explicitly says to change runtime behavior.
