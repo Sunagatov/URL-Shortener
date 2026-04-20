@@ -8,7 +8,14 @@
       "Bash(git *)",
       "Bash(grep -E \"\\\\.\\(sh|yml\\)$\")",
       "Bash(rm /Users/zufar/IdeaProjects/URL-Shortener/docs/BUG_ANALYSIS.md /Users/zufar/IdeaProjects/URL-Shortener/docs/QUICK_FIX.md /Users/zufar/IdeaProjects/URL-Shortener/docs/ANALYSIS_SUMMARY.md /Users/zufar/IdeaProjects/URL-Shortener/deploy-hetzner.sh /Users/zufar/IdeaProjects/URL-Shortener/docker-compose.prod.yml /Users/zufar/IdeaProjects/URL-Shortener/docker-compose.local-with-prod-db.yml)",
-      "Bash(rm -rf /Users/zufar/IdeaProjects/URL-Shortener/src/test/kotlin/com/zufar/urlshortener /Users/zufar/IdeaProjects/URL-Shortener/db/mongo-init.js)"
+      "Bash(rm -rf /Users/zufar/IdeaProjects/URL-Shortener/src/test/kotlin/com/zufar/urlshortener /Users/zufar/IdeaProjects/URL-Shortener/db/mongo-init.js)",
+      "Read(//Users/zufar/IdeaProjects/Vault/scripts/nginx/**)",
+      "Read(//Users/zufar/IdeaProjects/Vault/goss/templates/**)",
+      "Read(//Users/zufar/IdeaProjects/Vault/apps/iced-latte/backend/archive/**)",
+      "Read(//Users/zufar/IdeaProjects/Vault/apps/**)",
+      "Bash(xargs -I{} sh -c 'echo \"SYMLINK: {} -> $\\(readlink {}\\)\"')",
+      "Read(//Users/zufar/IdeaProjects/Vault/scripts/**)",
+      "Read(//Users/zufar/IdeaProjects/Vault/**)"
     ]
   }
 }
