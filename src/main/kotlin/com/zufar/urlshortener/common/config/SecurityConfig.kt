@@ -19,19 +19,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 class SecurityConfig(
     private val customUserDetailsService: CustomUserDetailsService,
-    private val jwtAuthenticationFilter: JwtAuthenticationFilter,
-    private val passwordEncoder: PasswordEncoder
+    private val jwtAuthenticationFilter: JwtAuthenticationFilter
 ) {
 
     @Bean
-    fun authenticationProvider(): DaoAuthenticationProvider {
+    fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
+
+    @Bean
+    fun authenticationProvider(passwordEncoder: PasswordEncoder): DaoAuthenticationProvider {
         val authProvider = DaoAuthenticationProvider(customUserDetailsService)
         authProvider.setPasswordEncoder(passwordEncoder)
         return authProvider
     }
-
-    @Bean
-    fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
     @Bean
     fun authenticationManager(authenticationConfiguration: AuthenticationConfiguration): AuthenticationManager {
@@ -39,7 +38,10 @@ class SecurityConfig(
     }
 
     @Bean
-    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
+    fun securityFilterChain(
+        http: HttpSecurity,
+        authenticationProvider: DaoAuthenticationProvider
+    ): SecurityFilterChain {
         http
             .csrf { it.disable() }
             .authorizeHttpRequests { auth ->
@@ -55,7 +57,7 @@ class SecurityConfig(
                     ).permitAll()
                     .anyRequest().authenticated()
             }
-            .authenticationProvider(authenticationProvider())
+            .authenticationProvider(authenticationProvider)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
 
         return http.build()
