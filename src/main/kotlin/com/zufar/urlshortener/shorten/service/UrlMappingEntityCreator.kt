@@ -29,26 +29,14 @@ class UrlMappingEntityCreator(private val userRepository: UserRepository) {
             expirationDate = LocalDateTime.now().plusDays(shortenUrlRequest.daysCount ?: DEFAULT_EXPIRATION_URL_DAYS),
             requestIp = httpServletRequest.remoteAddr,
             userAgent = httpServletRequest.getHeader("User-Agent"),
-            referer = httpServletRequest.getHeader("Referer"),
-            acceptLanguage = httpServletRequest.getHeader("Accept-Language"),
-            httpMethod = httpServletRequest.method,
             userId = getUserId()
         )
 
         log.debug(
-            "Created URL mapping: urlHash='{}', shortUrl='{}', originalUrl='{}', createdAt='{}', expirationDate='{}', " +
-                    "requestIp='{}', userAgent='{}', referer='{}', acceptLanguage='{}', httpMethod='{}', userId='{}'",
-            urlHash,
-            shortUrl,
-            shortenUrlRequest.originalUrl,
-            urlMapping.createdAt,
-            urlMapping.expirationDate,
-            urlMapping.requestIp,
-            urlMapping.userAgent,
-            urlMapping.referer,
-            urlMapping.acceptLanguage,
-            urlMapping.httpMethod,
-            urlMapping.userId
+            "Created URL mapping: urlHash='{}', shortUrl='{}', originalUrl='{}', createdAt='{}', expirationDate='{}', requestIp='{}', userAgent='{}', userId='{}'",
+            urlHash, shortUrl, shortenUrlRequest.originalUrl,
+            urlMapping.createdAt, urlMapping.expirationDate,
+            urlMapping.requestIp, urlMapping.userAgent, urlMapping.userId
         )
 
         return urlMapping

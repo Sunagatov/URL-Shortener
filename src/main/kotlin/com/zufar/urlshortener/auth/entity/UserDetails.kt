@@ -15,7 +15,5 @@ data class UserDetails(
     val country: String,
     val age: Int,
     val email: String,
-    val createdAt: LocalDateTime? = null,
-    val updatedAt: LocalDateTime? = null,
-    val lastLogin: LocalDateTime? = null
+    val createdAt: LocalDateTime? = null
 )

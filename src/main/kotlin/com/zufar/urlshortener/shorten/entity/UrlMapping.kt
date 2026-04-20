@@ -12,17 +12,11 @@ data class UrlMapping(
     val shortUrl: String,
     val originalUrl: String,
 
-    // URL metadata
     val createdAt: LocalDateTime,
     val expirationDate: LocalDateTime,
 
-    // Request-related metadata
     val requestIp: String?,
     val userAgent: String?,
-    val referer: String?,
-    val acceptLanguage: String?,
-    val httpMethod: String,
 
-    // Reference to the user who created this mapping
     val userId: String?
 )
