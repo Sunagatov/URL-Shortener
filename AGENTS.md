@@ -1,50 +1,29 @@
 # AGENTS.md
 
-This repository is a Kotlin + Spring Boot backend for a URL shortener.
+This repository already contains good human-facing docs. To keep AI coding sessions cheaper and faster, use the AI docs layer instead of scanning the whole codebase.
 
-Use the smallest relevant context for each task.
+## Start here
+1. Read `CLAUDE.md`
+2. Read `docs/ai/00-start-here.md`
+3. Read only the task-specific AI doc and feature spec you need
+4. Read the exact source files you plan to change
 
-## Read order
-1. README.md
-2. build.gradle.kts
-3. src/main/resources/application.properties
-4. docs/ai/repo-map.md
-5. docs/ai/domain-rules.md
-6. docs/ai/change-playbook.md
+## Goal
+Minimize token use by avoiding broad scans and repeated rediscovery of stable project facts.
 
-## Main features
-- user sign up
-- user sign in
-- refresh token
-- shorten URL
-- redirect short URL
+## What this app is
+A Kotlin + Spring Boot backend for URL shortening with MongoDB, JWT auth, Caffeine cache, rate limiting, Swagger/OpenAPI, and Prometheus/Actuator.
 
-## Stack
-- Kotlin
-- Java 21
-- Spring Boot
-- MongoDB
-- JWT
-- Caffeine cache
-- Bucket4j
-- Springdoc
-- Prometheus / Actuator
+## Important runtime surfaces
+- build and dependencies: `build.gradle.kts`
+- runtime config: `src/main/resources/application.properties`
+- local infra: `docker-compose.yml`
+- feature contracts: `docs/features/*.md`
+- AI navigation layer: `docs/ai/*.md`
 
-## Rules
-- Prefer minimal diffs.
-- Do not read unrelated files.
-- Trust runtime config and source code over docs if they disagree.
-- Add or update tests for behavior changes.
-- Avoid renaming API contracts unless explicitly requested.
-
-## Drift to verify before edits
-- token lifetime in docs vs runtime config
-- cache TTL in docs vs runtime config
-- MongoDB env var name in README vs application.properties
-
-## Useful commands
-```bash
-./gradlew test
-./gradlew bootRun
-docker compose up -d mongo
-```
+## Safe operating rules
+- Make the smallest correct diff.
+- Avoid changing unrelated files.
+- Prefer targeted tests.
+- Preserve public API paths unless the task explicitly changes them.
+- When docs conflict with config, trust runtime config and code first.

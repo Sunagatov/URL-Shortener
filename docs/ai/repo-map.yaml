@@ -1,0 +1,64 @@
+project:
+  name: URL Shortener Backend
+  repo: Sunagatov/URL-Shortener
+  default_branch: development
+  language: Kotlin
+  jvm: Java 21
+  framework: Spring Boot 3.5
+
+runtime:
+  database: MongoDB
+  auth: JWT
+  cache: Caffeine
+  rate_limit: custom filter / Bucket4j-related setup
+  observability:
+    - Spring Actuator
+    - Prometheus
+  scheduling: enabled
+
+entrypoints:
+  app_main: src/main/kotlin/com/zufar/urlshortener/UrlShortenerApplication.kt
+  config: src/main/resources/application.properties
+  build: build.gradle.kts
+  local_infra: docker-compose.yml
+  human_docs: README.md
+  feature_docs: docs/features/
+  ai_docs: docs/ai/
+
+api:
+  signup: POST /api/v1/auth/signup
+  signin: POST /api/v1/auth/signin
+  refresh_token: POST /api/v1/auth/refresh-token
+  create_short_url: POST /api/v1/urls
+  redirect: GET /url/{urlHash}
+
+packages:
+  auth: src/main/kotlin/com/zufar/urlshortener/auth/
+  common: src/main/kotlin/com/zufar/urlshortener/common/
+  shorten: src/main/kotlin/com/zufar/urlshortener/shorten/
+  user: src/main/kotlin/com/zufar/urlshortener/user/
+
+env:
+  - JWT_SECRET
+  - JWT_ACCESS_TOKEN_EXPIRATION
+  - JWT_REFRESH_TOKEN_EXPIRATION
+  - MONGODB_URI
+  - MONGODB_DATABASE
+  - SERVER_BASE_URL
+  - SERVER_PORT
+  - CORS_ALLOWED_ORIGINS
+  - RATE_LIMIT_REQUESTS
+  - CACHE_MAX_SIZE
+  - CACHE_EXPIRE_MINUTES
+  - SCHEDULER_URL_EXPIRATION_CRON
+
+commands:
+  test: ./gradlew test
+  run: ./gradlew bootRun
+  mongo_only: docker compose up -d mongo
+  docker_all: docker compose up -d --build
+
+known_drift:
+  - prose docs vs runtime token lifetime
+  - prose docs vs runtime cache ttl
+  - README MongoDB env key vs runtime MongoDB env key
