@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.shorten.controller
 
 import com.zufar.urlshortener.common.exception.ErrorResponse
+import com.zufar.urlshortener.common.exception.InvalidRequestException
 import com.zufar.urlshortener.shorten.dto.ShortenUrlRequest
 import com.zufar.urlshortener.shorten.dto.UrlMappingDto
 import com.zufar.urlshortener.shorten.dto.UrlMappingPageDto
@@ -36,6 +37,10 @@ class UrlController(
     private val pageableUrlMappingsProvider: PageableUrlMappingsProvider,
     private val urlMappingProvider: UrlMappingProvider
 ) {
+    private companion object {
+        const val MAX_PAGE_SIZE = 100
+    }
+
     @Operation(
         summary = "Shorten a URL",
         description = "Generates a shortened URL from a given long URL. Returns a shorter unique URL that redirects to the original URL.",
@@ -379,6 +384,13 @@ class UrlController(
         )
         @RequestParam(defaultValue = "10") size: Int
     ): ResponseEntity<UrlMappingPageDto> {
+        if (page < 0) {
+            throw InvalidRequestException("Page must be greater than or equal to 0")
+        }
+        if (size !in 1..MAX_PAGE_SIZE) {
+            throw InvalidRequestException("Size must be between 1 and $MAX_PAGE_SIZE")
+        }
+
         val urlMappingsPage = pageableUrlMappingsProvider.getUrlMappingsPage(page, size)
         return ResponseEntity.ok(urlMappingsPage)
     }

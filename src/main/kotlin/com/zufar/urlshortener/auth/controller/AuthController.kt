@@ -7,6 +7,7 @@ import com.zufar.urlshortener.auth.exception.InvalidTokenException
 import com.zufar.urlshortener.auth.exception.UserNotFoundException
 import org.springframework.dao.DuplicateKeyException
 import com.zufar.urlshortener.auth.repository.UserRepository
+import com.zufar.urlshortener.auth.service.EmailNormalizer
 import com.zufar.urlshortener.auth.service.JwtTokenProvider
 import com.zufar.urlshortener.auth.service.validator.AuthRequestValidator
 import com.zufar.urlshortener.common.exception.ErrorResponse
@@ -138,11 +139,14 @@ class AuthController(
         )
         @RequestBody signInRequest: SignInRequest
     ): ResponseEntity<AuthResponse> {
-        authRequestValidator.validateAuthRequest(signInRequest)
+        val normalizedEmail = EmailNormalizer.normalize(signInRequest.email)
+        val normalizedRequest = signInRequest.copy(email = normalizedEmail)
+
+        authRequestValidator.validateAuthRequest(normalizedRequest)
 
         val authentication = authenticationManager.authenticate(
             UsernamePasswordAuthenticationToken(
-                signInRequest.email,
+                normalizedEmail,
                 signInRequest.password
             )
         )
@@ -257,16 +261,19 @@ class AuthController(
         )
         @RequestBody signUpRequest: SignUpRequest
     ): ResponseEntity<AuthResponse> {
-        authRequestValidator.validateSignUpRequest(signUpRequest)
+        val normalizedEmail = EmailNormalizer.normalize(signUpRequest.email)
+        val normalizedRequest = signUpRequest.copy(email = normalizedEmail)
 
-        if (userRepository.findByEmail(signUpRequest.email) != null) {
+        authRequestValidator.validateSignUpRequest(normalizedRequest)
+
+        if (userRepository.findByEmailIgnoreCase(normalizedEmail) != null) {
             throw EmailAlreadyExistsException("Email is already in use")
         }
 
         val user = UserDetails(
             firstName = signUpRequest.firstName,
             lastName = signUpRequest.lastName,
-            email = signUpRequest.email,
+            email = normalizedEmail,
             password = passwordEncoder.encode(signUpRequest.password),
             country = signUpRequest.country,
             age = signUpRequest.age.toInt(),
@@ -411,7 +418,8 @@ class AuthController(
         }
 
         val username = jwtTokenProvider.getUsernameFromJWT(refreshTokenRequest.refreshToken)
-        val userDetails = userRepository.findByEmail(username)
+        val normalizedEmail = EmailNormalizer.normalize(username)
+        val userDetails = userRepository.findByEmailIgnoreCase(normalizedEmail)
             ?: throw UserNotFoundException("User not found for the provided refresh token")
 
         val userSpringDetails = User(

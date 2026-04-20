@@ -5,11 +5,12 @@ services:
     build: .
     ports:
       - "8080:8080"
+    env_file:
+      - .env.local
     environment:
-      - SERVER_BASE_URL=http://localhost:8080
-      - JWT_SECRET=mySecretKey123456789012345678901234567890
-      - MONGODB_URI=mongodb://mongo:27017
-      - MONGODB_DATABASE_NAME=urlshortener
+      SERVER_PORT: 8080
+      SERVER_BASE_URL: http://localhost:8080
+      MONGODB_URI: mongodb://mongo:27017
     depends_on:
       - mongo
     networks:

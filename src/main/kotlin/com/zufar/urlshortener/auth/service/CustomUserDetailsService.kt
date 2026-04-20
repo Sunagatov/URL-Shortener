@@ -10,8 +10,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException
 class CustomUserDetailsService(private val userRepository: UserRepository) : UserDetailsService {
 
     override fun loadUserByUsername(email: String): UserDetails {
-        val user = userRepository.findByEmail(email)
-            ?: throw UsernameNotFoundException("User with email='$email' is not found")
+        val normalizedEmail = EmailNormalizer.normalize(email)
+        val user = userRepository.findByEmailIgnoreCase(normalizedEmail)
+            ?: throw UsernameNotFoundException("User with email='$normalizedEmail' is not found")
 
         return org.springframework.security.core.userdetails.User.builder()
             .username(user.email)

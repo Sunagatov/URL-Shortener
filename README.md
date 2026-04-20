@@ -54,6 +54,8 @@ Spring Boot auto-imports `.env.local` for local startup, so exporting those vari
 
 ### Option B — Everything in Docker
 
+Docker also reads `.env.local` for local secrets and app config. Edit `.env.local` for local values; Compose overrides only the Mongo host inside the app container so it connects to `mongo` instead of `localhost`.
+
 ```bash
 docker compose up -d --build
 ```

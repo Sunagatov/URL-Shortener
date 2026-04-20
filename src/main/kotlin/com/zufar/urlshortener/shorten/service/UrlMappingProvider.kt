@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.shorten.service
 
 import com.zufar.urlshortener.auth.repository.UserRepository
+import com.zufar.urlshortener.auth.service.EmailNormalizer
 import com.zufar.urlshortener.shorten.dto.UrlMappingDto
 import com.zufar.urlshortener.shorten.entity.UrlMapping
 import com.zufar.urlshortener.shorten.exception.UrlNotFoundException
@@ -48,7 +49,8 @@ class UrlMappingProvider(
             throw IllegalStateException("User is not authenticated")
         }
 
-        val user = userRepository.findByEmail(email) ?: throw IllegalStateException("User not found")
+        val normalizedEmail = EmailNormalizer.normalize(email)
+        val user = userRepository.findByEmailIgnoreCase(normalizedEmail) ?: throw IllegalStateException("User not found")
         return user.id ?: throw IllegalStateException("User ID is missing")
     }
 }

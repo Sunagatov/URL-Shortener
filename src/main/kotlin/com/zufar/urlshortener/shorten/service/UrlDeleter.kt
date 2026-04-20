@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.shorten.service
 
 import com.zufar.urlshortener.auth.repository.UserRepository
+import com.zufar.urlshortener.auth.service.EmailNormalizer
 import com.zufar.urlshortener.shorten.exception.UrlNotFoundException
 import com.zufar.urlshortener.shorten.repository.UrlRepository
 import org.slf4j.LoggerFactory
@@ -40,7 +41,8 @@ class UrlDeleter(
             throw IllegalStateException("User is not authenticated")
         }
 
-        val user = userRepository.findByEmail(email) ?: throw IllegalStateException("User not found")
+        val normalizedEmail = EmailNormalizer.normalize(email)
+        val user = userRepository.findByEmailIgnoreCase(normalizedEmail) ?: throw IllegalStateException("User not found")
         return user.id ?: throw IllegalStateException("User ID is missing")
     }
 }

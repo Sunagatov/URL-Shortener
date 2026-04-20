@@ -44,7 +44,7 @@ class PageableUrlMappingsProviderTest {
     fun setupSecurityContext() {
         val auth = UsernamePasswordAuthenticationToken("test@example.com", null, emptyList())
         SecurityContextHolder.getContext().authentication = auth
-        whenever(userRepository.findByEmail("test@example.com")).thenReturn(testUser)
+        whenever(userRepository.findByEmailIgnoreCase("test@example.com")).thenReturn(testUser)
     }
 
     @AfterEach
