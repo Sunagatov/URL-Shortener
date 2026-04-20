@@ -401,7 +401,7 @@ class AuthController(
     ): ResponseEntity<RefreshTokenResponse> {
         authRequestValidator.validateRefreshTokenRequest(refreshTokenRequest)
 
-        if (!jwtTokenProvider.validateRefreshToken(refreshTokenRequest.refreshToken)) {
+        if (!jwtTokenProvider.validateToken(refreshTokenRequest.refreshToken)) {
             throw InvalidTokenException("Invalid or expired refresh token")
         }
 

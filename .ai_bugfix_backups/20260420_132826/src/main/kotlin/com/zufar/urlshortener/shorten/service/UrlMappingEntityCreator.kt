@@ -16,18 +16,15 @@ class UrlMappingEntityCreator(private val userRepository: UserRepository) {
 
     private val log = LoggerFactory.getLogger(UrlMappingEntityCreator::class.java)
 
-    fun create(
-        shortenUrlRequest: ShortenUrlRequest,
-        httpServletRequest: HttpServletRequest,
-        urlHash: String,
-        shortUrl: String
-    ): UrlMapping {
-        val normalizedOriginalUrl = shortenUrlRequest.originalUrl.trim()
+    fun create(shortenUrlRequest: ShortenUrlRequest,
+               httpServletRequest: HttpServletRequest,
+               urlHash: String,
+               shortUrl: String): UrlMapping {
 
         val urlMapping = UrlMapping(
             urlHash = urlHash,
             shortUrl = shortUrl,
-            originalUrl = normalizedOriginalUrl,
+            originalUrl = shortenUrlRequest.originalUrl,
             createdAt = LocalDateTime.now(),
             expirationDate = LocalDateTime.now().plusDays(shortenUrlRequest.daysCount ?: DEFAULT_EXPIRATION_URL_DAYS),
             requestIp = httpServletRequest.remoteAddr,
@@ -37,7 +34,7 @@ class UrlMappingEntityCreator(private val userRepository: UserRepository) {
 
         log.debug(
             "Created URL mapping: urlHash='{}', shortUrl='{}', originalUrl='{}', createdAt='{}', expirationDate='{}', requestIp='{}', userAgent='{}', userId='{}'",
-            urlHash, shortUrl, normalizedOriginalUrl,
+            urlHash, shortUrl, shortenUrlRequest.originalUrl,
             urlMapping.createdAt, urlMapping.expirationDate,
             urlMapping.requestIp, urlMapping.userAgent, urlMapping.userId
         )
@@ -46,14 +43,13 @@ class UrlMappingEntityCreator(private val userRepository: UserRepository) {
     }
 
     private fun getUserId(): String? {
-        val authentication = SecurityContextHolder.getContext().authentication ?: return null
-        val email = authentication.name
-
-        if (email.isBlank() || email == "anonymousUser") {
-            return null
+        val authentication = SecurityContextHolder.getContext().authentication
+        val email = authentication?.name ?: throw IllegalStateException("User is not authenticated")
+        var userId: String? = null
+        if ("anonymousUser" != email) {
+            val user = userRepository.findByEmail(email) ?: throw IllegalStateException("User not found")
+            userId = user.id
         }
-
-        val user = userRepository.findByEmail(email) ?: throw IllegalStateException("Authenticated user not found")
-        return user.id
+        return userId
     }
 }

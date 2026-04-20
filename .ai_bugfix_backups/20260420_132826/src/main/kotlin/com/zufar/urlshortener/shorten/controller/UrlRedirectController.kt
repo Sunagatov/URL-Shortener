@@ -14,10 +14,7 @@ import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.net.URI
 
 @RestController
@@ -89,7 +86,10 @@ class UrlRedirectController(private val urlMappingProvider: UrlMappingProvider) 
             )
         ]
     )
-    @GetMapping("/url/{urlHash}")
+    @GetMapping(
+        "/url/{urlHash}",
+        produces = ["application/json"]
+    )
     fun redirect(
         @Parameter(
             description = "The unique identifier (hash) of the shortened URL.",
@@ -101,7 +101,7 @@ class UrlRedirectController(private val urlMappingProvider: UrlMappingProvider) 
         httpServletRequest: HttpServletRequest
     ): ResponseEntity<Unit> {
         log.info("Redirect request for urlHash='{}' from IP='{}'", urlHash, httpServletRequest.remoteAddr)
-        val urlMapping = urlMappingProvider.getPublicUrlMappingByHash(urlHash)
+        val urlMapping = urlMappingProvider.getUrlMappingByHash(urlHash)
         log.info("Redirecting to originalUrl='{}'", urlMapping.originalUrl)
         return ResponseEntity.status(HttpStatus.FOUND)
             .location(URI(urlMapping.originalUrl))

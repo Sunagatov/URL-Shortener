@@ -196,27 +196,6 @@ class UrlController(
                 ]
             ),
             ApiResponse(
-                responseCode = "403",
-                description = "The current user does not own the URL mapping.",
-                content = [
-                    Content(
-                        mediaType = MediaType.APPLICATION_JSON_VALUE,
-                        schema = Schema(implementation = ErrorResponse::class),
-                        examples = [
-                            ExampleObject(
-                                name = "ForbiddenError",
-                                summary = "User is not allowed to delete this URL mapping",
-                                value = """
-                                    {
-                                      "errorMessage": "You are not allowed to delete this URL mapping"
-                                    }
-                                """
-                            )
-                        ]
-                    )
-                ]
-            ),
-            ApiResponse(
                 responseCode = "404",
                 description = "URL mapping not found.",
                 content = [
@@ -458,27 +437,6 @@ class UrlController(
                 ]
             ),
             ApiResponse(
-                responseCode = "403",
-                description = "The current user does not own the URL mapping.",
-                content = [
-                    Content(
-                        mediaType = MediaType.APPLICATION_JSON_VALUE,
-                        schema = Schema(implementation = ErrorResponse::class),
-                        examples = [
-                            ExampleObject(
-                                name = "ForbiddenError",
-                                summary = "User is not allowed to access this URL mapping",
-                                value = """
-                                    {
-                                      "errorMessage": "You are not allowed to access this URL mapping"
-                                    }
-                                """
-                            )
-                        ]
-                    )
-                ]
-            ),
-            ApiResponse(
                 responseCode = "404",
                 description = "URL mapping not found.",
                 content = [
@@ -531,7 +489,7 @@ class UrlController(
         )
         @PathVariable urlHash: String
     ): ResponseEntity<UrlMappingDto> {
-        val urlMapping = urlMappingProvider.getOwnedUrlMappingByHash(urlHash)
+        val urlMapping = urlMappingProvider.getUrlMappingByHash(urlHash)
         return ResponseEntity.ok(urlMapping)
     }
 }

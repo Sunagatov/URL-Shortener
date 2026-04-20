@@ -5,8 +5,8 @@ import com.zufar.urlshortener.shorten.repository.UrlRepository
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 
 @Service
 class UrlShortener(
@@ -20,10 +20,9 @@ class UrlShortener(
     @Value("\${app.base-url}")
     private lateinit var baseUrl: String
 
-    fun shortenUrl(
-        shortenUrlRequest: ShortenUrlRequest,
-        httpServletRequest: HttpServletRequest
-    ): String {
+    @Cacheable(value = ["urlMappings"], key = "#shortenUrlRequest.originalUrl")
+    fun shortenUrl(shortenUrlRequest: ShortenUrlRequest,
+                   httpServletRequest: HttpServletRequest): String {
 
         val originalUrl = shortenUrlRequest.originalUrl.trim()
         log.info("Shortening originalURL='{}' from IP='{}'", originalUrl, httpServletRequest.remoteAddr)
@@ -35,14 +34,8 @@ class UrlShortener(
 
         val existing = urlRepository.findByUrlHash(urlHash)
         if (existing.isPresent) {
-            val existingMapping = existing.get()
-            if (existingMapping.expirationDate.isAfter(LocalDateTime.now())) {
-                log.debug("Returning existing active shortUrl for urlHash='{}'", urlHash)
-                return existingMapping.shortUrl
-            }
-
-            log.info("Existing shortUrl for urlHash='{}' is expired. Recreating mapping.", urlHash)
-            urlRepository.deleteById(existingMapping.urlHash)
+            log.debug("Returning existing shortUrl for urlHash='{}'", urlHash)
+            return existing.get().shortUrl
         }
 
         val shortUrl = "$baseUrl/url/$urlHash"

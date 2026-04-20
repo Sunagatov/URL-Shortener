@@ -6,11 +6,10 @@ import com.zufar.urlshortener.shorten.exception.UrlNotFoundException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.BadCredentialsException
-import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import javax.naming.AuthenticationException
 
 private const val LOG_ERROR_MESSAGE = "An unexpected error occurred"
 
@@ -33,6 +32,14 @@ class GlobalExceptionHandler {
         return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
     }
 
+    @ExceptionHandler(Exception::class)
+    fun handleException(ex: Exception): ResponseEntity<ErrorResponse> {
+        log.error(LOG_ERROR_MESSAGE, ex)
+        val errorMessage = "An unexpected error occurred: ${ex.message ?: "No additional details provided"}"
+        val errorResponse = ErrorResponse(errorMessage = errorMessage)
+        return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
     @ExceptionHandler(UrlNotFoundException::class)
     fun handleUrlNotFound(ex: UrlNotFoundException): ResponseEntity<ErrorResponse> {
         log.error(LOG_ERROR_MESSAGE, ex)
@@ -47,7 +54,7 @@ class GlobalExceptionHandler {
         return ResponseEntity(errorResponse, HttpStatus.UNAUTHORIZED)
     }
 
-    @ExceptionHandler(BadCredentialsException::class)
+    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException::class)
     fun handleBadCredentialsException(ex: BadCredentialsException): ResponseEntity<ErrorResponse> {
         val errorResponse = ErrorResponse(errorMessage = "Invalid email or password")
         return ResponseEntity(errorResponse, HttpStatus.UNAUTHORIZED)
@@ -59,23 +66,9 @@ class GlobalExceptionHandler {
         return ResponseEntity(errorResponse, HttpStatus.UNAUTHORIZED)
     }
 
-    @ExceptionHandler(AccessDeniedException::class)
-    fun handleAccessDeniedException(ex: AccessDeniedException): ResponseEntity<ErrorResponse> {
-        val errorResponse = ErrorResponse(errorMessage = ex.message ?: "Access denied")
-        return ResponseEntity(errorResponse, HttpStatus.FORBIDDEN)
-    }
-
     @ExceptionHandler(EmailAlreadyExistsException::class)
     fun handleEmailAlreadyExistsException(ex: EmailAlreadyExistsException): ResponseEntity<ErrorResponse> {
         val errorResponse = ErrorResponse(errorMessage = ex.message ?: "Email already in use")
         return ResponseEntity(errorResponse, HttpStatus.CONFLICT)
-    }
-
-    @ExceptionHandler(Exception::class)
-    fun handleException(ex: Exception): ResponseEntity<ErrorResponse> {
-        log.error(LOG_ERROR_MESSAGE, ex)
-        val errorMessage = "An unexpected error occurred: ${ex.message ?: "No additional details provided"}"
-        val errorResponse = ErrorResponse(errorMessage = errorMessage)
-        return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 }
