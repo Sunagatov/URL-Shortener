@@ -57,3 +57,7 @@ docs/ENVIRONMENT_VARIABLES.md
 docs/ANALYSIS_SUMMARY.md
 docs/BUG_ANALYSIS.md
 docs/QUICK_FIX.md
+
+# AI context pack
+*.zip
+!tools/ai-context.sh
