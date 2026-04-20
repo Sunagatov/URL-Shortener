@@ -7,6 +7,7 @@ import com.zufar.urlshortener.shorten.repository.UrlRepository
 import org.springframework.data.domain.PageRequest
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class PageableUrlMappingsProvider(
@@ -17,14 +18,13 @@ class PageableUrlMappingsProvider(
     fun getUrlMappingsPage(page: Int, size: Int): UrlMappingPageDto {
         val pageable = PageRequest.of(page, size)
 
-        // Retrieve the authenticated user from SecurityContextHolder
         val authentication = SecurityContextHolder.getContext().authentication
         val email = authentication?.name ?: throw IllegalStateException("User is not authenticated")
         val user = userRepository.findByEmail(email) ?: throw IllegalStateException("User not found")
         val userId = user.id ?: throw IllegalStateException("User ID is missing")
 
-        // Fetch URL mappings for the user
-        val urlMappingsPage = urlRepository.findAllByUserId(userId, pageable)
+        val now = LocalDateTime.now()
+        val urlMappingsPage = urlRepository.findAllByUserIdAndExpirationDateAfter(userId, now, pageable)
 
         return UrlMappingPageDto(
             content = urlMappingsPage.content.map { UrlMappingDto.fromEntity(it) },

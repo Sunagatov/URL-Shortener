@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.auth.entity
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 
@@ -14,7 +15,10 @@ data class UserDetails(
     val password: String,
     val country: String,
     val age: Int,
+
+    @Indexed(unique = true)
     val email: String,
+
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null
 )

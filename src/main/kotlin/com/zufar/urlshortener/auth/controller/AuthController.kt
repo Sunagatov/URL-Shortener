@@ -5,6 +5,7 @@ import com.zufar.urlshortener.auth.entity.UserDetails
 import com.zufar.urlshortener.auth.exception.EmailAlreadyExistsException
 import com.zufar.urlshortener.auth.exception.InvalidTokenException
 import com.zufar.urlshortener.auth.exception.UserNotFoundException
+import org.springframework.dao.DuplicateKeyException
 import com.zufar.urlshortener.auth.repository.UserRepository
 import com.zufar.urlshortener.auth.service.JwtTokenProvider
 import com.zufar.urlshortener.auth.service.validator.AuthRequestValidator
@@ -273,7 +274,11 @@ class AuthController(
             updatedAt = LocalDateTime.now()
         )
 
-        userRepository.save(user)
+        try {
+            userRepository.save(user)
+        } catch (_: DuplicateKeyException) {
+            throw EmailAlreadyExistsException("Email is already in use")
+        }
 
         val userDetails = User(user.email, user.password, emptyList())
         val accessToken = jwtTokenProvider.generateAccessToken(userDetails)

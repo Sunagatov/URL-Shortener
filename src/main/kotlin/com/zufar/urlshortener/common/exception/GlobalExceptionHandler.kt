@@ -75,8 +75,7 @@ class GlobalExceptionHandler {
     @ExceptionHandler(Exception::class)
     fun handleException(ex: Exception): ResponseEntity<ErrorResponse> {
         log.error(LOG_ERROR_MESSAGE, ex)
-        val errorMessage = "An unexpected error occurred: ${ex.message ?: "No additional details provided"}"
-        val errorResponse = ErrorResponse(errorMessage = errorMessage)
+        val errorResponse = ErrorResponse(errorMessage = "An unexpected error occurred")
         return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 }

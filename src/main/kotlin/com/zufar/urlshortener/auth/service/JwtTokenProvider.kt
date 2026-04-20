@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component
 import java.util.Date
 import javax.crypto.SecretKey
 
+private const val MIN_JWT_SECRET_BYTES = 32
+
 @Component
 class JwtTokenProvider(
     @Value("\${jwt.secret}") private val jwtSecret: String,
@@ -21,7 +23,15 @@ class JwtTokenProvider(
         private const val REFRESH_TOKEN_TYPE = "refresh"
     }
 
-    private val secretKey: SecretKey = Keys.hmacShaKeyFor(jwtSecret.toByteArray())
+    private val secretKey: SecretKey
+
+    init {
+        val secretBytes = jwtSecret.toByteArray(Charsets.UTF_8)
+        require(secretBytes.size >= MIN_JWT_SECRET_BYTES) {
+            "JWT secret must be at least 256 bits (32 bytes). Set the JWT_SECRET environment variable."
+        }
+        secretKey = Keys.hmacShaKeyFor(secretBytes)
+    }
 
     fun generateAccessToken(userDetails: UserDetails): String =
         generateToken(userDetails, jwtExpirationInMs, ACCESS_TOKEN_TYPE)

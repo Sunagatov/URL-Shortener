@@ -19,7 +19,12 @@
       "Bash(rm apps/iced-latte-frontend apps/lexora-backend apps/lexora-frontend apps/url-shortener-backend apps/url-shortener-frontend apps/alloy apps/nginx-proxy-manager apps/otel-collector apps/wg-easy)",
       "Bash(rmdir scripts/nginx goss/templates)",
       "Bash(mv apps/iced-latte/backend/archive/*.md docs/archive/)",
-      "Bash(rmdir apps/iced-latte/backend/archive/)"
+      "Bash(rmdir apps/iced-latte/backend/archive/)",
+      "Bash(mkdir -p /Users/zufar/IdeaProjects/URL-Shortener/src/test/kotlin/com/zufar/urlshortener/shorten/service)",
+      "Bash(mkdir -p /Users/zufar/IdeaProjects/URL-Shortener/src/test/kotlin/com/zufar/urlshortener/common/exception)",
+      "Bash(mkdir -p /Users/zufar/IdeaProjects/URL-Shortener/src/test/kotlin/com/zufar/urlshortener/common/filter)",
+      "Bash(mkdir -p /Users/zufar/IdeaProjects/URL-Shortener/src/test/kotlin/com/zufar/urlshortener/auth/service)",
+      "Bash(mkdir -p /Users/zufar/IdeaProjects/URL-Shortener/src/test/resources)"
     ]
   }
 }

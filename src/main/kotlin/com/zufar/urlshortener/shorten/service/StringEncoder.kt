@@ -1,32 +1,20 @@
 package com.zufar.urlshortener.shorten.service
 
-import java.nio.charset.StandardCharsets
-import java.util.zip.CRC32
+import java.security.SecureRandom
 
 class StringEncoder {
 
     companion object {
         private const val BASE_58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-        private const val BASE = 58
+        private const val CODE_LENGTH = 8
+        private val secureRandom = SecureRandom()
 
-        fun encode(input: String): String {
-            val id = stringToLong(input)
-            val encoded = StringBuilder()
-
-            var number = id
-            while (number > 0) {
-                val remainder = (number % BASE).toInt()
-                encoded.insert(0, BASE_58_ALPHABET[remainder])
-                number /= BASE
+        fun generate(): String {
+            val sb = StringBuilder(CODE_LENGTH)
+            repeat(CODE_LENGTH) {
+                sb.append(BASE_58_ALPHABET[secureRandom.nextInt(BASE_58_ALPHABET.length)])
             }
-
-            return encoded.toString()
-        }
-
-        private fun stringToLong(input: String): Long {
-            val crc = CRC32()
-            crc.update(input.toByteArray(StandardCharsets.UTF_8))
-            return crc.value
+            return sb.toString()
         }
     }
 }

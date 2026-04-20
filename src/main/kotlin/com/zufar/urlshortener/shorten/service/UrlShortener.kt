@@ -6,7 +6,8 @@ import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
+
+private const val MAX_CODE_GENERATION_ATTEMPTS = 10
 
 @Service
 class UrlShortener(
@@ -24,32 +25,28 @@ class UrlShortener(
         shortenUrlRequest: ShortenUrlRequest,
         httpServletRequest: HttpServletRequest
     ): String {
-
         val originalUrl = shortenUrlRequest.originalUrl.trim()
         log.info("Shortening originalURL='{}' from IP='{}'", originalUrl, httpServletRequest.remoteAddr)
 
         urlValidator.validateUrl(originalUrl)
         daysCountValidator.validateDaysCount(shortenUrlRequest.daysCount)
 
-        val urlHash = StringEncoder.encode(originalUrl)
-
-        val existing = urlRepository.findByUrlHash(urlHash)
-        if (existing.isPresent) {
-            val existingMapping = existing.get()
-            if (existingMapping.expirationDate.isAfter(LocalDateTime.now())) {
-                log.debug("Returning existing active shortUrl for urlHash='{}'", urlHash)
-                return existingMapping.shortUrl
-            }
-
-            log.info("Existing shortUrl for urlHash='{}' is expired. Recreating mapping.", urlHash)
-            urlRepository.deleteById(existingMapping.urlHash)
-        }
-
+        val urlHash = generateUniqueCode()
         val shortUrl = "$baseUrl/url/$urlHash"
         val urlMapping = urlMappingEntityCreator.create(shortenUrlRequest, httpServletRequest, urlHash, shortUrl)
         urlRepository.save(urlMapping)
         log.info("Created shortUrl='{}' for originalURL='{}'", shortUrl, originalUrl)
 
         return shortUrl
+    }
+
+    private fun generateUniqueCode(): String {
+        repeat(MAX_CODE_GENERATION_ATTEMPTS) {
+            val candidate = StringEncoder.generate()
+            if (!urlRepository.findByUrlHash(candidate).isPresent) {
+                return candidate
+            }
+        }
+        throw IllegalStateException("Failed to generate a unique short code after $MAX_CODE_GENERATION_ATTEMPTS attempts")
     }
 }
