@@ -48,7 +48,7 @@ class SecurityConfig(
             .authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers(HttpMethod.POST, "/api/v1/urls").permitAll()
-                    .requestMatchers("/api/v1/auth/**", "/v1/auth/**", "/url/**", "/api/v1/swagger-ui/**", "/api/v1/api-docs/**").permitAll()
+                    .requestMatchers("/api/v1/auth/**", "/v1/auth/**", "/url/**", "/api/v1/swagger-ui/**", "/api/v1/api-docs/**", "/api/v1/health").permitAll()
                     .anyRequest().authenticated()
             }
             .authenticationProvider(authenticationProvider())
