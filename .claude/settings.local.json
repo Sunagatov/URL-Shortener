@@ -24,7 +24,11 @@
       "Bash(mkdir -p /Users/zufar/IdeaProjects/URL-Shortener/src/test/kotlin/com/zufar/urlshortener/common/exception)",
       "Bash(mkdir -p /Users/zufar/IdeaProjects/URL-Shortener/src/test/kotlin/com/zufar/urlshortener/common/filter)",
       "Bash(mkdir -p /Users/zufar/IdeaProjects/URL-Shortener/src/test/kotlin/com/zufar/urlshortener/auth/service)",
-      "Bash(mkdir -p /Users/zufar/IdeaProjects/URL-Shortener/src/test/resources)"
+      "Bash(mkdir -p /Users/zufar/IdeaProjects/URL-Shortener/src/test/resources)",
+      "Bash(/usr/libexec/java_home -v 21)",
+      "Bash(JAVA_HOME=$\\(/usr/libexec/java_home -v 21\\) ./gradlew clean test)",
+      "Bash(JAVA_HOME=$\\(/usr/libexec/java_home -v 21\\) ./gradlew test --info)",
+      "Bash(awk '{sum+=$1} END{print \"Total tests: \"sum}')"
     ]
   }
 }
