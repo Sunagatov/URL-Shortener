@@ -15,7 +15,11 @@
       "Read(//Users/zufar/IdeaProjects/Vault/apps/**)",
       "Bash(xargs -I{} sh -c 'echo \"SYMLINK: {} -> $\\(readlink {}\\)\"')",
       "Read(//Users/zufar/IdeaProjects/Vault/scripts/**)",
-      "Read(//Users/zufar/IdeaProjects/Vault/**)"
+      "Read(//Users/zufar/IdeaProjects/Vault/**)",
+      "Bash(rm apps/iced-latte-frontend apps/lexora-backend apps/lexora-frontend apps/url-shortener-backend apps/url-shortener-frontend apps/alloy apps/nginx-proxy-manager apps/otel-collector apps/wg-easy)",
+      "Bash(rmdir scripts/nginx goss/templates)",
+      "Bash(mv apps/iced-latte/backend/archive/*.md docs/archive/)",
+      "Bash(rmdir apps/iced-latte/backend/archive/)"
     ]
   }
 }
