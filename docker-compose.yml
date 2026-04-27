@@ -1,25 +1,40 @@
 services:
-  app:
-    build: .
-    ports:
-      - "8080:8080"
-    env_file:
-      - .env.local
-    environment:
-      SERVER_PORT: 8080
-      SERVER_BASE_URL: http://localhost:8080
-      MONGODB_URI: mongodb://mongo:27017
-    depends_on:
-      - mongo
-    networks:
-      - url-shortener-network
-
   mongo:
     image: mongo:7.0
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    networks:
+      - url-shortener-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend/.env.local
+    environment:
+      SERVER_PORT: 8080
+      SERVER_BASE_URL: http://localhost:8080
+      MONGODB_URI: mongodb://mongo:27017
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+    networks:
+      - url-shortener-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_BACKEND_REST_API_URL: http://localhost:8080
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
     networks:
       - url-shortener-network
 

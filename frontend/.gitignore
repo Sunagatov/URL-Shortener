@@ -1,0 +1,97 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Production builds
+build/
+dist/
+out/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Testing
+coverage/
+.nyc_output
+test-results/
+playwright-report/
+e2e/TEST_SUMMARY.md
+e2e/smoke.spec.ts
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# React/Next.js specific
+.next/
+.vercel
+.turbo
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# ESLint
+.eslintcache
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Storybook
+storybook-static/
+
+# Backup files
+*.backup
+*.new
+
+# SSH keys and credentials
+*.pem
+id_rsa
+*.key
+
+# Deployment scripts
+deploy-*.sh
+
+# Docker files (if not needed in repo)
+docker-compose.prod.yml
+
+# Environment files
+.env.prod
+
+# Documentation (if too large or auto-generated)
+.amazonq/
+
+# Amazon Q temporary docs
+BUG_CHECK_REPORT.md
+docs/ALREADY_MODERN.md
+docs/CHECKLIST.md
+docs/COMMIT_SUMMARY.md
+docs/COMPLETE_ANALYSIS.md
+docs/CSS_FIX.md
+docs/DEPENDENCY_UPDATE_GUIDE.md
+docs/FINAL_STATUS.md
+docs/FINAL_VERIFICATION.md
+docs/FIXES_APPLIED.md
+docs/LATEST_VERSIONS_CONFIRMED.md
+docs/MODERNIZATION_PLAN.md
+docs/MODERNIZATION_STATUS.md
+docs/RUN_LOCALLY.md
+docs/UPDATE_COMPLETED.md
+docs/VITE_MIGRATION.md

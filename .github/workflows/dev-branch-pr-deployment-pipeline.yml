@@ -22,6 +22,7 @@ jobs:
           cache: 'gradle'
 
       - name: Run tests
+        working-directory: backend
         run: ./gradlew clean test
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
@@ -29,10 +30,38 @@ jobs:
           MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
           SERVER_BASE_URL: http://localhost:8080
 
+  validate-frontend:
+    name: Validate frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the source code from the Github repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run frontend tests
+        working-directory: frontend
+        run: npm run test
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
   build-and-push-docker-image:
     name: Build and push a new docker image
     runs-on: ubuntu-latest
-    needs: run-tests
+    needs:
+      - run-tests
+      - validate-frontend
     steps:
       - name: Checkout the source code from the Github repository
         uses: actions/checkout@v4
@@ -44,7 +73,7 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build a new docker image
-        run: docker buildx build --platform linux/amd64 -t ${{ vars.DOCKER_HUB_ACCOUNT_NAME }}/${{ vars.DOCKER_IMAGE_NAME }}:latest-version --push .
+        run: docker buildx build --platform linux/amd64 -f backend/Dockerfile -t ${{ vars.DOCKER_HUB_ACCOUNT_NAME }}/${{ vars.DOCKER_IMAGE_NAME }}:latest-version --push backend
 
   deploy-app-to-server:
     name: Deploy application to remote server via SSH
@@ -64,5 +93,5 @@ jobs:
           script: |
             echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u ${{ vars.DOCKER_HUB_ACCOUNT_NAME }} --password-stdin
             cd /home/ec2-user/url-shortener
-            docker-compose pull
-            docker-compose up -d
+            docker-compose -f backend/docker-compose.yml pull
+            docker-compose -f backend/docker-compose.yml up -d

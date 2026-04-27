@@ -1,0 +1,134 @@
+{
+  "project": {
+    "name": "Shorty URL Frontend",
+    "repo": "Sunagatov/Shorty-URL-Frontend",
+    "default_branch": "development",
+    "type": "frontend-spa"
+  },
+  "stack": {
+    "language": "TypeScript 5",
+    "framework": "React 19",
+    "build_tool": "Vite 8",
+    "router": "react-router-dom 7",
+    "forms": [
+      "react-hook-form",
+      "zod"
+    ],
+    "http": "axios",
+    "styling": "Tailwind CSS",
+    "testing": [
+      "Vitest",
+      "Testing Library",
+      "Playwright"
+    ]
+  },
+  "commands": {
+    "dev": "npm run dev",
+    "build": "npm run build",
+    "test": "npm run test",
+    "type_check": "npm run type-check",
+    "e2e": "npm run test:e2e"
+  },
+  "entry_points": {
+    "app_entry": "src/index.tsx",
+    "router": "src/App.tsx",
+    "layout": "src/layouts/MainLayout.tsx"
+  },
+  "environment": {
+    "prefix": "REACT_APP_",
+    "required": [
+      "REACT_APP_BACKEND_REST_API_URL"
+    ]
+  },
+  "build": {
+    "out_dir": "build"
+  },
+  "auth": {
+    "context": "src/context/AuthContext.tsx",
+    "service": "src/services/AuthService.ts",
+    "storage": "src/utils/storage.ts",
+    "axios": "src/axiosConfig.ts",
+    "storage_keys": [
+      "accessToken",
+      "refreshToken",
+      "user"
+    ]
+  },
+  "api": {
+    "service": "src/services/ApiService.ts",
+    "endpoints": {
+      "auth": {
+        "signin": "/api/v1/auth/signin",
+        "signup": "/api/v1/auth/signup",
+        "refresh": "/api/v1/auth/refresh-token",
+        "logout": "/api/v1/auth/logout"
+      },
+      "urls": {
+        "create": "/api/v1/urls",
+        "list": "/api/v1/urls",
+        "details": "/api/v1/urls/:hash",
+        "delete": "/api/v1/urls/:hash"
+      },
+      "user": {
+        "profile": "/api/v1/user/profile",
+        "update": "/api/v1/user/profile",
+        "change_password": "/api/v1/user/change-password"
+      }
+    }
+  },
+  "routes": {
+    "home": "/",
+    "signin": "/signin",
+    "signup": "/signup",
+    "dashboard": "/account/dashboard",
+    "profile": "/account/profile",
+    "security": "/account/security",
+    "url_mappings": "/account/url-mappings",
+    "url_details": "/account/url-mappings/:urlHash"
+  },
+  "preferred_patterns": [
+    "Keep routes and endpoint paths centralized in src/constants/index.ts",
+    "Keep API calls centralized in src/services/ApiService.ts",
+    "Prefer existing useApi + axios pattern for incremental work",
+    "Reuse existing types in src/types/index.ts",
+    "Use current code as truth over older docs"
+  ],
+  "minimal_read_sets": {
+    "auth": [
+      "src/components/SignIn.tsx",
+      "src/components/SignUp.tsx",
+      "src/context/AuthContext.tsx",
+      "src/services/AuthService.ts",
+      "src/services/ApiService.ts",
+      "src/axiosConfig.ts",
+      "src/utils/storage.ts",
+      "src/utils/validation.ts",
+      "src/types/index.ts",
+      "src/constants/index.ts"
+    ],
+    "routing": [
+      "src/App.tsx",
+      "src/constants/index.ts",
+      "src/layouts/MainLayout.tsx"
+    ],
+    "url_feature": [
+      "src/components/UrlShortener.tsx",
+      "src/services/ApiService.ts",
+      "src/hooks/useApi.ts",
+      "src/types/index.ts",
+      "src/constants/index.ts"
+    ],
+    "validation": [
+      "target component",
+      "src/utils/validation.ts",
+      "src/types/index.ts",
+      "src/constants/index.ts"
+    ]
+  },
+  "known_drift": [
+    "Vite env names are intentionally REACT_APP_*",
+    "Older docs mention SignInPage.tsx/SignInForm.tsx, current code uses src/components/SignIn.tsx",
+    "Older docs describe different auth persistence wording than current storage.ts code",
+    "Older docs mention /dashboard; current route constant is /account/dashboard and current auth screens navigate home after success"
+  ]
+}

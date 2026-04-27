@@ -1,0 +1,37 @@
+/* src/index.css */
+/*noinspection CssUnknownAtRule*/
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+main {
+  flex-grow: 1;
+}
+
+img {
+  max-height: 40px;
+}
+
+.footer {
+  background-color: #1f2937;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+a {
+  text-decoration: none;
+}
+
+input:focus {
+  outline: none;
+}

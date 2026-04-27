@@ -1,63 +1,56 @@
 HELP.md
-.gradle
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Build output
+.gradle/
+.kotlin/
 build/
-!.gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+dist/
+out/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.prod
 
-### IntelliJ IDEA ###
-.idea
+# IDE
+.idea/
+.vscode/
 *.iws
 *.iml
 *.ipr
-out/
-!**/src/main/**/out/
-!**/src/test/**/out/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-
-### VS Code ###
-.vscode/
-
-### Kotlin ###
-.kotlin
-
-### Production ###
-.env.prod
-docker-compose.prod.yml
-
-### Environment & Deployment ###
-.env
-.env.local
-*.sh
+# Logs
 logs/
-prometheus.yml
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backend deployment/runtime files
+docker-compose.prod.yml
 docker-compose.local-with-prod-db.yml
+prometheus.yml
+*.sh
 
-### Amazon Q ###
+# Generated docs and local agent artifacts
 .amazonq/
-docs/ENVIRONMENT_VARIABLES.md
-docs/ANALYSIS_SUMMARY.md
-docs/BUG_ANALYSIS.md
-docs/QUICK_FIX.md
-
-# AI context pack
 *.zip
-!tools/ai-context.sh
