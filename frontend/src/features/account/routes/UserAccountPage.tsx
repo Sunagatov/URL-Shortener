@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUserProfile } from '@/features/account/api/accountApi';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import AccountSidebar from '@/app/layout/AccountSidebar';
 import { getApiErrorMessage, isSessionInvalidError } from '@/shared/lib/apiErrors';
 import type { User } from '@/shared/types';
 import { routes } from '@/app/routes';
-import AccountSidebar from '@/features/account/components/AccountSidebar';
 import { FaEdit, FaUser, FaEnvelope, FaGlobe, FaCalendarAlt } from 'react-icons/fa';
 
 const UserAccountPage: React.FC = () => {

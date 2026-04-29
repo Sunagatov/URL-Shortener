@@ -75,7 +75,7 @@ const AppRouter = () => {
             )}
           />
           <Route
-            path="/account/url-mappings/:urlHash"
+            path={routes.urlDetails(':urlHash')}
             element={(
               <ProtectedRoute>
                 <UrlMappingDetailsPage />

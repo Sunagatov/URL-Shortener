@@ -20,7 +20,7 @@ vi.mock('@/features/auth/hooks/useAuth', () => ({
   }),
 }));
 
-vi.mock('@/features/account/components/AccountSidebar', () => ({
+vi.mock('@/app/layout/AccountSidebar', () => ({
   default: () => <aside>Side Panel</aside>,
 }));
 

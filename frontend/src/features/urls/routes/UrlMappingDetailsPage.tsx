@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import AccountSidebar from '@/app/layout/AccountSidebar';
+import { routes } from '@/app/routes';
 import { deleteUrl, getUrlDetails } from '@/features/urls/api/urlsApi';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
-import AccountSidebar from '@/features/account/components/AccountSidebar';
 import { Button } from '@/shared/ui';
 import type { UrlMapping } from '@/shared/types';
-import { routes } from '@/app/routes';
 import {
     FaArrowLeft,
     FaCopy,

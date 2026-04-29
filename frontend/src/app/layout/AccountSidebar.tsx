@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import AuthService from '@/features/auth/lib/authService';
+import { routes } from '@/app/routes';
+import { authSession } from '@/shared/auth/authSession';
 import {
     FaTachometerAlt,
     FaUser,
@@ -14,7 +15,7 @@ interface SidePanelProps {
     desktopVisible?: boolean;
 }
 
-const SidePanel: React.FC<SidePanelProps> = ({ desktopVisible = true }) => {
+const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => {
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
@@ -38,17 +39,17 @@ const SidePanel: React.FC<SidePanelProps> = ({ desktopVisible = true }) => {
     }, [location.pathname]);
 
     const handleLogout = () => {
-        AuthService.logout();
-        navigate('/');
+        authSession.logout();
+        navigate(routes.home);
     };
 
     const isActive = (path: string) => location.pathname === path;
 
     const menuItems = [
-        { path: '/account/dashboard',    icon: FaTachometerAlt, label: 'Dashboard' },
-        { path: '/account/url-mappings', icon: FaLink,          label: 'My URLs'   },
-        { path: '/account/security',     icon: FaShieldAlt,     label: 'Security'  },
-        { path: '/account/profile',      icon: FaUser,          label: 'Profile'   },
+        { path: routes.dashboard,   icon: FaTachometerAlt, label: 'Dashboard' },
+        { path: routes.urlMappings, icon: FaLink,          label: 'My URLs'   },
+        { path: routes.security,    icon: FaShieldAlt,     label: 'Security'  },
+        { path: routes.profile,     icon: FaUser,          label: 'Profile'   },
     ];
 
     return (
@@ -115,7 +116,7 @@ const SidePanel: React.FC<SidePanelProps> = ({ desktopVisible = true }) => {
                 <div className="px-3 pb-6">
                     <div className="border-t border-white/10 pt-3 space-y-0.5">
                         <Link
-                            to="/"
+                            to={routes.home}
                             onClick={() => setIsOpen(false)}
                             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/35 hover:text-white hover:bg-white/10 transition-all duration-200"
                         >
@@ -136,4 +137,4 @@ const SidePanel: React.FC<SidePanelProps> = ({ desktopVisible = true }) => {
     );
 };
 
-export default SidePanel;
+export default AccountSidebar;

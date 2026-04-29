@@ -1,6 +1,6 @@
 import type { InternalAxiosRequestConfig } from 'axios';
 import { endpoints } from '@/shared/api/endpoints';
-import { STORAGE_KEYS } from '@/features/auth/lib/storage';
+import { STORAGE_KEYS } from '@/shared/auth/storage';
 
 type InterceptorPair = {
   fulfilled?: (value: any) => any;

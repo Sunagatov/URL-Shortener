@@ -1,12 +1,12 @@
 import { createContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import AuthService from '@/features/auth/lib/authService';
+import { authSession } from '@/shared/auth/authSession';
 import type { AuthContextType, User, AuthTokens } from '@/shared/types';
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(AuthService.isAuthenticated);
-    const [user, setUser] = useState<User | null>(AuthService.user);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(authSession.isAuthenticated);
+    const [user, setUser] = useState<User | null>(authSession.user);
     const [loading, setLoading] = useState<boolean>(false);
 
     useEffect(() => {
@@ -16,25 +16,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setLoading(false);
         };
 
-        AuthService.addListener(handleAuthChange);
+        authSession.addListener(handleAuthChange);
 
         return () => {
-            AuthService.removeListener(handleAuthChange);
+            authSession.removeListener(handleAuthChange);
         };
     }, []);
 
     const login = useCallback((tokens: AuthTokens, userData: User | null) => {
         setLoading(true);
-        AuthService.login(tokens, userData);
+        authSession.login(tokens, userData);
     }, []);
 
     const updateUser = useCallback((userData: User) => {
-        AuthService.updateUser(userData);
+        authSession.updateUser(userData);
     }, []);
 
     const logout = useCallback(() => {
         setLoading(true);
-        AuthService.logout();
+        authSession.logout();
     }, []);
 
     const value: AuthContextType = {

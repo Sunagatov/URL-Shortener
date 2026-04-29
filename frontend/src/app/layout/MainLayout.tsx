@@ -16,8 +16,8 @@ import {
 } from 'react-icons/fa';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { routes } from '@/app/routes';
-import AuthService from '@/features/auth/lib/authService';
-import AccountSidebar from '@/features/account/components/AccountSidebar';
+import { authSession } from '@/shared/auth/authSession';
+import AccountSidebar from '@/app/layout/AccountSidebar';
 
 
 interface MainLayoutProps {
@@ -33,7 +33,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const showMobileDrawerTrigger = isAuthenticated;
 
   const handleLogout = () => {
-    AuthService.logout();
+    authSession.logout();
     navigate(routes.home);
     setIsUserMenuOpen(false);
   };

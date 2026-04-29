@@ -1,6 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import AuthService from '@/features/auth/lib/authService';
-import { storage } from '@/features/auth/lib/storage';
+import { authSession } from '@/shared/auth/authSession';
+import { storage } from '@/shared/auth/storage';
 import { endpoints } from '@/shared/api/endpoints';
 import type { AuthTokens } from '@/shared/types';
 
@@ -75,7 +75,7 @@ axiosInstance.interceptors.response.use(
                 response.data as Partial<AuthTokens>;
 
             if (!newAccessToken) {
-                AuthService.logout();
+                authSession.logout();
 
                 if (!['/', '/signin', '/signup'].includes(window.location.pathname)) {
                     window.location.replace('/signin');
@@ -96,7 +96,7 @@ axiosInstance.interceptors.response.use(
 
             return axiosInstance(originalRequest);
         } catch (refreshError) {
-            AuthService.logout();
+            authSession.logout();
 
             if (!['/', '/signin', '/signup'].includes(window.location.pathname)) {
                 window.location.replace('/signin');

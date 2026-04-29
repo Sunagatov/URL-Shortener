@@ -1,10 +1,10 @@
-import { storage } from '@/features/auth/lib/storage';
+import { storage } from '@/shared/auth/storage';
 import type { User, AuthTokens } from '@/shared/types';
 
 type AuthListener = (isAuthenticated: boolean, user: User | null) => void;
 
-class AuthService {
-    private static instance: AuthService;
+class AuthSession {
+    private static instance: AuthSession;
     private listeners: Set<AuthListener> = new Set();
     private _isAuthenticated: boolean;
     private _user: User | null;
@@ -14,11 +14,11 @@ class AuthService {
         this._user = storage.getUser();
     }
 
-    public static getInstance(): AuthService {
-        if (!AuthService.instance) {
-            AuthService.instance = new AuthService();
+    public static getInstance(): AuthSession {
+        if (!AuthSession.instance) {
+            AuthSession.instance = new AuthSession();
         }
-        return AuthService.instance;
+        return AuthSession.instance;
     }
 
     public get isAuthenticated(): boolean {
@@ -65,4 +65,4 @@ class AuthService {
     }
 }
 
-export default AuthService.getInstance();
+export const authSession = AuthSession.getInstance();

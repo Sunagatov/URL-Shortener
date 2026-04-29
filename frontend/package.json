@@ -4,12 +4,9 @@
   "private": true,
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
-    "@react-oauth/google": "^0.12.1",
-    "@tanstack/react-query": "^5.90.21",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.5.2",
-    "@types/jest": "^29.5.14",
     "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -20,7 +17,6 @@
     "react-icons": "^5.6.0",
     "react-router-dom": "^7.13.1",
     "typescript": "^5.9.3",
-    "web-vitals": "^5.1.0",
     "zod": "^4.3.6"
   },
   "scripts": {
@@ -37,12 +33,6 @@
     "format": "prettier --write src/**/*.{ts,tsx,js,jsx,json,css,md}",
     "format:check": "prettier --check src/**/*.{ts,tsx,js,jsx,json,css,md}",
     "type-check": "tsc --noEmit"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   },
   "browserslist": {
     "production": [

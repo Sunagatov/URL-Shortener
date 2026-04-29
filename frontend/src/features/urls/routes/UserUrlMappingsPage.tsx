@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import AccountSidebar from '@/app/layout/AccountSidebar';
+import { routes } from '@/app/routes';
 import { deleteUrl, getUserUrls } from '@/features/urls/api/urlsApi';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
-import AccountSidebar from '@/features/account/components/AccountSidebar';
 import { Button } from '@/shared/ui';
 import type { UrlMapping } from '@/shared/types';
-import { routes } from '@/app/routes';
 import {
     FaTrash,
     FaInfoCircle,
@@ -289,7 +289,7 @@ const UserUrlMappingsPage: React.FC = () => {
                             </div>
                             <h3 className="text-lg font-bold text-white mb-2">No URLs yet</h3>
                             <p className="text-white/35 text-sm mb-6">Start by creating your first shortened URL</p>
-                            <Button onClick={() => navigate('/')} size="sm">
+                            <Button onClick={() => navigate(routes.home)} size="sm">
                                 Create Short URL
                             </Button>
                         </div>

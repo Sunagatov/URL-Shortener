@@ -1,12 +1,12 @@
 // src/components/Security.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import AccountSidebar from '@/app/layout/AccountSidebar';
+import { routes } from '@/app/routes';
 import { changePassword } from '@/features/account/api/accountApi';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { getApiErrorMessage, isSessionInvalidError } from '@/shared/lib/apiErrors';
-import AccountSidebar from '@/features/account/components/AccountSidebar';
 import { Button } from '@/shared/ui';
-import { routes } from '@/app/routes';
 import {
     FaShieldAlt,
     FaLock,

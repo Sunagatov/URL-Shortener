@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import AccountSidebar from '@/features/account/components/AccountSidebar';
+import AccountSidebar from '@/app/layout/AccountSidebar';
 import { Button } from '@/shared/ui';
 import { routes } from '@/app/routes';
 import {
