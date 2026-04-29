@@ -29,6 +29,7 @@ This document describes all configurable environment variables for the URL Short
 | Variable | Description | Default | Example |
 |----------|-------------|---------|---------|
 | `CORS_ALLOWED_ORIGINS` | Comma-separated list of allowed origins | `http://localhost:3000` | `http://localhost:3000,http://localhost:3001` |
+| `CORS_ALLOWED_ORIGIN_PATTERNS` | Comma-separated wildcard origin patterns | `http://localhost:*,http://127.0.0.1:*` | `https://*.yourdomain.com` |
 
 ## Rate Limiting
 
@@ -78,6 +79,7 @@ JWT_SECRET=mySecretKey123456789012345678901234567890
 MONGODB_URI=mongodb://localhost:27017
 MONGODB_DATABASE=urlshortener
 CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
+CORS_ALLOWED_ORIGIN_PATTERNS=http://localhost:*,http://127.0.0.1:*
 RATE_LIMIT_REQUESTS=1000
 SWAGGER_ENABLED=true
 LOG_LEVEL_APP=DEBUG
@@ -91,6 +93,7 @@ JWT_SECRET=<strong-random-secret>
 MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/?retryWrites=true&w=majority
 MONGODB_DATABASE=urlshortener
 CORS_ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+CORS_ALLOWED_ORIGIN_PATTERNS=https://*.yourdomain.com
 RATE_LIMIT_REQUESTS=100
 SWAGGER_ENABLED=false
 LOG_LEVEL_APP=INFO
