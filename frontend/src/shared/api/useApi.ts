@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
 import type { ApiError } from '@/shared/types';
 
 interface UseApiState<T> {
@@ -12,7 +13,7 @@ interface UseApiReturn<T> extends UseApiState<T> {
   reset: () => void;
 }
 
-export const useApi = <T = any>(): UseApiReturn<T> => {
+export const useApi = <T>(): UseApiReturn<T> => {
   const [state, setState] = useState<UseApiState<T>>({
     data: null,
     loading: false,
@@ -26,10 +27,10 @@ export const useApi = <T = any>(): UseApiReturn<T> => {
       const result = await apiCall();
       setState(prev => ({ ...prev, data: result, loading: false }));
       return result;
-    } catch (error: any) {
+    } catch (error: unknown) {
       const apiError: ApiError = {
-        errorMessage: error.response?.data?.errorMessage || error.message || 'An error occurred',
-        status: error.response?.status || 500,
+        errorMessage: getApiErrorMessage(error, 'An error occurred'),
+        status: getApiErrorStatus(error) ?? 500,
       };
       setState(prev => ({ ...prev, error: apiError, loading: false }));
       return null;

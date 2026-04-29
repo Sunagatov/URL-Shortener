@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AccountSidebar from '@/app/layout/AccountSidebar';
 import { routes } from '@/app/routes';
@@ -30,7 +30,7 @@ export const getVisiblePages = (page: number, totalPages: number, maxVisiblePage
 const UserUrlMappingsPage: React.FC = () => {
     const [urlMappings, setUrlMappings] = useState<UrlMapping[]>([]);
     const [page, setPage] = useState(0);
-    const [size] = useState(6);
+    const size = 6;
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
     const [errorMessage, setErrorMessage] = useState('');
@@ -38,7 +38,7 @@ const UserUrlMappingsPage: React.FC = () => {
     const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
     const navigate = useNavigate();
 
-    const fetchUrlMappings = async (pageNumber: number) => {
+    const fetchUrlMappings = useCallback(async (pageNumber: number) => {
         try {
             setIsLoading(true);
             const data = await getUserUrls(pageNumber, size);
@@ -55,11 +55,11 @@ const UserUrlMappingsPage: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [navigate]);
 
     useEffect(() => {
-        fetchUrlMappings(page);
-    }, [page]);
+        void fetchUrlMappings(page);
+    }, [fetchUrlMappings, page]);
 
     const handleDelete = async (urlHash: string) => {
         const confirmDelete = window.confirm(

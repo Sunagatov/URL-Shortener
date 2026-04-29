@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 const namePattern = /^[a-zA-Z'-]+$/;
-const countryPattern = /^[a-zA-Z'\-]+(\s[a-zA-Z'\-]+)*$/;
+const countryPattern = /^[a-zA-Z'-]+(\s[a-zA-Z'-]+)*$/;
 
 export const signInSchema = z.object({
   email: z

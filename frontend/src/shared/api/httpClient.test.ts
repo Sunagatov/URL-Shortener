@@ -3,8 +3,8 @@ import { endpoints } from '@/shared/api/endpoints';
 import { STORAGE_KEYS } from '@/shared/auth/storage';
 
 type InterceptorPair = {
-  fulfilled?: (value: any) => any;
-  rejected?: (value: any) => any;
+  fulfilled?: (value: unknown) => unknown;
+  rejected?: (value: unknown) => unknown;
 };
 
 type MockAxiosInstance = ReturnType<typeof vi.fn> & {
@@ -76,7 +76,7 @@ describe('httpClient auth interceptors', () => {
       endpoints.auth.signUp,
       endpoints.auth.refresh,
     ]) {
-      const config = api.requestInterceptor.fulfilled?.({ url, headers: {} });
+      const config = api.requestInterceptor.fulfilled?.({ url, headers: {} }) as InternalAxiosRequestConfig;
 
       expect(config.headers.Authorization).toBeUndefined();
     }
@@ -86,7 +86,7 @@ describe('httpClient auth interceptors', () => {
     const { api } = await loadHttpClient();
     localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, 'access-token');
 
-    const config = api.requestInterceptor.fulfilled?.({ url: endpoints.urls.list, headers: {} });
+    const config = api.requestInterceptor.fulfilled?.({ url: endpoints.urls.list, headers: {} }) as InternalAxiosRequestConfig;
 
     expect(config.headers.Authorization).toBe('Bearer access-token');
   });

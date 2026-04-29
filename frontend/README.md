@@ -107,6 +107,7 @@ e2e/                        # Playwright tests
 - Keep session persistence, auth token storage, and HTTP refresh mechanics in `shared/`, because multiple features and shared infrastructure depend on them.
 - Keep `app/` thin. It should compose providers, layout, and routes, not own business logic.
 - Keep tests close to the modules they verify. Route/page tests belong next to the route components, shared utility tests belong under `shared/`, and bootstrap tests belong under `app/`.
+- `npm run lint` enforces the current architecture boundaries, especially that `shared/` cannot depend on `features/` or `app/`.
 - Prefer `@/` imports over deep relative paths.
 
 ---
@@ -161,6 +162,7 @@ http://localhost:3000
 | `npm run dev`             | Start Vite dev server                  |
 | `npm start`               | Alias for Vite dev server              |
 | `npm run build`           | Type-check and build production assets |
+| `npm run lint`            | Run ESLint architecture checks         |
 | `npm run preview`         | Preview production build locally       |
 | `npm run type-check`      | Run TypeScript type checks             |
 | `npm run test`            | Run Vitest test suite                  |
