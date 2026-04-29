@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import AuthService from '../services/AuthService';
 import {
-    FaBars,
-    FaTimes,
     FaTachometerAlt,
     FaUser,
     FaShieldAlt,
@@ -16,6 +14,24 @@ const SidePanel: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+
+    React.useEffect(() => {
+        const handleToggleDrawer = () => setIsOpen((prev) => !prev);
+        const handleCloseDrawer = () => setIsOpen(false);
+
+        window.addEventListener('shorty:toggle-account-drawer', handleToggleDrawer);
+        window.addEventListener('shorty:close-account-drawer', handleCloseDrawer);
+
+        return () => {
+            window.removeEventListener('shorty:toggle-account-drawer', handleToggleDrawer);
+            window.removeEventListener('shorty:close-account-drawer', handleCloseDrawer);
+        };
+    }, []);
+
+    React.useEffect(() => {
+        setIsOpen(false);
+        window.dispatchEvent(new CustomEvent('shorty:close-user-menu'));
+    }, [location.pathname]);
 
     const handleLogout = () => {
         AuthService.logout();
@@ -33,15 +49,6 @@ const SidePanel: React.FC = () => {
 
     return (
         <>
-            {/* Mobile hamburger — fixed, never in flex flow */}
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="md:hidden fixed top-[76px] left-4 z-50 w-10 h-10 bg-[#0d0d20]/90 backdrop-blur-xl border border-white/15 text-white rounded-xl flex items-center justify-center shadow-lg hover:bg-white/10 transition-all duration-200"
-                aria-label="Toggle navigation"
-            >
-                {isOpen ? <FaTimes size={14} /> : <FaBars size={14} />}
-            </button>
-
             {/* Mobile backdrop */}
             {isOpen && (
                 <div

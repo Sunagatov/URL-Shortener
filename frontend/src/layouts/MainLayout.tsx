@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
+  FaBars,
   FaUserCircle,
   FaChevronDown,
   FaUser,
@@ -26,12 +27,27 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { isAuthenticated } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isAccountRoute = location.pathname.startsWith('/account');
+  const showMobileAccountDrawerTrigger = isAuthenticated && isAccountRoute;
+  const showMobileHeaderAccountMenu = !(isAuthenticated && isAccountRoute);
 
   const handleLogout = () => {
     AuthService.logout();
     navigate('/');
     setIsUserMenuOpen(false);
   };
+
+  const handleOpenMobileAccountNav = () => {
+    setIsUserMenuOpen(false);
+    window.dispatchEvent(new CustomEvent('shorty:toggle-account-drawer'));
+  };
+
+  React.useEffect(() => {
+    const handleCloseUserMenu = () => setIsUserMenuOpen(false);
+    window.addEventListener('shorty:close-user-menu', handleCloseUserMenu);
+    return () => window.removeEventListener('shorty:close-user-menu', handleCloseUserMenu);
+  }, []);
 
   const userMenuItems = [
     { icon: FaTachometerAlt, label: 'Dashboard', path: ROUTES.DASHBOARD },
@@ -60,8 +76,17 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
           {/* Navigation */}
           <div className="flex items-center space-x-3">
+            {showMobileAccountDrawerTrigger && (
+              <button
+                onClick={handleOpenMobileAccountNav}
+                className="md:hidden w-10 h-10 bg-white/10 hover:bg-white/15 backdrop-blur-sm border border-white/15 rounded-xl flex items-center justify-center transition-all duration-200"
+                aria-label="Open navigation"
+              >
+                <FaBars className="w-4 h-4 text-white" />
+              </button>
+            )}
             {isAuthenticated ? (
-              <div className="relative">
+              <div className={`relative ${showMobileHeaderAccountMenu ? '' : 'hidden md:block'}`}>
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
                   className="flex items-center space-x-2 bg-white/10 hover:bg-white/15 backdrop-blur-sm px-4 py-2 rounded-xl transition-all duration-200 border border-white/20 hover:border-white/30"
