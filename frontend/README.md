@@ -106,6 +106,7 @@ e2e/                        # Playwright tests
 - Move code into `shared/` only when it is genuinely reused and not tied to a single feature domain.
 - Keep session persistence, auth token storage, and HTTP refresh mechanics in `shared/`, because multiple features and shared infrastructure depend on them.
 - Keep `app/` thin. It should compose providers, layout, and routes, not own business logic.
+- Route pages are lazy-loaded through the app router so account and auth screens are split out of the landing-page entry chunk.
 - Keep tests close to the modules they verify. Route/page tests belong next to the route components, shared utility tests belong under `shared/`, and bootstrap tests belong under `app/`.
 - `npm run lint` enforces the current architecture boundaries, especially that `shared/` cannot depend on `features/` or `app/`.
 - Prefer `@/` imports over deep relative paths.
