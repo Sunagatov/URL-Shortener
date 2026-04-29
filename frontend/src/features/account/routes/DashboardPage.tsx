@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import AccountSidebar from '@/app/layout/AccountSidebar';
+import { AccountPageHeader, AccountPageLayout } from '@/app/layout/AccountPageLayout';
 import { Button } from '@/shared/ui';
 import { routes } from '@/app/routes';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
@@ -41,31 +41,23 @@ const DashboardPage: React.FC = () => {
     ];
 
     return (
-        <div className="flex min-h-[calc(100vh-72px)] bg-[#060612] bg-grid-dark md:min-h-[calc(100vh-96px)]">
-            <AccountSidebar />
-
-            <div className="flex-grow md:ml-64 px-4 pt-3 pb-10 sm:px-6 md:px-10 md:py-8">
-                <div className="max-w-5xl mx-auto">
-
-                    {/* Page header */}
-                    <div className="mb-8 mt-3 md:mt-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div>
-                            <h1 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
-                                Dashboard
-                            </h1>
-                            <p className="text-white/40 text-sm mt-0.5">Overview of your URL shortening activity</p>
-                        </div>
-                        <div className="flex gap-2">
-                            <Button onClick={() => navigate(routes.home)} variant="primary" size="sm">
-                                <FaPlus className="w-3.5 h-3.5" />
-                                <span>Create Short URL</span>
-                            </Button>
-                            <Button onClick={() => navigate(routes.urlMappings)} variant="secondary" size="sm">
-                                <FaEye className="w-3.5 h-3.5" />
-                                <span>View All URLs</span>
-                            </Button>
-                        </div>
-                    </div>
+        <AccountPageLayout contentClassName="max-w-5xl mx-auto">
+                    <AccountPageHeader
+                        title="Dashboard"
+                        description="Overview of your URL shortening activity"
+                        actions={(
+                            <div className="flex gap-2">
+                                <Button onClick={() => navigate(routes.home)} variant="primary" size="sm">
+                                    <FaPlus className="w-3.5 h-3.5" />
+                                    <span>Create Short URL</span>
+                                </Button>
+                                <Button onClick={() => navigate(routes.urlMappings)} variant="secondary" size="sm">
+                                    <FaEye className="w-3.5 h-3.5" />
+                                    <span>View All URLs</span>
+                                </Button>
+                            </div>
+                        )}
+                    />
 
                     {/* Analytics coming soon banner */}
                     <div className="rounded-xl bg-blue-950/40 border border-blue-500/15 p-4 mb-8 flex items-center gap-3">
@@ -137,9 +129,7 @@ const DashboardPage: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
+        </AccountPageLayout>
     );
 };
 

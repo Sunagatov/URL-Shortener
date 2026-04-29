@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { accountNavigationItems } from '@/app/layout/layoutNavigation';
 import { routes } from '@/app/routes';
 import { useAuth } from '@/shared/auth/useAuth';
 import { layoutEvents } from '@/shared/lib/layoutEvents';
 import {
-    FaTachometerAlt,
-    FaUser,
-    FaShieldAlt,
-    FaLink,
     FaSignOutAlt,
     FaHome,
 } from 'react-icons/fa';
@@ -44,13 +41,6 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
     };
 
     const isActive = (path: string) => location.pathname === path;
-
-    const menuItems = [
-        { path: routes.dashboard,   icon: FaTachometerAlt, label: 'Dashboard' },
-        { path: routes.urlMappings, icon: FaLink,          label: 'My URLs'   },
-        { path: routes.security,    icon: FaShieldAlt,     label: 'Security'  },
-        { path: routes.profile,     icon: FaUser,          label: 'Profile'   },
-    ];
 
     const displayName = user
         ? [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email
@@ -103,7 +93,7 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
 
                 {/* Nav */}
                 <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
-                    {menuItems.map((item) => {
+                    {accountNavigationItems.map((item) => {
                         const Icon = item.icon;
                         const active = isActive(item.path);
                         return (

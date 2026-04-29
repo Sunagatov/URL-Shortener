@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AccountSidebar from '@/app/layout/AccountSidebar';
+import { AccountPageHeader, AccountPageLayout } from '@/app/layout/AccountPageLayout';
 import { routes } from '@/app/routes';
 import { changePassword } from '@/features/account/api/accountApi';
 import { useAuth } from '@/shared/auth/useAuth';
@@ -73,18 +73,11 @@ const SecurityPage: React.FC = () => {
         'focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/30';
 
     return (
-        <div className="flex min-h-[calc(100vh-72px)] bg-[#060612] bg-grid-dark md:min-h-[calc(100vh-96px)]">
-            <AccountSidebar />
-
-            <div className="flex-grow md:ml-64 px-4 pt-3 pb-10 sm:px-6 md:px-10 md:py-8">
-                <div className="max-w-4xl mx-auto">
-
-                    <div className="mb-8 mt-3 md:mt-0">
-                        <h1 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
-                            Security
-                        </h1>
-                        <p className="text-white/40 text-sm mt-0.5">Manage your account security and password settings</p>
-                    </div>
+        <AccountPageLayout>
+                    <AccountPageHeader
+                        title="Security"
+                        description="Manage your account security and password settings"
+                    />
 
                     <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
@@ -249,9 +242,7 @@ const SecurityPage: React.FC = () => {
                             </form>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
+        </AccountPageLayout>
     );
 };
 

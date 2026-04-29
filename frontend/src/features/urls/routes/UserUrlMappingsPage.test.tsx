@@ -1,8 +1,9 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
+import { getVisiblePages } from '@/features/urls/lib/urlMappings';
 import * as urlsApi from '@/features/urls/api/urlsApi';
-import UserUrlMappingsPage, { getVisiblePages } from '@/features/urls/routes/UserUrlMappingsPage';
+import UserUrlMappingsPage from '@/features/urls/routes/UserUrlMappingsPage';
 
 vi.mock('@/features/urls/api/urlsApi', () => ({
   getUserUrls: vi.fn(),

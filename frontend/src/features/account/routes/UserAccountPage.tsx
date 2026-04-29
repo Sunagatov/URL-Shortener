@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+    AccountPageHeader,
+    AccountPageLayout,
+    AccountPageLoadingState,
+    AccountPageMessageState,
+} from '@/app/layout/AccountPageLayout';
 import { getUserProfile } from '@/features/account/api/accountApi';
-import AccountSidebar from '@/app/layout/AccountSidebar';
 import { useAuth } from '@/shared/auth/useAuth';
 import { getApiErrorMessage, isSessionInvalidError } from '@/shared/lib/apiErrors';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
@@ -58,30 +63,16 @@ const UserAccountPage: React.FC = () => {
         new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
     if (isLoading) {
-        return (
-            <div className="flex min-h-[calc(100vh-72px)] bg-[#060612] md:min-h-[calc(100vh-96px)]">
-                <AccountSidebar />
-                <div className="flex-grow md:ml-64 flex items-center justify-center">
-                    <div className="flex flex-col items-center gap-3">
-                        <div className="w-8 h-8 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin" />
-                        <p className="text-white/30 text-sm">Loading profile…</p>
-                    </div>
-                </div>
-            </div>
-        );
+        return <AccountPageLoadingState message="Loading profile…" />;
     }
 
     if (!userDetails) {
         return (
-            <div className="flex min-h-[calc(100vh-72px)] bg-[#060612] md:min-h-[calc(100vh-96px)]">
-                <AccountSidebar />
-                <div className="flex-grow md:ml-64 flex items-center justify-center px-6">
-                    <div className="text-center">
-                        <p className="text-white/35 text-sm">Unable to load user details</p>
-                        {errorMessage && <p className="mt-2 text-sm text-red-400">{errorMessage}</p>}
-                    </div>
-                </div>
-            </div>
+            <AccountPageMessageState
+                title="Profile unavailable"
+                message="Unable to load user details."
+                detail={errorMessage}
+            />
         );
     }
 
@@ -100,19 +91,11 @@ const UserAccountPage: React.FC = () => {
     ];
 
     return (
-        <div className="flex min-h-[calc(100vh-72px)] bg-[#060612] bg-grid-dark md:min-h-[calc(100vh-96px)]">
-            <AccountSidebar />
-
-            <div className="flex-grow md:ml-64 px-4 pt-3 pb-10 sm:px-6 md:px-10 md:py-8">
-                <div className="max-w-4xl mx-auto">
-
-                    {/* Header */}
-                    <div className="mb-8 mt-3 md:mt-0">
-                        <h1 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
-                            My Profile
-                        </h1>
-                        <p className="text-white/40 text-sm mt-0.5">Manage your personal information and preferences</p>
-                    </div>
+        <AccountPageLayout>
+                    <AccountPageHeader
+                        title="My Profile"
+                        description="Manage your personal information and preferences"
+                    />
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
@@ -222,9 +205,7 @@ const UserAccountPage: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
+        </AccountPageLayout>
     );
 };
 
