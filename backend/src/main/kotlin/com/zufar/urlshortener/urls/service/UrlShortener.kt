@@ -16,11 +16,9 @@ class UrlShortener(
     private val urlValidator: UrlValidator,
     private val daysCountValidator: DaysCountValidator,
     private val urlMappingEntityCreator: UrlMappingEntityCreator,
+    @Value("\${app.base-url}") private val baseUrl: String,
 ) {
     private val log = LoggerFactory.getLogger(UrlShortener::class.java)
-
-    @Value("\${app.base-url}")
-    private lateinit var baseUrl: String
 
     fun shortenUrl(
         shortenUrlRequest: ShortenUrlRequest,

@@ -13,8 +13,8 @@ class UrlValidator(
     @Value("\${app.base-url}") private val baseUrl: String
 ) {
     private val allowedProtocols = setOf("http", "https")
-    private val loopbackHosts = setOf("localhost", "127.0.0.1", "::1")
     private val validator = org.apache.commons.validator.routines.UrlValidator(allowedProtocols.toTypedArray())
+    private val blockedHosts = setOf("localhost", "127.0.0.1", "::1") + listOfNotNull(parseHost(baseUrl))
 
     fun validateUrl(url: String) {
         validate(url.isNotBlank(), "URL must not be empty or blank.")
@@ -36,11 +36,6 @@ class UrlValidator(
 
     private fun isValidHost(url: String): Boolean {
         val host = parseHost(url) ?: return false
-
-        val blockedHosts = buildSet {
-            addAll(loopbackHosts)
-            parseHost(baseUrl)?.let { add(it) }
-        }
 
         return host !in blockedHosts
     }

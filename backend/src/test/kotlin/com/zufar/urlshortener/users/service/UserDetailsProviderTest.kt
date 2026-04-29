@@ -2,6 +2,7 @@ package com.zufar.urlshortener.users.service
 
 import com.zufar.urlshortener.auth.entity.UserDetails
 import com.zufar.urlshortener.auth.repository.UserRepository
+import com.zufar.urlshortener.auth.service.CurrentUserProvider
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
@@ -14,7 +15,7 @@ import kotlin.test.assertEquals
 class UserDetailsProviderTest {
 
     private val userRepository: UserRepository = mock()
-    private val userDetailsProvider = UserDetailsProvider(userRepository)
+    private val userDetailsProvider = UserDetailsProvider(CurrentUserProvider(userRepository))
 
     @AfterEach
     fun tearDown() {

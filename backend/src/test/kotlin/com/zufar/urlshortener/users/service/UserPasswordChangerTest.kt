@@ -2,6 +2,7 @@ package com.zufar.urlshortener.users.service
 
 import com.zufar.urlshortener.auth.entity.UserDetails
 import com.zufar.urlshortener.auth.repository.UserRepository
+import com.zufar.urlshortener.auth.service.CurrentUserProvider
 import com.zufar.urlshortener.auth.service.validator.AuthRequestValidator
 import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
@@ -50,7 +51,12 @@ class UserPasswordChangerTest {
         whenever(passwordEncoder.matches("OldPassword1!", "old-hash")).thenReturn(true)
         whenever(passwordEncoder.encode("NewPassword1!")).thenReturn("new-hash")
 
-        UserPasswordChanger(userRepository, passwordEncoder, authRequestValidator).changePassword(
+        UserPasswordChanger(
+            userRepository,
+            passwordEncoder,
+            authRequestValidator,
+            CurrentUserProvider(userRepository)
+        ).changePassword(
             ChangePasswordRequest(
                 currentPassword = "OldPassword1!",
                 newPassword = "NewPassword1!"
@@ -83,7 +89,12 @@ class UserPasswordChangerTest {
         whenever(passwordEncoder.matches("WrongPassword1!", "old-hash")).thenReturn(false)
 
         assertThrows<InvalidRequestException> {
-            UserPasswordChanger(userRepository, passwordEncoder, authRequestValidator).changePassword(
+            UserPasswordChanger(
+                userRepository,
+                passwordEncoder,
+                authRequestValidator,
+                CurrentUserProvider(userRepository)
+            ).changePassword(
                 ChangePasswordRequest(
                     currentPassword = "WrongPassword1!",
                     newPassword = "NewPassword1!"
