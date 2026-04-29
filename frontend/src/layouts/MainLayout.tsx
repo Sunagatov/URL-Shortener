@@ -166,7 +166,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow flex items-center justify-center bg-[#060612] pt-24">
+      <main className="flex-grow flex items-center justify-center bg-[#060612] pt-[72px] md:pt-24">
         {children}
       </main>
 

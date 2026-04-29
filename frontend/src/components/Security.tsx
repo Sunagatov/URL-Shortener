@@ -96,11 +96,11 @@ const Security: React.FC = () => {
         <div className="flex min-h-screen bg-[#060612] bg-grid-dark">
             <SidePanel />
 
-            <div className="flex-grow md:ml-64 px-6 py-8 md:px-10">
+            <div className="flex-grow md:ml-64 px-4 pt-3 pb-8 sm:px-6 md:px-10 md:py-8">
                 <div className="max-w-5xl mx-auto">
 
                     {/* Header */}
-                    <div className="mb-8 mt-14 md:mt-0">
+                    <div className="mb-8 mt-3 md:mt-0">
                         <h1 className="text-3xl font-black text-white mb-1 tracking-tight">Security</h1>
                         <p className="text-white/45 text-sm">Manage your account security and password settings</p>
                     </div>

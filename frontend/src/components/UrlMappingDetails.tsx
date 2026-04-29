@@ -111,11 +111,11 @@ const UrlMappingDetails: React.FC = () => {
         <div className="flex min-h-screen bg-[#060612] bg-grid-dark">
             <SidePanel />
 
-            <div className="flex-grow md:ml-64 px-6 py-8 md:px-10">
+            <div className="flex-grow md:ml-64 px-4 pt-3 pb-8 sm:px-6 md:px-10 md:py-8">
                 <div className="max-w-5xl mx-auto">
 
                     {/* Header */}
-                    <div className="mb-8 mt-14 md:mt-0">
+                    <div className="mb-8 mt-3 md:mt-0">
                         <button
                             onClick={() => navigate('/account/url-mappings')}
                             className="flex items-center gap-2 text-white/40 hover:text-white text-sm mb-4 transition-colors group"

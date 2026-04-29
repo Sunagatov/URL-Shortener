@@ -33,11 +33,11 @@ const Dashboard: React.FC = () => {
         <div className="flex min-h-screen bg-[#060612] bg-grid-dark">
             <SidePanel />
 
-            <div className="flex-grow md:ml-64 px-6 py-8 md:px-10">
+            <div className="flex-grow md:ml-64 px-4 pt-3 pb-8 sm:px-6 md:px-10 md:py-8">
                 <div className="max-w-5xl mx-auto">
 
                     {/* Page header */}
-                    <div className="mb-10 mt-14 md:mt-0 flex flex-col md:flex-row md:items-start justify-between gap-6">
+                    <div className="mb-8 mt-3 md:mt-0 flex flex-col md:flex-row md:items-start justify-between gap-4 md:gap-6">
                         <div>
                             <h1 className="text-3xl font-black text-white mb-1 tracking-tight">Dashboard</h1>
                             <p className="text-white/45 text-sm">Overview of your URL shortening activity</p>
