@@ -10,6 +10,7 @@ import java.util.Date
 import javax.crypto.SecretKey
 
 private const val MIN_JWT_SECRET_BYTES = 32
+private const val TOKEN_VERSION_CLAIM = "tokenVersion"
 
 @Component
 class JwtTokenProvider(
@@ -41,6 +42,28 @@ class JwtTokenProvider(
 
     fun getUsernameFromJWT(token: String): String = parseClaims(token).subject
 
+    fun getTokenVersionFromJWT(token: String): Int? =
+        when (val value = parseClaims(token)[TOKEN_VERSION_CLAIM]) {
+            is Int -> value
+            is Number -> value.toInt()
+            else -> null
+        }
+
+    fun getUsernameFromValidAccessToken(token: String): String? {
+        return try {
+            val claims = parseClaims(token)
+            if ((claims[TOKEN_TYPE_CLAIM] as? String) == ACCESS_TOKEN_TYPE) {
+                claims.subject
+            } else {
+                null
+            }
+        } catch (_: JwtException) {
+            null
+        } catch (_: IllegalArgumentException) {
+            null
+        }
+    }
+
     fun validateAccessToken(token: String): Boolean = validateTokenByType(token, ACCESS_TOKEN_TYPE)
 
     fun validateRefreshToken(token: String): Boolean = validateTokenByType(token, REFRESH_TOKEN_TYPE)
@@ -48,10 +71,12 @@ class JwtTokenProvider(
     private fun generateToken(userDetails: UserDetails, expirationMs: Long, tokenType: String): String {
         val now = Date()
         val expiryDate = Date(now.time + expirationMs)
+        val tokenVersion = extractTokenVersion(userDetails)
 
         return Jwts.builder()
             .subject(userDetails.username)
             .claim(TOKEN_TYPE_CLAIM, tokenType)
+            .claim(TOKEN_VERSION_CLAIM, tokenVersion)
             .issuedAt(now)
             .expiration(expiryDate)
             .signWith(secretKey)
@@ -73,5 +98,9 @@ class JwtTokenProvider(
         } catch (_: IllegalArgumentException) {
             false
         }
+    }
+
+    private fun extractTokenVersion(userDetails: UserDetails): Int {
+        return (userDetails as? UserDetailsWithTokenVersion)?.tokenVersion ?: 0
     }
 }

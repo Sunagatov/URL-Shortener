@@ -2,7 +2,10 @@ package com.zufar.urlshortener.auth.service
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.security.core.userdetails.User
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class JwtTokenProviderTest {
@@ -34,17 +37,19 @@ class JwtTokenProviderTest {
     @Test
     fun `generated access token validates as access type`() {
         val provider = JwtTokenProvider(validSecret, accessExpiry, refreshExpiry)
-        val userDetails = org.springframework.security.core.userdetails.User("user@test.com", "pw", emptyList())
+        val userDetails = UserDetailsWithTokenVersion(User("user@test.com", "pw", emptyList()), 3)
 
         val token = provider.generateAccessToken(userDetails)
 
         assertTrue(provider.validateAccessToken(token))
+        assertEquals("user@test.com", provider.getUsernameFromValidAccessToken(token))
+        assertEquals(3, provider.getTokenVersionFromJWT(token))
     }
 
     @Test
     fun `access token is rejected as refresh token`() {
         val provider = JwtTokenProvider(validSecret, accessExpiry, refreshExpiry)
-        val userDetails = org.springframework.security.core.userdetails.User("user@test.com", "pw", emptyList())
+        val userDetails = UserDetailsWithTokenVersion(User("user@test.com", "pw", emptyList()), 1)
 
         val token = provider.generateAccessToken(userDetails)
 
@@ -54,10 +59,12 @@ class JwtTokenProviderTest {
     @Test
     fun `generated refresh token validates as refresh type`() {
         val provider = JwtTokenProvider(validSecret, accessExpiry, refreshExpiry)
-        val userDetails = org.springframework.security.core.userdetails.User("user@test.com", "pw", emptyList())
+        val userDetails = UserDetailsWithTokenVersion(User("user@test.com", "pw", emptyList()), 7)
 
         val token = provider.generateRefreshToken(userDetails)
 
         assertTrue(provider.validateRefreshToken(token))
+        assertEquals(7, provider.getTokenVersionFromJWT(token))
+        assertNull(provider.getUsernameFromValidAccessToken(token))
     }
 }

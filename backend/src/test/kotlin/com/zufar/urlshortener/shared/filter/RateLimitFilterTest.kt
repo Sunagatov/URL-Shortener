@@ -15,6 +15,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -128,5 +129,21 @@ class RateLimitFilterTest {
         filter.doFilter(request, response, filterChain)
 
         assertTrue(buckets.getIfPresent("203.0.113.5") != null, "Bucket should be keyed on forwarded IP")
+    }
+
+    @Test
+    fun `health endpoint bypasses rate limiting`() {
+        val request = MockHttpServletRequest().apply {
+            method = "GET"
+            servletPath = "/api/v1/health"
+            requestURI = "/api/v1/health"
+            remoteAddr = "10.0.0.5"
+        }
+        val response = MockHttpServletResponse()
+
+        filter.doFilter(request, response, filterChain)
+
+        verify(filterChain).doFilter(request, response)
+        verifyNoInteractions(rateLimitConfig)
     }
 }

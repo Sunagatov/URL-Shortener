@@ -19,6 +19,8 @@ data class UserDetails(
     @Indexed(unique = true)
     val email: String,
 
+    val tokenVersion: Int = 0,
+
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null
 )

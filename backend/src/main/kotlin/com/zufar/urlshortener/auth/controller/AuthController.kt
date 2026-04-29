@@ -9,6 +9,7 @@ import org.springframework.dao.DuplicateKeyException
 import com.zufar.urlshortener.auth.repository.UserRepository
 import com.zufar.urlshortener.auth.service.EmailNormalizer
 import com.zufar.urlshortener.auth.service.JwtTokenProvider
+import com.zufar.urlshortener.auth.service.withTokenVersion
 import com.zufar.urlshortener.auth.service.validator.AuthRequestValidator
 import com.zufar.urlshortener.shared.exception.ErrorResponse
 import io.swagger.v3.oas.annotations.Operation
@@ -288,8 +289,8 @@ class AuthController(
         }
 
         val userDetails = User(user.email, user.password, emptyList())
-        val accessToken = jwtTokenProvider.generateAccessToken(userDetails)
-        val refreshToken = jwtTokenProvider.generateRefreshToken(userDetails)
+        val accessToken = jwtTokenProvider.generateAccessToken(userDetails.withTokenVersion(user.tokenVersion))
+        val refreshToken = jwtTokenProvider.generateRefreshToken(userDetails.withTokenVersion(user.tokenVersion))
 
         return ResponseEntity.ok(AuthResponse(accessToken, refreshToken))
     }
@@ -421,13 +422,18 @@ class AuthController(
         val normalizedEmail = EmailNormalizer.normalize(username)
         val userDetails = userRepository.findByEmailIgnoreCase(normalizedEmail)
             ?: throw UserNotFoundException("User not found for the provided refresh token")
+        val tokenVersion = jwtTokenProvider.getTokenVersionFromJWT(refreshTokenRequest.refreshToken)
+            ?: throw InvalidTokenException("Invalid or expired refresh token")
+        if (tokenVersion != userDetails.tokenVersion) {
+            throw InvalidTokenException("Invalid or expired refresh token")
+        }
 
         val userSpringDetails = User(
             userDetails.email,
             userDetails.password,
             emptyList()
         )
-        val newAccessToken = jwtTokenProvider.generateAccessToken(userSpringDetails)
+        val newAccessToken = jwtTokenProvider.generateAccessToken(userSpringDetails.withTokenVersion(userDetails.tokenVersion))
 
         return ResponseEntity.ok(RefreshTokenResponse(newAccessToken))
     }

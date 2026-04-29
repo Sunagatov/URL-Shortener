@@ -61,6 +61,7 @@ class UserPasswordChangerTest {
         verify(userRepository).save(argThat {
             assertEquals("new-hash", password)
             assertEquals("user@example.com", email)
+            assertEquals(1, tokenVersion)
             updatedAt != null
         })
     }

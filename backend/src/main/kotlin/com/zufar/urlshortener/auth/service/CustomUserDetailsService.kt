@@ -19,5 +19,6 @@ class CustomUserDetailsService(private val userRepository: UserRepository) : Use
             .password(user.password)
             .authorities(emptyList())
             .build()
+            .withTokenVersion(user.tokenVersion)
     }
 }

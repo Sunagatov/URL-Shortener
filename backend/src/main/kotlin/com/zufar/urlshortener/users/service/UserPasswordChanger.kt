@@ -38,6 +38,7 @@ class UserPasswordChanger(
 
         val updatedUser = user.copy(
             password = passwordEncoder.encode(changePasswordRequest.newPassword),
+            tokenVersion = user.tokenVersion + 1,
             updatedAt = LocalDateTime.now()
         )
 

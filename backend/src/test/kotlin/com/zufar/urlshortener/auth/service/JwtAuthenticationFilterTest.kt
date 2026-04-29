@@ -36,8 +36,7 @@ class JwtAuthenticationFilterTest {
     fun `valid access token and existing user authenticates context`() {
         val token = "valid-token"
         val userDetails = User("user@example.com", "password", emptyList())
-        whenever(jwtTokenProvider.validateAccessToken(token)).thenReturn(true)
-        whenever(jwtTokenProvider.getUsernameFromJWT(token)).thenReturn("user@example.com")
+        whenever(jwtTokenProvider.getUsernameFromValidAccessToken(token)).thenReturn("user@example.com")
         whenever(customUserDetailsService.loadUserByUsername("user@example.com")).thenReturn(userDetails)
         val request = requestWithBearerToken(token)
 
@@ -49,8 +48,7 @@ class JwtAuthenticationFilterTest {
     @Test
     fun `valid access token and missing user does not throw and leaves context empty`() {
         val token = "valid-token"
-        whenever(jwtTokenProvider.validateAccessToken(token)).thenReturn(true)
-        whenever(jwtTokenProvider.getUsernameFromJWT(token)).thenReturn("missing@example.com")
+        whenever(jwtTokenProvider.getUsernameFromValidAccessToken(token)).thenReturn("missing@example.com")
         whenever(customUserDetailsService.loadUserByUsername("missing@example.com"))
             .thenThrow(UsernameNotFoundException("missing"))
         val request = requestWithBearerToken(token)
@@ -63,13 +61,13 @@ class JwtAuthenticationFilterTest {
     @Test
     fun `invalid token does not authenticate`() {
         val token = "invalid-token"
-        whenever(jwtTokenProvider.validateAccessToken(token)).thenReturn(false)
+        whenever(jwtTokenProvider.getUsernameFromValidAccessToken(token)).thenReturn(null)
         val request = requestWithBearerToken(token)
 
         filter.doFilter(request, MockHttpServletResponse(), MockFilterChain())
 
         assertNull(SecurityContextHolder.getContext().authentication)
-        verify(jwtTokenProvider).validateAccessToken(token)
+        verify(jwtTokenProvider).getUsernameFromValidAccessToken(token)
         verifyNoInteractions(customUserDetailsService)
     }
 

@@ -5,6 +5,7 @@ import com.zufar.urlshortener.auth.dto.SignInRequest
 import com.zufar.urlshortener.auth.dto.SignUpRequest
 import com.zufar.urlshortener.auth.entity.UserDetails
 import com.zufar.urlshortener.auth.exception.EmailAlreadyExistsException
+import com.zufar.urlshortener.auth.exception.InvalidTokenException
 import com.zufar.urlshortener.auth.repository.UserRepository
 import com.zufar.urlshortener.auth.service.JwtTokenProvider
 import com.zufar.urlshortener.auth.service.validator.AuthRequestValidator
@@ -119,6 +120,7 @@ class AuthControllerTest {
         )
         whenever(jwtTokenProvider.validateRefreshToken("refresh-token")).thenReturn(true)
         whenever(jwtTokenProvider.getUsernameFromJWT("refresh-token")).thenReturn("  User@Example.COM  ")
+        whenever(jwtTokenProvider.getTokenVersionFromJWT("refresh-token")).thenReturn(0)
         whenever(userRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
         whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("new-access-token")
 
@@ -126,5 +128,26 @@ class AuthControllerTest {
 
         verify(userRepository).findByEmailIgnoreCase("user@example.com")
         assertEquals("new-access-token", response.body?.accessToken)
+    }
+
+    @Test
+    fun `refreshAccessToken rejects token version mismatch`() {
+        val user = UserDetails(
+            firstName = "User",
+            lastName = "Test",
+            email = "user@example.com",
+            password = "hashed",
+            country = "USA",
+            age = 30,
+            tokenVersion = 2
+        )
+        whenever(jwtTokenProvider.validateRefreshToken("refresh-token")).thenReturn(true)
+        whenever(jwtTokenProvider.getUsernameFromJWT("refresh-token")).thenReturn("user@example.com")
+        whenever(jwtTokenProvider.getTokenVersionFromJWT("refresh-token")).thenReturn(1)
+        whenever(userRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
+
+        assertThrows<InvalidTokenException> {
+            controller().refreshAccessToken(RefreshTokenRequest("refresh-token"))
+        }
     }
 }

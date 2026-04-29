@@ -17,6 +17,17 @@ class RateLimitFilter(
     private val buckets: Cache<String, Bucket>
 ) : OncePerRequestFilter() {
 
+    override fun shouldNotFilter(request: HttpServletRequest): Boolean {
+        val path = request.servletPath
+        return request.method == "OPTIONS" ||
+            path == "/api/v1/health" ||
+            path.startsWith("/api/v1/auth/") ||
+            path == "/api/v1/auth" ||
+            path.startsWith("/api/v1/swagger-ui") ||
+            path.startsWith("/api/v1/api-docs") ||
+            path.startsWith("/actuator")
+    }
+
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,

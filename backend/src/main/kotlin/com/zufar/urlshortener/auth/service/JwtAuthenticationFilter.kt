@@ -27,17 +27,15 @@ class JwtAuthenticationFilter(
     ) {
         val jwt = getJwtFromRequest(request)
 
-        if (
-            jwt != null &&
-            jwtTokenProvider.validateAccessToken(jwt) &&
-            SecurityContextHolder.getContext().authentication == null
-        ) {
+        if (jwt != null && SecurityContextHolder.getContext().authentication == null) {
             try {
-                val username = jwtTokenProvider.getUsernameFromJWT(jwt)
-                val userDetails: UserDetails = customUserDetailsService.loadUserByUsername(username)
-                val authentication = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
-                authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
-                SecurityContextHolder.getContext().authentication = authentication
+                val username = jwtTokenProvider.getUsernameFromValidAccessToken(jwt)
+                if (username != null) {
+                    val userDetails: UserDetails = customUserDetailsService.loadUserByUsername(username)
+                    val authentication = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
+                    authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
+                    SecurityContextHolder.getContext().authentication = authentication
+                }
             } catch (_: AuthenticationException) {
                 SecurityContextHolder.clearContext()
             }
