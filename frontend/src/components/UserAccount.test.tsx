@@ -1,17 +1,15 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { ApiService } from '../services/ApiService';
-import UserAccount from './UserAccount';
+import * as accountApi from '@/features/account/api/accountApi';
+import UserAccountPage from '@/features/account/routes/UserAccountPage';
 
 const logout = vi.fn();
 
-vi.mock('../services/ApiService', () => ({
-  ApiService: {
-    getUserProfile: vi.fn(),
-  },
+vi.mock('@/features/account/api/accountApi', () => ({
+  getUserProfile: vi.fn(),
 }));
 
-vi.mock('../hooks/useAuth', () => ({
+vi.mock('@/features/auth/hooks/useAuth', () => ({
   useAuth: () => ({
     logout,
     login: vi.fn(),
@@ -22,16 +20,16 @@ vi.mock('../hooks/useAuth', () => ({
   }),
 }));
 
-vi.mock('./SidePanel', () => ({
+vi.mock('@/features/account/components/AccountSidebar', () => ({
   default: () => <aside>Side Panel</aside>,
 }));
 
-const mockGetUserProfile = vi.mocked(ApiService.getUserProfile);
+const mockGetUserProfile = vi.mocked(accountApi.getUserProfile);
 const renderUserAccount = () =>
   render(
     <MemoryRouter initialEntries={['/account/profile']}>
       <Routes>
-        <Route path="/account/profile" element={<UserAccount />} />
+        <Route path="/account/profile" element={<UserAccountPage />} />
         <Route path="/signin" element={<div>Sign In Destination</div>} />
       </Routes>
     </MemoryRouter>

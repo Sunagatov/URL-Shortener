@@ -1,24 +1,24 @@
 import { render, screen } from '@testing-library/react';
-import type { AuthContextType } from './types';
+import type { AuthContextType } from '@/shared/types';
 import App from './App';
-import { useAuth } from './hooks/useAuth';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
-vi.mock('./hooks/useAuth', () => ({
+vi.mock('@/features/auth/hooks/useAuth', () => ({
   useAuth: vi.fn(),
 }));
 
-vi.mock('./layouts/MainLayout', () => ({
+vi.mock('@/app/layout/MainLayout', () => ({
   MainLayout: ({ children }: { children: React.ReactNode }) => <main>{children}</main>,
 }));
 
-vi.mock('./components/UrlShortener', () => ({ default: () => <div>Home Page</div> }));
-vi.mock('./components/SignIn', () => ({ default: () => <div>Sign In Page</div> }));
-vi.mock('./components/SignUp', () => ({ default: () => <div>Sign Up Page</div> }));
-vi.mock('./components/UserAccount', () => ({ default: () => <div>Profile Page</div> }));
-vi.mock('./components/UserUrlMappings', () => ({ default: () => <div>URL Mappings Page</div> }));
-vi.mock('./components/UrlMappingDetails', () => ({ default: () => <div>URL Mapping Details Page</div> }));
-vi.mock('./components/Security', () => ({ default: () => <div>Security Page</div> }));
-vi.mock('./components/Dashboard', () => ({ default: () => <div>Dashboard Page</div> }));
+vi.mock('@/features/urls/routes/UrlShortenerPage', () => ({ default: () => <div>Home Page</div> }));
+vi.mock('@/features/auth/routes/SignInPage', () => ({ default: () => <div>Sign In Page</div> }));
+vi.mock('@/features/auth/routes/SignUpPage', () => ({ default: () => <div>Sign Up Page</div> }));
+vi.mock('@/features/account/routes/UserAccountPage', () => ({ default: () => <div>Profile Page</div> }));
+vi.mock('@/features/urls/routes/UserUrlMappingsPage', () => ({ default: () => <div>URL Mappings Page</div> }));
+vi.mock('@/features/urls/routes/UrlMappingDetailsPage', () => ({ default: () => <div>URL Mapping Details Page</div> }));
+vi.mock('@/features/account/routes/SecurityPage', () => ({ default: () => <div>Security Page</div> }));
+vi.mock('@/features/account/routes/DashboardPage', () => ({ default: () => <div>Dashboard Page</div> }));
 
 const mockUseAuth = vi.mocked(useAuth);
 

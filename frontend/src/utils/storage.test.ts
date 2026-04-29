@@ -1,5 +1,4 @@
-import { STORAGE_KEYS } from '../constants';
-import { storage } from './storage';
+import { STORAGE_KEYS, storage } from '@/features/auth/lib/storage';
 
 describe('storage.getUser', () => {
   beforeEach(() => {

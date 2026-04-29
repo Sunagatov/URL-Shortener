@@ -1,19 +1,17 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { ApiService } from '../services/ApiService';
-import SignIn from './SignIn';
+import * as authApi from '@/features/auth/api/authApi';
+import SignInPage from '@/features/auth/routes/SignInPage';
 
 const login = vi.fn();
 
-vi.mock('../services/ApiService', () => ({
-  ApiService: {
-    signIn: vi.fn(),
-    getUserProfile: vi.fn(),
-  },
+vi.mock('@/features/auth/api/authApi', () => ({
+  signIn: vi.fn(),
+  getUserProfile: vi.fn(),
 }));
 
-vi.mock('../hooks/useAuth', () => ({
+vi.mock('@/features/auth/hooks/useAuth', () => ({
   useAuth: () => ({
     login,
     updateUser: vi.fn(),
@@ -24,7 +22,7 @@ vi.mock('../hooks/useAuth', () => ({
   }),
 }));
 
-vi.mock('../hooks/useApi', () => ({
+vi.mock('@/shared/api/useApi', () => ({
   useApi: () => ({
     execute: (apiCall: () => Promise<unknown>) => apiCall(),
     loading: false,
@@ -34,14 +32,14 @@ vi.mock('../hooks/useApi', () => ({
   }),
 }));
 
-const mockSignIn = vi.mocked(ApiService.signIn);
-const mockGetUserProfile = vi.mocked(ApiService.getUserProfile);
+const mockSignIn = vi.mocked(authApi.signIn);
+const mockGetUserProfile = vi.mocked(authApi.getUserProfile);
 
 const renderSignInWithRoutes = (state?: unknown) =>
   render(
     <MemoryRouter initialEntries={[{ pathname: '/signin', state }]}>
       <Routes>
-        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signin" element={<SignInPage />} />
         <Route path="/" element={<div>Home Destination</div>} />
         <Route path="/account/profile" element={<div>Profile Destination</div>} />
       </Routes>

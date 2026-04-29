@@ -1,20 +1,18 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { ApiService } from '../services/ApiService';
-import UrlMappingDetails from './UrlMappingDetails';
+import * as urlsApi from '@/features/urls/api/urlsApi';
+import UrlMappingDetailsPage from '@/features/urls/routes/UrlMappingDetailsPage';
 
-vi.mock('../services/ApiService', () => ({
-  ApiService: {
-    getUrlDetails: vi.fn(),
-    deleteUrl: vi.fn(),
-  },
+vi.mock('@/features/urls/api/urlsApi', () => ({
+  getUrlDetails: vi.fn(),
+  deleteUrl: vi.fn(),
 }));
 
-vi.mock('./SidePanel', () => ({
+vi.mock('@/features/account/components/AccountSidebar', () => ({
   default: () => <aside>Side Panel</aside>,
 }));
 
-const mockGetUrlDetails = vi.mocked(ApiService.getUrlDetails);
+const mockGetUrlDetails = vi.mocked(urlsApi.getUrlDetails);
 
 describe('UrlMappingDetails', () => {
   beforeEach(() => {
@@ -33,7 +31,7 @@ describe('UrlMappingDetails', () => {
     render(
       <MemoryRouter initialEntries={['/account/url-mappings/abc123']}>
         <Routes>
-          <Route path="/account/url-mappings/:urlHash" element={<UrlMappingDetails />} />
+          <Route path="/account/url-mappings/:urlHash" element={<UrlMappingDetailsPage />} />
         </Routes>
       </MemoryRouter>
     );
@@ -45,7 +43,7 @@ describe('UrlMappingDetails', () => {
     render(
       <MemoryRouter initialEntries={['/account/url-mappings']}>
         <Routes>
-          <Route path="/account/url-mappings" element={<UrlMappingDetails />} />
+          <Route path="/account/url-mappings" element={<UrlMappingDetailsPage />} />
         </Routes>
       </MemoryRouter>
     );
@@ -68,7 +66,7 @@ describe('UrlMappingDetails', () => {
     render(
       <MemoryRouter initialEntries={['/account/url-mappings/abc123']}>
         <Routes>
-          <Route path="/account/url-mappings/:urlHash" element={<UrlMappingDetails />} />
+          <Route path="/account/url-mappings/:urlHash" element={<UrlMappingDetailsPage />} />
         </Routes>
       </MemoryRouter>
     );

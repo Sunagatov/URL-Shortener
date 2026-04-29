@@ -1,10 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { MainLayout } from '../layouts/MainLayout';
-import SignIn from './SignIn';
-import SignUp from './SignUp';
+import { MainLayout } from '@/app/layout/MainLayout';
+import SignInPage from '@/features/auth/routes/SignInPage';
+import SignUpPage from '@/features/auth/routes/SignUpPage';
 
-vi.mock('../hooks/useAuth', () => ({
+vi.mock('@/features/auth/hooks/useAuth', () => ({
   useAuth: () => ({
     isAuthenticated: false,
     login: vi.fn(),
@@ -14,7 +14,7 @@ vi.mock('../hooks/useAuth', () => ({
   }),
 }));
 
-vi.mock('../hooks/useApi', () => ({
+vi.mock('@/shared/api/useApi', () => ({
   useApi: () => ({
     execute: vi.fn(),
     loading: false,
@@ -22,18 +22,16 @@ vi.mock('../hooks/useApi', () => ({
   }),
 }));
 
-vi.mock('../services/ApiService', () => ({
-  ApiService: {
-    signIn: vi.fn(),
-    signUp: vi.fn(),
-  },
+vi.mock('@/features/auth/api/authApi', () => ({
+  signIn: vi.fn(),
+  signUp: vi.fn(),
 }));
 
 describe('placeholder flows', () => {
   it('disables forgot password instead of linking to a placeholder route', () => {
     render(
       <MemoryRouter>
-        <SignIn />
+        <SignInPage />
       </MemoryRouter>
     );
 
@@ -44,7 +42,7 @@ describe('placeholder flows', () => {
   it('renders terms and privacy as non-clickable coming-soon text', () => {
     render(
       <MemoryRouter>
-        <SignUp />
+        <SignUpPage />
       </MemoryRouter>
     );
 

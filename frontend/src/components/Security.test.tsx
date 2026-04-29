@@ -1,18 +1,16 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { ApiService } from '../services/ApiService';
-import Security from './Security';
+import * as accountApi from '@/features/account/api/accountApi';
+import SecurityPage from '@/features/account/routes/SecurityPage';
 
 const logout = vi.fn();
 
-vi.mock('../services/ApiService', () => ({
-  ApiService: {
-    changePassword: vi.fn(),
-  },
+vi.mock('@/features/account/api/accountApi', () => ({
+  changePassword: vi.fn(),
 }));
 
-vi.mock('../hooks/useAuth', () => ({
+vi.mock('@/features/auth/hooks/useAuth', () => ({
   useAuth: () => ({
     logout,
     login: vi.fn(),
@@ -23,7 +21,7 @@ vi.mock('../hooks/useAuth', () => ({
   }),
 }));
 
-vi.mock('./SidePanel', () => ({
+vi.mock('@/features/account/components/AccountSidebar', () => ({
   default: () => <aside>Side Panel</aside>,
 }));
 
@@ -31,7 +29,7 @@ const renderSecurity = () =>
   render(
     <MemoryRouter initialEntries={['/account/security']}>
       <Routes>
-        <Route path="/account/security" element={<Security />} />
+        <Route path="/account/security" element={<SecurityPage />} />
         <Route path="/signin" element={<div>Sign In Destination</div>} />
       </Routes>
     </MemoryRouter>
@@ -39,7 +37,7 @@ const renderSecurity = () =>
 
 describe('Security', () => {
   beforeEach(() => {
-    vi.mocked(ApiService.changePassword).mockResolvedValue(undefined);
+    vi.mocked(accountApi.changePassword).mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -51,14 +49,14 @@ describe('Security', () => {
 
     const activeBadges = screen.getAllByText('Active');
     expect(activeBadges).toHaveLength(3);
-    expect(activeBadges[0]).toHaveClass('bg-green-100', 'text-green-600');
+    expect(activeBadges[0]).toHaveClass('bg-emerald-900/30', 'text-emerald-400');
   });
 
   it('does not show fabricated account security facts', () => {
     renderSecurity();
 
-    expect(screen.getByText('Security summary is not available yet')).toBeInTheDocument();
-    expect(screen.getByText('Last password change information is not available yet')).toBeInTheDocument();
+    expect(screen.getByText('Summary not available yet')).toBeInTheDocument();
+    expect(screen.getByText('Password change history is not available yet.')).toBeInTheDocument();
     expect(screen.queryByText('All systems secure')).not.toBeInTheDocument();
     expect(screen.queryByText('30 days ago')).not.toBeInTheDocument();
   });
@@ -70,15 +68,15 @@ describe('Security', () => {
     const newPasswordInput = screen.getByPlaceholderText('Enter your new password');
 
     await user.type(newPasswordInput, 'a');
-    expect(screen.getByText('Weak')).toHaveClass('text-red-600');
+    expect(screen.getByText('Weak')).toHaveClass('text-red-400');
 
     await user.clear(newPasswordInput);
     await user.type(newPasswordInput, 'abcdefgH');
-    expect(screen.getByText('Medium')).toHaveClass('text-yellow-600');
+    expect(screen.getByText('Medium')).toHaveClass('text-amber-400');
 
     await user.clear(newPasswordInput);
     await user.type(newPasswordInput, 'Abcdefg1!');
-    expect(screen.getByText('Strong')).toHaveClass('text-green-600');
+    expect(screen.getByText('Strong')).toHaveClass('text-emerald-400');
   });
 
   it('submits password changes through the central API service', async () => {
@@ -90,7 +88,7 @@ describe('Security', () => {
     await user.type(screen.getByPlaceholderText('Confirm your new password'), 'NewPassword1!');
     await user.click(screen.getByRole('button', { name: /update password/i }));
 
-    expect(ApiService.changePassword).toHaveBeenCalledWith({
+    expect(accountApi.changePassword).toHaveBeenCalledWith({
       currentPassword: 'OldPassword1!',
       newPassword: 'NewPassword1!',
     });
@@ -98,7 +96,7 @@ describe('Security', () => {
 
   it('logs out and redirects to sign-in when the session is no longer valid', async () => {
     const user = userEvent.setup();
-    vi.mocked(ApiService.changePassword).mockRejectedValue({
+    vi.mocked(accountApi.changePassword).mockRejectedValue({
       response: {
         status: 403,
         data: {

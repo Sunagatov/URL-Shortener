@@ -1,22 +1,20 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { ApiService } from '../services/ApiService';
-import UserUrlMappings, { getVisiblePages } from './UserUrlMappings';
+import * as urlsApi from '@/features/urls/api/urlsApi';
+import UserUrlMappingsPage, { getVisiblePages } from '@/features/urls/routes/UserUrlMappingsPage';
 
-vi.mock('../services/ApiService', () => ({
-  ApiService: {
-    getUserUrls: vi.fn(),
-    deleteUrl: vi.fn(),
-  },
+vi.mock('@/features/urls/api/urlsApi', () => ({
+  getUserUrls: vi.fn(),
+  deleteUrl: vi.fn(),
 }));
 
-vi.mock('./SidePanel', () => ({
+vi.mock('@/features/account/components/AccountSidebar', () => ({
   default: () => <aside>Side Panel</aside>,
 }));
 
-const mockGetUserUrls = vi.mocked(ApiService.getUserUrls);
-const mockDeleteUrl = vi.mocked(ApiService.deleteUrl);
+const mockGetUserUrls = vi.mocked(urlsApi.getUserUrls);
+const mockDeleteUrl = vi.mocked(urlsApi.deleteUrl);
 
 const mapping = {
   urlHash: 'abc123',
@@ -54,7 +52,7 @@ describe('UserUrlMappings', () => {
 
     render(
       <MemoryRouter>
-        <UserUrlMappings />
+        <UserUrlMappingsPage />
       </MemoryRouter>
     );
 
@@ -88,7 +86,7 @@ describe('UserUrlMappings', () => {
 
     render(
       <MemoryRouter>
-        <UserUrlMappings />
+        <UserUrlMappingsPage />
       </MemoryRouter>
     );
 
@@ -120,7 +118,7 @@ describe('UserUrlMappings', () => {
 
     render(
       <MemoryRouter>
-        <UserUrlMappings />
+        <UserUrlMappingsPage />
       </MemoryRouter>
     );
 

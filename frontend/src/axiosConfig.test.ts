@@ -1,5 +1,6 @@
 import type { InternalAxiosRequestConfig } from 'axios';
-import { API_ENDPOINTS, STORAGE_KEYS } from './constants';
+import { endpoints } from '@/shared/api/endpoints';
+import { STORAGE_KEYS } from '@/features/auth/lib/storage';
 
 type InterceptorPair = {
   fulfilled?: (value: any) => any;
@@ -38,8 +39,8 @@ const createMockAxiosInstance = () => {
   return { instance, requestInterceptor, responseInterceptor };
 };
 
-describe('axiosConfig auth interceptors', () => {
-  const loadAxiosConfig = async () => {
+describe('httpClient auth interceptors', () => {
+  const loadHttpClient = async () => {
     vi.resetModules();
     localStorage.clear();
 
@@ -51,7 +52,7 @@ describe('axiosConfig auth interceptors', () => {
       default: { create },
     }));
 
-    const module = await import('./axiosConfig');
+    const module = await import('@/shared/api/httpClient');
 
     return {
       axiosInstance: module.default as unknown as MockAxiosInstance,
@@ -67,13 +68,13 @@ describe('axiosConfig auth interceptors', () => {
   });
 
   it('does not attach Authorization to auth endpoints', async () => {
-    const { api } = await loadAxiosConfig();
+    const { api } = await loadHttpClient();
     localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, 'access-token');
 
     for (const url of [
-      API_ENDPOINTS.AUTH.SIGNIN,
-      API_ENDPOINTS.AUTH.SIGNUP,
-      API_ENDPOINTS.AUTH.REFRESH,
+      endpoints.auth.signIn,
+      endpoints.auth.signUp,
+      endpoints.auth.refresh,
     ]) {
       const config = api.requestInterceptor.fulfilled?.({ url, headers: {} });
 
@@ -82,21 +83,21 @@ describe('axiosConfig auth interceptors', () => {
   });
 
   it('attaches Authorization to protected endpoints', async () => {
-    const { api } = await loadAxiosConfig();
+    const { api } = await loadHttpClient();
     localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, 'access-token');
 
-    const config = api.requestInterceptor.fulfilled?.({ url: API_ENDPOINTS.URLS.LIST, headers: {} });
+    const config = api.requestInterceptor.fulfilled?.({ url: endpoints.urls.list, headers: {} });
 
     expect(config.headers.Authorization).toBe('Bearer access-token');
   });
 
   it('does not refresh when an auth endpoint returns 401', async () => {
-    const { raw, api } = await loadAxiosConfig();
+    const { raw, api } = await loadHttpClient();
     localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, 'refresh-token');
 
     await expect(
       api.responseInterceptor.rejected?.({
-        config: { url: API_ENDPOINTS.AUTH.SIGNIN, headers: {} },
+        config: { url: endpoints.auth.signIn, headers: {} },
         response: { status: 401 },
       })
     ).rejects.toMatchObject({ response: { status: 401 } });
@@ -105,7 +106,7 @@ describe('axiosConfig auth interceptors', () => {
   });
 
   it('refreshes, stores rotated tokens, and retries protected requests once', async () => {
-    const { axiosInstance, raw, api } = await loadAxiosConfig();
+    const { axiosInstance, raw, api } = await loadHttpClient();
     localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, 'old-refresh-token');
     raw.instance.post.mockResolvedValue({
       data: {
@@ -115,7 +116,7 @@ describe('axiosConfig auth interceptors', () => {
     });
 
     const originalRequest = {
-      url: API_ENDPOINTS.URLS.LIST,
+      url: endpoints.urls.list,
       headers: {},
     };
 
@@ -124,7 +125,7 @@ describe('axiosConfig auth interceptors', () => {
       response: { status: 401 },
     });
 
-    expect(raw.instance.post).toHaveBeenCalledWith(API_ENDPOINTS.AUTH.REFRESH, {
+    expect(raw.instance.post).toHaveBeenCalledWith(endpoints.auth.refresh, {
       refreshToken: 'old-refresh-token',
     });
     expect(localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)).toBe('new-access-token');
@@ -135,7 +136,7 @@ describe('axiosConfig auth interceptors', () => {
   });
 
   it('logs out and redirects protected pages to sign-in when refresh fails', async () => {
-    const { raw, api } = await loadAxiosConfig();
+    const { raw, api } = await loadHttpClient();
     const replace = vi.fn();
     localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, 'access-token');
     localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, 'refresh-token');
@@ -152,7 +153,7 @@ describe('axiosConfig auth interceptors', () => {
 
     await expect(
       api.responseInterceptor.rejected?.({
-        config: { url: API_ENDPOINTS.URLS.LIST, headers: {} },
+        config: { url: endpoints.urls.list, headers: {} },
         response: { status: 401 },
       })
     ).rejects.toThrow('refresh failed');

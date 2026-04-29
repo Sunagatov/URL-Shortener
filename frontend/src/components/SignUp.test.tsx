@@ -1,20 +1,18 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { ApiService } from '../services/ApiService';
-import SignIn from './SignIn';
-import SignUp from './SignUp';
+import * as authApi from '@/features/auth/api/authApi';
+import SignInPage from '@/features/auth/routes/SignInPage';
+import SignUpPage from '@/features/auth/routes/SignUpPage';
 
 const login = vi.fn();
 
-vi.mock('../services/ApiService', () => ({
-  ApiService: {
-    signUp: vi.fn(),
-    getUserProfile: vi.fn(),
-  },
+vi.mock('@/features/auth/api/authApi', () => ({
+  signUp: vi.fn(),
+  getUserProfile: vi.fn(),
 }));
 
-vi.mock('../hooks/useAuth', () => ({
+vi.mock('@/features/auth/hooks/useAuth', () => ({
   useAuth: () => ({
     login,
     updateUser: vi.fn(),
@@ -25,7 +23,7 @@ vi.mock('../hooks/useAuth', () => ({
   }),
 }));
 
-vi.mock('../hooks/useApi', () => ({
+vi.mock('@/shared/api/useApi', () => ({
   useApi: () => ({
     execute: (apiCall: () => Promise<unknown>) => apiCall(),
     loading: false,
@@ -35,13 +33,13 @@ vi.mock('../hooks/useApi', () => ({
   }),
 }));
 
-const mockSignUp = vi.mocked(ApiService.signUp);
-const mockGetUserProfile = vi.mocked(ApiService.getUserProfile);
+const mockSignUp = vi.mocked(authApi.signUp);
+const mockGetUserProfile = vi.mocked(authApi.getUserProfile);
 
 const renderSignUp = () =>
   render(
     <MemoryRouter>
-      <SignUp />
+      <SignUpPage />
     </MemoryRouter>
   );
 
@@ -49,8 +47,8 @@ const renderAuthRoutes = (initialPath: '/signin' | '/signup', state?: unknown) =
   render(
     <MemoryRouter initialEntries={[{ pathname: initialPath, state }]}>
       <Routes>
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
+        <Route path="/signin" element={<SignInPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
         <Route path="/" element={<div>Home Destination</div>} />
         <Route path="/account/profile" element={<div>Profile Destination</div>} />
       </Routes>

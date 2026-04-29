@@ -80,20 +80,31 @@ This project communicates with the Shorty URL backend via REST API.
 
 ## Project structure
 
+The frontend uses a feature-first structure. Code is grouped by product area such as authentication, account management, and URL management instead of global technical layers.
+
 ```text
 src/
-├── components/      # Reusable UI and page-level components
-├── constants/       # Routes, API paths, validation constants
-├── context/         # Auth context
-├── hooks/           # Custom hooks
-├── layouts/         # App layout
-├── services/        # API service layer and auth service
-├── test/            # Vitest setup
-├── types/           # Shared TypeScript models
-└── utils/           # Validation and storage helpers
+├── app/                    # App bootstrap, router, layout, route map
+├── features/
+│   ├── account/            # Account pages, profile API, security flow
+│   ├── auth/               # Auth provider, guards, sign-in/sign-up flows
+│   └── urls/               # URL creation, listing, details, deletion
+├── shared/
+│   ├── api/                # Shared Axios client and cross-feature API hooks
+│   ├── lib/                # Cross-cutting helpers such as API error parsing
+│   ├── types/              # Shared TypeScript models
+│   └── ui/                 # Reusable UI primitives
+└── test/                   # Vitest setup
 
-e2e/                 # Playwright tests
+e2e/                        # Playwright tests
 ```
+
+### Structure rules
+
+- Keep route pages, feature-specific API calls, local models, and feature-only helpers inside the owning feature.
+- Move code into `shared/` only when it is genuinely reused and not tied to a single feature domain.
+- Keep `app/` thin. It should compose providers, layout, and routes, not own business logic.
+- Prefer `@/` imports over deep relative paths.
 
 ---
 
