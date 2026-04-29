@@ -9,6 +9,7 @@ import { useAuth } from '@/shared/auth/useAuth';
 import { createUrlSchema, type CreateUrlFormData } from '@/features/urls/model/urlValidation';
 import { routes } from '@/app/routes';
 import { Button, useToast } from '@/shared/ui';
+import { usePageTitle } from '@/shared/lib/usePageTitle';
 import {
     FaLink,
     FaCopy,
@@ -24,6 +25,7 @@ import {
 } from 'react-icons/fa';
 
 const UrlShortenerPage: React.FC = () => {
+    usePageTitle();
     const { isAuthenticated } = useAuth();
     const { execute, loading, error } = useApi<{ shortUrl: string }>();
     const toast = useToast();

@@ -9,6 +9,7 @@ import { signUpSchema, type SignUpFormData, type SignUpFormInput } from '@/featu
 import { routes } from '@/app/routes';
 import type { AuthTokens } from '@/shared/types';
 import { Button } from '@/shared/ui';
+import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { FaUser, FaEnvelope, FaLock, FaGlobe, FaCalendarAlt, FaLink, FaCheck } from 'react-icons/fa';
 
 type AuthLocationState = {
@@ -71,6 +72,7 @@ const FieldIcon: React.FC<{ icon: React.ElementType }> = ({ icon: Icon }) => (
 );
 
 const SignUpPage: React.FC = () => {
+    usePageTitle('Sign Up');
     const navigate = useNavigate();
     const location = useLocation();
     const { login, updateUser } = useAuth();
