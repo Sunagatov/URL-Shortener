@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import AccountSidebar from '@/app/layout/AccountSidebar';
 import { routes } from '@/app/routes';
 import { changePassword } from '@/features/account/api/accountApi';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/shared/auth/useAuth';
 import { getApiErrorMessage, isSessionInvalidError } from '@/shared/lib/apiErrors';
 import { Button } from '@/shared/ui';
 import {

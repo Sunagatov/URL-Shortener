@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from 'react';
-import { AuthProvider } from '@/features/auth/providers/AuthProvider';
+import { AuthProvider } from '@/shared/auth/AuthProvider';
 
 export function Providers({ children }: PropsWithChildren) {
   return <AuthProvider>{children}</AuthProvider>;

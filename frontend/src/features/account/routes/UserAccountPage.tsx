@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUserProfile } from '@/features/account/api/accountApi';
-import { useAuth } from '@/features/auth/hooks/useAuth';
 import AccountSidebar from '@/app/layout/AccountSidebar';
+import { useAuth } from '@/shared/auth/useAuth';
 import { getApiErrorMessage, isSessionInvalidError } from '@/shared/lib/apiErrors';
 import type { User } from '@/shared/types';
 import { routes } from '@/app/routes';

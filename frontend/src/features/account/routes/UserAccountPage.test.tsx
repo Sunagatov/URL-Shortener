@@ -9,7 +9,7 @@ vi.mock('@/features/account/api/accountApi', () => ({
   getUserProfile: vi.fn(),
 }));
 
-vi.mock('@/features/auth/hooks/useAuth', () => ({
+vi.mock('@/shared/auth/useAuth', () => ({
   useAuth: () => ({
     logout,
     login: vi.fn(),

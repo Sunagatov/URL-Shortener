@@ -4,7 +4,7 @@ import { MainLayout } from '@/app/layout/MainLayout';
 import SignInPage from '@/features/auth/routes/SignInPage';
 import SignUpPage from '@/features/auth/routes/SignUpPage';
 
-vi.mock('@/features/auth/hooks/useAuth', () => ({
+vi.mock('@/shared/auth/useAuth', () => ({
   useAuth: () => ({
     isAuthenticated: false,
     login: vi.fn(),

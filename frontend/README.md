@@ -90,7 +90,7 @@ src/
 │   ├── auth/               # Auth provider, guards, sign-in/sign-up flows
 │   └── urls/               # URL creation, listing, details, deletion
 ├── shared/
-│   ├── auth/               # Shared session persistence and auth state primitives
+│   ├── auth/               # Shared auth session, provider, hook, and persistence primitives
 │   ├── api/                # Shared Axios client and cross-feature API hooks
 │   ├── lib/                # Cross-cutting helpers such as API error parsing
 │   ├── types/              # Shared TypeScript models
@@ -105,6 +105,7 @@ e2e/                        # Playwright tests
 - Keep route pages, feature-specific API calls, local models, and feature-only helpers inside the owning feature.
 - Move code into `shared/` only when it is genuinely reused and not tied to a single feature domain.
 - Keep session persistence, auth token storage, and HTTP refresh mechanics in `shared/`, because multiple features and shared infrastructure depend on them.
+- Feature folders must not import each other directly. Cross-feature behavior should go through `shared/` or `app/`.
 - Keep `app/` thin. It should compose providers, layout, and routes, not own business logic.
 - Route pages are lazy-loaded through the app router so account and auth screens are split out of the landing-page entry chunk.
 - Keep tests close to the modules they verify. Route/page tests belong next to the route components, shared utility tests belong under `shared/`, and bootstrap tests belong under `app/`.

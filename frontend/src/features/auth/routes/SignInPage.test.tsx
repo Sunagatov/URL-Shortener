@@ -11,7 +11,7 @@ vi.mock('@/features/auth/api/authApi', () => ({
   getUserProfile: vi.fn(),
 }));
 
-vi.mock('@/features/auth/hooks/useAuth', () => ({
+vi.mock('@/shared/auth/useAuth', () => ({
   useAuth: () => ({
     login,
     updateUser: vi.fn(),

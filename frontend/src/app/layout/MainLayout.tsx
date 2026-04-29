@@ -14,9 +14,9 @@ import {
   FaLinkedin,
   FaHeart
 } from 'react-icons/fa';
-import { useAuth } from '@/features/auth/hooks/useAuth';
 import { routes } from '@/app/routes';
 import { authSession } from '@/shared/auth/authSession';
+import { useAuth } from '@/shared/auth/useAuth';
 import AccountSidebar from '@/app/layout/AccountSidebar';
 
 

@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { z } from 'zod';
 import { createUrl } from '@/features/urls/api/urlsApi';
 import { useApi } from '@/shared/api/useApi';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/shared/auth/useAuth';
 import { createUrlSchema, type CreateUrlFormData } from '@/features/urls/model/urlValidation';
 import { routes } from '@/app/routes';
 import { Button } from '@/shared/ui';
