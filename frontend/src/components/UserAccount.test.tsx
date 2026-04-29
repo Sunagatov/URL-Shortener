@@ -1,6 +1,9 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ApiService } from '../services/ApiService';
 import UserAccount from './UserAccount';
+
+const logout = vi.fn();
 
 vi.mock('../services/ApiService', () => ({
   ApiService: {
@@ -8,13 +11,37 @@ vi.mock('../services/ApiService', () => ({
   },
 }));
 
+vi.mock('../hooks/useAuth', () => ({
+  useAuth: () => ({
+    logout,
+    login: vi.fn(),
+    updateUser: vi.fn(),
+    isAuthenticated: true,
+    user: null,
+    loading: false,
+  }),
+}));
+
 vi.mock('./SidePanel', () => ({
   default: () => <aside>Side Panel</aside>,
 }));
 
 const mockGetUserProfile = vi.mocked(ApiService.getUserProfile);
+const renderUserAccount = () =>
+  render(
+    <MemoryRouter initialEntries={['/account/profile']}>
+      <Routes>
+        <Route path="/account/profile" element={<UserAccount />} />
+        <Route path="/signin" element={<div>Sign In Destination</div>} />
+      </Routes>
+    </MemoryRouter>
+  );
 
 describe('UserAccount', () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('renders profile details from the central API service', async () => {
     mockGetUserProfile.mockResolvedValue({
       id: 'user-1',
@@ -26,7 +53,7 @@ describe('UserAccount', () => {
       createdAt: '2024-01-15T12:00:00.000Z',
     });
 
-    render(<UserAccount />);
+    renderUserAccount();
 
     expect(await screen.findByText('Test User')).toBeInTheDocument();
     expect(screen.getAllByText('test@example.com')[0]).toBeInTheDocument();
@@ -39,9 +66,25 @@ describe('UserAccount', () => {
   it('shows an error when the profile request fails', async () => {
     mockGetUserProfile.mockRejectedValue(new Error('Request failed'));
 
-    render(<UserAccount />);
+    renderUserAccount();
 
-    expect(await screen.findByText(/failed to fetch user details/i)).toBeInTheDocument();
+    expect(await screen.findByText('Request failed')).toBeInTheDocument();
+  });
+
+  it('logs out and redirects to sign-in when the session is no longer valid', async () => {
+    mockGetUserProfile.mockRejectedValue({
+      response: {
+        status: 404,
+        data: {
+          errorMessage: 'User not found',
+        },
+      },
+    });
+
+    renderUserAccount();
+
+    expect(await screen.findByText('Sign In Destination')).toBeInTheDocument();
+    await waitFor(() => expect(logout).toHaveBeenCalled());
   });
 
   it('renders only the available first name in the profile header', async () => {
@@ -52,7 +95,7 @@ describe('UserAccount', () => {
       createdAt: '2024-01-15T12:00:00.000Z',
     });
 
-    render(<UserAccount />);
+    renderUserAccount();
 
     expect(await screen.findByRole('heading', { name: 'Test' })).toBeInTheDocument();
     expect(screen.queryByText(/undefined/i)).not.toBeInTheDocument();
@@ -65,7 +108,7 @@ describe('UserAccount', () => {
       createdAt: '2024-01-15T12:00:00.000Z',
     });
 
-    render(<UserAccount />);
+    renderUserAccount();
 
     expect(await screen.findByRole('heading', { name: 'User' })).toBeInTheDocument();
     expect(screen.queryByText(/undefined/i)).not.toBeInTheDocument();

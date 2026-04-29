@@ -1,6 +1,9 @@
 // src/components/Security.tsx
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ApiService } from '../services/ApiService';
+import { useAuth } from '../hooks/useAuth';
+import { getApiErrorMessage, isSessionInvalidError } from '../utils/apiErrors';
 import SidePanel from './SidePanel';
 import { Button } from './ui';
 import {
@@ -25,6 +28,8 @@ const Security: React.FC = () => {
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
+    const { logout } = useAuth();
 
     const getPasswordStrength = (password: string) => {
         let score = 0;
@@ -69,6 +74,8 @@ const Security: React.FC = () => {
     const handlePasswordChange = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
+        setErrorMessage('');
+        setSuccessMessage('');
 
         if (newPassword !== confirmPassword) {
             setErrorMessage('New password and confirm password do not match.');
@@ -93,14 +100,14 @@ const Security: React.FC = () => {
             setCurrentPassword('');
             setNewPassword('');
             setConfirmPassword('');
-        } catch (error: any) {
-            if (error.response) {
-                setErrorMessage(error.response.data.errorMessage || 'Error changing password.');
-            } else if (error.request) {
-                setErrorMessage('No response from the server. Please try again later.');
-            } else {
-                setErrorMessage('Error: ' + error.message);
+        } catch (error: unknown) {
+            if (isSessionInvalidError(error)) {
+                logout();
+                navigate('/signin', { replace: true });
+                return;
             }
+
+            setErrorMessage(getApiErrorMessage(error, 'Error changing password.'));
         } finally {
             setIsLoading(false);
         }

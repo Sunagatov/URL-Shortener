@@ -100,4 +100,32 @@ describe('UserUrlMappings', () => {
     await waitFor(() => expect(mockDeleteUrl).toHaveBeenCalledWith('abc123'));
     await waitFor(() => expect(mockGetUserUrls).toHaveBeenCalledWith(0, 6));
   });
+
+  it('shows the backend access-denied message when deletion is forbidden', async () => {
+    mockGetUserUrls.mockResolvedValue({
+      content: [mapping],
+      page: 0,
+      size: 6,
+      totalElements: 1,
+      totalPages: 1,
+    });
+    mockDeleteUrl.mockRejectedValue({
+      response: {
+        status: 403,
+        data: {
+          errorMessage: 'You are not allowed to delete this URL mapping',
+        },
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <UserUrlMappings />
+      </MemoryRouter>
+    );
+
+    await userEvent.click(await screen.findByTitle('Delete URL'));
+
+    expect(await screen.findByText('You are not allowed to delete this URL mapping')).toBeInTheDocument();
+  });
 });

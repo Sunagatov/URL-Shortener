@@ -1,7 +1,10 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ApiService } from '../services/ApiService';
 import Security from './Security';
+
+const logout = vi.fn();
 
 vi.mock('../services/ApiService', () => ({
   ApiService: {
@@ -9,9 +12,30 @@ vi.mock('../services/ApiService', () => ({
   },
 }));
 
+vi.mock('../hooks/useAuth', () => ({
+  useAuth: () => ({
+    logout,
+    login: vi.fn(),
+    updateUser: vi.fn(),
+    isAuthenticated: true,
+    user: null,
+    loading: false,
+  }),
+}));
+
 vi.mock('./SidePanel', () => ({
   default: () => <aside>Side Panel</aside>,
 }));
+
+const renderSecurity = () =>
+  render(
+    <MemoryRouter initialEntries={['/account/security']}>
+      <Routes>
+        <Route path="/account/security" element={<Security />} />
+        <Route path="/signin" element={<div>Sign In Destination</div>} />
+      </Routes>
+    </MemoryRouter>
+  );
 
 describe('Security', () => {
   beforeEach(() => {
@@ -23,7 +47,7 @@ describe('Security', () => {
   });
 
   it('renders security feature badges with static Tailwind classes', () => {
-    render(<Security />);
+    renderSecurity();
 
     const activeBadges = screen.getAllByText('Active');
     expect(activeBadges).toHaveLength(3);
@@ -31,7 +55,7 @@ describe('Security', () => {
   });
 
   it('does not show fabricated account security facts', () => {
-    render(<Security />);
+    renderSecurity();
 
     expect(screen.getByText('Security summary is not available yet')).toBeInTheDocument();
     expect(screen.getByText('Last password change information is not available yet')).toBeInTheDocument();
@@ -41,7 +65,7 @@ describe('Security', () => {
 
   it('renders weak, medium, and strong password strength using explicit classes', async () => {
     const user = userEvent.setup();
-    render(<Security />);
+    renderSecurity();
 
     const newPasswordInput = screen.getByPlaceholderText('Enter your new password');
 
@@ -59,7 +83,7 @@ describe('Security', () => {
 
   it('submits password changes through the central API service', async () => {
     const user = userEvent.setup();
-    render(<Security />);
+    renderSecurity();
 
     await user.type(screen.getByPlaceholderText('Enter your current password'), 'OldPassword1!');
     await user.type(screen.getByPlaceholderText('Enter your new password'), 'NewPassword1!');
@@ -70,5 +94,27 @@ describe('Security', () => {
       currentPassword: 'OldPassword1!',
       newPassword: 'NewPassword1!',
     });
+  });
+
+  it('logs out and redirects to sign-in when the session is no longer valid', async () => {
+    const user = userEvent.setup();
+    vi.mocked(ApiService.changePassword).mockRejectedValue({
+      response: {
+        status: 403,
+        data: {
+          errorMessage: 'Access denied',
+        },
+      },
+    });
+
+    renderSecurity();
+
+    await user.type(screen.getByPlaceholderText('Enter your current password'), 'OldPassword1!');
+    await user.type(screen.getByPlaceholderText('Enter your new password'), 'NewPassword1!');
+    await user.type(screen.getByPlaceholderText('Confirm your new password'), 'NewPassword1!');
+    await user.click(screen.getByRole('button', { name: /update password/i }));
+
+    expect(await screen.findByText('Sign In Destination')).toBeInTheDocument();
+    await waitFor(() => expect(logout).toHaveBeenCalled());
   });
 });

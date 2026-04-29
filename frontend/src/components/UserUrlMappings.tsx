@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiService } from '../services/ApiService';
+import { getApiErrorMessage, getApiErrorStatus } from '../utils/apiErrors';
 import SidePanel from './SidePanel';
 import { Button } from './ui';
 import type { UrlMapping } from '../types';
@@ -44,11 +45,11 @@ const UserUrlMappings: React.FC = () => {
             setPage(data.page);
             setTotalPages(data.totalPages);
             setTotalElements(data.totalElements);
-        } catch (error: any) {
-            if (error.response && error.response.status === 401) {
+        } catch (error: unknown) {
+            if (getApiErrorStatus(error) === 401) {
                 navigate('/signin');
             } else {
-                setErrorMessage('Failed to fetch URL mappings.');
+                setErrorMessage(getApiErrorMessage(error, 'Failed to fetch URL mappings.'));
             }
         } finally {
             setIsLoading(false);
@@ -73,8 +74,13 @@ const UserUrlMappings: React.FC = () => {
 
             await fetchUrlMappings(nextPage);
             setErrorMessage('');
-        } catch {
-            setErrorMessage('Failed to delete URL mapping.');
+        } catch (error: unknown) {
+            if (getApiErrorStatus(error) === 401) {
+                navigate('/signin');
+                return;
+            }
+
+            setErrorMessage(getApiErrorMessage(error, 'Failed to delete URL mapping.'));
         }
     };
 

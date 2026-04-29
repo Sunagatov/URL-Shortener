@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ApiService } from '../services/ApiService';
+import { useAuth } from '../hooks/useAuth';
+import { getApiErrorMessage, isSessionInvalidError } from '../utils/apiErrors';
 import type { User } from '../types';
 import SidePanel from './SidePanel';
 import { FaEdit, FaUser, FaEnvelope, FaGlobe, FaCalendarAlt } from 'react-icons/fa';
@@ -8,6 +11,8 @@ const UserAccount: React.FC = () => {
     const [userDetails, setUserDetails] = useState<User | null>(null);
     const [errorMessage, setErrorMessage] = useState('');
     const [isLoading, setIsLoading] = useState(true);
+    const navigate = useNavigate();
+    const { logout } = useAuth();
 
     useEffect(() => {
         let isMounted = true;
@@ -20,9 +25,15 @@ const UserAccount: React.FC = () => {
                     setUserDetails(response);
                     setErrorMessage('');
                 }
-            } catch {
+            } catch (error: unknown) {
+                if (isMounted && isSessionInvalidError(error)) {
+                    logout();
+                    navigate('/signin', { replace: true });
+                    return;
+                }
+
                 if (isMounted) {
-                    setErrorMessage('Failed to fetch user details.');
+                    setErrorMessage(getApiErrorMessage(error, 'Failed to fetch user details.'));
                 }
             } finally {
                 if (isMounted) {
@@ -36,7 +47,7 @@ const UserAccount: React.FC = () => {
         return () => {
             isMounted = false;
         };
-    }, []);
+    }, [logout, navigate]);
 
     const getInitials = (firstName?: string, lastName?: string) => {
         const initials = `${firstName?.charAt(0) ?? ''}${lastName?.charAt(0) ?? ''}`.toUpperCase();

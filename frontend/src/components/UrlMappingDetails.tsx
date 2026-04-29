@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ApiService } from '../services/ApiService';
+import { getApiErrorMessage, getApiErrorStatus } from '../utils/apiErrors';
 import SidePanel from './SidePanel';
 import { Button } from './ui';
 import type { UrlMapping } from '../types';
@@ -36,11 +37,11 @@ const UrlMappingDetails: React.FC = () => {
                 setIsLoading(true);
                 const response = await ApiService.getUrlDetails(urlHash);
                 setUrlMapping(response);
-            } catch (error: any) {
-                if (error.response && error.response.status === 401) {
+            } catch (error: unknown) {
+                if (getApiErrorStatus(error) === 401) {
                     navigate('/signin');
                 } else {
-                    setErrorMessage('Failed to fetch URL mapping details.');
+                    setErrorMessage(getApiErrorMessage(error, 'Failed to fetch URL mapping details.'));
                 }
             } finally {
                 setIsLoading(false);
@@ -68,8 +69,13 @@ const UrlMappingDetails: React.FC = () => {
         try {
             await ApiService.deleteUrl(urlMapping.urlHash);
             navigate('/account/url-mappings');
-        } catch (error: any) {
-            setErrorMessage('Failed to delete URL mapping.');
+        } catch (error: unknown) {
+            if (getApiErrorStatus(error) === 401) {
+                navigate('/signin');
+                return;
+            }
+
+            setErrorMessage(getApiErrorMessage(error, 'Failed to delete URL mapping.'));
         }
     };
 
@@ -111,7 +117,9 @@ const UrlMappingDetails: React.FC = () => {
                 <div className="flex-grow md:ml-72 p-8">
                     <div className="text-center py-16">
                         <h2 className="text-2xl font-bold text-gray-900 mb-4">URL Not Found</h2>
-                        <p className="text-gray-600 mb-6">The requested URL mapping could not be found.</p>
+                        <p className="text-gray-600 mb-6">
+                            {errorMessage || 'The requested URL mapping could not be found.'}
+                        </p>
                         <Button onClick={() => navigate('/account/url-mappings')}>
                             Back to URL Mappings
                         </Button>

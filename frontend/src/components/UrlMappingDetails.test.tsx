@@ -51,7 +51,29 @@ describe('UrlMappingDetails', () => {
     );
 
     expect(await screen.findByText(/url not found/i)).toBeInTheDocument();
-    expect(screen.getByText(/requested url mapping could not be found/i)).toBeInTheDocument();
+    expect(screen.getByText(/url mapping id is missing/i)).toBeInTheDocument();
     expect(mockGetUrlDetails).not.toHaveBeenCalled();
+  });
+
+  it('preserves backend forbidden messages instead of collapsing them into a generic not found state', async () => {
+    mockGetUrlDetails.mockRejectedValue({
+      response: {
+        status: 403,
+        data: {
+          errorMessage: 'You are not allowed to access this URL mapping',
+        },
+      },
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/account/url-mappings/abc123']}>
+        <Routes>
+          <Route path="/account/url-mappings/:urlHash" element={<UrlMappingDetails />} />
+        </Routes>
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText(/url not found/i)).toBeInTheDocument();
+    expect(screen.getByText('You are not allowed to access this URL mapping')).toBeInTheDocument();
   });
 });
