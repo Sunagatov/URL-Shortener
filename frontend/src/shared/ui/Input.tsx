@@ -13,7 +13,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>((
   const generatedId = useId();
   const inputId = id ?? generatedId;
   const errorId = `${inputId}-error`;
-  const baseStyles = 'w-full rounded-xl border border-white/12 bg-[#11182b] px-4 py-3 text-white placeholder-white/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-200';
+  const baseStyles = 'w-full rounded-xl border border-white/7 bg-[#11182b] px-4 py-3 text-white placeholder-white/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-200';
   const errorStyles = error ? 'border-red-500/40 focus:ring-red-500/40' : '';
   const iconStyles = icon ? 'pl-12' : '';
 

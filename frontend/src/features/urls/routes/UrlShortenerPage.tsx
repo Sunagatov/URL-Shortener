@@ -115,7 +115,7 @@ const UrlShortenerPage: React.FC = () => {
                                         {...register('originalUrl')}
                                         type="url"
                                         placeholder="Paste your long URL here…"
-                                        className="w-full h-full bg-[#11182b] border border-white/12 text-white placeholder-white/30 pl-11 pr-4 py-3.5 rounded-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] focus:outline-none focus:ring-2 focus:ring-blue-500/40 text-base"
+                                        className="w-full h-full bg-[#11182b] border border-white/7 text-white placeholder-white/30 pl-11 pr-4 py-3.5 rounded-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] focus:outline-none focus:ring-2 focus:ring-blue-500/40 text-base"
                                     />
                                 </div>
                                 <Button type="submit" loading={loading} size="lg" className="flex-shrink-0">
