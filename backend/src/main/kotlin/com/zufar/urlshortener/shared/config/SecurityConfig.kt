@@ -15,8 +15,10 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher.withDefaults
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.web.util.matcher.RegexRequestMatcher
 
 @Configuration
 @EnableMethodSecurity
@@ -45,6 +47,8 @@ class SecurityConfig(
         http: HttpSecurity,
         passwordEncoder: PasswordEncoder
     ): SecurityFilterChain {
+        val publicShortUrlMatcher = RegexRequestMatcher("^/[1-9A-HJ-NP-Za-km-z]{8}$", HttpMethod.GET.name())
+
         http
             .csrf { it.disable() }
             .cors { }
@@ -57,11 +61,12 @@ class SecurityConfig(
                 auth
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/v1/urls").permitAll()
+                    .requestMatchers(withDefaults().matcher(HttpMethod.GET, "/favicon.ico")).permitAll()
+                    .requestMatchers(publicShortUrlMatcher).permitAll()
                     .requestMatchers(
                         "/api/v1/health",
                         "/api/v1/auth/**",
                         "/v1/auth/**",
-                        "/{urlHash:[1-9A-HJ-NP-Za-km-z]{8}}",
                         "/api/v1/swagger-ui/**",
                         "/api/v1/api-docs/**"
                     ).permitAll()

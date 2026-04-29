@@ -1,5 +1,7 @@
 package com.zufar.urlshortener.shared.security
 
+import com.zufar.urlshortener.urls.dto.UrlMappingDto
+import com.zufar.urlshortener.urls.service.UrlMappingProvider
 import com.zufar.urlshortener.urls.service.UrlShortener
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -16,8 +18,10 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.time.LocalDateTime
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -28,6 +32,9 @@ class SecurityRestExceptionHandlingTest {
 
     @Autowired
     private lateinit var urlShortener: UrlShortener
+
+    @Autowired
+    private lateinit var urlMappingProvider: UrlMappingProvider
 
     @Test
     fun `users endpoint without auth returns 401 JSON`() {
@@ -58,11 +65,38 @@ class SecurityRestExceptionHandlingTest {
             .andExpect(jsonPath("$.shortUrl").value("http://localhost:8080/abc12345"))
     }
 
+    @Test
+    fun `public short url redirect remains accessible without auth`() {
+        whenever(urlMappingProvider.getPublicUrlMappingByHash("abc12345")).thenReturn(
+            UrlMappingDto(
+                urlHash = "abc12345",
+                shortUrl = "http://localhost:8080/abc12345",
+                originalUrl = "https://example.com/original",
+                createdAt = LocalDateTime.now(),
+                expirationDate = LocalDateTime.now().plusHours(1)
+            )
+        )
+
+        mockMvc.perform(get("/abc12345"))
+            .andExpect(status().isFound)
+            .andExpect(header().string("Location", "https://example.com/original"))
+    }
+
+    @Test
+    fun `favicon request does not require auth`() {
+        mockMvc.perform(get("/favicon.ico"))
+            .andExpect(status().isNoContent)
+    }
+
     @TestConfiguration
     class TestConfig {
 
         @Bean
         @Primary
         fun urlShortener(): UrlShortener = mock()
+
+        @Bean
+        @Primary
+        fun urlMappingProvider(): UrlMappingProvider = mock()
     }
 }
