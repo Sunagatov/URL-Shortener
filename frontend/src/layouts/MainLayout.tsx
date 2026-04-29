@@ -55,6 +55,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     { icon: FaShieldAlt, label: 'Security', path: ROUTES.SECURITY },
     { icon: FaUser, label: 'Profile', path: ROUTES.PROFILE },
   ];
+  const mobileHeaderActionClassName = 'md:hidden w-10 h-10 bg-white/10 hover:bg-white/15 backdrop-blur-sm border border-white/15 rounded-xl flex items-center justify-center transition-all duration-200';
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -79,7 +80,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             {showMobileAccountDrawerTrigger && (
               <button
                 onClick={handleOpenMobileAccountNav}
-                className="md:hidden w-10 h-10 bg-white/10 hover:bg-white/15 backdrop-blur-sm border border-white/15 rounded-xl flex items-center justify-center transition-all duration-200"
+                className={mobileHeaderActionClassName}
                 aria-label="Open navigation"
               >
                 <FaBars className="w-4 h-4 text-white" />
@@ -89,13 +90,15 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               <div className={`relative ${showMobileHeaderAccountMenu ? '' : 'hidden md:block'}`}>
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center space-x-2 bg-white/10 hover:bg-white/15 backdrop-blur-sm px-4 py-2 rounded-xl transition-all duration-200 border border-white/20 hover:border-white/30"
+                  className="flex items-center justify-center md:justify-start gap-2 md:px-4 w-10 h-10 md:w-auto md:h-auto md:py-2 bg-white/10 hover:bg-white/15 backdrop-blur-sm rounded-xl transition-all duration-200 border border-white/15 md:border-white/20 hover:border-white/30"
+                  aria-label="Open account menu"
                 >
-                  <div className="w-7 h-7 bg-white/15 rounded-lg flex items-center justify-center">
+                  <div className="hidden md:flex w-7 h-7 bg-white/15 rounded-lg items-center justify-center">
                     <FaUserCircle className="w-4 h-4" />
                   </div>
+                  <FaBars className="md:hidden w-4 h-4 text-white" />
                   <span className="hidden md:inline font-medium text-sm">Account</span>
-                  <FaChevronDown className={`w-3 h-3 transition-transform duration-200 ${
+                  <FaChevronDown className={`hidden md:block w-3 h-3 transition-transform duration-200 ${
                     isUserMenuOpen ? 'rotate-180' : ''
                   }`} />
                 </button>
