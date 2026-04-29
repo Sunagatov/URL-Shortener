@@ -2,7 +2,7 @@ package com.zufar.urlshortener.users.controller
 
 import com.zufar.urlshortener.shared.exception.ErrorResponse
 import com.zufar.urlshortener.users.dto.UserDetailsDto
-import com.zufar.urlshortener.users.service.UserDetailsProvider
+import com.zufar.urlshortener.users.service.query.UserProfileService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.ExampleObject
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController
     description = "Operations related to managing and retrieving user details."
 )
 class UserProfileController(
-    private val userDetailsProvider: UserDetailsProvider
+    private val userProfileService: UserProfileService
 ) {
 
     @Operation(
@@ -103,5 +103,5 @@ class UserProfileController(
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     fun getUserDetails(): ResponseEntity<UserDetailsDto> =
-        ResponseEntity.ok(userDetailsProvider.getUserDetails())
+        ResponseEntity.ok(userProfileService.getUserDetails())
 }

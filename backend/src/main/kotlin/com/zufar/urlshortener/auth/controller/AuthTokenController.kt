@@ -2,7 +2,7 @@ package com.zufar.urlshortener.auth.controller
 
 import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
 import com.zufar.urlshortener.auth.dto.RefreshTokenResponse
-import com.zufar.urlshortener.auth.service.AuthService
+import com.zufar.urlshortener.auth.service.token.RefreshAccessTokenService
 import com.zufar.urlshortener.shared.exception.ErrorResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController
     description = "Endpoints for user authentication, registration, and token management."
 )
 class AuthTokenController(
-    private val authService: AuthService
+    private val refreshAccessTokenService: RefreshAccessTokenService
 ) {
 
     @Operation(
@@ -145,5 +145,5 @@ class AuthTokenController(
         )
         @RequestBody refreshTokenRequest: RefreshTokenRequest
     ): ResponseEntity<RefreshTokenResponse> =
-        ResponseEntity.ok(authService.refreshAccessToken(refreshTokenRequest))
+        ResponseEntity.ok(refreshAccessTokenService.refresh(refreshTokenRequest))
 }

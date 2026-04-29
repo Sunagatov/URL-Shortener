@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.urls.service
 
-import com.zufar.urlshortener.auth.service.CurrentUserProvider
+import com.zufar.urlshortener.auth.service.user.CurrentUserService
 import com.zufar.urlshortener.urls.dto.ShortenUrlRequest
 import com.zufar.urlshortener.urls.entity.UrlMapping
 import jakarta.servlet.http.HttpServletRequest
@@ -13,7 +13,7 @@ private const val DEFAULT_EXPIRATION_URL_DAYS = 365L
 
 @Service
 class UrlMappingEntityCreator(
-    private val currentUserProvider: CurrentUserProvider,
+    private val currentUserService: CurrentUserService,
     private val clock: Clock
 ) {
 
@@ -36,7 +36,7 @@ class UrlMappingEntityCreator(
             expirationDate = now.plusDays(shortenUrlRequest.daysCount ?: DEFAULT_EXPIRATION_URL_DAYS),
             requestIp = httpServletRequest.remoteAddr,
             userAgent = httpServletRequest.getHeader("User-Agent"),
-            userId = currentUserProvider.getCurrentUserIdOrNull()
+            userId = currentUserService.getCurrentUserIdOrNull()
         )
 
         log.debug(

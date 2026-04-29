@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.urls.service
 
-import com.zufar.urlshortener.auth.service.CurrentUserProvider
+import com.zufar.urlshortener.auth.service.user.CurrentUserService
 import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.exception.UrlNotFoundException
 import com.zufar.urlshortener.urls.repository.UrlRepository
@@ -14,7 +14,7 @@ private const val URL_MAPPING_NOT_FOUND_MESSAGE = "URL mapping not found"
 @Service
 class UrlAccessService(
     private val urlRepository: UrlRepository,
-    private val currentUserProvider: CurrentUserProvider,
+    private val currentUserService: CurrentUserService,
     private val clock: Clock
 ) {
 
@@ -28,7 +28,7 @@ class UrlAccessService(
 
     fun getOwnedActiveUrlMapping(urlHash: String, accessDeniedMessage: String): UrlMapping {
         val urlMapping = getActiveUrlMapping(urlHash)
-        val currentUserId = currentUserProvider.requireCurrentUserId()
+        val currentUserId = currentUserService.requireCurrentUserId()
 
         if (urlMapping.userId == null || urlMapping.userId != currentUserId) {
             throw AccessDeniedException(accessDeniedMessage)

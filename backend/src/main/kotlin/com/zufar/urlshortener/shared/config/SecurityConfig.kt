@@ -1,7 +1,7 @@
 package com.zufar.urlshortener.shared.config
 
-import com.zufar.urlshortener.auth.service.CustomUserDetailsService
-import com.zufar.urlshortener.auth.service.JwtAuthenticationFilter
+import com.zufar.urlshortener.auth.security.CustomUserDetailsService
+import com.zufar.urlshortener.auth.security.JwtAuthenticationFilter
 import com.zufar.urlshortener.shared.security.RestAccessDeniedHandler
 import com.zufar.urlshortener.shared.security.RestAuthenticationEntryPoint
 import com.zufar.urlshortener.urls.UrlHashFormat

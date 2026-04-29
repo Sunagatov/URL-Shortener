@@ -2,7 +2,7 @@ package com.zufar.urlshortener.auth.controller
 
 import com.zufar.urlshortener.auth.dto.AuthResponse
 import com.zufar.urlshortener.auth.dto.SignUpRequest
-import com.zufar.urlshortener.auth.service.AuthService
+import com.zufar.urlshortener.auth.service.registration.SignUpService
 import com.zufar.urlshortener.shared.exception.ErrorResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController
     description = "Endpoints for user authentication, registration, and token management."
 )
 class AuthSignUpController(
-    private val authService: AuthService
+    private val signUpService: SignUpService
 ) {
 
     @Operation(
@@ -130,5 +130,5 @@ class AuthSignUpController(
         )
         @RequestBody signUpRequest: SignUpRequest
     ): ResponseEntity<AuthResponse> =
-        ResponseEntity.ok(authService.registerUser(signUpRequest))
+        ResponseEntity.ok(signUpService.register(signUpRequest))
 }

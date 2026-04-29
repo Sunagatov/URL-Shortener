@@ -2,8 +2,8 @@ package com.zufar.urlshortener.urls.controller
 
 import com.zufar.urlshortener.shared.exception.ErrorResponse
 import com.zufar.urlshortener.urls.dto.UrlMappingDto
-import com.zufar.urlshortener.urls.service.UrlDeleter
-import com.zufar.urlshortener.urls.service.UrlMappingProvider
+import com.zufar.urlshortener.urls.service.command.DeleteUrlMappingService
+import com.zufar.urlshortener.urls.service.query.UrlQueryService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -27,8 +27,8 @@ import org.springframework.web.bind.annotation.RestController
     description = "Operations for managing shortened URLs, including creating, retrieving, and deleting URL mappings."
 )
 class UserUrlMappingController(
-    private val urlDeleter: UrlDeleter,
-    private val urlMappingProvider: UrlMappingProvider
+    private val deleteUrlMappingService: DeleteUrlMappingService,
+    private val urlQueryService: UrlQueryService
 ) {
 
     @Operation(
@@ -130,7 +130,7 @@ class UserUrlMappingController(
         @Parameter(description = "The unique hash identifier of the URL mapping to be deleted.", example = "abc123", required = true)
         @PathVariable urlHash: String
     ): ResponseEntity<Void> {
-        urlDeleter.deleteUrl(urlHash)
+        deleteUrlMappingService.delete(urlHash)
         return ResponseEntity.noContent().build()
     }
 
@@ -278,5 +278,5 @@ class UserUrlMappingController(
         @Parameter(description = "The unique hash of the URL mapping.", example = "abc123", required = true)
         @PathVariable urlHash: String
     ): ResponseEntity<UrlMappingDto> =
-        ResponseEntity.ok(urlMappingProvider.getOwnedUrlMappingByHash(urlHash))
+        ResponseEntity.ok(urlQueryService.getOwnedByHash(urlHash))
 }

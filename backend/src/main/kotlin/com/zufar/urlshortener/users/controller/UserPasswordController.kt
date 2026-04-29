@@ -2,7 +2,7 @@ package com.zufar.urlshortener.users.controller
 
 import com.zufar.urlshortener.shared.exception.ErrorResponse
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
-import com.zufar.urlshortener.users.service.UserPasswordChanger
+import com.zufar.urlshortener.users.service.command.ChangePasswordService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController
     description = "Operations related to managing and retrieving user details."
 )
 class UserPasswordController(
-    private val userPasswordChanger: UserPasswordChanger
+    private val changePasswordService: ChangePasswordService
 ) {
 
     @Operation(
@@ -43,7 +43,7 @@ class UserPasswordController(
         consumes = [MediaType.APPLICATION_JSON_VALUE]
     )
     fun changePassword(@RequestBody changePasswordRequest: ChangePasswordRequest): ResponseEntity<Void> {
-        userPasswordChanger.changePassword(changePasswordRequest)
+        changePasswordService.changePassword(changePasswordRequest)
         return ResponseEntity.noContent().build()
     }
 }

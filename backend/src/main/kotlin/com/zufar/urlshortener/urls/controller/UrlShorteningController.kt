@@ -3,7 +3,7 @@ package com.zufar.urlshortener.urls.controller
 import com.zufar.urlshortener.shared.exception.ErrorResponse
 import com.zufar.urlshortener.urls.dto.ShortenUrlRequest
 import com.zufar.urlshortener.urls.dto.UrlResponse
-import com.zufar.urlshortener.urls.service.UrlShortener
+import com.zufar.urlshortener.urls.service.command.ShortenUrlService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.ExampleObject
@@ -28,7 +28,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody as SwaggerRequestBod
     description = "Operations for managing shortened URLs, including creating, retrieving, and deleting URL mappings."
 )
 class UrlShorteningController(
-    private val urlShortener: UrlShortener
+    private val shortenUrlService: ShortenUrlService
 ) {
 
     @Operation(
@@ -133,5 +133,5 @@ class UrlShorteningController(
         @Valid @RequestBody shortenUrlRequest: ShortenUrlRequest,
         httpServletRequest: HttpServletRequest
     ): ResponseEntity<UrlResponse> =
-        ResponseEntity.ok(UrlResponse(urlShortener.shortenUrl(shortenUrlRequest, httpServletRequest)))
+        ResponseEntity.ok(UrlResponse(shortenUrlService.shorten(shortenUrlRequest, httpServletRequest)))
 }

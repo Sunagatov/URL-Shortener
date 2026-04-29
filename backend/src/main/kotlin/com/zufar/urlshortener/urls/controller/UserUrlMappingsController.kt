@@ -1,9 +1,9 @@
 package com.zufar.urlshortener.urls.controller
 
 import com.zufar.urlshortener.shared.exception.ErrorResponse
-import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.urls.dto.UrlMappingPageDto
-import com.zufar.urlshortener.urls.service.PageableUrlMappingsProvider
+import com.zufar.urlshortener.urls.service.query.UserUrlMappingsQueryService
+import com.zufar.urlshortener.urls.validation.UrlMappingsPageRequestValidator
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
-private const val MAX_PAGE_SIZE = 100
 private const val DEFAULT_PAGE = 0
 private const val DEFAULT_SIZE = 10
 
@@ -30,7 +29,8 @@ private const val DEFAULT_SIZE = 10
     description = "Operations for managing shortened URLs, including creating, retrieving, and deleting URL mappings."
 )
 class UserUrlMappingsController(
-    private val pageableUrlMappingsProvider: PageableUrlMappingsProvider
+    private val userUrlMappingsQueryService: UserUrlMappingsQueryService,
+    private val urlMappingsPageRequestValidator: UrlMappingsPageRequestValidator
 ) {
 
     @Operation(
@@ -131,16 +131,7 @@ class UserUrlMappingsController(
         @Parameter(description = "Page size.", example = "10", required = false)
         @RequestParam(defaultValue = "$DEFAULT_SIZE") size: Int
     ): ResponseEntity<UrlMappingPageDto> {
-        validatePagination(page, size)
-        return ResponseEntity.ok(pageableUrlMappingsProvider.getUrlMappingsPage(page, size))
-    }
-
-    private fun validatePagination(page: Int, size: Int) {
-        if (page < 0) {
-            throw InvalidRequestException("Page must be greater than or equal to 0")
-        }
-        if (size !in 1..MAX_PAGE_SIZE) {
-            throw InvalidRequestException("Size must be between 1 and $MAX_PAGE_SIZE")
-        }
+        urlMappingsPageRequestValidator.validate(page, size)
+        return ResponseEntity.ok(userUrlMappingsQueryService.getPage(page, size))
     }
 }

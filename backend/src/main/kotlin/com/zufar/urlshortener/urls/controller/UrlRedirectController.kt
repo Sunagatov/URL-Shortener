@@ -2,7 +2,7 @@ package com.zufar.urlshortener.urls.controller
 
 import com.zufar.urlshortener.shared.exception.ErrorResponse
 import com.zufar.urlshortener.urls.UrlHashFormat
-import com.zufar.urlshortener.urls.service.UrlMappingProvider
+import com.zufar.urlshortener.urls.service.query.UrlQueryService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.headers.Header
@@ -27,7 +27,7 @@ import java.net.URI
     name = "URL Redirection",
     description = "Operations related to redirecting shortened URLs to their original destinations."
 )
-class UrlRedirectController(private val urlMappingProvider: UrlMappingProvider) {
+class UrlRedirectController(private val urlQueryService: UrlQueryService) {
 
     private val log = LoggerFactory.getLogger(UrlRedirectController::class.java)
 
@@ -100,7 +100,7 @@ class UrlRedirectController(private val urlMappingProvider: UrlMappingProvider) 
         httpServletRequest: HttpServletRequest
     ): ResponseEntity<Unit> {
         log.info("Redirect request for urlHash='{}' from IP='{}'", urlHash, httpServletRequest.remoteAddr)
-        val urlMapping = urlMappingProvider.getPublicUrlMappingByHash(urlHash)
+        val urlMapping = urlQueryService.getPublicByHash(urlHash)
         log.info("Redirecting to originalUrl='{}'", urlMapping.originalUrl)
         return ResponseEntity.status(HttpStatus.FOUND)
             .location(URI(urlMapping.originalUrl))
