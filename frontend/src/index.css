@@ -105,10 +105,11 @@ input:focus {
 /* ─── Gradient border cards ─────────────────────── */
 .gradient-border-card {
   position: relative;
-  background: white;
+  background: rgba(17, 24, 43, 0.88);
   border-radius: 20px;
   isolation: isolate;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .gradient-border-card::before {
@@ -140,6 +141,13 @@ input:focus {
 .bg-dots-light {
   background-image: radial-gradient(circle, rgba(0, 0, 0, 0.07) 1px, transparent 1px);
   background-size: 22px 22px;
+}
+
+.bg-grid-soft {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 60px 60px;
 }
 
 /* ─── Scrollbar ─────────────────────────────────── */

@@ -219,21 +219,22 @@ const UrlShortener: React.FC = () => {
             </section>
 
             {/* ── Features ──────────────────────────────────────── */}
-            <section className="py-28 bg-white bg-dots-light relative">
+            <section className="py-28 bg-[#0d1324] bg-grid-soft relative overflow-hidden">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(96,165,250,0.08),transparent_36%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.08),transparent_34%)] pointer-events-none" />
                 <div className="max-w-6xl mx-auto px-6">
-                    <div className="text-center mb-16">
-                        <span className="inline-block bg-blue-50 text-blue-600 text-sm font-semibold px-4 py-1.5 rounded-full mb-4 border border-blue-100">
+                    <div className="relative z-10 text-center mb-16">
+                        <span className="inline-block bg-blue-500/10 text-blue-300 text-sm font-semibold px-4 py-1.5 rounded-full mb-4 border border-blue-400/20">
                             Why Shorty URL
                         </span>
-                        <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight leading-tight">
+                        <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight leading-tight">
                             Everything you need,<br className="hidden md:block" /> nothing you don't
                         </h2>
-                        <p className="text-lg text-gray-500 max-w-xl mx-auto">
+                        <p className="text-lg text-white/50 max-w-xl mx-auto">
                             Powerful tools designed to make link management simple, fast, and insightful.
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                         {features.map((feature, i) => {
                             const Icon = feature.icon;
                             return (
@@ -241,8 +242,8 @@ const UrlShortener: React.FC = () => {
                                     <div className={`w-12 h-12 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-5 shadow-lg ${feature.glow}`}>
                                         <Icon className="w-5 h-5 text-white" />
                                     </div>
-                                    <h3 className="text-base font-bold text-gray-900 mb-2">{feature.title}</h3>
-                                    <p className="text-sm text-gray-500 leading-relaxed">{feature.description}</p>
+                                    <h3 className="text-base font-bold text-white mb-2">{feature.title}</h3>
+                                    <p className="text-sm text-white/50 leading-relaxed">{feature.description}</p>
                                 </div>
                             );
                         })}
