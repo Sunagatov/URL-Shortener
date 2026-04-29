@@ -11,7 +11,7 @@ export const Card: React.FC<CardProps> = ({
   className = '', 
   hover = false 
 }) => {
-  const baseStyles = 'rounded-2xl border border-white/10 bg-white/5 shadow-lg backdrop-blur-xl';
+  const baseStyles = 'rounded-2xl border border-white/12 bg-white/6 shadow-lg backdrop-blur-xl';
   const hoverStyles = hover ? 'hover:shadow-xl transition-all duration-300 hover:-translate-y-1' : '';
   
   return (

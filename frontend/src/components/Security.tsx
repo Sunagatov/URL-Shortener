@@ -90,7 +90,7 @@ const Security: React.FC = () => {
         { title: 'Data Encryption',     description: 'All your data is encrypted and secure',           icon: FaKey,       color: 'text-emerald-400', ring: 'bg-emerald-600/20 border-emerald-500/25', badge: 'bg-emerald-900/30 text-emerald-400 border border-emerald-500/20' },
     ];
 
-    const inputClass = "w-full px-4 py-3 pr-12 bg-white/5 border border-white/15 text-white placeholder-white/25 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-200 text-sm";
+    const inputClass = "w-full px-4 py-3 pr-12 bg-[#11182b] border border-white/12 text-white placeholder-white/30 rounded-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-200 text-sm";
 
     return (
         <div className="flex min-h-screen bg-[#060612] bg-grid-dark">
