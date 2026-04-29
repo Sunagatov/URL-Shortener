@@ -7,7 +7,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useApi } from '../hooks/useApi';
 import { signInSchema, type SignInFormData } from '../utils/validation';
 import { ROUTES } from '../constants';
-import type { User, AuthTokens } from '../types';
+import type { AuthTokens } from '../types';
 import { Button, Card, Input } from './ui';
 import { FaEnvelope, FaLock, FaSignInAlt, FaGoogle, FaGithub } from 'react-icons/fa';
 
@@ -22,8 +22,8 @@ type AuthLocationState = {
 const SignIn: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { login } = useAuth();
-    const { execute, loading, error } = useApi<{ user: User } & AuthTokens>();
+    const { login, updateUser } = useAuth();
+    const { execute, loading, error } = useApi<AuthTokens>();
 
     const from = (location.state as AuthLocationState | null)?.from;
     const destination = from
@@ -41,8 +41,13 @@ const SignIn: React.FC = () => {
     const onSubmit = async (data: SignInFormData) => {
         const result = await execute(() => ApiService.signIn(data));
         if (result) {
-            const { user, accessToken, refreshToken } = result;
-            login({ accessToken, refreshToken }, user);
+            login(result, null);
+            try {
+                const profile = await ApiService.getUserProfile();
+                updateUser(profile);
+            } catch {
+                // Keep the authenticated session even if the profile bootstrap request fails.
+            }
             navigate(destination, { replace: true });
         }
     };

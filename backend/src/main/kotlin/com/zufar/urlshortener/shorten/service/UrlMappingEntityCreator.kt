@@ -6,6 +6,7 @@ import com.zufar.urlshortener.shorten.dto.ShortenUrlRequest
 import com.zufar.urlshortener.shorten.entity.UrlMapping
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -56,7 +57,7 @@ class UrlMappingEntityCreator(private val userRepository: UserRepository) {
 
         val normalizedEmail = EmailNormalizer.normalize(email)
         val user = userRepository.findByEmailIgnoreCase(normalizedEmail)
-            ?: throw IllegalStateException("Authenticated user not found")
-        return user.id
+            ?: throw AuthenticationCredentialsNotFoundException("Authenticated user not found")
+        return user.id ?: throw AuthenticationCredentialsNotFoundException("Authenticated user not found")
     }
 }

@@ -254,12 +254,12 @@ const UserUrlMappings: React.FC = () => {
                                         </div>
 
                                         {/* Expiration Date */}
-                                        {mapping.expiresAt && (
+                                        {mapping.expirationDate && (
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-500 mb-2">Expires</label>
                                                 <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
                                                     <p className="text-orange-700 text-sm font-medium">
-                                                        {formatDate(mapping.expiresAt)}
+                                                        {formatDate(mapping.expirationDate)}
                                                     </p>
                                                 </div>
                                             </div>

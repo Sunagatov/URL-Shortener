@@ -29,7 +29,7 @@ class AuthService {
         return this._user;
     }
 
-    public login(tokens: AuthTokens, user: User): void {
+    public login(tokens: AuthTokens, user: User | null): void {
         storage.setTokens(tokens);
         storage.setUser(user);
         this._isAuthenticated = true;

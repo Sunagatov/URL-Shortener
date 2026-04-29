@@ -10,12 +10,14 @@ const login = vi.fn();
 vi.mock('../services/ApiService', () => ({
   ApiService: {
     signUp: vi.fn(),
+    getUserProfile: vi.fn(),
   },
 }));
 
 vi.mock('../hooks/useAuth', () => ({
   useAuth: () => ({
     login,
+    updateUser: vi.fn(),
     isAuthenticated: false,
     user: null,
     logout: vi.fn(),
@@ -34,6 +36,7 @@ vi.mock('../hooks/useApi', () => ({
 }));
 
 const mockSignUp = vi.mocked(ApiService.signUp);
+const mockGetUserProfile = vi.mocked(ApiService.getUserProfile);
 
 const renderSignUp = () =>
   render(
@@ -67,13 +70,13 @@ describe('SignUp', () => {
     mockSignUp.mockResolvedValue({
       accessToken: 'access-token',
       refreshToken: 'refresh-token',
-      user: {
-        id: 'user-1',
-        email: 'test@example.com',
-        firstName: 'Test',
-        lastName: 'User',
-        createdAt: '2024-01-01T00:00:00.000Z',
-      },
+    });
+    mockGetUserProfile.mockResolvedValue({
+      email: 'test@example.com',
+      firstName: 'Test',
+      lastName: 'User',
+      country: 'USA',
+      age: 25,
     });
   });
 

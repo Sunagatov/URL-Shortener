@@ -33,8 +33,13 @@ export const storage = {
     }
   },
 
-  setUser: (user: User): void => {
-    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+  setUser: (user: User | null): void => {
+    if (user) {
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+      return;
+    }
+
+    localStorage.removeItem(STORAGE_KEYS.USER);
   },
 
   setTokens: (tokens: AuthTokens): void => {

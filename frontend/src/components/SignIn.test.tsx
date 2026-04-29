@@ -9,12 +9,14 @@ const login = vi.fn();
 vi.mock('../services/ApiService', () => ({
   ApiService: {
     signIn: vi.fn(),
+    getUserProfile: vi.fn(),
   },
 }));
 
 vi.mock('../hooks/useAuth', () => ({
   useAuth: () => ({
     login,
+    updateUser: vi.fn(),
     isAuthenticated: false,
     user: null,
     logout: vi.fn(),
@@ -33,6 +35,7 @@ vi.mock('../hooks/useApi', () => ({
 }));
 
 const mockSignIn = vi.mocked(ApiService.signIn);
+const mockGetUserProfile = vi.mocked(ApiService.getUserProfile);
 
 const renderSignInWithRoutes = (state?: unknown) =>
   render(
@@ -50,13 +53,13 @@ describe('SignIn', () => {
     mockSignIn.mockResolvedValue({
       accessToken: 'access-token',
       refreshToken: 'refresh-token',
-      user: {
-        id: 'user-1',
-        email: 'test@example.com',
-        firstName: 'Test',
-        lastName: 'User',
-        createdAt: '2024-01-01T00:00:00.000Z',
-      },
+    });
+    mockGetUserProfile.mockResolvedValue({
+      email: 'test@example.com',
+      firstName: 'Test',
+      lastName: 'User',
+      country: 'USA',
+      age: 30,
     });
   });
 
@@ -79,16 +82,14 @@ describe('SignIn', () => {
     await user.click(screen.getByRole('button', { name: /sign in/i }));
 
     expect(await screen.findByText('Profile Destination')).toBeInTheDocument();
-    expect(login).toHaveBeenCalledWith(
-      { accessToken: 'access-token', refreshToken: 'refresh-token' },
-      expect.objectContaining({ email: 'test@example.com' })
-    );
+    expect(login).toHaveBeenCalledWith({ accessToken: 'access-token', refreshToken: 'refresh-token' }, null);
     await waitFor(() =>
       expect(mockSignIn).toHaveBeenCalledWith({
         email: 'test@example.com',
         password: 'TestPassword123!',
       })
     );
+    await waitFor(() => expect(mockGetUserProfile).toHaveBeenCalled());
   });
 
   it('falls back to home after successful sign-in without a preserved route', async () => {

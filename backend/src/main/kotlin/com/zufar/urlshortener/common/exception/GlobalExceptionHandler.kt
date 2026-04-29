@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.zufar.urlshortener.auth.exception.EmailAlreadyExistsException
 import com.zufar.urlshortener.auth.exception.InvalidTokenException
+import com.zufar.urlshortener.auth.exception.UserNotFoundException
 import com.zufar.urlshortener.shorten.exception.UrlNotFoundException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -75,6 +76,12 @@ class GlobalExceptionHandler {
     fun handleEmailAlreadyExistsException(ex: EmailAlreadyExistsException): ResponseEntity<ErrorResponse> {
         val errorResponse = ErrorResponse(errorMessage = ex.message ?: "Email already in use")
         return ResponseEntity(errorResponse, HttpStatus.CONFLICT)
+    }
+
+    @ExceptionHandler(UserNotFoundException::class)
+    fun handleUserNotFoundException(ex: UserNotFoundException): ResponseEntity<ErrorResponse> {
+        val errorResponse = ErrorResponse(errorMessage = ex.message ?: "User not found")
+        return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
     }
 
     @ExceptionHandler(MethodArgumentNotValidException::class)

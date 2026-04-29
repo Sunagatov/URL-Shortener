@@ -23,9 +23,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         };
     }, []);
 
-    const login = useCallback((tokens: AuthTokens, userData: User) => {
+    const login = useCallback((tokens: AuthTokens, userData: User | null) => {
         setLoading(true);
         AuthService.login(tokens, userData);
+    }, []);
+
+    const updateUser = useCallback((userData: User) => {
+        AuthService.updateUser(userData);
     }, []);
 
     const logout = useCallback(() => {
@@ -37,6 +41,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAuthenticated,
         user,
         login,
+        updateUser,
         logout,
         loading,
     };

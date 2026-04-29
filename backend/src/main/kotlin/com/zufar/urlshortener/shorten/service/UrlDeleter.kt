@@ -1,11 +1,13 @@
 package com.zufar.urlshortener.shorten.service
 
+import com.zufar.urlshortener.auth.exception.UserNotFoundException
 import com.zufar.urlshortener.auth.repository.UserRepository
 import com.zufar.urlshortener.auth.service.EmailNormalizer
 import com.zufar.urlshortener.shorten.exception.UrlNotFoundException
 import com.zufar.urlshortener.shorten.repository.UrlRepository
 import org.slf4j.LoggerFactory
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 
@@ -34,15 +36,16 @@ class UrlDeleter(
 
     private fun getCurrentUserId(): String {
         val authentication = SecurityContextHolder.getContext().authentication
-            ?: throw IllegalStateException("User is not authenticated")
+            ?: throw AuthenticationCredentialsNotFoundException("User is not authenticated")
 
         val email = authentication.name
         if (email.isBlank() || email == "anonymousUser") {
-            throw IllegalStateException("User is not authenticated")
+            throw AuthenticationCredentialsNotFoundException("User is not authenticated")
         }
 
         val normalizedEmail = EmailNormalizer.normalize(email)
-        val user = userRepository.findByEmailIgnoreCase(normalizedEmail) ?: throw IllegalStateException("User not found")
-        return user.id ?: throw IllegalStateException("User ID is missing")
+        val user = userRepository.findByEmailIgnoreCase(normalizedEmail)
+            ?: throw UserNotFoundException("User not found")
+        return user.id ?: throw UserNotFoundException("User not found")
     }
 }

@@ -6,7 +6,6 @@ import { ApiService } from '../services/ApiService';
 import { useApi } from '../hooks/useApi';
 import { useAuth } from '../hooks/useAuth';
 import { createUrlSchema, type CreateUrlFormData } from '../utils/validation';
-import type { UrlMapping } from '../types';
 import { ROUTES } from '../constants';
 import { Button, Card, Input } from './ui';
 import {
@@ -24,7 +23,7 @@ import {
 
 const UrlShortener: React.FC = () => {
     const { isAuthenticated } = useAuth();
-    const { execute, loading, error } = useApi<UrlMapping>();
+    const { execute, loading, error } = useApi<{ shortUrl: string }>();
     const {
         register,
         handleSubmit,

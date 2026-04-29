@@ -1,23 +1,19 @@
 export interface User {
-  id: string;
+  id?: string;
   email: string;
   firstName?: string;
   lastName?: string;
   country?: string;
   age?: number;
-  createdAt: string;
+  createdAt?: string;
 }
 
 export interface UrlMapping {
-  id: string;
-  originalUrl: string;
-  shortUrl: string;
   urlHash: string;
+  shortUrl: string;
+  originalUrl: string;
   createdAt: string;
-  expiresAt?: string | null;
-  clickCount: number;
-  isActive: boolean;
-  userId?: string;
+  expirationDate: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -49,8 +45,7 @@ export interface SignUpRequest {
 
 export interface CreateUrlRequest {
   originalUrl: string;
-  customAlias?: string | undefined;
-  expiresAt?: string | undefined;
+  daysCount?: number | undefined;
 }
 
 export interface ApiError {
@@ -61,7 +56,8 @@ export interface ApiError {
 export interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
-  login: (tokens: AuthTokens, user: User) => void;
+  login: (tokens: AuthTokens, user: User | null) => void;
+  updateUser: (user: User) => void;
   logout: () => void;
   loading: boolean;
 }

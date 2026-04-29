@@ -21,16 +21,13 @@ describe('UrlMappingDetails', () => {
     vi.clearAllMocks();
   });
 
-  it('renders expiration dates from expiresAt', async () => {
+  it('renders expiration dates from expirationDate', async () => {
     mockGetUrlDetails.mockResolvedValue({
-      id: 'url-1',
       urlHash: 'abc123',
       shortUrl: 'https://sho.rt/abc123',
       originalUrl: 'https://example.com/a-long-url',
       createdAt: '2024-01-01T00:00:00.000Z',
-      expiresAt: '2024-02-01T00:00:00.000Z',
-      clickCount: 0,
-      isActive: true,
+      expirationDate: '2024-02-01T00:00:00.000Z',
     });
 
     render(

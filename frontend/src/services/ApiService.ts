@@ -12,12 +12,12 @@ import type {
 
 export class ApiService {
   // Auth endpoints
-  static async signIn(data: SignInRequest): Promise<{ user: User } & AuthTokens> {
+  static async signIn(data: SignInRequest): Promise<AuthTokens> {
     const response = await axiosInstance.post(API_ENDPOINTS.AUTH.SIGNIN, data);
     return response.data;
   }
 
-  static async signUp(data: SignUpRequest): Promise<{ user: User } & AuthTokens> {
+  static async signUp(data: SignUpRequest): Promise<AuthTokens> {
     const response = await axiosInstance.post(API_ENDPOINTS.AUTH.SIGNUP, data);
     return response.data;
   }
@@ -30,7 +30,7 @@ export class ApiService {
   }
 
   // URL endpoints
-  static async createUrl(data: CreateUrlRequest): Promise<UrlMapping> {
+  static async createUrl(data: CreateUrlRequest): Promise<{ shortUrl: string }> {
     const response = await axiosInstance.post(API_ENDPOINTS.URLS.CREATE, data);
     return response.data;
   }

@@ -291,14 +291,14 @@ const UrlMappingDetails: React.FC = () => {
                                     </div>
 
                                     {/* Expiration Date */}
-                                    {urlMapping.expiresAt && (
+                                    {urlMapping.expirationDate && (
                                         <div className="flex items-center space-x-3 p-4 bg-orange-50 rounded-xl border border-orange-200">
                                             <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
                                                 <FaClock className="w-4 h-4 text-orange-600" />
                                             </div>
                                             <div>
                                                 <p className="text-sm font-medium text-gray-500 mb-1">Expires</p>
-                                                <p className="text-lg font-semibold text-gray-900">{formatDate(urlMapping.expiresAt)}</p>
+                                                <p className="text-lg font-semibold text-gray-900">{formatDate(urlMapping.expirationDate)}</p>
                                             </div>
                                         </div>
                                     )}
