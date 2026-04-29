@@ -7,7 +7,12 @@ import com.zufar.urlshortener.auth.entity.UserDetails
 import com.zufar.urlshortener.auth.exception.EmailAlreadyExistsException
 import com.zufar.urlshortener.auth.exception.InvalidTokenException
 import com.zufar.urlshortener.auth.repository.UserRepository
-import com.zufar.urlshortener.auth.service.validator.AuthRequestValidator
+import com.zufar.urlshortener.auth.security.JwtTokenProvider
+import com.zufar.urlshortener.auth.service.authentication.SignInService
+import com.zufar.urlshortener.auth.service.registration.SignUpService
+import com.zufar.urlshortener.auth.service.support.AuthTokenIssuer
+import com.zufar.urlshortener.auth.service.token.RefreshAccessTokenService
+import com.zufar.urlshortener.auth.validation.AuthRequestValidator
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -27,32 +32,42 @@ import java.time.ZoneOffset
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
-class AuthServiceTest {
+class AuthenticationServicesTest {
 
     @Mock private lateinit var authenticationManager: AuthenticationManager
+    @Mock private lateinit var authTokenIssuer: AuthTokenIssuer
     @Mock private lateinit var jwtTokenProvider: JwtTokenProvider
     @Mock private lateinit var authRequestValidator: AuthRequestValidator
     @Mock private lateinit var userRepository: UserRepository
     @Mock private lateinit var passwordEncoder: PasswordEncoder
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
 
-    private fun service() = AuthService(
-        authenticationManager = authenticationManager,
-        jwtTokenProvider = jwtTokenProvider,
+    private fun signInService() = SignInService(authenticationManager, authRequestValidator, authTokenIssuer)
+
+    private fun signUpService() = SignUpService(
         authRequestValidator = authRequestValidator,
         userRepository = userRepository,
         passwordEncoder = passwordEncoder,
+        authTokenIssuer = authTokenIssuer,
         clock = clock
     )
 
+    private fun refreshAccessTokenService() = RefreshAccessTokenService(
+        authRequestValidator = authRequestValidator,
+        userRepository = userRepository,
+        jwtTokenProvider = jwtTokenProvider,
+        authTokenIssuer = authTokenIssuer
+    )
+
     @Test
-    fun `registerUser lowercases and trims email before save`() {
+    fun `register lowercases and trims email before save`() {
         whenever(passwordEncoder.encode("SecurePassword123!")).thenReturn("hashed-password")
         whenever(userRepository.save(any<UserDetails>())).thenAnswer { it.arguments[0] }
-        whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access-token")
-        whenever(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh-token")
+        whenever(authTokenIssuer.issueAuthentication(any<UserDetails>())).thenReturn(
+            com.zufar.urlshortener.auth.dto.AuthResponse("access-token", "refresh-token")
+        )
 
-        service().registerUser(
+        signUpService().register(
             SignUpRequest(
                 firstName = "Jane",
                 lastName = "Doe",
@@ -72,7 +87,7 @@ class AuthServiceTest {
     }
 
     @Test
-    fun `registerUser duplicate check is case-insensitive`() {
+    fun `register duplicate check is case-insensitive`() {
         whenever(userRepository.findByEmailIgnoreCase("jane.doe@example.com")).thenReturn(
             UserDetails(
                 firstName = "Jane",
@@ -85,7 +100,7 @@ class AuthServiceTest {
         )
 
         assertThrows<EmailAlreadyExistsException> {
-            service().registerUser(
+            signUpService().register(
                 SignUpRequest(
                     firstName = "Jane",
                     lastName = "Doe",
@@ -99,15 +114,16 @@ class AuthServiceTest {
     }
 
     @Test
-    fun `authenticateUser passes normalized email to authentication manager`() {
+    fun `authenticate passes normalized email to authentication manager`() {
         val principal = User("user@example.com", "hashed", emptyList())
         whenever(authenticationManager.authenticate(any())).thenReturn(
             UsernamePasswordAuthenticationToken(principal, null, principal.authorities)
         )
-        whenever(jwtTokenProvider.generateAccessToken(principal)).thenReturn("access-token")
-        whenever(jwtTokenProvider.generateRefreshToken(principal)).thenReturn("refresh-token")
+        whenever(authTokenIssuer.issueAuthentication(principal)).thenReturn(
+            com.zufar.urlshortener.auth.dto.AuthResponse("access-token", "refresh-token")
+        )
 
-        service().authenticateUser(SignInRequest("  User@Example.COM  ", "password"))
+        signInService().authenticate(SignInRequest("  User@Example.COM  ", "password"))
 
         val captor = ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken::class.java)
         verify(authenticationManager).authenticate(captor.capture())
@@ -115,7 +131,7 @@ class AuthServiceTest {
     }
 
     @Test
-    fun `refreshAccessToken looks up normalized email from token subject`() {
+    fun `refresh access token looks up normalized email from token subject`() {
         val user = UserDetails(
             firstName = "User",
             lastName = "Test",
@@ -128,16 +144,16 @@ class AuthServiceTest {
         whenever(jwtTokenProvider.getUsernameFromJWT("refresh-token")).thenReturn("  User@Example.COM  ")
         whenever(jwtTokenProvider.getTokenVersionFromJWT("refresh-token")).thenReturn(0)
         whenever(userRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
-        whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("new-access-token")
+        whenever(authTokenIssuer.issueAccessToken(user)).thenReturn("new-access-token")
 
-        val response = service().refreshAccessToken(RefreshTokenRequest("refresh-token"))
+        val response = refreshAccessTokenService().refresh(RefreshTokenRequest("refresh-token"))
 
         verify(userRepository).findByEmailIgnoreCase("user@example.com")
         assertEquals("new-access-token", response.accessToken)
     }
 
     @Test
-    fun `refreshAccessToken rejects token version mismatch`() {
+    fun `refresh access token rejects token version mismatch`() {
         val user = UserDetails(
             firstName = "User",
             lastName = "Test",
@@ -153,7 +169,7 @@ class AuthServiceTest {
         whenever(userRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
 
         assertThrows<InvalidTokenException> {
-            service().refreshAccessToken(RefreshTokenRequest("refresh-token"))
+            refreshAccessTokenService().refresh(RefreshTokenRequest("refresh-token"))
         }
     }
 }

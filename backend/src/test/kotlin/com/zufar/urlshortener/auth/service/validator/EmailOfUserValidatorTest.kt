@@ -1,5 +1,6 @@
 package com.zufar.urlshortener.auth.service.validator
 
+import com.zufar.urlshortener.auth.validation.EmailOfUserValidator
 import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow

@@ -2,7 +2,7 @@ package com.zufar.urlshortener.auth.controller
 
 import com.zufar.urlshortener.auth.dto.AuthResponse
 import com.zufar.urlshortener.auth.dto.SignUpRequest
-import com.zufar.urlshortener.auth.service.AuthService
+import com.zufar.urlshortener.auth.service.registration.SignUpService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -14,11 +14,11 @@ import kotlin.test.assertEquals
 @ExtendWith(MockitoExtension::class)
 class AuthSignUpControllerTest {
 
-    @Mock private lateinit var authService: AuthService
+    @Mock private lateinit var signUpService: SignUpService
 
     @Test
     fun `registerUser delegates to auth service`() {
-        val controller = AuthSignUpController(authService)
+        val controller = AuthSignUpController(signUpService)
         val request = SignUpRequest(
             firstName = "Jane",
             lastName = "Doe",
@@ -28,11 +28,11 @@ class AuthSignUpControllerTest {
             password = "SecurePassword123!"
         )
         val response = AuthResponse("access-token", "refresh-token")
-        whenever(authService.registerUser(request)).thenReturn(response)
+        whenever(signUpService.register(request)).thenReturn(response)
 
         val result = controller.registerUser(request)
 
-        verify(authService).registerUser(request)
+        verify(signUpService).register(request)
         assertEquals(response, result.body)
     }
 }

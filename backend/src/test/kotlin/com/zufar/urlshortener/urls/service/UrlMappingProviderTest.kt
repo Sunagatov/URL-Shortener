@@ -2,6 +2,7 @@ package com.zufar.urlshortener.urls.service
 
 import com.zufar.urlshortener.urls.dto.UrlMappingDto
 import com.zufar.urlshortener.urls.entity.UrlMapping
+import com.zufar.urlshortener.urls.service.query.UrlQueryService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -21,7 +22,7 @@ class UrlMappingProviderTest {
         val urlMapping = mapping()
         whenever(urlAccessService.getActiveUrlMapping("abc12345")).thenReturn(urlMapping)
 
-        val result = UrlMappingProvider(urlAccessService).getPublicUrlMappingByHash("abc12345")
+        val result = UrlQueryService(urlAccessService).getPublicByHash("abc12345")
 
         assertEquals(UrlMappingDto.fromEntity(urlMapping), result)
     }
@@ -32,7 +33,7 @@ class UrlMappingProviderTest {
         whenever(urlAccessService.getOwnedActiveUrlMapping("abc12345", "You are not allowed to access this URL mapping"))
             .thenReturn(urlMapping)
 
-        val result = UrlMappingProvider(urlAccessService).getOwnedUrlMappingByHash("abc12345")
+        val result = UrlQueryService(urlAccessService).getOwnedByHash("abc12345")
 
         verify(urlAccessService).getOwnedActiveUrlMapping("abc12345", "You are not allowed to access this URL mapping")
         assertEquals(UrlMappingDto.fromEntity(urlMapping), result)

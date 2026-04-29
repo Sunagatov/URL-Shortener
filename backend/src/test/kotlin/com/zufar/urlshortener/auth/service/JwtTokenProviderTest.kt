@@ -1,5 +1,7 @@
 package com.zufar.urlshortener.auth.service
 
+import com.zufar.urlshortener.auth.security.JwtTokenProvider
+import com.zufar.urlshortener.auth.security.withTokenVersion
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.security.core.userdetails.User
@@ -37,7 +39,7 @@ class JwtTokenProviderTest {
     @Test
     fun `generated access token validates as access type`() {
         val provider = JwtTokenProvider(validSecret, accessExpiry, refreshExpiry)
-        val userDetails = UserDetailsWithTokenVersion(User("user@test.com", "pw", emptyList()), 3)
+        val userDetails = User("user@test.com", "pw", emptyList()).withTokenVersion(3)
 
         val token = provider.generateAccessToken(userDetails)
 
@@ -49,7 +51,7 @@ class JwtTokenProviderTest {
     @Test
     fun `access token is rejected as refresh token`() {
         val provider = JwtTokenProvider(validSecret, accessExpiry, refreshExpiry)
-        val userDetails = UserDetailsWithTokenVersion(User("user@test.com", "pw", emptyList()), 1)
+        val userDetails = User("user@test.com", "pw", emptyList()).withTokenVersion(1)
 
         val token = provider.generateAccessToken(userDetails)
 
@@ -59,7 +61,7 @@ class JwtTokenProviderTest {
     @Test
     fun `generated refresh token validates as refresh type`() {
         val provider = JwtTokenProvider(validSecret, accessExpiry, refreshExpiry)
-        val userDetails = UserDetailsWithTokenVersion(User("user@test.com", "pw", emptyList()), 7)
+        val userDetails = User("user@test.com", "pw", emptyList()).withTokenVersion(7)
 
         val token = provider.generateRefreshToken(userDetails)
 

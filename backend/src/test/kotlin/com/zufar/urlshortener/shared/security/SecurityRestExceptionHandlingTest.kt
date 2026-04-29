@@ -1,8 +1,8 @@
 package com.zufar.urlshortener.shared.security
 
 import com.zufar.urlshortener.urls.dto.UrlMappingDto
-import com.zufar.urlshortener.urls.service.UrlMappingProvider
-import com.zufar.urlshortener.urls.service.UrlShortener
+import com.zufar.urlshortener.urls.service.command.ShortenUrlService
+import com.zufar.urlshortener.urls.service.query.UrlQueryService
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -31,10 +31,10 @@ class SecurityRestExceptionHandlingTest {
     private lateinit var mockMvc: MockMvc
 
     @Autowired
-    private lateinit var urlShortener: UrlShortener
+    private lateinit var shortenUrlService: ShortenUrlService
 
     @Autowired
-    private lateinit var urlMappingProvider: UrlMappingProvider
+    private lateinit var urlQueryService: UrlQueryService
 
     @Test
     fun `users endpoint without auth returns 401 JSON`() {
@@ -54,7 +54,7 @@ class SecurityRestExceptionHandlingTest {
 
     @Test
     fun `shorten url endpoint remains publicly accessible`() {
-        whenever(urlShortener.shortenUrl(any(), any())).thenReturn("http://localhost:8080/abc12345")
+        whenever(shortenUrlService.shorten(any(), any())).thenReturn("http://localhost:8080/abc12345")
 
         mockMvc.perform(
             post("/api/v1/urls")
@@ -67,7 +67,7 @@ class SecurityRestExceptionHandlingTest {
 
     @Test
     fun `public short url redirect remains accessible without auth`() {
-        whenever(urlMappingProvider.getPublicUrlMappingByHash("abc12345")).thenReturn(
+        whenever(urlQueryService.getPublicByHash("abc12345")).thenReturn(
             UrlMappingDto(
                 urlHash = "abc12345",
                 shortUrl = "http://localhost:8080/abc12345",
@@ -93,10 +93,10 @@ class SecurityRestExceptionHandlingTest {
 
         @Bean
         @Primary
-        fun urlShortener(): UrlShortener = mock()
+        fun shortenUrlService(): ShortenUrlService = mock()
 
         @Bean
         @Primary
-        fun urlMappingProvider(): UrlMappingProvider = mock()
+        fun urlQueryService(): UrlQueryService = mock()
     }
 }

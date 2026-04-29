@@ -2,6 +2,7 @@ package com.zufar.urlshortener.auth.service
 
 import com.zufar.urlshortener.auth.entity.UserDetails
 import com.zufar.urlshortener.auth.repository.UserRepository
+import com.zufar.urlshortener.auth.security.CustomUserDetailsService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock

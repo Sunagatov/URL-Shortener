@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.urls.service
 
-import com.zufar.urlshortener.auth.service.CurrentUserProvider
+import com.zufar.urlshortener.auth.service.user.CurrentUserService
 import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.exception.UrlNotFoundException
 import com.zufar.urlshortener.urls.repository.UrlRepository
@@ -22,10 +22,10 @@ import kotlin.test.assertEquals
 class UrlAccessServiceTest {
 
     @Mock private lateinit var urlRepository: UrlRepository
-    @Mock private lateinit var currentUserProvider: CurrentUserProvider
+    @Mock private lateinit var currentUserService: CurrentUserService
 
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
-    private val service by lazy { UrlAccessService(urlRepository, currentUserProvider, clock) }
+    private val service by lazy { UrlAccessService(urlRepository, currentUserService, clock) }
 
     @Test
     fun `getActiveUrlMapping returns active mapping`() {
@@ -51,7 +51,7 @@ class UrlAccessServiceTest {
     fun `getOwnedActiveUrlMapping rejects access to mapping owned by another user`() {
         val urlMapping = mapping(userId = "another-user", expirationDate = LocalDateTime.parse("2024-01-02T10:15:30"))
         whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(urlMapping))
-        whenever(currentUserProvider.requireCurrentUserId()).thenReturn("user-123")
+        whenever(currentUserService.requireCurrentUserId()).thenReturn("user-123")
 
         val exception = assertThrows<AccessDeniedException> {
             service.getOwnedActiveUrlMapping("abc12345", "forbidden")
@@ -64,7 +64,7 @@ class UrlAccessServiceTest {
     fun `getOwnedActiveUrlMapping returns mapping for owner`() {
         val urlMapping = mapping(userId = "user-123", expirationDate = LocalDateTime.parse("2024-01-02T10:15:30"))
         whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(urlMapping))
-        whenever(currentUserProvider.requireCurrentUserId()).thenReturn("user-123")
+        whenever(currentUserService.requireCurrentUserId()).thenReturn("user-123")
 
         val result = service.getOwnedActiveUrlMapping("abc12345", "forbidden")
 

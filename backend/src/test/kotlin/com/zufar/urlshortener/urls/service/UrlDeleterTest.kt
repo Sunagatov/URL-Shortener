@@ -2,6 +2,7 @@ package com.zufar.urlshortener.urls.service
 
 import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.repository.UrlRepository
+import com.zufar.urlshortener.urls.service.command.DeleteUrlMappingService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -31,7 +32,7 @@ class UrlDeleterTest {
         whenever(urlAccessService.getOwnedActiveUrlMapping("abc12345", "You are not allowed to delete this URL mapping"))
             .thenReturn(urlMapping)
 
-        UrlDeleter(urlRepository, urlAccessService).deleteUrl("abc12345")
+        DeleteUrlMappingService(urlRepository, urlAccessService).delete("abc12345")
 
         verify(urlRepository).deleteById("abc12345")
     }

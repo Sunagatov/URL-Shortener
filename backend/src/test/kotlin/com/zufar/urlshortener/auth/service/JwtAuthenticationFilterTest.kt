@@ -1,5 +1,8 @@
 package com.zufar.urlshortener.auth.service
 
+import com.zufar.urlshortener.auth.security.CustomUserDetailsService
+import com.zufar.urlshortener.auth.security.JwtAuthenticationFilter
+import com.zufar.urlshortener.auth.security.JwtTokenProvider
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

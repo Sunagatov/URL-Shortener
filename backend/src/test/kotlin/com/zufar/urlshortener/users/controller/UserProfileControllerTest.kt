@@ -1,7 +1,7 @@
 package com.zufar.urlshortener.users.controller
 
 import com.zufar.urlshortener.users.dto.UserDetailsDto
-import com.zufar.urlshortener.users.service.UserDetailsProvider
+import com.zufar.urlshortener.users.service.query.UserProfileService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -14,11 +14,11 @@ import kotlin.test.assertEquals
 @ExtendWith(MockitoExtension::class)
 class UserProfileControllerTest {
 
-    @Mock private lateinit var userDetailsProvider: UserDetailsProvider
+    @Mock private lateinit var userProfileService: UserProfileService
 
     @Test
     fun `getUserDetails delegates to details provider`() {
-        val controller = UserProfileController(userDetailsProvider)
+        val controller = UserProfileController(userProfileService)
         val responseBody = UserDetailsDto(
             firstName = "Jane",
             lastName = "Doe",
@@ -27,11 +27,11 @@ class UserProfileControllerTest {
             age = 28,
             createdAt = LocalDateTime.parse("2024-01-01T10:15:30")
         )
-        whenever(userDetailsProvider.getUserDetails()).thenReturn(responseBody)
+        whenever(userProfileService.getUserDetails()).thenReturn(responseBody)
 
         val response = controller.getUserDetails()
 
-        verify(userDetailsProvider).getUserDetails()
+        verify(userProfileService).getUserDetails()
         assertEquals(responseBody, response.body)
     }
 }

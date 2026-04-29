@@ -3,6 +3,7 @@ package com.zufar.urlshortener.urls.service
 import com.zufar.urlshortener.urls.dto.ShortenUrlRequest
 import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.repository.UrlRepository
+import com.zufar.urlshortener.urls.service.command.ShortenUrlService
 import jakarta.servlet.http.HttpServletRequest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -40,7 +41,7 @@ class UrlShortenerTest {
         userId = null
     )
 
-    private fun createShortener(baseUrl: String = this.baseUrl) = UrlShortener(
+    private fun createShortener(baseUrl: String = this.baseUrl) = ShortenUrlService(
         urlRepository = urlRepository,
         urlValidator = urlValidator,
         daysCountValidator = daysCountValidator,
@@ -60,8 +61,8 @@ class UrlShortenerTest {
         whenever(urlRepository.insert(any<UrlMapping>())).thenAnswer { it.arguments[0] }
 
         val urlShortener = createShortener()
-        val shortUrl1 = urlShortener.shortenUrl(ShortenUrlRequest("http://example.com", null), httpRequest)
-        val shortUrl2 = urlShortener.shortenUrl(ShortenUrlRequest("http://other.com", null), httpRequest)
+        val shortUrl1 = urlShortener.shorten(ShortenUrlRequest("http://example.com", null), httpRequest)
+        val shortUrl2 = urlShortener.shorten(ShortenUrlRequest("http://other.com", null), httpRequest)
 
         assertNotEquals(shortUrl1, shortUrl2, "Different URLs must produce different short codes")
     }
@@ -77,8 +78,8 @@ class UrlShortenerTest {
         whenever(urlRepository.insert(any<UrlMapping>())).thenAnswer { it.arguments[0] }
 
         val urlShortener = createShortener()
-        urlShortener.shortenUrl(ShortenUrlRequest("http://example.com", null), httpRequest)
-        urlShortener.shortenUrl(ShortenUrlRequest("http://example.com", null), httpRequest)
+        urlShortener.shorten(ShortenUrlRequest("http://example.com", null), httpRequest)
+        urlShortener.shorten(ShortenUrlRequest("http://example.com", null), httpRequest)
 
         verify(urlRepository, times(2)).insert(any<UrlMapping>())
         verify(urlRepository, never()).findByUrlHash(any())
@@ -99,7 +100,7 @@ class UrlShortenerTest {
         }
 
         val urlShortener = createShortener()
-        val shortUrl = urlShortener.shortenUrl(ShortenUrlRequest("http://example.com", null), httpRequest)
+        val shortUrl = urlShortener.shorten(ShortenUrlRequest("http://example.com", null), httpRequest)
 
         assertTrue(shortUrl.startsWith("http://localhost:8080/"))
         verify(urlRepository, times(2)).insert(any<UrlMapping>())
@@ -118,7 +119,7 @@ class UrlShortenerTest {
 
         val urlShortener = createShortener()
         assertThrows<IllegalStateException> {
-            urlShortener.shortenUrl(ShortenUrlRequest("http://example.com", null), httpRequest)
+            urlShortener.shorten(ShortenUrlRequest("http://example.com", null), httpRequest)
         }
 
         verify(urlRepository, times(10)).insert(any<UrlMapping>())
@@ -136,7 +137,7 @@ class UrlShortenerTest {
         whenever(urlRepository.insert(any<UrlMapping>())).thenAnswer { it.arguments[0] }
 
         val urlShortener = createShortener("http://localhost:8080/")
-        val shortUrl = urlShortener.shortenUrl(ShortenUrlRequest("http://example.com", null), httpRequest)
+        val shortUrl = urlShortener.shorten(ShortenUrlRequest("http://example.com", null), httpRequest)
 
         assertTrue(shortUrl.startsWith("http://localhost:8080/"))
         assertTrue(!shortUrl.removePrefix("http://localhost:8080").contains("//"))

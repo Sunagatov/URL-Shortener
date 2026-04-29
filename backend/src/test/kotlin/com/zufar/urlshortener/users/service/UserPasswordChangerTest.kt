@@ -2,8 +2,9 @@ package com.zufar.urlshortener.users.service
 
 import com.zufar.urlshortener.auth.entity.UserDetails
 import com.zufar.urlshortener.auth.repository.UserRepository
-import com.zufar.urlshortener.auth.service.CurrentUserProvider
-import com.zufar.urlshortener.auth.service.validator.AuthRequestValidator
+import com.zufar.urlshortener.auth.service.user.CurrentUserService
+import com.zufar.urlshortener.auth.validation.AuthRequestValidator
+import com.zufar.urlshortener.users.service.command.ChangePasswordService
 import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
 import org.junit.jupiter.api.AfterEach
@@ -55,11 +56,11 @@ class UserPasswordChangerTest {
         whenever(passwordEncoder.matches("OldPassword1!", "old-hash")).thenReturn(true)
         whenever(passwordEncoder.encode("NewPassword1!")).thenReturn("new-hash")
 
-        UserPasswordChanger(
+        ChangePasswordService(
             userRepository,
             passwordEncoder,
             authRequestValidator,
-            CurrentUserProvider(userRepository),
+            CurrentUserService(userRepository),
             clock
         ).changePassword(
             ChangePasswordRequest(
@@ -95,11 +96,11 @@ class UserPasswordChangerTest {
         whenever(passwordEncoder.matches("WrongPassword1!", "old-hash")).thenReturn(false)
 
         assertThrows<InvalidRequestException> {
-            UserPasswordChanger(
+            ChangePasswordService(
                 userRepository,
                 passwordEncoder,
                 authRequestValidator,
-                CurrentUserProvider(userRepository),
+                CurrentUserService(userRepository),
                 clock
             ).changePassword(
                 ChangePasswordRequest(
