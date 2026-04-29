@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import type { AuthContextType } from '@/shared/types';
-import App from './App';
+import App from '@/App';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 
 vi.mock('@/features/auth/hooks/useAuth', () => ({
