@@ -127,14 +127,14 @@ e2e/                        # Playwright tests
 Create a `.env` file in the project root:
 
 ```bash
-REACT_APP_BACKEND_REST_API_URL=http://localhost:8080
+VITE_BACKEND_REST_API_URL=http://localhost:8080
 ```
 
 ### Required variables
 
 | Variable                         | Required | Description                      |
 | -------------------------------- | -------- | -------------------------------- |
-| `REACT_APP_BACKEND_REST_API_URL` | Yes      | Base URL of the backend REST API |
+| `VITE_BACKEND_REST_API_URL` | Yes      | Base URL of the backend REST API |
 
 Never commit real environment values.
 
@@ -199,7 +199,7 @@ The E2E suite expects a working backend with the expected authentication and URL
 By default:
 
 - frontend runs on `http://localhost:3000`
-- backend should be reachable through `REACT_APP_BACKEND_REST_API_URL`
+- backend should be reachable through `VITE_BACKEND_REST_API_URL`
 
 You can override the frontend port for Playwright if needed:
 
@@ -248,7 +248,7 @@ http://localhost:8080
 From the monorepo root, build with:
 
 ```bash
-docker build -f frontend/Dockerfile --build-arg REACT_APP_BACKEND_REST_API_URL=http://localhost:8080 -t shorty-url-frontend frontend
+docker build -f frontend/Dockerfile --build-arg VITE_BACKEND_REST_API_URL=http://localhost:8080 -t shorty-url-frontend frontend
 ```
 
 ---

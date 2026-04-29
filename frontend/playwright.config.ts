@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 const FRONTEND_PORT = Number(process.env.PLAYWRIGHT_FRONTEND_PORT ?? 3000);
 const FRONTEND_URL = `http://localhost:${FRONTEND_PORT}`;
-const BACKEND_URL = process.env.REACT_APP_BACKEND_REST_API_URL ?? 'http://localhost:8080';
+const BACKEND_URL = process.env.VITE_BACKEND_REST_API_URL ?? 'http://localhost:8080';
 const webServerEnv = Object.fromEntries(
   Object.entries(process.env).filter((entry): entry is [string, string] => typeof entry[1] === 'string')
 );
@@ -32,7 +32,7 @@ export default defineConfig({
     url: FRONTEND_URL,
     env: {
       ...webServerEnv,
-      REACT_APP_BACKEND_REST_API_URL: BACKEND_URL,
+      VITE_BACKEND_REST_API_URL: BACKEND_URL,
     },
     reuseExistingServer: !process.env.CI,
     timeout: 120000,

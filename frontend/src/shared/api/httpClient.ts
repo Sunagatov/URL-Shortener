@@ -4,10 +4,10 @@ import { storage } from '@/shared/auth/storage';
 import { endpoints } from '@/shared/api/endpoints';
 import type { AuthTokens } from '@/shared/types';
 
-const backendRestApiUrl = import.meta.env.REACT_APP_BACKEND_REST_API_URL;
+const backendRestApiUrl = import.meta.env.VITE_BACKEND_REST_API_URL;
 
 if (!backendRestApiUrl) {
-    throw new Error('REACT_APP_BACKEND_REST_API_URL environment variable is not set');
+    throw new Error('VITE_BACKEND_REST_API_URL environment variable is not set');
 }
 
 type RetryableRequestConfig = InternalAxiosRequestConfig & {

@@ -6,7 +6,7 @@
     "type": "frontend-spa"
   },
   "stack": {
-    "language": "TypeScript 5",
+    "language": "TypeScript 6",
     "framework": "React 19",
     "build_tool": "Vite 8",
     "router": "react-router-dom 7",
@@ -35,9 +35,9 @@
     "layout": "src/layouts/MainLayout.tsx"
   },
   "environment": {
-    "prefix": "REACT_APP_",
+    "prefix": "VITE_",
     "required": [
-      "REACT_APP_BACKEND_REST_API_URL"
+      "VITE_BACKEND_REST_API_URL"
     ]
   },
   "build": {
@@ -126,7 +126,7 @@
     ]
   },
   "known_drift": [
-    "Vite env names are intentionally REACT_APP_*",
+    "Vite env names use the native VITE_* prefix",
     "Older docs mention SignInPage.tsx/SignInForm.tsx, current code uses src/components/SignIn.tsx",
     "Older docs describe different auth persistence wording than current storage.ts code",
     "Older docs mention /dashboard; current route constant is /account/dashboard and current auth screens navigate home after success"
