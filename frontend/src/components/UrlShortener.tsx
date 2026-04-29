@@ -83,22 +83,22 @@ const UrlShortener: React.FC = () => {
                 <div className="absolute inset-0 bg-grid-dark pointer-events-none" />
 
                 {/* Content */}
-                <div className="relative z-10 w-full max-w-3xl mx-auto px-6 text-center">
+                <div className="relative z-10 w-full max-w-3xl mx-auto px-5 sm:px-6 text-center py-10">
 
                     {/* Trust badge */}
-                    <div className="animate-fade-up inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-8 text-sm text-white/70">
+                    <div className="animate-fade-up inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-6 md:mb-8 text-sm text-white/70">
                         <FaBolt className="w-3 h-3 text-amber-400" />
                         Trusted by 500K+ users worldwide
                     </div>
 
                     {/* Headline */}
-                    <h1 className="animate-fade-up-d1 text-5xl md:text-[72px] font-black text-white leading-[1.05] tracking-tight mb-6">
+                    <h1 className="animate-fade-up-d1 text-4xl sm:text-5xl md:text-[72px] font-black text-white leading-[1.05] tracking-tight mb-5 md:mb-6">
                         Turn long URLs into
                         <span className="block gradient-text-animated mt-1">powerful short links</span>
                     </h1>
 
                     {/* Subtitle */}
-                    <p className="animate-fade-up-d2 text-lg md:text-xl text-white/55 max-w-xl mx-auto mb-10 leading-relaxed">
+                    <p className="animate-fade-up-d2 text-base md:text-xl text-white/55 max-w-xl mx-auto mb-8 md:mb-10 leading-relaxed">
                         Create memorable links, track performance, and share with confidence.
                         Free forever — no sign-up required.
                     </p>

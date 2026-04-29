@@ -31,22 +31,16 @@ const UserAccount: React.FC = () => {
                     navigate('/signin', { replace: true });
                     return;
                 }
-
                 if (isMounted) {
                     setErrorMessage(getApiErrorMessage(error, 'Failed to fetch user details.'));
                 }
             } finally {
-                if (isMounted) {
-                    setIsLoading(false);
-                }
+                if (isMounted) setIsLoading(false);
             }
         };
 
         fetchUserDetails();
-
-        return () => {
-            isMounted = false;
-        };
+        return () => { isMounted = false; };
     }, [logout, navigate]);
 
     const getInitials = (firstName?: string, lastName?: string) => {
@@ -60,20 +54,14 @@ const UserAccount: React.FC = () => {
     };
 
     const formatDate = (dateString: string) =>
-        new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        });
+        new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
     if (isLoading) {
         return (
-            <div className="flex min-h-screen">
+            <div className="flex min-h-screen bg-[#060612]">
                 <SidePanel />
-                <div className="flex-grow md:ml-72 p-8">
-                    <div className="flex items-center justify-center h-96">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                    </div>
+                <div className="flex-grow md:ml-64 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500" />
                 </div>
             </div>
         );
@@ -81,187 +69,140 @@ const UserAccount: React.FC = () => {
 
     if (!userDetails) {
         return (
-            <div className="flex min-h-screen">
+            <div className="flex min-h-screen bg-[#060612]">
                 <SidePanel />
-                <div className="flex-grow md:ml-72 p-8">
-                    <div className="flex items-center justify-center h-96">
-                        <p className={errorMessage ? 'text-red-600' : 'text-gray-500'}>
-                            {errorMessage || 'Unable to load user details'}
-                        </p>
-                    </div>
+                <div className="flex-grow md:ml-64 flex items-center justify-center">
+                    <p className={errorMessage ? 'text-red-400' : 'text-white/40'}>
+                        {errorMessage || 'Unable to load user details'}
+                    </p>
                 </div>
             </div>
         );
     }
 
+    const profileFields = [
+        { icon: FaUser,        label: 'First Name',  value: userDetails.firstName ?? '-',  color: 'text-blue-400',    ring: 'bg-blue-600/20 border-blue-500/25'   },
+        { icon: FaUser,        label: 'Last Name',   value: userDetails.lastName ?? '-',   color: 'text-violet-400',  ring: 'bg-violet-600/20 border-violet-500/25' },
+        { icon: FaEnvelope,    label: 'Email',       value: userDetails.email,              color: 'text-emerald-400', ring: 'bg-emerald-600/20 border-emerald-500/25' },
+        { icon: FaGlobe,       label: 'Country',     value: userDetails.country ?? '-',    color: 'text-amber-400',   ring: 'bg-amber-600/20 border-amber-500/25'  },
+        { icon: FaCalendarAlt, label: 'Age',         value: typeof userDetails.age === 'number' ? `${userDetails.age} years old` : '-', color: 'text-rose-400', ring: 'bg-rose-600/20 border-rose-500/25', wide: true },
+    ];
+
     return (
-        <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+        <div className="flex min-h-screen bg-[#060612] bg-grid-dark">
             <SidePanel />
-            <div className="flex-grow md:ml-72 p-8">
+
+            <div className="flex-grow md:ml-64 px-6 py-8 md:px-10">
                 <div className="max-w-5xl mx-auto">
+
                     {/* Header */}
-                    <div className="mb-8">
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">My Profile</h1>
-                        <p className="text-gray-600">Manage your personal information and preferences</p>
+                    <div className="mb-8 mt-14 md:mt-0">
+                        <h1 className="text-3xl font-black text-white mb-1 tracking-tight">My Profile</h1>
+                        <p className="text-white/45 text-sm">Manage your personal information and preferences</p>
                     </div>
 
                     {errorMessage && (
-                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                            <p className="text-red-600 text-sm">{errorMessage}</p>
+                        <div className="mb-6 p-4 bg-red-900/30 border border-red-500/30 rounded-xl">
+                            <p className="text-red-400 text-sm">{errorMessage}</p>
                         </div>
                     )}
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        {/* Profile Card */}
-                        <div className="lg:col-span-2">
-                            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-                                {/* Header with gradient */}
-                                <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-8 relative">
-                                    <div className="flex items-center space-x-4">
-                                        {/* Avatar */}
-                                        <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border-4 border-white/30">
-                                            <span className="text-lg font-bold text-white">
-                                                {getInitials(userDetails.firstName, userDetails.lastName)}
-                                            </span>
-                                        </div>
-                                        
-                                        {/* User Info */}
-                                        <div>
-                                            <h2 className="text-2xl font-bold text-white mb-1">
-                                                {getDisplayName(userDetails)}
-                                            </h2>
-                                            <p className="text-blue-100">{userDetails.email}</p>
-                                            <p className="text-blue-200 text-sm mt-1">
-                                                Member since {userDetails.createdAt ? formatDate(userDetails.createdAt) : '-'}
-                                            </p>
-                                        </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+                        {/* Main profile card */}
+                        <div className="lg:col-span-2 rounded-2xl bg-white/5 border border-white/10 overflow-hidden">
+                            {/* Gradient header */}
+                            <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-7 relative">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border-2 border-white/30 flex-shrink-0">
+                                        <span className="text-xl font-black text-white">
+                                            {getInitials(userDetails.firstName, userDetails.lastName)}
+                                        </span>
                                     </div>
-                                    
-                                    {/* Edit Button */}
-                                    <button
-                                        type="button"
-                                        disabled
-                                        className="absolute top-4 right-4 bg-white/10 text-white/70 px-3 py-2 rounded-lg cursor-not-allowed flex items-center space-x-2 border border-white/20"
-                                        title="Profile editing is not implemented yet"
-                                    >
-                                        <FaEdit className="w-4 h-4" />
-                                        <span className="hidden sm:inline text-sm">Edit (coming soon)</span>
-                                    </button>
+                                    <div>
+                                        <h2 className="text-xl font-bold text-white mb-0.5">{getDisplayName(userDetails)}</h2>
+                                        <p className="text-blue-100 text-sm">{userDetails.email}</p>
+                                        <p className="text-blue-200/70 text-xs mt-1">
+                                            Member since {userDetails.createdAt ? formatDate(userDetails.createdAt) : '—'}
+                                        </p>
+                                    </div>
                                 </div>
+                                <button
+                                    type="button"
+                                    disabled
+                                    title="Profile editing is not implemented yet"
+                                    className="absolute top-4 right-4 bg-white/10 text-white/60 px-3 py-1.5 rounded-lg cursor-not-allowed flex items-center gap-2 border border-white/20 text-xs"
+                                >
+                                    <FaEdit className="w-3 h-3" />
+                                    <span className="hidden sm:inline">Edit (coming soon)</span>
+                                </button>
+                            </div>
 
-                                {/* Profile Details */}
-                                <div className="p-6">
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Personal Information</h3>
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                                            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                                                <FaUser className="w-3 h-3 text-blue-600" />
+                            {/* Profile fields */}
+                            <div className="p-6">
+                                <p className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-4">Personal Information</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {profileFields.map((field, i) => {
+                                        const Icon = field.icon;
+                                        return (
+                                            <div key={i} className={`flex items-center gap-3 p-3.5 bg-white/5 border border-white/10 rounded-xl ${field.wide ? 'md:col-span-2' : ''}`}>
+                                                <div className={`w-8 h-8 rounded-xl border flex items-center justify-center flex-shrink-0 ${field.ring}`}>
+                                                    <Icon className={`w-3.5 h-3.5 ${field.color}`} />
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs text-white/35 font-medium">{field.label}</p>
+                                                    <p className="text-sm font-semibold text-white">{field.value}</p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p className="text-xs font-medium text-gray-500">First Name</p>
-                                                <p className="text-sm font-semibold text-gray-900">{userDetails.firstName ?? '-'}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                                            <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                                                <FaUser className="w-3 h-3 text-green-600" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-medium text-gray-500">Last Name</p>
-                                                <p className="text-sm font-semibold text-gray-900">{userDetails.lastName ?? '-'}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                                            <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                                <FaEnvelope className="w-3 h-3 text-purple-600" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-medium text-gray-500">Email</p>
-                                                <p className="text-sm font-semibold text-gray-900">{userDetails.email}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                                            <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                                                <FaGlobe className="w-3 h-3 text-orange-600" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-medium text-gray-500">Country</p>
-                                                <p className="text-sm font-semibold text-gray-900">{userDetails.country ?? '-'}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg md:col-span-2">
-                                            <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
-                                                <FaCalendarAlt className="w-3 h-3 text-indigo-600" />
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-medium text-gray-500">Age</p>
-                                                <p className="text-sm font-semibold text-gray-900">
-                                                    {typeof userDetails.age === 'number' ? `${userDetails.age} years old` : '-'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         </div>
 
-                        {/* Sidebar */}
-                        <div className="space-y-6">
+                        {/* Sidebar cards */}
+                        <div className="space-y-4">
                             {/* Account Stats */}
-                            <div className="bg-white rounded-2xl shadow-lg p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Account Stats</h3>
-                                <p className="text-sm text-gray-500 mb-4">Usage analytics are not available yet.</p>
-                                <div className="flex justify-between">
-                                    <span className="text-sm text-gray-600">Member Since</span>
-                                    <span className="font-semibold text-gray-900">
-                                        {userDetails.createdAt ? formatDate(userDetails.createdAt) : '-'}
+                            <div className="rounded-2xl bg-white/5 border border-white/10 p-5">
+                                <p className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-4">Account Stats</p>
+                                <p className="text-xs text-white/30 mb-4">Usage analytics are not available yet.</p>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xs text-white/50">Member Since</span>
+                                    <span className="text-xs font-semibold text-white">
+                                        {userDetails.createdAt ? formatDate(userDetails.createdAt) : '—'}
                                     </span>
                                 </div>
                             </div>
 
                             {/* Quick Actions */}
-                            <div className="bg-white rounded-2xl shadow-lg p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-                                <div className="space-y-2">
-                                    <button
-                                        type="button"
-                                        disabled
-                                        className="w-full flex items-center space-x-3 p-3 text-left rounded-lg cursor-not-allowed text-gray-400"
-                                        title="Profile editing is not implemented yet"
-                                    >
-                                        <FaEdit className="w-4 h-4" />
-                                        <span className="text-sm font-medium">Edit Profile (coming soon)</span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        disabled
-                                        className="w-full flex items-center space-x-3 p-3 text-left rounded-lg cursor-not-allowed text-gray-400"
-                                        title="Password settings are available on the Security page"
-                                    >
-                                        <FaUser className="w-4 h-4" />
-                                        <span className="text-sm font-medium">Change Password (use Security)</span>
-                                    </button>
-                                    <button
-                                        type="button"
-                                        disabled
-                                        className="w-full flex items-center space-x-3 p-3 text-left rounded-lg cursor-not-allowed text-gray-400"
-                                        title="Data export is not implemented yet"
-                                    >
-                                        <FaGlobe className="w-4 h-4" />
-                                        <span className="text-sm font-medium">Export Data (coming soon)</span>
-                                    </button>
+                            <div className="rounded-2xl bg-white/5 border border-white/10 p-5">
+                                <p className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-4">Quick Actions</p>
+                                <div className="space-y-1">
+                                    {[
+                                        { icon: FaEdit,  label: 'Edit Profile (coming soon)'          },
+                                        { icon: FaUser,  label: 'Change Password (use Security)'      },
+                                        { icon: FaGlobe, label: 'Export Data (coming soon)'           },
+                                    ].map((action, i) => {
+                                        const Icon = action.icon;
+                                        return (
+                                            <button
+                                                key={i}
+                                                type="button"
+                                                disabled
+                                                className="w-full flex items-center gap-3 p-3 rounded-xl text-white/25 cursor-not-allowed text-left"
+                                            >
+                                                <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+                                                <span className="text-xs font-medium">{action.label}</span>
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
 
                             {/* Profile Completion */}
-                            <div className="bg-white rounded-2xl shadow-lg p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Profile Completion</h3>
-                                <p className="text-sm text-gray-500">Profile completion tracking is not available yet.</p>
+                            <div className="rounded-2xl bg-white/5 border border-white/10 p-5">
+                                <p className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3">Profile Completion</p>
+                                <p className="text-xs text-white/30">Profile completion tracking is not available yet.</p>
                             </div>
                         </div>
                     </div>

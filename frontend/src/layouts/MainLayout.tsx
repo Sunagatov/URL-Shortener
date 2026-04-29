@@ -82,12 +82,12 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                       className="fixed inset-0 z-10"
                       onClick={() => setIsUserMenuOpen(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 py-2 z-20">
-                      <div className="px-4 py-3 border-b border-gray-100">
-                        <p className="text-sm font-medium text-gray-900">Account Menu</p>
-                        <p className="text-xs text-gray-500">Manage your account settings</p>
+                    <div className="absolute right-0 mt-2 w-60 bg-[#0d0d20]/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 py-2 z-20">
+                      <div className="px-4 py-3 border-b border-white/10">
+                        <p className="text-sm font-semibold text-white">Account</p>
+                        <p className="text-xs text-white/40">Manage your settings</p>
                       </div>
-                      <div className="py-2">
+                      <div className="py-1.5">
                         {userMenuItems.map((item, index) => {
                           const Icon = item.icon;
                           return (
@@ -95,21 +95,21 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                               key={index}
                               to={item.path}
                               onClick={() => setIsUserMenuOpen(false)}
-                              className="flex items-center space-x-3 px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors duration-200"
+                              className="flex items-center space-x-3 px-4 py-2.5 text-white/60 hover:bg-white/10 hover:text-white transition-colors duration-200"
                             >
-                              <Icon className="w-4 h-4" />
-                              <span className="font-medium">{item.label}</span>
+                              <Icon className="w-3.5 h-3.5" />
+                              <span className="text-sm font-medium">{item.label}</span>
                             </Link>
                           );
                         })}
                       </div>
-                      <div className="border-t border-gray-100 pt-2">
+                      <div className="border-t border-white/10 pt-1.5">
                         <button
                           onClick={handleLogout}
-                          className="flex items-center space-x-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 transition-colors duration-200"
+                          className="flex items-center space-x-3 w-full px-4 py-2.5 text-red-400/80 hover:bg-red-900/20 hover:text-red-300 transition-colors duration-200"
                         >
-                          <FaSignOutAlt className="w-4 h-4" />
-                          <span className="font-medium">Sign Out</span>
+                          <FaSignOutAlt className="w-3.5 h-3.5" />
+                          <span className="text-sm font-medium">Sign Out</span>
                         </button>
                       </div>
                     </div>
