@@ -145,7 +145,14 @@ const UrlCard: React.FC<{
 
             {/* Actions */}
             <div className="px-5 py-3 bg-white/[0.02] border-t border-white/[0.06] flex justify-end">
-                <Button onClick={onDelete} variant="danger" size="sm" title="Delete URL" loading={isDeleting}>
+                <Button
+                    onClick={onDelete}
+                    variant="secondary"
+                    size="sm"
+                    title="Delete URL"
+                    loading={isDeleting}
+                    className="text-red-400/40 hover:text-red-300 hover:bg-red-900/20 hover:border-red-500/20"
+                >
                     {!isDeleting && <FaTrash className="w-3 h-3" />}
                     <span>{isDeleting ? 'Deleting…' : 'Delete'}</span>
                 </Button>
