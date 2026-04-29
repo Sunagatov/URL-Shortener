@@ -8,7 +8,7 @@ import { useApi } from '@/shared/api/useApi';
 import { useAuth } from '@/shared/auth/useAuth';
 import { createUrlSchema, type CreateUrlFormData } from '@/features/urls/model/urlValidation';
 import { routes } from '@/app/routes';
-import { Button } from '@/shared/ui';
+import { Button, useToast } from '@/shared/ui';
 import {
     FaLink,
     FaCopy,
@@ -26,6 +26,7 @@ import {
 const UrlShortenerPage: React.FC = () => {
     const { isAuthenticated } = useAuth();
     const { execute, loading, error } = useApi<{ shortUrl: string }>();
+    const toast = useToast();
     const {
         register,
         handleSubmit,
@@ -40,7 +41,11 @@ const UrlShortenerPage: React.FC = () => {
 
     const onSubmit = async (data: CreateUrlFormData) => {
         const result = await execute(() => createUrl(data));
-        if (result) setShortUrl(result.shortUrl);
+        if (result) {
+            setShortUrl(result.shortUrl);
+        } else if (error) {
+            toast.error(error.errorMessage);
+        }
     };
 
     const handleClear = () => { reset(); setShortUrl(''); setCopied(false); };
@@ -50,6 +55,7 @@ const UrlShortenerPage: React.FC = () => {
             await navigator.clipboard.writeText(shortUrl);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
+            toast.success('Copied to clipboard');
         } catch (err) {
             console.error('Failed to copy:', err);
         }
@@ -130,13 +136,6 @@ const UrlShortenerPage: React.FC = () => {
                             </p>
                         )}
                     </div>
-
-                    {/* API error */}
-                    {error && (
-                        <div className="mb-6 p-4 bg-red-900/30 border border-red-500/30 text-red-300 rounded-2xl backdrop-blur-sm flex items-center gap-2 text-sm">
-                            ❌ {error.errorMessage}
-                        </div>
-                    )}
 
                     {/* Success result */}
                     {shortUrl && (

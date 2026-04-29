@@ -5,21 +5,20 @@ import { routes } from '@/app/routes';
 import { changePassword } from '@/features/account/api/accountApi';
 import { useAuth } from '@/shared/auth/useAuth';
 import { getApiErrorMessage, isSessionInvalidError } from '@/shared/lib/apiErrors';
-import { Button } from '@/shared/ui';
+import { Button, useToast } from '@/shared/ui';
 import { FaShieldAlt, FaLock, FaEye, FaEyeSlash, FaCheck, FaTimes, FaKey, FaClock, FaExclamationTriangle } from 'react-icons/fa';
 
 const SecurityPage: React.FC = () => {
     const [currentPassword, setCurrentPassword]         = useState('');
     const [newPassword, setNewPassword]                 = useState('');
     const [confirmPassword, setConfirmPassword]         = useState('');
-    const [successMessage, setSuccessMessage]           = useState('');
-    const [errorMessage, setErrorMessage]               = useState('');
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword]         = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading]                     = useState(false);
     const navigate = useNavigate();
     const { logout } = useAuth();
+    const toast = useToast();
 
     const getPasswordStrength = (password: string) => {
         let score = 0;
@@ -41,17 +40,15 @@ const SecurityPage: React.FC = () => {
     const handlePasswordChange = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
-        setErrorMessage('');
-        setSuccessMessage('');
-        if (newPassword !== confirmPassword) { setErrorMessage('Passwords do not match.'); setIsLoading(false); return; }
-        if (passwordStrength.strength === 'Weak') { setErrorMessage('Please choose a stronger password.'); setIsLoading(false); return; }
+        if (newPassword !== confirmPassword) { toast.error('Passwords do not match.'); setIsLoading(false); return; }
+        if (passwordStrength.strength === 'Weak') { toast.error('Please choose a stronger password.'); setIsLoading(false); return; }
         try {
             await changePassword({ currentPassword, newPassword });
-            setSuccessMessage('Password changed successfully.');
+            toast.success('Password changed successfully.');
             setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
         } catch (error: unknown) {
             if (isSessionInvalidError(error)) { logout(); navigate(routes.signIn, { replace: true }); return; }
-            setErrorMessage(getApiErrorMessage(error, 'Error changing password.'));
+            toast.error(getApiErrorMessage(error, 'Error changing password.'));
         } finally {
             setIsLoading(false);
         }
@@ -236,19 +233,6 @@ const SecurityPage: React.FC = () => {
                                         </p>
                                     )}
                                 </div>
-
-                                {errorMessage && (
-                                    <div className="p-4 bg-red-900/20 border border-red-500/20 rounded-xl flex items-center gap-3">
-                                        <FaExclamationTriangle className="w-4 h-4 text-red-400 flex-shrink-0" />
-                                        <p className="text-red-400 text-sm">{errorMessage}</p>
-                                    </div>
-                                )}
-                                {successMessage && (
-                                    <div className="p-4 bg-blue-900/20 border border-blue-500/20 rounded-xl flex items-center gap-3">
-                                        <FaCheck className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                                        <p className="text-blue-300 text-sm">{successMessage}</p>
-                                    </div>
-                                )}
 
                                 <Button
                                     type="submit"

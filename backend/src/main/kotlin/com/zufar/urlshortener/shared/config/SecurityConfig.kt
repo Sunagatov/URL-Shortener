@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.ProviderManager
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
@@ -30,22 +30,20 @@ class SecurityConfig(
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
 
-    @Bean
-    fun authenticationProvider(passwordEncoder: PasswordEncoder): DaoAuthenticationProvider {
+    private fun daoAuthenticationProvider(passwordEncoder: PasswordEncoder): DaoAuthenticationProvider {
         val authProvider = DaoAuthenticationProvider(customUserDetailsService)
         authProvider.setPasswordEncoder(passwordEncoder)
         return authProvider
     }
 
     @Bean
-    fun authenticationManager(authenticationConfiguration: AuthenticationConfiguration): AuthenticationManager {
-        return authenticationConfiguration.authenticationManager
-    }
+    fun authenticationManager(passwordEncoder: PasswordEncoder): AuthenticationManager =
+        ProviderManager(daoAuthenticationProvider(passwordEncoder))
 
     @Bean
     fun securityFilterChain(
         http: HttpSecurity,
-        authenticationProvider: DaoAuthenticationProvider
+        passwordEncoder: PasswordEncoder
     ): SecurityFilterChain {
         http
             .csrf { it.disable() }
@@ -69,7 +67,7 @@ class SecurityConfig(
                     ).permitAll()
                     .anyRequest().authenticated()
             }
-            .authenticationProvider(authenticationProvider)
+            .authenticationProvider(daoAuthenticationProvider(passwordEncoder))
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
 
         return http.build()

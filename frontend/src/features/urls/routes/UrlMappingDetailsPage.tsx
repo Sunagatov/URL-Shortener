@@ -4,7 +4,8 @@ import AccountSidebar from '@/app/layout/AccountSidebar';
 import { routes } from '@/app/routes';
 import { deleteUrl, getUrlDetails } from '@/features/urls/api/urlsApi';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
-import { Button } from '@/shared/ui';
+import { usePageTitle } from '@/shared/lib/usePageTitle';
+import { Button, useToast, ConfirmModal } from '@/shared/ui';
 import type { UrlMapping } from '@/shared/types';
 import {
     FaArrowLeft,
@@ -15,29 +16,32 @@ import {
     FaClock,
     FaQrcode,
     FaTrash,
-    FaEdit,
+    FaLock,
     FaCheck,
 } from 'react-icons/fa';
 
 const UrlMappingDetailsPage: React.FC = () => {
+    usePageTitle('URL Details');
     const { urlHash } = useParams<{ urlHash: string }>();
     const [urlMapping, setUrlMapping]     = useState<UrlMapping | null>(null);
-    const [errorMessage, setErrorMessage] = useState('');
     const [isLoading, setIsLoading]       = useState(true);
     const [copiedUrl, setCopiedUrl]       = useState<string | null>(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [isDeleting, setIsDeleting]     = useState(false);
     const navigate = useNavigate();
+    const toast = useToast();
 
     useEffect(() => {
         const fetchUrlMapping = async () => {
-            if (!urlHash) { setErrorMessage('URL mapping id is missing.'); setIsLoading(false); return; }
+            if (!urlHash) { toast.error('URL mapping id is missing.'); setIsLoading(false); return; }
             try {
                 setIsLoading(true);
                 const response = await getUrlDetails(urlHash);
                 setUrlMapping(response);
             } catch (error: unknown) {
                 if (getApiErrorStatus(error) === 401) { navigate(routes.signIn, { replace: true }); return; }
-                if (getApiErrorStatus(error) === 404) { setUrlMapping(null); setErrorMessage('The requested URL mapping could not be found.'); return; }
-                setErrorMessage(getApiErrorMessage(error, 'Failed to fetch URL mapping details.'));
+                if (getApiErrorStatus(error) === 404) { setUrlMapping(null); return; }
+                toast.error(getApiErrorMessage(error, 'Failed to fetch URL mapping details.'));
             } finally {
                 setIsLoading(false);
             }
@@ -50,18 +54,22 @@ const UrlMappingDetailsPage: React.FC = () => {
             await navigator.clipboard.writeText(url);
             setCopiedUrl(url);
             setTimeout(() => setCopiedUrl(null), 2000);
+            toast.success('Copied to clipboard');
         } catch (err) { console.error('Failed to copy URL:', err); }
     };
 
     const handleDelete = async () => {
         if (!urlMapping) return;
-        if (!window.confirm('Delete this URL mapping?')) return;
+        setIsDeleting(true);
         try {
             await deleteUrl(urlMapping.urlHash);
             navigate(routes.urlMappings);
         } catch (error: unknown) {
             if (getApiErrorStatus(error) === 401) { navigate(routes.signIn, { replace: true }); return; }
-            setErrorMessage(getApiErrorMessage(error, 'Failed to delete URL mapping.'));
+            toast.error(getApiErrorMessage(error, 'Failed to delete URL mapping.'));
+        } finally {
+            setIsDeleting(false);
+            setShowDeleteModal(false);
         }
     };
 
@@ -94,7 +102,7 @@ const UrlMappingDetailsPage: React.FC = () => {
                             <FaLink className="w-5 h-5 text-white/15" />
                         </div>
                         <h2 className="text-xl font-bold text-white mb-2">URL Not Found</h2>
-                        <p className="text-white/35 text-sm mb-6">{errorMessage || 'The requested URL mapping could not be found.'}</p>
+                        <p className="text-white/35 text-sm mb-6">The requested URL mapping could not be found.</p>
                         <Button onClick={() => navigate(routes.urlMappings)} size="sm">Back to My URLs</Button>
                     </div>
                 </div>
@@ -131,23 +139,22 @@ const UrlMappingDetailsPage: React.FC = () => {
                                 </div>
                             </div>
                             <div className="flex gap-2">
-                                <Button variant="secondary" size="sm" disabled title="Editing is not available yet">
-                                    <FaEdit className="w-3.5 h-3.5" />
-                                    <span className="hidden sm:inline">Edit</span>
-                                </Button>
-                                <Button onClick={handleDelete} variant="danger" size="sm">
+                                <div className="group relative inline-flex">
+                                    <Button variant="secondary" size="sm" disabled className="border-dashed opacity-40">
+                                        <FaLock className="w-3 h-3" />
+                                        <span className="hidden sm:inline">Edit</span>
+                                    </Button>
+                                    <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/10 bg-[#0d0f1e] px-2.5 py-1.5 text-xs text-white/55 opacity-0 shadow-xl transition-opacity duration-150 group-hover:opacity-100 z-20">
+                                        Coming soon
+                                    </div>
+                                </div>
+                                <Button onClick={() => setShowDeleteModal(true)} variant="danger" size="sm">
                                     <FaTrash className="w-3.5 h-3.5" />
                                     <span className="hidden sm:inline">Delete</span>
                                 </Button>
                             </div>
                         </div>
                     </div>
-
-                    {errorMessage && (
-                        <div className="mb-6 p-4 bg-red-900/20 border border-red-500/20 rounded-xl">
-                            <p className="text-red-400 text-sm">{errorMessage}</p>
-                        </div>
-                    )}
 
                     <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
                         {/* Left: URL info */}
@@ -278,6 +285,16 @@ const UrlMappingDetailsPage: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            <ConfirmModal
+                isOpen={showDeleteModal}
+                title="Delete URL?"
+                message="This short link will stop working immediately and cannot be restored."
+                confirmLabel="Delete"
+                isLoading={isDeleting}
+                onConfirm={handleDelete}
+                onCancel={() => setShowDeleteModal(false)}
+            />
         </div>
     );
 };

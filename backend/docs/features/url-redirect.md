@@ -10,7 +10,7 @@ Redirects users from a shortened URL to the original destination URL.
 
 ## API Endpoint
 ```
-GET /url/{urlHash}
+GET /{urlHash}
 ```
 
 ## Request
@@ -52,9 +52,9 @@ Location: https://www.example.com/original-page
 ## Redirect Flow
 
 ```
-User clicks: http://116.203.197.65/url/abc123
+User clicks: http://116.203.197.65/abc123
     ↓
-Backend receives GET /url/abc123
+Backend receives GET /abc123
     ↓
 Lookup urlHash='abc123' in database
     ↓
@@ -89,8 +89,8 @@ return ResponseEntity.status(HttpStatus.FOUND)
 
 ### Current Setup
 ```nginx
-location /url/ {
-    proxy_pass http://url-shortener-app:8080/url/;
+location ~ ^/[1-9A-HJ-NP-Za-km-z]{8}$ {
+    proxy_pass http://url-shortener-app:8080;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -104,7 +104,7 @@ This is a direct browser redirect, no frontend JavaScript involved.
 
 ### Usage Example
 ```html
-<a href="http://116.203.197.65/url/abc123">Click here</a>
+<a href="http://116.203.197.65/abc123">Click here</a>
 ```
 
 ## Analytics (Future Enhancement)
@@ -137,7 +137,7 @@ This is a direct browser redirect, no frontend JavaScript involved.
 ### Manual Test
 ```bash
 # Test redirect
-curl -I http://116.203.197.65/url/abc123
+curl -I http://116.203.197.65/abc123
 
 # Expected response
 HTTP/1.1 302 Found
@@ -167,7 +167,7 @@ Location: https://www.example.com/original-page
 ## Logging
 
 ```
-INFO: Received redirect request for shortUrl='http://116.203.197.65/url/abc123' 
+INFO: Received redirect request for shortUrl='http://116.203.197.65/abc123' 
       from IP='192.168.1.1', User-Agent='Mozilla/5.0...'
 INFO: Redirecting to the originalUrl='https://www.example.com'
 ```

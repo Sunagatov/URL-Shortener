@@ -69,7 +69,9 @@ dependencies {
 
     // Validation
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("commons-validator:commons-validator:$commonsValidatorVersion")
+    implementation("commons-validator:commons-validator:$commonsValidatorVersion") {
+        exclude(group = "commons-logging", module = "commons-logging")
+    }
 
     // Caching
     implementation("org.springframework.boot:spring-boot-starter-cache")

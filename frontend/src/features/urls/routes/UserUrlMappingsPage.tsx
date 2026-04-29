@@ -1,21 +1,27 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AccountSidebar from '@/app/layout/AccountSidebar';
 import { routes } from '@/app/routes';
+import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { deleteUrl, getUserUrls } from '@/features/urls/api/urlsApi';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
-import { Button } from '@/shared/ui';
+import { Button, useToast, ConfirmModal } from '@/shared/ui';
 import type { UrlMapping } from '@/shared/types';
 import {
     FaTrash,
-    FaInfoCircle,
     FaLink,
     FaExternalLinkAlt,
     FaCopy,
     FaChevronLeft,
     FaChevronRight,
     FaPlus,
+    FaSearch,
+    FaTimes,
+    FaSortAmountDown,
+    FaSortAmountUp,
 } from 'react-icons/fa';
+
+const PAGE_SIZE = 6;
 
 export const getVisiblePages = (page: number, totalPages: number, maxVisiblePages = 5) => {
     const startPage = Math.max(
@@ -34,17 +40,21 @@ const getDomainLabel = (url: string) => {
 const UrlCard: React.FC<{
     mapping: UrlMapping;
     index: number;
-    onCopy: (url: string) => void;
+    onCopy: (url: string, e: React.MouseEvent) => void;
     copiedUrl: string | null;
     onDetails: () => void;
-    onDelete: () => void;
+    onDelete: (e: React.MouseEvent) => void;
+    isDeleting: boolean;
     formatDate: (d: string) => string;
-}> = ({ mapping, index, onCopy, copiedUrl, onDetails, onDelete, formatDate }) => {
+}> = ({ mapping, index, onCopy, copiedUrl, onDetails, onDelete, isDeleting, formatDate }) => {
     const domain = getDomainLabel(mapping.originalUrl);
     const shortSlug = mapping.shortUrl.split('/').pop() ?? mapping.shortUrl;
 
     return (
-        <div className="group rounded-2xl bg-white/[0.04] border border-white/[0.07] hover:border-white/[0.13] hover:bg-white/[0.06] transition-all duration-200 overflow-hidden">
+        <div
+            onClick={onDetails}
+            className="group cursor-pointer rounded-2xl bg-white/[0.04] border border-white/[0.07] hover:border-blue-500/25 hover:bg-white/[0.055] transition-all duration-200 overflow-hidden"
+        >
             {/* Card header */}
             <div className="px-5 py-3.5 flex items-center gap-3 border-b border-white/[0.06]">
                 <div className="w-8 h-8 rounded-xl bg-blue-600/15 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
@@ -58,6 +68,7 @@ const UrlCard: React.FC<{
                     </div>
                     <p className="text-xs text-white/25 mt-0.5">{formatDate(mapping.createdAt)}</p>
                 </div>
+                <FaChevronRight className="w-3 h-3 text-white/15 group-hover:text-white/40 transition-colors flex-shrink-0" />
             </div>
 
             {/* URLs */}
@@ -66,27 +77,27 @@ const UrlCard: React.FC<{
                 <div>
                     <p className="text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-1.5">Short URL</p>
                     <div className="flex items-center gap-2 bg-[#0a1220] rounded-xl px-3 py-2.5 border border-white/[0.06] group/row hover:border-blue-500/20 transition-colors">
-                        <a
-                            href={mapping.shortUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 text-blue-400 hover:text-blue-300 text-sm truncate transition-colors"
+                        <span
+                            className="flex-1 text-blue-400 text-sm truncate"
                             style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}
                         >
                             …/{shortSlug}
-                        </a>
+                        </span>
                         <div className="flex items-center gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity">
                             <button
-                                onClick={() => onCopy(mapping.shortUrl)}
+                                onClick={e => onCopy(mapping.shortUrl, e)}
                                 className="p-1.5 text-white/30 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-all"
                                 title="Copy"
                             >
-                                <FaCopy className="w-3 h-3" />
+                                {copiedUrl === mapping.shortUrl
+                                    ? <FaChevronRight className="w-3 h-3 text-blue-400" />
+                                    : <FaCopy className="w-3 h-3" />}
                             </button>
                             <a
                                 href={mapping.shortUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                onClick={e => e.stopPropagation()}
                                 className="p-1.5 text-white/30 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-all"
                                 title="Open"
                             >
@@ -103,19 +114,16 @@ const UrlCard: React.FC<{
                 <div>
                     <p className="text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-1.5">Original URL</p>
                     <div className="flex items-center gap-2 bg-white/[0.03] rounded-xl px-3 py-2.5 border border-white/[0.05] group/row hover:border-white/[0.10] transition-colors">
-                        <a
-                            href={mapping.originalUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 text-white/45 hover:text-white/70 text-xs truncate transition-colors"
+                        <span
+                            className="flex-1 text-white/45 text-xs truncate"
                             style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}
                             title={mapping.originalUrl}
                         >
                             {mapping.originalUrl}
-                        </a>
+                        </span>
                         <div className="flex items-center gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity shrink-0">
                             <button
-                                onClick={() => onCopy(mapping.originalUrl)}
+                                onClick={e => onCopy(mapping.originalUrl, e)}
                                 className="p-1.5 text-white/30 hover:text-white/60 hover:bg-white/5 rounded-lg transition-all"
                                 title="Copy"
                             >
@@ -136,13 +144,10 @@ const UrlCard: React.FC<{
             </div>
 
             {/* Actions */}
-            <div className="px-5 py-3 bg-white/[0.02] border-t border-white/[0.06] flex gap-2">
-                <Button onClick={onDetails} variant="secondary" size="sm" className="flex-1 justify-center">
-                    <FaInfoCircle className="w-3 h-3" />
-                    <span>Details</span>
-                </Button>
-                <Button onClick={onDelete} variant="danger" size="sm" title="Delete URL">
-                    <FaTrash className="w-3 h-3" />
+            <div className="px-5 py-3 bg-white/[0.02] border-t border-white/[0.06] flex justify-end">
+                <Button onClick={onDelete} variant="danger" size="sm" title="Delete URL" loading={isDeleting}>
+                    {!isDeleting && <FaTrash className="w-3 h-3" />}
+                    <span>{isDeleting ? 'Deleting…' : 'Delete'}</span>
                 </Button>
             </div>
         </div>
@@ -150,55 +155,139 @@ const UrlCard: React.FC<{
 };
 
 const UserUrlMappingsPage: React.FC = () => {
-    const [urlMappings, setUrlMappings] = useState<UrlMapping[]>([]);
-    const [page, setPage] = useState(0);
-    const size = 6;
+    usePageTitle('My URLs');
+
+    // Server-paged state
+    const [urlMappings, setUrlMappings]     = useState<UrlMapping[]>([]);
+    const [serverPage, setServerPage]       = useState(0);
     const [totalPages, setTotalPages]       = useState(0);
     const [totalElements, setTotalElements] = useState(0);
-    const [errorMessage, setErrorMessage]   = useState('');
     const [isLoading, setIsLoading]         = useState(true);
-    const [copiedUrl, setCopiedUrl]         = useState<string | null>(null);
-    const navigate = useNavigate();
 
-    const fetchUrlMappings = useCallback(async (pageNumber: number) => {
+    // Search + sort state
+    const [search, setSearch]               = useState('');
+    const [sortOrder, setSortOrder]         = useState<'newest' | 'oldest'>('newest');
+
+    // All mappings for search mode (fetch-once)
+    const [allMappings, setAllMappings]     = useState<UrlMapping[]>([]);
+    const [allLoaded, setAllLoaded]         = useState(false);
+    const [clientPage, setClientPage]       = useState(0);
+
+    // Copy + delete state
+    const [copiedUrl, setCopiedUrl]         = useState<string | null>(null);
+    const [deleteTarget, setDeleteTarget]   = useState<string | null>(null);
+    const [isDeleting, setIsDeleting]       = useState(false);
+
+    const navigate = useNavigate();
+    const toast = useToast();
+    const redirectToSignIn = useCallback(() => {
+        navigate(routes.signIn, { replace: true });
+    }, [navigate]);
+
+    const fetchPage = useCallback(async (pageNumber: number) => {
         try {
             setIsLoading(true);
-            const data = await getUserUrls(pageNumber, size);
+            const data = await getUserUrls(pageNumber, PAGE_SIZE);
             setUrlMappings(data.content);
-            setPage(data.page);
+            setServerPage(data.page);
             setTotalPages(data.totalPages);
             setTotalElements(data.totalElements);
         } catch (error: unknown) {
             if (getApiErrorStatus(error) === 401) {
-                navigate(routes.signIn, { replace: true });
+                redirectToSignIn();
                 return;
             }
-            setErrorMessage(getApiErrorMessage(error, 'Failed to fetch URL mappings.'));
+            toast.error(getApiErrorMessage(error, 'Failed to fetch URL mappings.'));
         } finally {
             setIsLoading(false);
         }
-    }, [navigate]);
+    }, [redirectToSignIn, toast]);
 
-    useEffect(() => { void fetchUrlMappings(page); }, [fetchUrlMappings, page]);
-
-    const handleDelete = async (urlHash: string) => {
-        if (!window.confirm('Delete this URL mapping?')) return;
+    const fetchAll = useCallback(async () => {
         try {
-            await deleteUrl(urlHash);
-            const nextPage = urlMappings.length === 1 && page > 0 ? page - 1 : page;
-            await fetchUrlMappings(nextPage);
-            setErrorMessage('');
+            const data = await getUserUrls(0, 500);
+            setAllMappings(data.content);
+            setAllLoaded(true);
         } catch (error: unknown) {
-            if (getApiErrorStatus(error) === 401) { navigate(routes.signIn, { replace: true }); return; }
-            setErrorMessage(getApiErrorMessage(error, 'Failed to delete URL mapping.'));
+            if (getApiErrorStatus(error) === 401) {
+                redirectToSignIn();
+            }
+        }
+    }, [redirectToSignIn]);
+
+    useEffect(() => { void fetchPage(0); }, [fetchPage]);
+
+    // When user starts searching, load all URLs once
+    useEffect(() => {
+        if (search.trim() && !allLoaded) { void fetchAll(); }
+        setClientPage(0);
+    }, [search, allLoaded, fetchAll]);
+
+    const isSearchMode = search.trim().length > 0;
+
+    const filteredAndSorted = useMemo(() => {
+        const source = isSearchMode ? allMappings : urlMappings;
+        const q = search.toLowerCase().trim();
+        const filtered = isSearchMode
+            ? source.filter(m =>
+                m.originalUrl.toLowerCase().includes(q) ||
+                m.shortUrl.toLowerCase().includes(q)
+              )
+            : source;
+        if (sortOrder === 'oldest') {
+            return [...filtered].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        }
+        return [...filtered].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }, [isSearchMode, allMappings, urlMappings, search, sortOrder]);
+
+    const clientTotalPages  = Math.ceil(filteredAndSorted.length / PAGE_SIZE);
+    const displayMappings   = isSearchMode
+        ? filteredAndSorted.slice(clientPage * PAGE_SIZE, (clientPage + 1) * PAGE_SIZE)
+        : filteredAndSorted;
+    const displayTotalPages = isSearchMode ? clientTotalPages : totalPages;
+    const displayPage       = isSearchMode ? clientPage : serverPage;
+    const displayTotal      = isSearchMode ? filteredAndSorted.length : totalElements;
+
+    const handlePageChange = (p: number) => {
+        if (isSearchMode) { setClientPage(p); }
+        else {
+            setServerPage(p);
+            void fetchPage(p);
         }
     };
 
-    const handleCopyUrl = async (url: string) => {
+    const handleDelete = async () => {
+        if (!deleteTarget) return;
+        setIsDeleting(true);
+        try {
+            await deleteUrl(deleteTarget);
+            toast.success('URL deleted successfully.');
+            if (isSearchMode) {
+                setAllMappings(prev => prev.filter(m => m.urlHash !== deleteTarget));
+            } else {
+                const nextPage = urlMappings.length === 1 && serverPage > 0 ? serverPage - 1 : serverPage;
+                await fetchPage(nextPage);
+            }
+            setTotalElements(prev => prev - 1);
+            setDeleteTarget(null);
+        } catch (error: unknown) {
+            if (getApiErrorStatus(error) === 401) {
+                redirectToSignIn();
+                return;
+            }
+            toast.error(getApiErrorMessage(error, 'Failed to delete URL mapping.'));
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const handleCopyUrl = async (url: string, e: React.MouseEvent) => {
+        e.stopPropagation();
         try {
             await navigator.clipboard.writeText(url);
             setCopiedUrl(url);
             setTimeout(() => setCopiedUrl(null), 2000);
+            toast.success('Copied to clipboard');
         } catch (err) { console.error('Failed to copy URL:', err); }
     };
 
@@ -226,49 +315,100 @@ const UserUrlMappingsPage: React.FC = () => {
                 <div className="mx-auto flex min-h-full max-w-6xl flex-col">
 
                     {/* Header */}
-                    <div className="mb-8 mt-3 md:mt-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="mb-5 mt-3 md:mt-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                             <h1 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
                                 My URLs
                             </h1>
                             <p className="text-white/40 text-sm mt-0.5">Manage and track your shortened links</p>
                         </div>
-                        <div className="flex items-center gap-3">
-                            {totalElements > 0 && (
-                                <span className="text-xs text-white/35 hidden sm:block">
-                                    {totalElements} link{totalElements !== 1 ? 's' : ''}
-                                </span>
-                            )}
-                            <Button onClick={() => navigate(routes.home)} variant="primary" size="sm">
-                                <FaPlus className="w-3.5 h-3.5" />
-                                <span>New URL</span>
-                            </Button>
-                        </div>
+                        <Button onClick={() => { navigate(routes.home); }} variant="primary" size="sm">
+                            <FaPlus className="w-3.5 h-3.5" />
+                            <span>New URL</span>
+                        </Button>
                     </div>
 
-                    {errorMessage && (
-                        <div className="mb-6 p-4 bg-red-900/20 border border-red-500/20 rounded-xl">
-                            <p className="text-red-400 text-sm">{errorMessage}</p>
+                    {/* Toolbar: search + sort + count */}
+                    <div className="mb-6 flex flex-col sm:flex-row gap-2.5">
+                        {/* Search input */}
+                        <div className="relative flex-1">
+                            <FaSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/25 pointer-events-none" />
+                            <input
+                                type="text"
+                                value={search}
+                                onChange={e => setSearch(e.target.value)}
+                                placeholder="Search by original or short URL…"
+                                className="w-full pl-10 pr-10 py-2.5 bg-white/[0.04] border border-white/[0.08] text-white placeholder-white/25 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/25 transition-all"
+                            />
+                            {search && (
+                                <button
+                                    onClick={() => setSearch('')}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+                                >
+                                    <FaTimes className="w-3.5 h-3.5" />
+                                </button>
+                            )}
                         </div>
-                    )}
+
+                        {/* Sort toggle */}
+                        <button
+                            onClick={() => setSortOrder(o => o === 'newest' ? 'oldest' : 'newest')}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.04] border border-white/[0.08] hover:border-white/[0.14] hover:bg-white/[0.07] text-white/55 hover:text-white/80 rounded-xl text-sm transition-all whitespace-nowrap"
+                        >
+                            {sortOrder === 'newest'
+                                ? <FaSortAmountDown className="w-3.5 h-3.5" />
+                                : <FaSortAmountUp className="w-3.5 h-3.5" />}
+                            {sortOrder === 'newest' ? 'Newest first' : 'Oldest first'}
+                        </button>
+
+                        {/* Count badge */}
+                        {displayTotal > 0 && (
+                            <div className="flex items-center px-4 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl">
+                                <span className="text-xs text-white/35 whitespace-nowrap">
+                                    {isSearchMode
+                                        ? `${displayTotal} result${displayTotal !== 1 ? 's' : ''}`
+                                        : `${totalElements} link${totalElements !== 1 ? 's' : ''}`}
+                                </span>
+                            </div>
+                        )}
+                    </div>
 
                     {/* URL Cards Grid */}
-                    {urlMappings.length > 0 ? (
+                    {displayMappings.length > 0 ? (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-                            {urlMappings.map((mapping, index) => (
+                            {displayMappings.map((mapping, index) => (
                                 <UrlCard
                                     key={mapping.urlHash}
                                     mapping={mapping}
-                                    index={index + 1 + page * size}
+                                    index={displayPage * PAGE_SIZE + index + 1}
                                     onCopy={handleCopyUrl}
                                     copiedUrl={copiedUrl}
-                                    onDetails={() => navigate(`/account/url-mappings/${mapping.urlHash}`)}
-                                    onDelete={() => handleDelete(mapping.urlHash)}
+                                    onDetails={() => { navigate(`/account/url-mappings/${mapping.urlHash}`); }}
+                                    onDelete={e => { e.stopPropagation(); setDeleteTarget(mapping.urlHash); }}
+                                    isDeleting={isDeleting && deleteTarget === mapping.urlHash}
                                     formatDate={formatDate}
                                 />
                             ))}
                         </div>
+                    ) : isSearchMode ? (
+                        /* No search results */
+                        <div className="flex flex-1 items-start justify-center pt-4 sm:items-center sm:pt-0">
+                            <div className="w-full rounded-2xl bg-white/[0.04] border border-white/[0.07] px-6 py-14 sm:max-w-md text-center">
+                                <div className="w-14 h-14 mx-auto mb-5 rounded-2xl border border-white/[0.07] bg-white/[0.04] flex items-center justify-center">
+                                    <FaSearch className="w-5 h-5 text-white/15" />
+                                </div>
+                                <h3 className="text-lg font-bold text-white mb-2">No results</h3>
+                                <p className="text-sm text-white/35 mb-6 leading-relaxed">
+                                    No URLs match "<span className="text-white/55">{search}</span>"
+                                </p>
+                                <Button onClick={() => { setSearch(''); }} variant="secondary" size="sm" className="mx-auto">
+                                    <FaTimes className="w-3.5 h-3.5" />
+                                    Clear search
+                                </Button>
+                            </div>
+                        </div>
                     ) : (
+                        /* Empty state */
                         <div className="flex flex-1 items-start justify-center pt-4 sm:items-center sm:pt-0">
                             <div className="w-full rounded-2xl bg-white/[0.04] border border-white/[0.07] px-6 py-14 sm:max-w-md text-center">
                                 <div className="w-14 h-14 mx-auto mb-5 rounded-2xl border border-white/[0.07] bg-white/[0.04] flex items-center justify-center">
@@ -278,7 +418,7 @@ const UserUrlMappingsPage: React.FC = () => {
                                 <p className="text-sm text-white/35 mb-6 leading-relaxed">
                                     Shorten your first link and start tracking clicks.
                                 </p>
-                                <Button onClick={() => navigate(routes.home)} size="sm" className="mx-auto">
+                                <Button onClick={() => { navigate(routes.home); }} size="sm" className="mx-auto">
                                     <FaPlus className="w-3.5 h-3.5" />
                                     Create Short URL
                                 </Button>
@@ -287,29 +427,31 @@ const UserUrlMappingsPage: React.FC = () => {
                     )}
 
                     {/* Pagination */}
-                    {totalPages > 1 && (
+                    {displayTotalPages > 1 && (
                         <div className="flex flex-col sm:flex-row items-center justify-between bg-white/[0.04] border border-white/[0.07] rounded-2xl px-5 py-4 gap-4 mt-auto">
                             <p className="text-xs text-white/35">
                                 Showing{' '}
-                                <span className="text-white font-semibold">{page * size + 1}–{Math.min((page + 1) * size, totalElements)}</span>
+                                <span className="text-white font-semibold">
+                                    {displayPage * PAGE_SIZE + 1}–{Math.min((displayPage + 1) * PAGE_SIZE, displayTotal)}
+                                </span>
                                 {' '}of{' '}
-                                <span className="text-white font-semibold">{totalElements}</span>
+                                <span className="text-white font-semibold">{displayTotal}</span>
                             </p>
                             <div className="flex items-center gap-1.5">
                                 <Button
-                                    onClick={() => setPage(p => Math.max(0, p - 1))}
-                                    disabled={page === 0}
+                                    onClick={() => handlePageChange(Math.max(0, displayPage - 1))}
+                                    disabled={displayPage === 0}
                                     variant="secondary"
                                     size="sm"
                                 >
                                     <FaChevronLeft className="w-3 h-3" />
                                 </Button>
-                                {getVisiblePages(page, totalPages).map((pageNum) => (
+                                {getVisiblePages(displayPage, displayTotalPages).map((pageNum) => (
                                     <button
                                         key={pageNum}
-                                        onClick={() => setPage(pageNum)}
+                                        onClick={() => handlePageChange(pageNum)}
                                         className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all ${
-                                            pageNum === page
+                                            pageNum === displayPage
                                                 ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(59,130,246,0.3)]'
                                                 : 'bg-white/[0.06] text-white/45 hover:bg-white/[0.10] hover:text-white'
                                         }`}
@@ -318,8 +460,8 @@ const UserUrlMappingsPage: React.FC = () => {
                                     </button>
                                 ))}
                                 <Button
-                                    onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
-                                    disabled={page >= totalPages - 1}
+                                    onClick={() => handlePageChange(Math.min(displayTotalPages - 1, displayPage + 1))}
+                                    disabled={displayPage >= displayTotalPages - 1}
                                     variant="secondary"
                                     size="sm"
                                 >
@@ -330,6 +472,16 @@ const UserUrlMappingsPage: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            <ConfirmModal
+                isOpen={!!deleteTarget}
+                title="Delete URL?"
+                message="This short link will stop working immediately and cannot be restored."
+                confirmLabel="Delete"
+                isLoading={isDeleting}
+                onConfirm={handleDelete}
+                onCancel={() => setDeleteTarget(null)}
+            />
         </div>
     );
 };

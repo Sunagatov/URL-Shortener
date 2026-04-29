@@ -3,6 +3,7 @@ package com.zufar.urlshortener.shared.exception
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.zufar.urlshortener.auth.exception.InvalidTokenException
 import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
 import com.zufar.urlshortener.urls.dto.ShortenUrlRequest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -42,6 +43,22 @@ class GlobalExceptionHandlerTest {
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.statusCode)
         assertEquals("An unexpected error occurred", response.body!!.errorMessage)
+    }
+
+    @Test
+    fun `invalid token exception returns 401 with original message`() {
+        val response = handler.handleInvalidTokenException(InvalidTokenException("Invalid or expired refresh token"))
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.statusCode)
+        assertEquals("Invalid or expired refresh token", response.body!!.errorMessage)
+    }
+
+    @Test
+    fun `illegal argument exception returns 400 with original message`() {
+        val response = handler.handleIllegalArgumentException(IllegalArgumentException("Invalid input"))
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
+        assertEquals("Invalid input", response.body!!.errorMessage)
     }
 
     @Test

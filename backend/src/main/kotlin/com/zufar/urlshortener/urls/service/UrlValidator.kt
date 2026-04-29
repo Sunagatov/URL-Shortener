@@ -1,5 +1,6 @@
 package com.zufar.urlshortener.urls.service
 
+import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.net.URI
@@ -16,12 +17,18 @@ class UrlValidator(
     private val validator = org.apache.commons.validator.routines.UrlValidator(allowedProtocols.toTypedArray())
 
     fun validateUrl(url: String) {
-        require(url.isNotBlank()) { "URL must not be empty or blank." }
-        require(!url.contains(" ")) { "URL must not contain spaces." }
-        require(url.length <= MAX_ALLOWED_URL_LENGTH) { "URL exceeds the maximum allowed length of $MAX_ALLOWED_URL_LENGTH characters." }
-        require(hasValidProtocol(url)) { "URL must have a proper scheme (http or https)." }
-        require(validator.isValid(url)) { "URL is not valid. Please ensure it has the correct format and syntax." }
-        require(isValidHost(url)) { "URL must contain a valid host. Loopback addresses and the current shortener host are not allowed." }
+        validate(url.isNotBlank(), "URL must not be empty or blank.")
+        validate(!url.contains(" "), "URL must not contain spaces.")
+        validate(url.length <= MAX_ALLOWED_URL_LENGTH, "URL exceeds the maximum allowed length of $MAX_ALLOWED_URL_LENGTH characters.")
+        validate(hasValidProtocol(url), "URL must have a proper scheme (http or https).")
+        validate(validator.isValid(url), "URL is not valid. Please ensure it has the correct format and syntax.")
+        validate(isValidHost(url), "URL must contain a valid host. Loopback addresses and the current shortener host are not allowed.")
+    }
+
+    private fun validate(condition: Boolean, message: String) {
+        if (!condition) {
+            throw InvalidRequestException(message)
+        }
     }
 
     private fun hasValidProtocol(url: String): Boolean =

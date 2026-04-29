@@ -1,5 +1,6 @@
 package com.zufar.urlshortener.urls.service
 
+import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -9,7 +10,7 @@ class UrlValidatorTest {
     fun `same host as configured base url is rejected`() {
         val validator = UrlValidator("http://116.203.197.65:8080")
 
-        assertThrows<IllegalArgumentException> {
+        assertThrows<InvalidRequestException> {
             validator.validateUrl("http://116.203.197.65:8080/url/abc123")
         }
     }
@@ -18,7 +19,7 @@ class UrlValidatorTest {
     fun `configured domain host is rejected`() {
         val validator = UrlValidator("https://short.example.com")
 
-        assertThrows<IllegalArgumentException> {
+        assertThrows<InvalidRequestException> {
             validator.validateUrl("https://short.example.com/url/abc123")
         }
     }
@@ -27,7 +28,7 @@ class UrlValidatorTest {
     fun `loopback hosts are rejected`() {
         val validator = UrlValidator("https://short.example.com")
 
-        assertThrows<IllegalArgumentException> {
+        assertThrows<InvalidRequestException> {
             validator.validateUrl("http://localhost:8080/example")
         }
     }

@@ -28,28 +28,28 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidRequestException::class)
     fun handleInvalidRequestException(ex: InvalidRequestException): ResponseEntity<ErrorResponse> {
-        log.error("Invalid request: ${ex.message}", ex)
+        log.warn("Invalid request: {}", ex.message)
         val errorResponse = ErrorResponse(errorMessage = ex.message ?: "Invalid request")
         return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
     }
 
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgumentException(ex: IllegalArgumentException): ResponseEntity<ErrorResponse> {
-        log.error(LOG_ERROR_MESSAGE, ex)
+        log.warn("Invalid input: {}", ex.message)
         val errorResponse = ErrorResponse(errorMessage = ex.message ?: "Invalid input")
         return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
     }
 
     @ExceptionHandler(UrlNotFoundException::class)
     fun handleUrlNotFound(ex: UrlNotFoundException): ResponseEntity<ErrorResponse> {
-        log.error(LOG_ERROR_MESSAGE, ex)
+        log.warn("URL not found: {}", ex.message)
         val errorResponse = ErrorResponse(errorMessage = ex.message ?: "URL not found")
         return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
     }
 
     @ExceptionHandler(InvalidTokenException::class)
     fun handleInvalidTokenException(ex: InvalidTokenException): ResponseEntity<ErrorResponse> {
-        log.error("Invalid token: ${ex.message}", ex)
+        log.warn("Invalid token: {}", ex.message)
         val errorResponse = ErrorResponse(errorMessage = ex.message ?: "Invalid token")
         return ResponseEntity(errorResponse, HttpStatus.UNAUTHORIZED)
     }

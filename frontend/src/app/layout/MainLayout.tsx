@@ -66,22 +66,11 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
       {/* Header */}
       <header className="bg-[#060612]/85 backdrop-blur-xl text-white py-4 fixed w-full z-[60] border-b border-white/10">
-        <div className="container mx-auto flex justify-between items-center px-4">
-          {/* Logo */}
-          <Link
-            to={routes.home}
-            className="flex items-center space-x-3 text-xl md:text-2xl font-bold hover:opacity-80 transition-opacity duration-200"
-          >
-            <div className="w-9 h-9 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/10">
-              <FaLink className="w-4 h-4 text-white" />
-            </div>
-            <span className="bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent font-bold tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
-              Shorty URL
-            </span>
-          </Link>
-
-          {/* Navigation */}
-          <div className="flex items-center space-x-3">
+        {/* 3-col on mobile: [hamburger] [logo centered] [account]
+             2-col on desktop: [logo] [account] */}
+        <div className="container mx-auto flex justify-between items-center px-4 relative">
+          {/* Left: hamburger only on mobile */}
+          <div className="flex items-center md:hidden w-10">
             {showMobileDrawerTrigger && (
               <button
                 onClick={handleOpenMobileAccountNav}
@@ -91,6 +80,23 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                 <FaBars className="w-4 h-4 text-white" />
               </button>
             )}
+          </div>
+
+          {/* Logo — centered absolutely on mobile, static left on desktop */}
+          <Link
+            to={routes.home}
+            className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 flex items-center gap-2.5 text-xl md:text-2xl font-bold hover:opacity-80 transition-opacity duration-200"
+          >
+            <div className="w-9 h-9 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/10">
+              <FaLink className="w-4 h-4 text-white" />
+            </div>
+            <span className="bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent font-bold tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
+              Shorty URL
+            </span>
+          </Link>
+
+          {/* Right: account / sign-in */}
+          <div className="flex items-center space-x-3">
             {isAuthenticated ? (
               <div className="relative hidden md:block">
                 <button
@@ -122,14 +128,22 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                       <div className="py-1.5">
                         {userMenuItems.map((item, index) => {
                           const Icon = item.icon;
+                          const active = location.pathname === item.path;
                           return (
                             <Link
                               key={index}
                               to={item.path}
                               onClick={() => setIsUserMenuOpen(false)}
-                              className="flex items-center space-x-3 px-4 py-2.5 text-white/60 hover:bg-white/10 hover:text-white transition-colors duration-200"
+                              className={`relative flex items-center space-x-3 px-4 py-2.5 transition-colors duration-200 ${
+                                active
+                                  ? 'bg-blue-500/10 text-white'
+                                  : 'text-white/60 hover:bg-white/10 hover:text-white'
+                              }`}
                             >
-                              <Icon className="w-3.5 h-3.5" />
+                              {active && (
+                                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-blue-400 rounded-r-full" />
+                              )}
+                              <Icon className={`w-3.5 h-3.5 ${active ? 'text-blue-400' : ''}`} />
                               <span className="text-sm font-medium">{item.label}</span>
                             </Link>
                           );

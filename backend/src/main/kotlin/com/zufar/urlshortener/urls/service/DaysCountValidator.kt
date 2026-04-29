@@ -1,5 +1,6 @@
 package com.zufar.urlshortener.urls.service
 
+import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import org.springframework.stereotype.Service
 
 private const val MIN_ALLOWED_DAYS_COUNT = 1L
@@ -12,7 +13,13 @@ class DaysCountValidator {
         if (daysCount == null) {
             return
         }
-        require(daysCount >= MIN_ALLOWED_DAYS_COUNT) { "Days count must be at least $MIN_ALLOWED_DAYS_COUNT day(s)." }
-        require(daysCount <= MAX_ALLOWED_DAYS_COUNT) { "Days count must not exceed $MAX_ALLOWED_DAYS_COUNT day(s)." }
+        validate(daysCount >= MIN_ALLOWED_DAYS_COUNT, "Days count must be at least $MIN_ALLOWED_DAYS_COUNT day(s).")
+        validate(daysCount <= MAX_ALLOWED_DAYS_COUNT, "Days count must not exceed $MAX_ALLOWED_DAYS_COUNT day(s).")
+    }
+
+    private fun validate(condition: Boolean, message: String) {
+        if (!condition) {
+            throw InvalidRequestException(message)
+        }
     }
 }

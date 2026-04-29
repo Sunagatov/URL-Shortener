@@ -4,16 +4,17 @@ import { getUserProfile } from '@/features/account/api/accountApi';
 import AccountSidebar from '@/app/layout/AccountSidebar';
 import { useAuth } from '@/shared/auth/useAuth';
 import { getApiErrorMessage, isSessionInvalidError } from '@/shared/lib/apiErrors';
+import { useToast } from '@/shared/ui';
 import type { User } from '@/shared/types';
 import { routes } from '@/app/routes';
 import { FaEdit, FaUser, FaEnvelope, FaGlobe, FaCalendarAlt, FaShieldAlt, FaDownload } from 'react-icons/fa';
 
 const UserAccountPage: React.FC = () => {
     const [userDetails, setUserDetails] = useState<User | null>(null);
-    const [errorMessage, setErrorMessage] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
     const { logout } = useAuth();
+    const toast = useToast();
 
     useEffect(() => {
         let isMounted = true;
@@ -21,10 +22,10 @@ const UserAccountPage: React.FC = () => {
             try {
                 setIsLoading(true);
                 const response = await getUserProfile();
-                if (isMounted) { setUserDetails(response); setErrorMessage(''); }
+                if (isMounted) { setUserDetails(response); }
             } catch (error: unknown) {
                 if (isMounted && isSessionInvalidError(error)) { logout(); navigate(routes.signIn, { replace: true }); return; }
-                if (isMounted) setErrorMessage(getApiErrorMessage(error, 'Failed to fetch user details.'));
+                if (isMounted) toast.error(getApiErrorMessage(error, 'Failed to fetch user details.'));
             } finally {
                 if (isMounted) setIsLoading(false);
             }
@@ -61,9 +62,7 @@ const UserAccountPage: React.FC = () => {
             <div className="flex min-h-[calc(100vh-72px)] bg-[#060612] md:min-h-[calc(100vh-96px)]">
                 <AccountSidebar />
                 <div className="flex-grow md:ml-64 flex items-center justify-center px-6">
-                    <p className={errorMessage ? 'text-red-400 text-sm' : 'text-white/35 text-sm'}>
-                        {errorMessage || 'Unable to load user details'}
-                    </p>
+                    <p className="text-white/35 text-sm">Unable to load user details</p>
                 </div>
             </div>
         );
@@ -91,12 +90,6 @@ const UserAccountPage: React.FC = () => {
                         </h1>
                         <p className="text-white/40 text-sm mt-0.5">Manage your personal information and preferences</p>
                     </div>
-
-                    {errorMessage && (
-                        <div className="mb-6 p-4 bg-red-900/20 border border-red-500/20 rounded-xl">
-                            <p className="text-red-400 text-sm">{errorMessage}</p>
-                        </div>
-                    )}
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 

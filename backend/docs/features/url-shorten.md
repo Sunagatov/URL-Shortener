@@ -38,7 +38,7 @@ Authorization: Bearer {accessToken}  # optional
 ### Success (200 OK)
 ```json
 {
-  "shortUrl": "http://116.203.197.65/url/abc123"
+  "shortUrl": "http://116.203.197.65/abc123"
 }
 ```
 
@@ -141,7 +141,7 @@ curl -X POST http://116.203.197.65/api/v1/urls \
 ### Expected Response
 ```json
 {
-  "shortUrl": "http://116.203.197.65/url/abc123"
+  "shortUrl": "http://116.203.197.65/abc123"
 }
 ```
 
