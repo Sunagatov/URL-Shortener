@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails as SpringUserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import java.time.Clock
 import java.time.LocalDateTime
 
 @Service
@@ -26,7 +27,8 @@ class AuthService(
     private val jwtTokenProvider: JwtTokenProvider,
     private val authRequestValidator: AuthRequestValidator,
     private val userRepository: UserRepository,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    private val clock: Clock
 ) {
 
     fun authenticateUser(signInRequest: SignInRequest): AuthResponse {
@@ -58,14 +60,8 @@ class AuthService(
         val refreshToken = refreshTokenRequest.refreshToken
         validateRefreshToken(refreshToken)
 
-        val normalizedEmail = EmailNormalizer.normalize(jwtTokenProvider.getUsernameFromJWT(refreshToken))
-        val userDetails = userRepository.findByEmailIgnoreCase(normalizedEmail)
-            ?: throw UserNotFoundException("User not found for the provided refresh token")
-        val tokenVersion = jwtTokenProvider.getTokenVersionFromJWT(refreshToken)
-            ?: throw InvalidTokenException("Invalid or expired refresh token")
-        if (tokenVersion != userDetails.tokenVersion) {
-            throw InvalidTokenException("Invalid or expired refresh token")
-        }
+        val userDetails = findUserByRefreshToken(refreshToken)
+        validateRefreshTokenVersion(refreshToken, userDetails)
 
         val newAccessToken =
             jwtTokenProvider.generateAccessToken(userDetails.toSpringUser().withTokenVersion(userDetails.tokenVersion))
@@ -86,7 +82,7 @@ class AuthService(
     }
 
     private fun buildUser(signUpRequest: SignUpRequest): UserDetails {
-        val now = LocalDateTime.now()
+        val now = LocalDateTime.now(clock)
 
         return UserDetails(
             firstName = signUpRequest.firstName,
@@ -116,6 +112,20 @@ class AuthService(
 
     private fun validateRefreshToken(refreshToken: String) {
         if (!jwtTokenProvider.validateRefreshToken(refreshToken)) {
+            throw InvalidTokenException("Invalid or expired refresh token")
+        }
+    }
+
+    private fun findUserByRefreshToken(refreshToken: String): UserDetails {
+        val normalizedEmail = EmailNormalizer.normalize(jwtTokenProvider.getUsernameFromJWT(refreshToken))
+        return userRepository.findByEmailIgnoreCase(normalizedEmail)
+            ?: throw UserNotFoundException("User not found for the provided refresh token")
+    }
+
+    private fun validateRefreshTokenVersion(refreshToken: String, userDetails: UserDetails) {
+        val tokenVersion = jwtTokenProvider.getTokenVersionFromJWT(refreshToken)
+            ?: throw InvalidTokenException("Invalid or expired refresh token")
+        if (tokenVersion != userDetails.tokenVersion) {
             throw InvalidTokenException("Invalid or expired refresh token")
         }
     }

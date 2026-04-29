@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -16,15 +15,18 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import java.time.Clock
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 @ExtendWith(MockitoExtension::class)
 class PageableUrlMappingsProviderTest {
 
     @Mock private lateinit var urlRepository: UrlRepository
     @Mock private lateinit var currentUserProvider: CurrentUserProvider
-
-    @InjectMocks private lateinit var provider: PageableUrlMappingsProvider
+    private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
+    private val provider by lazy { PageableUrlMappingsProvider(urlRepository, currentUserProvider, clock) }
 
     private val testUser = UserDetails(
         id = "user-123",

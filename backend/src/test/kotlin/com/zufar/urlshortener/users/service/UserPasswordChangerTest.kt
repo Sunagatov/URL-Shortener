@@ -20,6 +20,9 @@ import org.mockito.kotlin.whenever
 import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneOffset
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
@@ -28,6 +31,7 @@ class UserPasswordChangerTest {
     @Mock private lateinit var userRepository: UserRepository
     @Mock private lateinit var passwordEncoder: PasswordEncoder
     @Mock private lateinit var authRequestValidator: AuthRequestValidator
+    private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
 
     @AfterEach
     fun tearDown() {
@@ -55,7 +59,8 @@ class UserPasswordChangerTest {
             userRepository,
             passwordEncoder,
             authRequestValidator,
-            CurrentUserProvider(userRepository)
+            CurrentUserProvider(userRepository),
+            clock
         ).changePassword(
             ChangePasswordRequest(
                 currentPassword = "OldPassword1!",
@@ -68,7 +73,8 @@ class UserPasswordChangerTest {
             assertEquals("new-hash", password)
             assertEquals("user@example.com", email)
             assertEquals(1, tokenVersion)
-            updatedAt != null
+            assertEquals("2024-01-01T10:15:30", updatedAt.toString())
+            true
         })
     }
 
@@ -93,7 +99,8 @@ class UserPasswordChangerTest {
                 userRepository,
                 passwordEncoder,
                 authRequestValidator,
-                CurrentUserProvider(userRepository)
+                CurrentUserProvider(userRepository),
+                clock
             ).changePassword(
                 ChangePasswordRequest(
                     currentPassword = "WrongPassword1!",

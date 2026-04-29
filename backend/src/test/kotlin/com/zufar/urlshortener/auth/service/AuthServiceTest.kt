@@ -21,6 +21,9 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.crypto.password.PasswordEncoder
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneOffset
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
@@ -31,13 +34,15 @@ class AuthServiceTest {
     @Mock private lateinit var authRequestValidator: AuthRequestValidator
     @Mock private lateinit var userRepository: UserRepository
     @Mock private lateinit var passwordEncoder: PasswordEncoder
+    private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
 
     private fun service() = AuthService(
         authenticationManager = authenticationManager,
         jwtTokenProvider = jwtTokenProvider,
         authRequestValidator = authRequestValidator,
         userRepository = userRepository,
-        passwordEncoder = passwordEncoder
+        passwordEncoder = passwordEncoder,
+        clock = clock
     )
 
     @Test
@@ -62,6 +67,8 @@ class AuthServiceTest {
         val captor = ArgumentCaptor.forClass(UserDetails::class.java)
         verify(userRepository).save(captor.capture())
         assertEquals("jane.doe@example.com", captor.value.email)
+        assertEquals("2024-01-01T10:15:30", captor.value.createdAt.toString())
+        assertEquals(captor.value.createdAt, captor.value.updatedAt)
     }
 
     @Test

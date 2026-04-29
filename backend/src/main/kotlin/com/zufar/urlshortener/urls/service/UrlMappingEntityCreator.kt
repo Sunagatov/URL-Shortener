@@ -6,12 +6,16 @@ import com.zufar.urlshortener.urls.entity.UrlMapping
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.Clock
 import java.time.LocalDateTime
 
 private const val DEFAULT_EXPIRATION_URL_DAYS = 365L
 
 @Service
-class UrlMappingEntityCreator(private val currentUserProvider: CurrentUserProvider) {
+class UrlMappingEntityCreator(
+    private val currentUserProvider: CurrentUserProvider,
+    private val clock: Clock
+) {
 
     private val log = LoggerFactory.getLogger(UrlMappingEntityCreator::class.java)
 
@@ -22,7 +26,7 @@ class UrlMappingEntityCreator(private val currentUserProvider: CurrentUserProvid
         shortUrl: String
     ): UrlMapping {
         val normalizedOriginalUrl = shortenUrlRequest.originalUrl.trim()
-        val now = LocalDateTime.now()
+        val now = LocalDateTime.now(clock)
 
         val urlMapping = UrlMapping(
             urlHash = urlHash,

@@ -7,6 +7,7 @@ import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import java.time.Clock
 import java.time.LocalDateTime
 
 @Service
@@ -14,7 +15,8 @@ class UserPasswordChanger(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
     private val authRequestValidator: AuthRequestValidator,
-    private val currentUserProvider: CurrentUserProvider
+    private val currentUserProvider: CurrentUserProvider,
+    private val clock: Clock
 ) {
 
     fun changePassword(changePasswordRequest: ChangePasswordRequest) {
@@ -28,7 +30,7 @@ class UserPasswordChanger(
         val updatedUser = user.copy(
             password = passwordEncoder.encode(changePasswordRequest.newPassword),
             tokenVersion = user.tokenVersion + 1,
-            updatedAt = LocalDateTime.now()
+            updatedAt = LocalDateTime.now(clock)
         )
 
         userRepository.save(updatedUser)

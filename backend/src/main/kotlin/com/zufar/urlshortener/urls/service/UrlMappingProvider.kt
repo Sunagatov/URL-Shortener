@@ -7,12 +7,14 @@ import com.zufar.urlshortener.urls.exception.UrlNotFoundException
 import com.zufar.urlshortener.urls.repository.UrlRepository
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
+import java.time.Clock
 import java.time.LocalDateTime
 
 @Service
 class UrlMappingProvider(
     private val urlRepository: UrlRepository,
-    private val currentUserProvider: CurrentUserProvider
+    private val currentUserProvider: CurrentUserProvider,
+    private val clock: Clock
 ) {
 
     fun getPublicUrlMappingByHash(urlHash: String): UrlMappingDto {
@@ -31,7 +33,7 @@ class UrlMappingProvider(
     }
 
     private fun getActiveUrlMapping(urlHash: String): UrlMapping {
-        val now = LocalDateTime.now()
+        val now = LocalDateTime.now(clock)
 
         return urlRepository.findByUrlHash(urlHash)
             .filter { it.expirationDate.isAfter(now) }
