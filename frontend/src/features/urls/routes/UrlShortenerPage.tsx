@@ -92,7 +92,7 @@ const UrlShortenerPage: React.FC = () => {
                     </div>
 
                     {/* Headline */}
-                    <h1 className="animate-fade-up-d1 text-4xl sm:text-5xl md:text-[72px] font-black text-white leading-[1.05] tracking-tight mb-5 md:mb-6">
+                    <h1 className="animate-fade-up-d1 text-4xl sm:text-5xl md:text-[68px] font-bold text-white leading-[1.05] tracking-tight mb-5 md:mb-6" style={{ fontFamily: 'var(--font-display)' }}>
                         URL shortener for
                         <span className="block gradient-text-animated mt-1">powerful short links</span>
                     </h1>
@@ -226,7 +226,7 @@ const UrlShortenerPage: React.FC = () => {
                         <span className="inline-block bg-blue-500/10 text-blue-300 text-sm font-semibold px-4 py-1.5 rounded-full mb-4 border border-blue-400/20">
                             Why Shorty URL
                         </span>
-                        <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight leading-tight">
+                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight leading-tight" style={{ fontFamily: 'var(--font-display)' }}>
                             Everything you need,<br className="hidden md:block" /> nothing you don't
                         </h2>
                         <p className="text-lg text-white/50 max-w-xl mx-auto">
@@ -256,7 +256,7 @@ const UrlShortenerPage: React.FC = () => {
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[300px] bg-blue-700/10 rounded-full blur-[120px] pointer-events-none" />
                 <div className="relative z-10 max-w-6xl mx-auto px-6">
                     <div className="text-center mb-16">
-                        <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">
+                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
                             Trusted by millions
                         </h2>
                         <p className="text-white/45 text-lg max-w-lg mx-auto">
@@ -283,7 +283,7 @@ const UrlShortenerPage: React.FC = () => {
                     <div className="absolute -top-48 -right-48 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
                     <div className="absolute -bottom-48 -left-48 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
                     <div className="relative z-10 max-w-2xl mx-auto px-6 text-center">
-                        <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">
+                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
                             Unlock more power
                         </h2>
                         <p className="text-white/65 text-lg mb-10">

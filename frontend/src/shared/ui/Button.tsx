@@ -16,29 +16,51 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
-  const baseStyles = 'font-semibold rounded-xl transition-all duration-200 transform hover:scale-105 disabled:transform-none disabled:cursor-not-allowed flex items-center justify-center space-x-2';
-  
-  const variants = {
-    primary: 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white shadow-lg hover:shadow-xl',
-    secondary: 'bg-white/8 hover:bg-white/12 disabled:bg-white/6 text-white/82 disabled:text-white/30 border border-transparent hover:border-transparent shadow-sm hover:shadow-md backdrop-blur-sm',
-    danger: 'bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white shadow-lg hover:shadow-xl',
-    ghost: 'bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white border border-white/30 hover:border-white/50'
+  const base =
+    'font-semibold rounded-xl transition-all duration-200 flex items-center justify-center gap-2 ' +
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 ' +
+    'disabled:cursor-not-allowed disabled:opacity-50 disabled:pointer-events-none';
+
+  const variants: Record<string, string> = {
+    primary:
+      'bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white ' +
+      'shadow-[0_1px_2px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)] ' +
+      'hover:shadow-[0_4px_12px_rgba(59,130,246,0.35)]',
+    secondary:
+      'bg-white/6 hover:bg-white/10 active:bg-white/5 text-white/75 hover:text-white ' +
+      'border border-white/10 hover:border-white/18 ' +
+      'backdrop-blur-sm',
+    danger:
+      'bg-red-600/90 hover:bg-red-600 active:bg-red-700 text-white ' +
+      'shadow-[0_1px_2px_rgba(0,0,0,0.4)]',
+    ghost:
+      'bg-white/10 hover:bg-white/15 text-white border border-white/20 hover:border-white/30 ' +
+      'backdrop-blur-sm',
   };
-  
-  const sizes = {
-    sm: 'px-4 py-2 text-sm',
-    md: 'px-6 py-3 text-base',
-    lg: 'px-8 py-4 text-lg'
+
+  const sizes: Record<string, string> = {
+    sm: 'px-3.5 py-2 text-sm',
+    md: 'px-5 py-2.5 text-sm',
+    lg: 'px-6 py-3.5 text-base',
   };
 
   return (
     <button
-      className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`${base} ${variants[variant]} ${sizes[size]} ${className}`}
       disabled={disabled || loading}
       {...props}
     >
       {loading && (
-        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+        <svg
+          className="animate-spin h-4 w-4 shrink-0"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3V0a12 12 0 110 24v-4l-3 3 3 3v4a12 12 0 01-12-12z" />
+        </svg>
       )}
       {children}
     </button>

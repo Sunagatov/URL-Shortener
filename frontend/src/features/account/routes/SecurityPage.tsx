@@ -1,4 +1,3 @@
-// src/components/Security.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AccountSidebar from '@/app/layout/AccountSidebar';
@@ -7,17 +6,7 @@ import { changePassword } from '@/features/account/api/accountApi';
 import { useAuth } from '@/shared/auth/useAuth';
 import { getApiErrorMessage, isSessionInvalidError } from '@/shared/lib/apiErrors';
 import { Button } from '@/shared/ui';
-import {
-    FaShieldAlt,
-    FaLock,
-    FaEye,
-    FaEyeSlash,
-    FaCheck,
-    FaTimes,
-    FaKey,
-    FaClock,
-    FaExclamationTriangle
-} from 'react-icons/fa';
+import { FaShieldAlt, FaLock, FaEye, FaEyeSlash, FaCheck, FaTimes, FaKey, FaClock, FaExclamationTriangle } from 'react-icons/fa';
 
 const SecurityPage: React.FC = () => {
     const [currentPassword, setCurrentPassword]         = useState('');
@@ -42,10 +31,9 @@ const SecurityPage: React.FC = () => {
             special:   /[!@#$%^&*(),.?":{}|<>]/.test(password),
         };
         Object.values(checks).forEach(c => c && score++);
-
-        if (score < 2) return { strength: 'Weak',   width: '20%', textClass: 'text-red-400',    barClass: 'bg-red-500'    };
-        if (score < 4) return { strength: 'Medium', width: '60%', textClass: 'text-amber-400',  barClass: 'bg-amber-500'  };
-        return              { strength: 'Strong', width: '100%', textClass: 'text-emerald-400', barClass: 'bg-emerald-500' };
+        if (score < 2) return { strength: 'Weak',   width: '20%', textClass: 'text-red-400',   barClass: 'bg-red-500'   };
+        if (score < 4) return { strength: 'Medium', width: '60%', textClass: 'text-amber-400', barClass: 'bg-amber-500' };
+        return              { strength: 'Strong', width: '100%', textClass: 'text-blue-400',  barClass: 'bg-blue-500'  };
     };
 
     const passwordStrength = getPasswordStrength(newPassword);
@@ -55,117 +43,114 @@ const SecurityPage: React.FC = () => {
         setIsLoading(true);
         setErrorMessage('');
         setSuccessMessage('');
-
-        if (newPassword !== confirmPassword) {
-            setErrorMessage('New password and confirm password do not match.');
-            setIsLoading(false);
-            return;
-        }
-        if (passwordStrength.strength === 'Weak') {
-            setErrorMessage('Please choose a stronger password.');
-            setIsLoading(false);
-            return;
-        }
-
+        if (newPassword !== confirmPassword) { setErrorMessage('Passwords do not match.'); setIsLoading(false); return; }
+        if (passwordStrength.strength === 'Weak') { setErrorMessage('Please choose a stronger password.'); setIsLoading(false); return; }
         try {
             await changePassword({ currentPassword, newPassword });
             setSuccessMessage('Password changed successfully.');
-            setCurrentPassword('');
-            setNewPassword('');
-            setConfirmPassword('');
+            setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
         } catch (error: unknown) {
-            if (isSessionInvalidError(error)) {
-                logout();
-                navigate(routes.signIn, { replace: true });
-                return;
-            }
+            if (isSessionInvalidError(error)) { logout(); navigate(routes.signIn, { replace: true }); return; }
             setErrorMessage(getApiErrorMessage(error, 'Error changing password.'));
         } finally {
             setIsLoading(false);
         }
     };
 
-    const securityFeatures = [
-        { title: 'Password Protection', description: 'Your account is protected with a secure password', icon: FaLock,      color: 'text-emerald-400', ring: 'bg-emerald-600/20 border-emerald-500/25', badge: 'bg-emerald-900/30 text-emerald-400 border border-emerald-500/20' },
-        { title: 'Account Security',    description: 'Regular security monitoring and protection',       icon: FaShieldAlt, color: 'text-emerald-400', ring: 'bg-emerald-600/20 border-emerald-500/25', badge: 'bg-emerald-900/30 text-emerald-400 border border-emerald-500/20' },
-        { title: 'Data Encryption',     description: 'All your data is encrypted and secure',           icon: FaKey,       color: 'text-emerald-400', ring: 'bg-emerald-600/20 border-emerald-500/25', badge: 'bg-emerald-900/30 text-emerald-400 border border-emerald-500/20' },
-    ];
+    const inputClass =
+        'w-full px-4 py-3 pr-12 bg-[#0d0f1c] border border-white/[0.08] text-white ' +
+        'placeholder-white/25 rounded-xl transition-all duration-200 text-sm ' +
+        'focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/30';
 
-    const inputClass = "w-full px-4 py-3 pr-12 bg-[#11182b] border border-white/7 text-white placeholder-white/30 rounded-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-200 text-sm";
+    const EyeToggle: React.FC<{ show: boolean; onToggle: () => void }> = ({ show, onToggle }) => (
+        <button
+            type="button"
+            onClick={onToggle}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/55 transition-colors p-1"
+        >
+            {show ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
+        </button>
+    );
 
     return (
         <div className="flex min-h-[calc(100vh-72px)] bg-[#060612] bg-grid-dark md:min-h-[calc(100vh-96px)]">
             <AccountSidebar />
 
-            <div className="flex-grow md:ml-64 px-4 pt-3 pb-8 sm:px-6 md:px-10 md:py-8">
-                <div className="max-w-5xl mx-auto">
+            <div className="flex-grow md:ml-64 px-4 pt-3 pb-10 sm:px-6 md:px-10 md:py-8">
+                <div className="max-w-4xl mx-auto">
 
-                    {/* Header */}
                     <div className="mb-8 mt-3 md:mt-0">
-                        <h1 className="text-3xl font-black text-white mb-1 tracking-tight">Security</h1>
-                        <p className="text-white/45 text-sm">Manage your account security and password settings</p>
+                        <h1 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
+                            Security
+                        </h1>
+                        <p className="text-white/40 text-sm mt-0.5">Manage your account security and password settings</p>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
-                        {/* Security overview */}
-                        <div className="lg:col-span-1 rounded-2xl bg-white/5 border border-white/10 p-6">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 bg-emerald-600/20 border border-emerald-500/25 rounded-xl flex items-center justify-center">
-                                    <FaShieldAlt className="w-5 h-5 text-emerald-400" />
+                        {/* Security status panel */}
+                        <div className="lg:col-span-2 space-y-4">
+                            <div className="rounded-2xl bg-white/[0.04] border border-white/[0.07] p-5">
+                                <div className="flex items-center gap-3 mb-5">
+                                    <div className="w-9 h-9 bg-blue-600/15 border border-blue-500/20 rounded-xl flex items-center justify-center">
+                                        <FaShieldAlt className="w-4 h-4 text-blue-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-semibold text-white">Security Status</p>
+                                        <p className="text-xs text-white/30">Summary not available yet</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-sm font-bold text-white">Security Status</p>
-                                    <p className="text-xs text-white/35">Summary not available yet</p>
-                                </div>
-                            </div>
 
-                            <div className="space-y-2 mb-6">
-                                {securityFeatures.map((feature, i) => {
-                                    const Icon = feature.icon;
-                                    return (
-                                        <div key={i} className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 rounded-xl">
-                                            <div className={`w-7 h-7 rounded-lg border flex items-center justify-center flex-shrink-0 ${feature.ring}`}>
-                                                <Icon className={`w-3 h-3 ${feature.color}`} />
+                                <div className="space-y-2">
+                                    {[
+                                        { icon: FaLock,      label: 'Password Protection', desc: 'Account is protected' },
+                                        { icon: FaShieldAlt, label: 'Account Security',    desc: 'Regular monitoring'   },
+                                        { icon: FaKey,       label: 'Data Encryption',     desc: 'All data is encrypted' },
+                                    ].map((f, i) => {
+                                        const Icon = f.icon;
+                                        return (
+                                            <div key={i} className="flex items-center gap-3 p-3 bg-white/[0.03] border border-white/[0.06] rounded-xl">
+                                                <div className="w-7 h-7 bg-blue-600/10 border border-blue-500/15 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                    <Icon className="w-3 h-3 text-blue-400/70" />
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-xs font-semibold text-white/75 truncate">{f.label}</p>
+                                                    <p className="text-[10px] text-white/30 truncate">{f.desc}</p>
+                                                </div>
+                                                <span className="text-[10px] font-medium text-blue-400/80 bg-blue-900/25 border border-blue-500/15 px-2 py-0.5 rounded-full flex-shrink-0">
+                                                    Active
+                                                </span>
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-xs font-semibold text-white truncate">{feature.title}</p>
-                                                <p className="text-xs text-white/35 truncate">{feature.description}</p>
-                                            </div>
-                                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${feature.badge}`}>
-                                                Active
-                                            </span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-
-                            <div className="p-4 bg-blue-900/20 border border-blue-500/20 rounded-xl">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <FaClock className="w-3.5 h-3.5 text-blue-400" />
-                                    <span className="text-xs font-semibold text-blue-300">Last Password Change</span>
+                                        );
+                                    })}
                                 </div>
-                                <p className="text-xs text-blue-300/60">Password change history is not available yet.</p>
+
+                                <div className="mt-4 p-3.5 bg-white/[0.03] border border-white/[0.06] rounded-xl flex items-center gap-3">
+                                    <FaClock className="w-3.5 h-3.5 text-white/25 flex-shrink-0" />
+                                    <div>
+                                        <p className="text-[10px] font-semibold text-white/30 uppercase tracking-widest">Last Password Change</p>
+                                        <p className="text-xs text-white/25 mt-0.5">History not available yet.</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         {/* Password change form */}
-                        <div className="lg:col-span-2 rounded-2xl bg-white/5 border border-white/10 overflow-hidden">
-                            {/* Form header */}
-                            <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6 flex items-center gap-4">
-                                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                                    <FaLock className="w-5 h-5 text-white" />
+                        <div className="lg:col-span-3 rounded-2xl bg-white/[0.04] border border-white/[0.07] overflow-hidden">
+                            <div className="px-6 py-5 border-b border-white/[0.07] flex items-center gap-3">
+                                <div className="w-9 h-9 bg-blue-600/15 border border-blue-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                                    <FaLock className="w-4 h-4 text-blue-400" />
                                 </div>
                                 <div>
-                                    <h2 className="text-lg font-bold text-white">Change Password</h2>
-                                    <p className="text-blue-100/70 text-sm">Update your account password</p>
+                                    <p className="text-sm font-semibold text-white">Change Password</p>
+                                    <p className="text-xs text-white/35">Update your account password</p>
                                 </div>
                             </div>
 
-                            <form onSubmit={handlePasswordChange} className="p-8 space-y-5">
+                            <form onSubmit={handlePasswordChange} className="p-6 space-y-5">
                                 {/* Current password */}
                                 <div>
-                                    <label className="block text-white/60 text-xs font-semibold mb-2 uppercase tracking-wider">
+                                    <label className="block text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">
                                         Current Password
                                     </label>
                                     <div className="relative">
@@ -177,19 +162,13 @@ const SecurityPage: React.FC = () => {
                                             className={inputClass}
                                             placeholder="Enter your current password"
                                         />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors p-1"
-                                        >
-                                            {showCurrentPassword ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
-                                        </button>
+                                        <EyeToggle show={showCurrentPassword} onToggle={() => setShowCurrentPassword(v => !v)} />
                                     </div>
                                 </div>
 
                                 {/* New password */}
                                 <div>
-                                    <label className="block text-white/60 text-xs font-semibold mb-2 uppercase tracking-wider">
+                                    <label className="block text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">
                                         New Password
                                     </label>
                                     <div className="relative">
@@ -199,39 +178,33 @@ const SecurityPage: React.FC = () => {
                                             onChange={e => setNewPassword(e.target.value)}
                                             required
                                             className={inputClass}
-                                            placeholder="Enter your new password"
+                                            placeholder="Enter a new strong password"
                                         />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowNewPassword(!showNewPassword)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors p-1"
-                                        >
-                                            {showNewPassword ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
-                                        </button>
+                                        <EyeToggle show={showNewPassword} onToggle={() => setShowNewPassword(v => !v)} />
                                     </div>
 
                                     {newPassword && (
-                                        <div className="mt-3">
-                                            <div className="flex justify-between mb-2">
-                                                <span className="text-xs text-white/40">Strength</span>
+                                        <div className="mt-3 space-y-2">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-[10px] text-white/30 uppercase tracking-widest">Strength</span>
                                                 <span className={`text-xs font-semibold ${passwordStrength.textClass}`}>
                                                     {passwordStrength.strength}
                                                 </span>
                                             </div>
-                                            <div className="w-full bg-white/10 rounded-full h-1.5">
+                                            <div className="w-full bg-white/[0.07] rounded-full h-1">
                                                 <div
-                                                    className={`${passwordStrength.barClass} h-1.5 rounded-full transition-all duration-300`}
+                                                    className={`${passwordStrength.barClass} h-1 rounded-full transition-all duration-300`}
                                                     style={{ width: passwordStrength.width }}
                                                 />
                                             </div>
-                                            <div className="mt-3 grid grid-cols-2 gap-1.5 text-xs">
+                                            <div className="grid grid-cols-2 gap-1.5 pt-1">
                                                 {[
-                                                    { ok: newPassword.length >= 8,                        label: '8+ characters'    },
-                                                    { ok: /[A-Z]/.test(newPassword),                      label: 'Uppercase letter' },
-                                                    { ok: /\d/.test(newPassword),                         label: 'Number'           },
-                                                    { ok: /[!@#$%^&*(),.?":{}|<>]/.test(newPassword),    label: 'Special char'     },
+                                                    { ok: newPassword.length >= 8,                     label: '8+ characters'    },
+                                                    { ok: /[A-Z]/.test(newPassword),                   label: 'Uppercase letter' },
+                                                    { ok: /\d/.test(newPassword),                      label: 'Number'           },
+                                                    { ok: /[!@#$%^&*(),.?":{}|<>]/.test(newPassword),  label: 'Special char'     },
                                                 ].map((check, i) => (
-                                                    <div key={i} className={`flex items-center gap-1.5 ${check.ok ? 'text-emerald-400' : 'text-white/25'}`}>
+                                                    <div key={i} className={`flex items-center gap-1.5 text-xs ${check.ok ? 'text-blue-400' : 'text-white/20'}`}>
                                                         {check.ok ? <FaCheck size={9} /> : <FaTimes size={9} />}
                                                         <span>{check.label}</span>
                                                     </div>
@@ -243,7 +216,7 @@ const SecurityPage: React.FC = () => {
 
                                 {/* Confirm password */}
                                 <div>
-                                    <label className="block text-white/60 text-xs font-semibold mb-2 uppercase tracking-wider">
+                                    <label className="block text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">
                                         Confirm New Password
                                     </label>
                                     <div className="relative">
@@ -252,20 +225,10 @@ const SecurityPage: React.FC = () => {
                                             value={confirmPassword}
                                             onChange={e => setConfirmPassword(e.target.value)}
                                             required
-                                            className={`${inputClass} ${
-                                                confirmPassword && newPassword !== confirmPassword
-                                                    ? 'border-red-500/40 focus:ring-red-500/40'
-                                                    : ''
-                                            }`}
+                                            className={`${inputClass} ${confirmPassword && newPassword !== confirmPassword ? 'border-red-500/30 focus:ring-red-500/30' : ''}`}
                                             placeholder="Confirm your new password"
                                         />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors p-1"
-                                        >
-                                            {showConfirmPassword ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
-                                        </button>
+                                        <EyeToggle show={showConfirmPassword} onToggle={() => setShowConfirmPassword(v => !v)} />
                                     </div>
                                     {confirmPassword && newPassword !== confirmPassword && (
                                         <p className="mt-2 text-xs text-red-400 flex items-center gap-1.5">
@@ -274,17 +237,16 @@ const SecurityPage: React.FC = () => {
                                     )}
                                 </div>
 
-                                {/* Messages */}
                                 {errorMessage && (
-                                    <div className="p-4 bg-red-900/30 border border-red-500/30 rounded-xl flex items-center gap-3">
+                                    <div className="p-4 bg-red-900/20 border border-red-500/20 rounded-xl flex items-center gap-3">
                                         <FaExclamationTriangle className="w-4 h-4 text-red-400 flex-shrink-0" />
                                         <p className="text-red-400 text-sm">{errorMessage}</p>
                                     </div>
                                 )}
                                 {successMessage && (
-                                    <div className="p-4 bg-emerald-900/30 border border-emerald-500/30 rounded-xl flex items-center gap-3">
-                                        <FaCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                                        <p className="text-emerald-400 text-sm">{successMessage}</p>
+                                    <div className="p-4 bg-blue-900/20 border border-blue-500/20 rounded-xl flex items-center gap-3">
+                                        <FaCheck className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                                        <p className="text-blue-300 text-sm">{successMessage}</p>
                                     </div>
                                 )}
 

@@ -32,6 +32,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const isAccountRoute = location.pathname.startsWith('/account');
   const isSignInRoute = location.pathname === routes.signIn;
   const isSignUpRoute = location.pathname === routes.signUp;
+  const isAuthRoute = isSignInRoute || isSignUpRoute;
   const showMobileDrawerTrigger = isAuthenticated;
 
   const handleLogout = () => {
@@ -74,7 +75,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             <div className="w-9 h-9 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/10">
               <FaLink className="w-4 h-4 text-white" />
             </div>
-            <span className="bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent font-bold tracking-tight">
+            <span className="bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent font-bold tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
               Shorty URL
             </span>
           </Link>
@@ -173,7 +174,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       {/* Main Content */}
       <main
         className={`flex-grow bg-[#060612] pt-[72px] md:pt-24 ${
-          isAccountRoute ? '' : 'flex items-center justify-center'
+          isAccountRoute || isAuthRoute ? '' : 'flex items-center justify-center'
         }`}
       >
         {children}

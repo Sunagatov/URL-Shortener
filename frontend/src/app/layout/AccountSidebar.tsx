@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { routes } from '@/app/routes';
 import { authSession } from '@/shared/auth/authSession';
+import { useAuth } from '@/shared/auth/useAuth';
 import {
     FaTachometerAlt,
     FaUser,
@@ -19,17 +20,16 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+    const { user } = useAuth();
 
     React.useEffect(() => {
         const handleToggleDrawer = () => setIsOpen((prev) => !prev);
-        const handleCloseDrawer = () => setIsOpen(false);
-
+        const handleCloseDrawer  = () => setIsOpen(false);
         window.addEventListener('shorty:toggle-account-drawer', handleToggleDrawer);
-        window.addEventListener('shorty:close-account-drawer', handleCloseDrawer);
-
+        window.addEventListener('shorty:close-account-drawer',  handleCloseDrawer);
         return () => {
             window.removeEventListener('shorty:toggle-account-drawer', handleToggleDrawer);
-            window.removeEventListener('shorty:close-account-drawer', handleCloseDrawer);
+            window.removeEventListener('shorty:close-account-drawer',  handleCloseDrawer);
         };
     }, []);
 
@@ -52,12 +52,20 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
         { path: routes.profile,     icon: FaUser,          label: 'Profile'   },
     ];
 
+    const displayName = user
+        ? [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email
+        : 'Account';
+
+    const initials = user
+        ? `${user.firstName?.charAt(0) ?? ''}${user.lastName?.charAt(0) ?? ''}`.toUpperCase() || 'U'
+        : 'U';
+
     return (
         <>
             {/* Mobile backdrop */}
             {isOpen && (
                 <div
-                    className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+                    className="md:hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
                     onClick={() => setIsOpen(false)}
                 />
             )}
@@ -67,27 +75,36 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
                 ${isOpen ? 'translate-x-0' : '-translate-x-full'}
                 ${desktopVisible ? 'md:translate-x-0' : 'md:hidden'}
                 fixed top-0 left-0 h-full w-64
-                bg-[#0d0d20] border-r border-white/10
+                bg-[#0a0c1b] border-r border-white/[0.07]
                 z-50 transition-transform duration-300 ease-in-out
                 flex flex-col
             `}>
-                {/* Brand */}
-                <div className="px-5 mt-20 pb-4">
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-blue-600/20 border border-blue-500/30 rounded-xl flex items-center justify-center">
-                            <FaLink className="w-3.5 h-3.5 text-blue-400" />
+                {/* User profile section */}
+                <div className="px-4 mt-[76px] pb-4">
+                    <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.07]">
+                        <div className="w-9 h-9 rounded-xl bg-blue-600/25 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                            <span className="text-sm font-bold text-blue-300" style={{ fontFamily: 'var(--font-display)' }}>
+                                {initials}
+                            </span>
                         </div>
-                        <div>
-                            <p className="text-sm font-semibold text-white leading-tight">Shorty URL</p>
-                            <p className="text-xs text-white/35">Manage your links</p>
+                        <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-white truncate leading-tight">
+                                {displayName}
+                            </p>
+                            {user?.email && displayName !== user.email && (
+                                <p className="text-xs text-white/35 truncate mt-0.5">{user.email}</p>
+                            )}
                         </div>
                     </div>
                 </div>
 
-                <div className="mx-5 border-t border-white/10 mb-3" />
+                <div className="mx-4 border-t border-white/[0.06] mb-2" />
 
                 {/* Nav */}
                 <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
+                    <p className="px-3 pb-2 pt-1 text-[10px] font-semibold text-white/25 uppercase tracking-widest">
+                        Navigation
+                    </p>
                     {menuItems.map((item) => {
                         const Icon = item.icon;
                         const active = isActive(item.path);
@@ -96,38 +113,36 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
                                 key={item.path}
                                 to={item.path}
                                 onClick={() => setIsOpen(false)}
-                                className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
-                                    active
-                                        ? 'bg-blue-600/20 text-white border border-blue-500/25'
-                                        : 'text-white/50 hover:text-white hover:bg-white/10'
-                                }`}
+                                className={`
+                                    group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
+                                    ${active ? 'sidebar-item-active' : 'text-white/45 hover:text-white hover:bg-white/[0.06]'}
+                                `}
                             >
                                 <Icon className={`w-4 h-4 flex-shrink-0 transition-colors ${
-                                    active ? 'text-blue-400' : 'text-white/35 group-hover:text-white/70'
+                                    active ? 'text-blue-400' : 'text-white/30 group-hover:text-white/60'
                                 }`} />
                                 <span className="text-sm font-medium">{item.label}</span>
-                                {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-blue-400" />}
                             </Link>
                         );
                     })}
                 </nav>
 
                 {/* Bottom */}
-                <div className="px-3 pb-6">
-                    <div className="border-t border-white/10 pt-3 space-y-0.5">
+                <div className="px-3 pb-5">
+                    <div className="border-t border-white/[0.06] pt-3 space-y-0.5">
                         <Link
                             to={routes.home}
                             onClick={() => setIsOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/35 hover:text-white hover:bg-white/10 transition-all duration-200"
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition-all duration-200"
                         >
                             <FaHome className="w-4 h-4" />
                             <span className="text-sm font-medium">Home</span>
                         </Link>
                         <button
                             type="button"
-                            aria-label="Log out from sidebar"
+                            aria-label="Sign out"
                             onClick={handleLogout}
-                            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-red-400/70 hover:text-red-300 hover:bg-red-900/20 transition-all duration-200"
+                            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-red-400/60 hover:text-red-300 hover:bg-red-900/15 transition-all duration-200"
                         >
                             <FaSignOutAlt className="w-4 h-4" />
                             <span className="text-sm font-medium">Sign Out</span>

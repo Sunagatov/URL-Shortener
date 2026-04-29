@@ -1,40 +1,48 @@
 /* src/index.css */
 @import "tailwindcss";
 
+/* ─── CSS Variables ─────────────────────────────── */
+:root {
+  --bg-base:      #060612;
+  --bg-surface:   #0d0f1c;
+  --bg-elevated:  #131629;
+  --border:       rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --accent:       #3b82f6;
+  --accent-hover: #2563eb;
+  --accent-glow:  rgba(59, 130, 246, 0.18);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.55);
+  --text-muted:   rgba(255, 255, 255, 0.30);
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+}
+
 html, body {
   margin: 0;
   padding: 0;
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body), sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--bg-base);
+  color: var(--text-primary);
 }
 
-main {
-  flex-grow: 1;
-}
+main { flex-grow: 1; }
+img  { max-height: 40px; }
+a    { text-decoration: none; }
 
-img {
-  max-height: 40px;
-}
+input:focus { outline: none; }
 
-.footer {
-  background-color: #1f2937;
-  color: white;
-  padding: 20px;
-  text-align: center;
-}
+/* ─── Display / heading font ─────────────────────── */
+.font-display { font-family: var(--font-display), sans-serif !important; }
+.font-mono-url { font-family: var(--font-mono), monospace !important; }
 
-a {
-  text-decoration: none;
-}
-
-input:focus {
-  outline: none;
-}
-
+/* ─── Autofill dark override ─────────────────────── */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -42,8 +50,8 @@ input:-webkit-autofill:active {
   -webkit-text-fill-color: #ffffff;
   caret-color: #ffffff;
   transition: background-color 9999s ease-in-out 0s;
-  -webkit-box-shadow: 0 0 0 1000px #11182b inset;
-  box-shadow: 0 0 0 1000px #11182b inset;
+  -webkit-box-shadow: 0 0 0 1000px #0d0f1c inset;
+  box-shadow: 0 0 0 1000px #0d0f1c inset;
 }
 
 /* ─── Animated orbs ─────────────────────────────── */
@@ -51,47 +59,41 @@ input:-webkit-autofill:active {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50%       { transform: translate(30px, -40px) scale(1.06); }
 }
-
 @keyframes orb-float-2 {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50%       { transform: translate(-40px, 20px) scale(0.94); }
 }
-
 @keyframes orb-float-3 {
   0%, 100% { transform: translate(0, 0) scale(1); }
   50%       { transform: translate(20px, 30px) scale(1.08); }
 }
-
 .orb-1 { animation: orb-float-1  8s ease-in-out infinite; }
 .orb-2 { animation: orb-float-2 11s ease-in-out infinite; }
 .orb-3 { animation: orb-float-3 14s ease-in-out infinite; }
 
 /* ─── Fade-up entrance ──────────────────────────── */
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(28px); }
+  from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
-.animate-fade-up    { animation: fade-up 0.65s ease-out 0s    both; }
-.animate-fade-up-d1 { animation: fade-up 0.65s ease-out 0.12s both; }
-.animate-fade-up-d2 { animation: fade-up 0.65s ease-out 0.24s both; }
-.animate-fade-up-d3 { animation: fade-up 0.65s ease-out 0.36s both; }
+.animate-fade-up    { animation: fade-up 0.55s ease-out 0s    both; }
+.animate-fade-up-d1 { animation: fade-up 0.55s ease-out 0.1s  both; }
+.animate-fade-up-d2 { animation: fade-up 0.55s ease-out 0.2s  both; }
+.animate-fade-up-d3 { animation: fade-up 0.55s ease-out 0.3s  both; }
 
 /* ─── Shimmer (animated gradient text) ─────────── */
 @keyframes shimmer {
   0%   { background-position: 0 center; }
   100% { background-position: 200% center; }
 }
-
 .gradient-text {
-  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+  background: linear-gradient(135deg, #60a5fa 0%, #818cf8 50%, #a78bfa 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-
 .gradient-text-animated {
-  background: linear-gradient(90deg, #60a5fa 0%, #a78bfa 40%, #f472b6 70%, #60a5fa 100%);
+  background: linear-gradient(90deg, #60a5fa 0%, #818cf8 40%, #a78bfa 70%, #60a5fa 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -99,67 +101,113 @@ input:-webkit-autofill:active {
   animation: shimmer 4s linear infinite;
 }
 
+/* ─── Skeleton shimmer ──────────────────────────── */
+@keyframes skeleton-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 0%,
+    rgba(255,255,255,0.09) 50%,
+    rgba(255,255,255,0.04) 100%
+  );
+  background-size: 800px 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+  border-radius: 8px;
+}
+
 /* ─── Glassmorphism ─────────────────────────────── */
 .glass-card {
   background: rgba(255, 255, 255, 0.07);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 20px;
 }
 
-/* ─── Gradient border cards ─────────────────────── */
+/* ─── Feature cards ─────────────────────────────── */
 .gradient-border-card {
   position: relative;
-  background: rgba(17, 24, 43, 0.88);
-  border-radius: 20px;
+  background: rgba(13, 15, 28, 0.9);
+  border-radius: 16px;
   isolation: isolate;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border: 1px solid rgba(255, 255, 255, 0.07);
 }
-
 .gradient-border-card::before {
   content: '';
   position: absolute;
-  inset: -1.5px;
-  border-radius: 21.5px;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+  inset: -1px;
+  border-radius: 17px;
+  background: linear-gradient(135deg, #3b82f6, #6366f1, #8b5cf6);
   z-index: -1;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.25s ease;
 }
-
 .gradient-border-card:hover::before { opacity: 1; }
-
 .gradient-border-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 24px 48px -12px rgba(59, 130, 246, 0.18);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -12px rgba(59, 130, 246, 0.15);
 }
 
 /* ─── Background patterns ───────────────────────── */
 .bg-grid-dark {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 60px 60px;
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 64px 64px;
 }
-
-.bg-dots-light {
-  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.07) 1px, transparent 1px);
-  background-size: 22px 22px;
-}
-
 .bg-grid-soft {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 60px 60px;
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+.bg-dots-subtle {
+  background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ─── Sidebar active indicator ──────────────────── */
+.sidebar-item-active {
+  position: relative;
+  background: rgba(59, 130, 246, 0.12);
+  color: #fff;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+.sidebar-item-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: #3b82f6;
+  border-radius: 0 2px 2px 0;
 }
 
 /* ─── Scrollbar ─────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #0d0d1f; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #3b82f6, #8b5cf6);
+  background: rgba(59, 130, 246, 0.4);
   border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.6); }
+
+/* ─── Auth split panel ──────────────────────────── */
+.auth-brand-panel {
+  background: linear-gradient(145deg, #0d1628 0%, #060612 60%, #0a0e20 100%);
+  border-right: 1px solid rgba(255,255,255,0.07);
+}
+
+/* ─── Footer ─────────────────────────────────────── */
+.footer {
+  background-color: var(--bg-base);
+  color: white;
+  padding: 20px;
+  text-align: center;
 }

@@ -12,9 +12,9 @@ import {
     FaLink,
     FaExternalLinkAlt,
     FaCopy,
-    FaCalendarAlt,
     FaChevronLeft,
     FaChevronRight,
+    FaPlus,
 } from 'react-icons/fa';
 
 export const getVisiblePages = (page: number, totalPages: number, maxVisiblePages = 5) => {
@@ -23,19 +23,141 @@ export const getVisiblePages = (page: number, totalPages: number, maxVisiblePage
         Math.min(page - Math.floor(maxVisiblePages / 2), Math.max(0, totalPages - maxVisiblePages))
     );
     const endPage = Math.min(totalPages, startPage + maxVisiblePages);
-
     return Array.from({ length: endPage - startPage }, (_, index) => startPage + index);
+};
+
+const getDomainLabel = (url: string) => {
+    try { return new URL(url).hostname.replace('www.', ''); }
+    catch { return url.slice(0, 20); }
+};
+
+const UrlCard: React.FC<{
+    mapping: UrlMapping;
+    index: number;
+    onCopy: (url: string) => void;
+    copiedUrl: string | null;
+    onDetails: () => void;
+    onDelete: () => void;
+    formatDate: (d: string) => string;
+}> = ({ mapping, index, onCopy, copiedUrl, onDetails, onDelete, formatDate }) => {
+    const domain = getDomainLabel(mapping.originalUrl);
+    const shortSlug = mapping.shortUrl.split('/').pop() ?? mapping.shortUrl;
+
+    return (
+        <div className="group rounded-2xl bg-white/[0.04] border border-white/[0.07] hover:border-white/[0.13] hover:bg-white/[0.06] transition-all duration-200 overflow-hidden">
+            {/* Card header */}
+            <div className="px-5 py-3.5 flex items-center gap-3 border-b border-white/[0.06]">
+                <div className="w-8 h-8 rounded-xl bg-blue-600/15 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
+                    <FaLink className="w-3 h-3 text-blue-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs font-semibold text-white/50">#{index}</span>
+                        <span className="text-xs text-white/25">·</span>
+                        <span className="text-xs text-white/45 truncate">{domain}</span>
+                    </div>
+                    <p className="text-xs text-white/25 mt-0.5">{formatDate(mapping.createdAt)}</p>
+                </div>
+            </div>
+
+            {/* URLs */}
+            <div className="px-5 py-4 space-y-3">
+                {/* Short URL row */}
+                <div>
+                    <p className="text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-1.5">Short URL</p>
+                    <div className="flex items-center gap-2 bg-[#0a1220] rounded-xl px-3 py-2.5 border border-white/[0.06] group/row hover:border-blue-500/20 transition-colors">
+                        <a
+                            href={mapping.shortUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 text-blue-400 hover:text-blue-300 text-sm truncate transition-colors"
+                            style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}
+                        >
+                            …/{shortSlug}
+                        </a>
+                        <div className="flex items-center gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity">
+                            <button
+                                onClick={() => onCopy(mapping.shortUrl)}
+                                className="p-1.5 text-white/30 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-all"
+                                title="Copy"
+                            >
+                                <FaCopy className="w-3 h-3" />
+                            </button>
+                            <a
+                                href={mapping.shortUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-1.5 text-white/30 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-all"
+                                title="Open"
+                            >
+                                <FaExternalLinkAlt className="w-3 h-3" />
+                            </a>
+                        </div>
+                        {copiedUrl === mapping.shortUrl && (
+                            <span className="text-[10px] text-blue-400 font-medium shrink-0">Copied!</span>
+                        )}
+                    </div>
+                </div>
+
+                {/* Original URL row */}
+                <div>
+                    <p className="text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-1.5">Original URL</p>
+                    <div className="flex items-center gap-2 bg-white/[0.03] rounded-xl px-3 py-2.5 border border-white/[0.05] group/row hover:border-white/[0.10] transition-colors">
+                        <a
+                            href={mapping.originalUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 text-white/45 hover:text-white/70 text-xs truncate transition-colors"
+                            style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}
+                            title={mapping.originalUrl}
+                        >
+                            {mapping.originalUrl}
+                        </a>
+                        <div className="flex items-center gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity shrink-0">
+                            <button
+                                onClick={() => onCopy(mapping.originalUrl)}
+                                className="p-1.5 text-white/30 hover:text-white/60 hover:bg-white/5 rounded-lg transition-all"
+                                title="Copy"
+                            >
+                                <FaCopy className="w-3 h-3" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {mapping.expirationDate && (
+                    <div className="flex items-center gap-2 px-3 py-2 bg-amber-900/15 border border-amber-500/15 rounded-xl">
+                        <span className="text-[10px] font-semibold text-amber-400/60 uppercase tracking-widest">Expires</span>
+                        <span className="text-xs text-amber-300/70 ml-auto" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem' }}>
+                            {formatDate(mapping.expirationDate)}
+                        </span>
+                    </div>
+                )}
+            </div>
+
+            {/* Actions */}
+            <div className="px-5 py-3 bg-white/[0.02] border-t border-white/[0.06] flex gap-2">
+                <Button onClick={onDetails} variant="secondary" size="sm" className="flex-1 justify-center">
+                    <FaInfoCircle className="w-3 h-3" />
+                    <span>Details</span>
+                </Button>
+                <Button onClick={onDelete} variant="danger" size="sm" title="Delete URL">
+                    <FaTrash className="w-3 h-3" />
+                </Button>
+            </div>
+        </div>
+    );
 };
 
 const UserUrlMappingsPage: React.FC = () => {
     const [urlMappings, setUrlMappings] = useState<UrlMapping[]>([]);
     const [page, setPage] = useState(0);
     const size = 6;
-    const [totalPages, setTotalPages] = useState(0);
+    const [totalPages, setTotalPages]       = useState(0);
     const [totalElements, setTotalElements] = useState(0);
-    const [errorMessage, setErrorMessage] = useState('');
-    const [isLoading, setIsLoading] = useState(true);
-    const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage]   = useState('');
+    const [isLoading, setIsLoading]         = useState(true);
+    const [copiedUrl, setCopiedUrl]         = useState<string | null>(null);
     const navigate = useNavigate();
 
     const fetchUrlMappings = useCallback(async (pageNumber: number) => {
@@ -51,37 +173,23 @@ const UserUrlMappingsPage: React.FC = () => {
                 navigate(routes.signIn, { replace: true });
                 return;
             }
-
             setErrorMessage(getApiErrorMessage(error, 'Failed to fetch URL mappings.'));
         } finally {
             setIsLoading(false);
         }
     }, [navigate]);
 
-    useEffect(() => {
-        void fetchUrlMappings(page);
-    }, [fetchUrlMappings, page]);
+    useEffect(() => { void fetchUrlMappings(page); }, [fetchUrlMappings, page]);
 
     const handleDelete = async (urlHash: string) => {
-        const confirmDelete = window.confirm(
-            'Are you sure you want to delete this URL mapping?'
-        );
-        if (!confirmDelete) return;
-
+        if (!window.confirm('Delete this URL mapping?')) return;
         try {
             await deleteUrl(urlHash);
-
-            const shouldGoBackOnePage = urlMappings.length === 1 && page > 0;
-            const nextPage = shouldGoBackOnePage ? page - 1 : page;
-
+            const nextPage = urlMappings.length === 1 && page > 0 ? page - 1 : page;
             await fetchUrlMappings(nextPage);
             setErrorMessage('');
         } catch (error: unknown) {
-            if (getApiErrorStatus(error) === 401) {
-                navigate(routes.signIn, { replace: true });
-                return;
-            }
-
+            if (getApiErrorStatus(error) === 401) { navigate(routes.signIn, { replace: true }); return; }
             setErrorMessage(getApiErrorMessage(error, 'Failed to delete URL mapping.'));
         }
     };
@@ -91,41 +199,21 @@ const UserUrlMappingsPage: React.FC = () => {
             await navigator.clipboard.writeText(url);
             setCopiedUrl(url);
             setTimeout(() => setCopiedUrl(null), 2000);
-        } catch (error) {
-            console.error('Failed to copy URL:', error);
-        }
+        } catch (err) { console.error('Failed to copy URL:', err); }
     };
 
-    const handlePreviousPage = () => {
-        if (page > 0) {
-            setPage(page - 1);
-        }
-    };
-
-    const handleNextPage = () => {
-        if (page < totalPages - 1) {
-            setPage(page + 1);
-        }
-    };
-
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        });
-    };
-
-    const truncateUrl = (url: string, maxLength: number = 40) => {
-        return url.length > maxLength ? `${url.substring(0, maxLength)}...` : url;
-    };
+    const formatDate = (dateString: string) =>
+        new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
     if (isLoading) {
         return (
             <div className="flex min-h-[calc(100vh-72px)] bg-[#060612] md:min-h-[calc(100vh-96px)]">
                 <AccountSidebar />
                 <div className="flex-grow md:ml-64 flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500" />
+                    <div className="flex flex-col items-center gap-3">
+                        <div className="w-8 h-8 rounded-full border-2 border-blue-500/30 border-t-blue-500 animate-spin" />
+                        <p className="text-white/30 text-sm">Loading your URLs…</p>
+                    </div>
                 </div>
             </div>
         );
@@ -134,203 +222,107 @@ const UserUrlMappingsPage: React.FC = () => {
     return (
         <div className="flex min-h-[calc(100vh-72px)] bg-[#060612] bg-grid-dark md:min-h-[calc(100vh-96px)]">
             <AccountSidebar />
-            <div className="flex-grow md:ml-64 px-4 pt-3 pb-8 sm:px-6 md:px-10 md:py-8">
+            <div className="flex-grow md:ml-64 px-4 pt-3 pb-10 sm:px-6 md:px-10 md:py-8">
                 <div className="mx-auto flex min-h-full max-w-6xl flex-col">
+
                     {/* Header */}
-                    <div className="mb-8 mt-3 md:mt-0">
-                        <h1 className="text-3xl font-black text-white mb-1 tracking-tight">My URLs</h1>
-                        <p className="text-white/45 text-sm">Manage and track your shortened URLs</p>
-                        {totalElements > 0 && (
-                            <div className="mt-4 flex items-center gap-2">
-                                <span className="bg-blue-900/30 text-blue-400 border border-blue-500/25 px-3 py-1 rounded-full text-xs font-medium">
-                                    {totalElements} Total URLs
+                    <div className="mb-8 mt-3 md:mt-0 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h1 className="text-2xl font-bold text-white tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
+                                My URLs
+                            </h1>
+                            <p className="text-white/40 text-sm mt-0.5">Manage and track your shortened links</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            {totalElements > 0 && (
+                                <span className="text-xs text-white/35 hidden sm:block">
+                                    {totalElements} link{totalElements !== 1 ? 's' : ''}
                                 </span>
-                                <span className="bg-white/5 text-white/50 border border-white/10 px-3 py-1 rounded-full text-xs font-medium">
-                                    Page {page + 1} of {totalPages}
-                                </span>
-                            </div>
-                        )}
+                            )}
+                            <Button onClick={() => navigate(routes.home)} variant="primary" size="sm">
+                                <FaPlus className="w-3.5 h-3.5" />
+                                <span>New URL</span>
+                            </Button>
+                        </div>
                     </div>
 
                     {errorMessage && (
-                        <div className="mb-6 p-4 bg-red-900/30 border border-red-500/30 rounded-xl">
+                        <div className="mb-6 p-4 bg-red-900/20 border border-red-500/20 rounded-xl">
                             <p className="text-red-400 text-sm">{errorMessage}</p>
                         </div>
                     )}
 
                     {/* URL Cards Grid */}
                     {urlMappings.length > 0 ? (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
                             {urlMappings.map((mapping, index) => (
-                                <div
+                                <UrlCard
                                     key={mapping.urlHash}
-                                    className="rounded-2xl overflow-hidden border border-white/10 bg-white/5 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-white/20"
-                                >
-                                    {/* Card Header */}
-                                    <div className="bg-white/5 px-5 py-4 border-b border-white/10 flex items-center gap-3">
-                                        <div className="w-9 h-9 bg-blue-600/20 border border-blue-500/25 rounded-xl flex items-center justify-center flex-shrink-0">
-                                            <FaLink className="w-3.5 h-3.5 text-blue-400" />
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-bold text-white">URL #{index + 1 + page * size}</p>
-                                            <p className="text-xs text-white/35 flex items-center gap-1">
-                                                <FaCalendarAlt className="w-2.5 h-2.5" />
-                                                Created {formatDate(mapping.createdAt)}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {/* Card Content */}
-                                    <div className="p-5 space-y-4">
-                                        {/* Short URL */}
-                                        <div>
-                                            <label className="block text-xs font-semibold text-white/40 mb-2 uppercase tracking-wider">Short URL</label>
-                                            <div className="flex items-center gap-2 p-3 bg-emerald-900/20 rounded-xl border border-emerald-500/25">
-                                                <a
-                                                    href={mapping.shortUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex-1 text-emerald-400 hover:text-emerald-300 font-medium truncate text-sm"
-                                                >
-                                                    {mapping.shortUrl}
-                                                </a>
-                                                <button
-                                                    onClick={() => handleCopyUrl(mapping.shortUrl)}
-                                                    className="p-1.5 text-emerald-400/70 hover:bg-emerald-500/10 hover:text-emerald-300 rounded-lg transition-colors"
-                                                    title="Copy short URL"
-                                                >
-                                                    <FaCopy className="w-3.5 h-3.5" />
-                                                </button>
-                                                <a
-                                                    href={mapping.shortUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="p-1.5 text-emerald-400/70 hover:bg-emerald-500/10 hover:text-emerald-300 rounded-lg transition-colors"
-                                                    title="Open short URL"
-                                                >
-                                                    <FaExternalLinkAlt className="w-3.5 h-3.5" />
-                                                </a>
-                                            </div>
-                                            {copiedUrl === mapping.shortUrl && (
-                                                <p className="text-xs text-emerald-400 mt-1">✓ Copied!</p>
-                                            )}
-                                        </div>
-
-                                        {/* Original URL */}
-                                        <div>
-                                            <label className="block text-xs font-semibold text-white/40 mb-2 uppercase tracking-wider">Original URL</label>
-                                            <div className="flex items-center gap-2 p-3 bg-blue-900/20 rounded-xl border border-blue-500/25">
-                                                <a
-                                                    href={mapping.originalUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex-1 text-blue-300 hover:text-blue-200 truncate text-sm"
-                                                    title={mapping.originalUrl}
-                                                >
-                                                    {truncateUrl(mapping.originalUrl, 50)}
-                                                </a>
-                                                <button
-                                                    onClick={() => handleCopyUrl(mapping.originalUrl)}
-                                                    className="p-1.5 text-blue-300/70 hover:bg-blue-500/10 hover:text-blue-200 rounded-lg transition-colors"
-                                                    title="Copy original URL"
-                                                >
-                                                    <FaCopy className="w-3.5 h-3.5" />
-                                                </button>
-                                                <a
-                                                    href={mapping.originalUrl}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="p-1.5 text-blue-300/70 hover:bg-blue-500/10 hover:text-blue-200 rounded-lg transition-colors"
-                                                    title="Open original URL"
-                                                >
-                                                    <FaExternalLinkAlt className="w-3.5 h-3.5" />
-                                                </a>
-                                            </div>
-                                            {copiedUrl === mapping.originalUrl && (
-                                                <p className="text-xs text-emerald-400 mt-1">✓ Copied!</p>
-                                            )}
-                                        </div>
-
-                                        {mapping.expirationDate && (
-                                            <div>
-                                                <label className="block text-xs font-semibold text-white/40 mb-2 uppercase tracking-wider">Expires</label>
-                                                <div className="p-3 bg-amber-900/20 rounded-xl border border-amber-500/25">
-                                                    <p className="text-amber-300 text-sm font-medium">{formatDate(mapping.expirationDate)}</p>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Card Actions */}
-                                    <div className="px-5 py-4 bg-white/5 border-t border-white/10 flex gap-3">
-                                        <Button
-                                            onClick={() => navigate(`/account/url-mappings/${mapping.urlHash}`)}
-                                            className="flex-1"
-                                            size="sm"
-                                        >
-                                            <FaInfoCircle className="w-3.5 h-3.5" />
-                                            <span>Details</span>
-                                        </Button>
-                                        <Button
-                                            onClick={() => handleDelete(mapping.urlHash)}
-                                            variant="danger"
-                                            size="sm"
-                                            title="Delete URL"
-                                        >
-                                            <FaTrash className="w-3.5 h-3.5" />
-                                        </Button>
-                                    </div>
-                                </div>
+                                    mapping={mapping}
+                                    index={index + 1 + page * size}
+                                    onCopy={handleCopyUrl}
+                                    copiedUrl={copiedUrl}
+                                    onDetails={() => navigate(`/account/url-mappings/${mapping.urlHash}`)}
+                                    onDelete={() => handleDelete(mapping.urlHash)}
+                                    formatDate={formatDate}
+                                />
                             ))}
                         </div>
                     ) : (
                         <div className="flex flex-1 items-start justify-center pt-4 sm:items-center sm:pt-0">
-                            <div className="w-full rounded-2xl bg-white/5 border border-white/10 px-6 py-12 sm:max-w-md sm:px-8 sm:py-14">
-                                <div className="mx-auto flex max-w-sm flex-col items-center text-center">
-                                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
-                                        <FaLink className="w-6 h-6 text-white/20" />
-                                    </div>
-                                    <h3 className="mb-2 text-lg font-bold text-white">No URLs yet</h3>
-                                    <p className="mb-6 text-sm text-white/35">Start by creating your first shortened URL</p>
-                                    <Button onClick={() => navigate(routes.home)} size="sm" className="mx-auto">
-                                        Create Short URL
-                                    </Button>
+                            <div className="w-full rounded-2xl bg-white/[0.04] border border-white/[0.07] px-6 py-14 sm:max-w-md text-center">
+                                <div className="w-14 h-14 mx-auto mb-5 rounded-2xl border border-white/[0.07] bg-white/[0.04] flex items-center justify-center">
+                                    <FaLink className="w-5 h-5 text-white/15" />
                                 </div>
+                                <h3 className="text-lg font-bold text-white mb-2">No URLs yet</h3>
+                                <p className="text-sm text-white/35 mb-6 leading-relaxed">
+                                    Shorten your first link and start tracking clicks.
+                                </p>
+                                <Button onClick={() => navigate(routes.home)} size="sm" className="mx-auto">
+                                    <FaPlus className="w-3.5 h-3.5" />
+                                    Create Short URL
+                                </Button>
                             </div>
                         </div>
                     )}
 
                     {/* Pagination */}
                     {totalPages > 1 && (
-                        <div className="flex flex-col sm:flex-row items-center justify-between bg-white/5 border border-white/10 rounded-2xl p-5 gap-4">
-                            <p className="text-xs text-white/40">
-                                Showing <span className="text-white font-semibold">{page * size + 1}–{Math.min((page + 1) * size, totalElements)}</span> of <span className="text-white font-semibold">{totalElements}</span> results
+                        <div className="flex flex-col sm:flex-row items-center justify-between bg-white/[0.04] border border-white/[0.07] rounded-2xl px-5 py-4 gap-4 mt-auto">
+                            <p className="text-xs text-white/35">
+                                Showing{' '}
+                                <span className="text-white font-semibold">{page * size + 1}–{Math.min((page + 1) * size, totalElements)}</span>
+                                {' '}of{' '}
+                                <span className="text-white font-semibold">{totalElements}</span>
                             </p>
-
-                            <div className="flex items-center gap-2">
-                                <Button onClick={handlePreviousPage} disabled={page === 0} variant={page === 0 ? 'secondary' : 'primary'} size="sm">
+                            <div className="flex items-center gap-1.5">
+                                <Button
+                                    onClick={() => setPage(p => Math.max(0, p - 1))}
+                                    disabled={page === 0}
+                                    variant="secondary"
+                                    size="sm"
+                                >
                                     <FaChevronLeft className="w-3 h-3" />
-                                    <span>Prev</span>
                                 </Button>
-
-                                <div className="flex items-center gap-1">
-                                    {getVisiblePages(page, totalPages).map((pageNum) => (
-                                        <button
-                                            key={pageNum}
-                                            onClick={() => setPage(pageNum)}
-                                            className={`w-8 h-8 rounded-lg text-xs font-semibold transition-colors ${
-                                                pageNum === page
-                                                    ? 'bg-blue-600 text-white'
-                                                    : 'bg-white/10 text-white/50 hover:bg-white/15 hover:text-white'
-                                            }`}
-                                        >
-                                            {pageNum + 1}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                <Button onClick={handleNextPage} disabled={page >= totalPages - 1} variant={page >= totalPages - 1 ? 'secondary' : 'primary'} size="sm">
-                                    <span>Next</span>
+                                {getVisiblePages(page, totalPages).map((pageNum) => (
+                                    <button
+                                        key={pageNum}
+                                        onClick={() => setPage(pageNum)}
+                                        className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all ${
+                                            pageNum === page
+                                                ? 'bg-blue-600 text-white shadow-[0_0_12px_rgba(59,130,246,0.3)]'
+                                                : 'bg-white/[0.06] text-white/45 hover:bg-white/[0.10] hover:text-white'
+                                        }`}
+                                    >
+                                        {pageNum + 1}
+                                    </button>
+                                ))}
+                                <Button
+                                    onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                                    disabled={page >= totalPages - 1}
+                                    variant="secondary"
+                                    size="sm"
+                                >
                                     <FaChevronRight className="w-3 h-3" />
                                 </Button>
                             </div>
