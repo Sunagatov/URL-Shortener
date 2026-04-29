@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
-import com.zufar.urlshortener.shorten.dto.ShortenUrlRequest
+import com.zufar.urlshortener.urls.dto.ShortenUrlRequest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test

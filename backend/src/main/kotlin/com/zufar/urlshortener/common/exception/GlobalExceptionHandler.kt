@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.zufar.urlshortener.auth.exception.EmailAlreadyExistsException
 import com.zufar.urlshortener.auth.exception.InvalidTokenException
 import com.zufar.urlshortener.auth.exception.UserNotFoundException
-import com.zufar.urlshortener.shorten.exception.UrlNotFoundException
+import com.zufar.urlshortener.urls.exception.UrlNotFoundException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

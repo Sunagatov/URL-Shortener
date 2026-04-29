@@ -1,0 +1,59 @@
+package com.zufar.urlshortener.urls.service
+
+import com.zufar.urlshortener.auth.exception.UserNotFoundException
+import com.zufar.urlshortener.auth.repository.UserRepository
+import com.zufar.urlshortener.auth.service.EmailNormalizer
+import com.zufar.urlshortener.urls.dto.UrlMappingDto
+import com.zufar.urlshortener.urls.entity.UrlMapping
+import com.zufar.urlshortener.urls.exception.UrlNotFoundException
+import com.zufar.urlshortener.urls.repository.UrlRepository
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.stereotype.Service
+import java.time.LocalDateTime
+
+@Service
+class UrlMappingProvider(
+    private val urlRepository: UrlRepository,
+    private val userRepository: UserRepository
+) {
+
+    fun getPublicUrlMappingByHash(urlHash: String): UrlMappingDto {
+        return UrlMappingDto.fromEntity(getActiveUrlMapping(urlHash))
+    }
+
+    fun getOwnedUrlMappingByHash(urlHash: String): UrlMappingDto {
+        val urlMapping = getActiveUrlMapping(urlHash)
+        val currentUserId = getCurrentUserId()
+
+        if (urlMapping.userId == null || urlMapping.userId != currentUserId) {
+            throw AccessDeniedException("You are not allowed to access this URL mapping")
+        }
+
+        return UrlMappingDto.fromEntity(urlMapping)
+    }
+
+    private fun getActiveUrlMapping(urlHash: String): UrlMapping {
+        val now = LocalDateTime.now()
+
+        return urlRepository.findByUrlHash(urlHash)
+            .filter { it.expirationDate.isAfter(now) }
+            .orElseThrow { UrlNotFoundException("URL mapping not found") }
+    }
+
+    private fun getCurrentUserId(): String {
+        val authentication = SecurityContextHolder.getContext().authentication
+            ?: throw AuthenticationCredentialsNotFoundException("User is not authenticated")
+
+        val email = authentication.name
+        if (email.isBlank() || email == "anonymousUser") {
+            throw AuthenticationCredentialsNotFoundException("User is not authenticated")
+        }
+
+        val normalizedEmail = EmailNormalizer.normalize(email)
+        val user = userRepository.findByEmailIgnoreCase(normalizedEmail)
+            ?: throw UserNotFoundException("User not found")
+        return user.id ?: throw UserNotFoundException("User not found")
+    }
+}

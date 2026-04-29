@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.common.security
 
-import com.zufar.urlshortener.shorten.service.UrlShortener
+import com.zufar.urlshortener.urls.service.UrlShortener
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
