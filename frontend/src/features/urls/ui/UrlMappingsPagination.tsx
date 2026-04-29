@@ -33,7 +33,7 @@ export const UrlMappingsPagination = ({
         >
           <FaChevronLeft className="h-3 w-3" />
         </Button>
-        {getVisiblePages(page, totalPages).map((pageNumber) => (
+        {getVisiblePages(page, totalPages).map(pageNumber => (
           <button
             key={pageNumber}
             onClick={() => onPageChange(pageNumber)}

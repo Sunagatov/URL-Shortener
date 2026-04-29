@@ -1,6 +1,10 @@
 import { FaCalendarAlt, FaEnvelope, FaGlobe, FaLock, FaUser } from 'react-icons/fa';
 import type { User } from '@/shared/types';
-import { formatUserDate, getUserDisplayName, getUserInitials } from '@/features/users/model/userProfile';
+import {
+  formatUserDate,
+  getUserDisplayName,
+  getUserInitials,
+} from '@/features/users/model/userProfile';
 
 interface UserProfileCardProps {
   user: User;
@@ -12,7 +16,11 @@ export function UserProfileCard({ user }: UserProfileCardProps) {
     { icon: FaUser, label: 'Last Name', value: user.lastName ?? '—' },
     { icon: FaEnvelope, label: 'Email', value: user.email, wide: true },
     { icon: FaGlobe, label: 'Country', value: user.country ?? '—' },
-    { icon: FaCalendarAlt, label: 'Age', value: typeof user.age === 'number' ? `${user.age} years old` : '—' },
+    {
+      icon: FaCalendarAlt,
+      label: 'Age',
+      value: typeof user.age === 'number' ? `${user.age} years old` : '—',
+    },
   ];
 
   return (
@@ -62,7 +70,7 @@ export function UserProfileCard({ user }: UserProfileCardProps) {
           Personal Information
         </p>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-          {infoFields.map((field) => {
+          {infoFields.map(field => {
             const Icon = field.icon;
 
             return (

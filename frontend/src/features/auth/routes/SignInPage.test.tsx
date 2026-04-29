@@ -2,12 +2,16 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import * as authApi from '@/features/auth/api/authApi';
+import * as userProfileApi from '@/features/users/api/userProfileApi';
 import SignInPage from '@/features/auth/routes/SignInPage';
 
 const login = vi.fn();
 
 vi.mock('@/features/auth/api/authApi', () => ({
   signIn: vi.fn(),
+}));
+
+vi.mock('@/features/users/api/userProfileApi', () => ({
   getUserProfile: vi.fn(),
 }));
 
@@ -33,7 +37,7 @@ vi.mock('@/shared/api/useApi', () => ({
 }));
 
 const mockSignIn = vi.mocked(authApi.signIn);
-const mockGetUserProfile = vi.mocked(authApi.getUserProfile);
+const mockGetUserProfile = vi.mocked(userProfileApi.getUserProfile);
 
 const renderSignInWithRoutes = (state?: unknown) =>
   render(
@@ -80,7 +84,10 @@ describe('SignIn', () => {
     await user.click(screen.getByRole('button', { name: /sign in/i }));
 
     expect(await screen.findByText('Profile Destination')).toBeInTheDocument();
-    expect(login).toHaveBeenCalledWith({ accessToken: 'access-token', refreshToken: 'refresh-token' }, null);
+    expect(login).toHaveBeenCalledWith(
+      { accessToken: 'access-token', refreshToken: 'refresh-token' },
+      null
+    );
     await waitFor(() =>
       expect(mockSignIn).toHaveBeenCalledWith({
         email: 'test@example.com',

@@ -37,7 +37,9 @@ export function AccountSidebarCards({ onNavigate, user }: AccountSidebarCardsPro
             {user.createdAt ? formatUserDate(user.createdAt) : '—'}
           </span>
         </div>
-        <p className="mt-3 text-xs text-white/20">Usage analytics will appear here when available.</p>
+        <p className="mt-3 text-xs text-white/20">
+          Usage analytics will appear here when available.
+        </p>
       </div>
 
       <div className="rounded-2xl border border-white/[0.07] bg-white/[0.04] p-5">
@@ -45,7 +47,7 @@ export function AccountSidebarCards({ onNavigate, user }: AccountSidebarCardsPro
           Quick Actions
         </p>
         <div className="space-y-1">
-          {quickActions.map((action) => {
+          {quickActions.map(action => {
             const Icon = action.icon;
 
             return (

@@ -40,7 +40,10 @@ const UserAccountPage: React.FC = () => {
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <UserProfileCard user={userDetails} />
-        <AccountSidebarCards user={userDetails} onNavigate={(path) => navigate(path || routes.security)} />
+        <AccountSidebarCards
+          user={userDetails}
+          onNavigate={path => navigate(path || routes.security)}
+        />
       </div>
     </AccountPageLayout>
   );

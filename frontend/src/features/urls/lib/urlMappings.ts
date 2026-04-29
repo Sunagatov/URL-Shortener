@@ -3,7 +3,7 @@ export const PAGE_SIZE = 6;
 export const getVisiblePages = (page: number, totalPages: number, maxVisiblePages = 5) => {
   const startPage = Math.max(
     0,
-    Math.min(page - Math.floor(maxVisiblePages / 2), Math.max(0, totalPages - maxVisiblePages)),
+    Math.min(page - Math.floor(maxVisiblePages / 2), Math.max(0, totalPages - maxVisiblePages))
   );
   const endPage = Math.min(totalPages, startPage + maxVisiblePages);
   return Array.from({ length: endPage - startPage }, (_, index) => startPage + index);

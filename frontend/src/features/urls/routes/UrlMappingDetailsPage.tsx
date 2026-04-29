@@ -1,12 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { AccountPageLoadingState, AccountPageMessageState, AccountPageLayout } from '@/app/layout/AccountPageLayout';
+import {
+  AccountPageLoadingState,
+  AccountPageMessageState,
+  AccountPageLayout,
+} from '@/app/layout/AccountPageLayout';
 import { routes } from '@/app/routes';
 import { useClipboard } from '@/shared/lib/useClipboard';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { ConfirmModal, useToast } from '@/shared/ui';
 import { useUrlMappingDetails } from '@/features/urls/model/useUrlMappingDetails';
-import { UrlDetailsHeader, UrlInfoCard, UrlMetadataCard } from '@/features/urls/ui/details/UrlDetailsContent';
+import {
+  UrlDetailsHeader,
+  UrlInfoCard,
+  UrlMetadataCard,
+} from '@/features/urls/ui/details/UrlDetailsContent';
 
 const UrlMappingDetailsPage: React.FC = () => {
   usePageTitle('URL Details');
@@ -15,7 +23,8 @@ const UrlMappingDetailsPage: React.FC = () => {
   const toast = useToast();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const { copiedValue, copyValue } = useClipboard();
-  const { deleteMapping, errorMessage, isDeleting, isLoading, urlMapping } = useUrlMappingDetails(urlHash);
+  const { deleteMapping, errorMessage, isDeleting, isLoading, urlMapping } =
+    useUrlMappingDetails(urlHash);
 
   const handleCopyUrl = async (url: string) => {
     const didCopy = await copyValue(url);

@@ -66,7 +66,7 @@ export const UrlMappingCard = ({
             </span>
             <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover/row:opacity-100">
               <button
-                onClick={(event) => {
+                onClick={event => {
                   stopPropagation(event);
                   void onCopy(mapping.shortUrl);
                 }}
@@ -110,7 +110,7 @@ export const UrlMappingCard = ({
             </span>
             <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover/row:opacity-100">
               <button
-                onClick={(event) => {
+                onClick={event => {
                   stopPropagation(event);
                   void onCopy(mapping.originalUrl);
                 }}
@@ -140,7 +140,7 @@ export const UrlMappingCard = ({
 
       <div className="flex justify-end border-t border-white/[0.06] bg-white/[0.02] px-5 py-3">
         <Button
-          onClick={(event) => {
+          onClick={event => {
             stopPropagation(event);
             void onDelete();
           }}

@@ -46,8 +46,8 @@ export function UrlShortenerHero({
         </h1>
 
         <p className="mx-auto mb-8 max-w-xl text-base leading-relaxed text-white/55 animate-fade-up-d2 md:mb-10 md:text-xl">
-          Create memorable links, track performance, and share with confidence.
-          Free forever — no sign-up required.
+          Create memorable links, track performance, and share with confidence. Free forever — no
+          sign-up required.
         </p>
 
         {children}
@@ -122,7 +122,7 @@ export function UrlShortenerHero({
         ) : null}
 
         <div className="flex flex-wrap justify-center gap-5 text-sm text-white/35">
-          {heroHighlights.map((highlight) => (
+          {heroHighlights.map(highlight => (
             <span key={highlight.label} className="flex items-center gap-2">
               <span className={`inline-block h-1.5 w-1.5 rounded-full ${highlight.color}`} />
               {highlight.label}
@@ -140,11 +140,7 @@ interface UrlShortenerFormProps {
   onSubmit: React.FormEventHandler<HTMLFormElement>;
 }
 
-export function UrlShortenerForm({
-  children,
-  isLoading = false,
-  onSubmit,
-}: UrlShortenerFormProps) {
+export function UrlShortenerForm({ children, isLoading = false, onSubmit }: UrlShortenerFormProps) {
   return (
     <div className="glass-card mb-6 animate-fade-up-d3 p-2.5">
       <form onSubmit={onSubmit}>

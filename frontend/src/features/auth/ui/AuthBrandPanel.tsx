@@ -59,7 +59,7 @@ export function AuthBrandPanel({
         <p className="mb-10 max-w-sm text-base leading-relaxed text-white/45">{description}</p>
 
         <div className="space-y-4">
-          {features.map((feature) => {
+          {features.map(feature => {
             const Icon = feature.icon;
 
             return (
@@ -82,7 +82,7 @@ export function AuthBrandPanel({
 
       {stats ? (
         <div className="relative z-10 mt-10 grid grid-cols-3 gap-3">
-          {stats.map((stat) => (
+          {stats.map(stat => (
             <div
               key={stat.label}
               className="rounded-xl border border-white/[0.07] bg-white/[0.04] p-3 text-center"

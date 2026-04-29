@@ -28,7 +28,7 @@ export const UrlMappingsToolbar = ({
         <input
           type="text"
           value={search}
-          onChange={(event) => onSearchChange(event.target.value)}
+          onChange={event => onSearchChange(event.target.value)}
           placeholder="Search by original or short URL…"
           className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] py-2.5 pl-10 pr-10 text-sm text-white placeholder-white/25 transition-all focus:border-blue-500/25 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
         />

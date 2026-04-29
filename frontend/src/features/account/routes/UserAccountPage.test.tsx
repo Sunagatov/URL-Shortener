@@ -1,11 +1,11 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import * as accountApi from '@/features/account/api/accountApi';
+import * as userProfileApi from '@/features/users/api/userProfileApi';
 import UserAccountPage from '@/features/account/routes/UserAccountPage';
 
 const logout = vi.fn();
 
-vi.mock('@/features/account/api/accountApi', () => ({
+vi.mock('@/features/users/api/userProfileApi', () => ({
   getUserProfile: vi.fn(),
 }));
 
@@ -24,7 +24,7 @@ vi.mock('@/app/layout/AccountSidebar', () => ({
   default: () => <aside>Side Panel</aside>,
 }));
 
-const mockGetUserProfile = vi.mocked(accountApi.getUserProfile);
+const mockGetUserProfile = vi.mocked(userProfileApi.getUserProfile);
 const renderUserAccount = () =>
   render(
     <MemoryRouter initialEntries={['/account/profile']}>

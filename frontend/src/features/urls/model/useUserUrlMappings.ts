@@ -54,7 +54,7 @@ export const useUserUrlMappings = () => {
         setIsLoading(false);
       }
     },
-    [redirectToSignIn, toast],
+    [redirectToSignIn, toast]
   );
 
   const fetchAll = useCallback(async () => {
@@ -86,7 +86,7 @@ export const useUserUrlMappings = () => {
     const source = isSearchMode ? allMappings : urlMappings;
     const query = search.toLowerCase().trim();
     const filtered = isSearchMode
-      ? source.filter((mapping) => {
+      ? source.filter(mapping => {
           return (
             mapping.originalUrl.toLowerCase().includes(query) ||
             mapping.shortUrl.toLowerCase().includes(query)
@@ -130,12 +130,12 @@ export const useUserUrlMappings = () => {
       toast.success('URL deleted successfully.');
       setPageError(null);
       if (isSearchMode) {
-        setAllMappings((previous) => previous.filter((mapping) => mapping.urlHash !== urlHash));
+        setAllMappings(previous => previous.filter(mapping => mapping.urlHash !== urlHash));
       } else {
         const nextPage = urlMappings.length === 1 && serverPage > 0 ? serverPage - 1 : serverPage;
         await fetchPage(nextPage);
       }
-      setTotalElements((previous) => previous - 1);
+      setTotalElements(previous => previous - 1);
     } catch (error: unknown) {
       if (getApiErrorStatus(error) === 401) {
         redirectToSignIn();
@@ -174,8 +174,7 @@ export const useUserUrlMappings = () => {
     search,
     setSearch,
     sortOrder,
-    toggleSortOrder: () =>
-      setSortOrder((current) => (current === 'newest' ? 'oldest' : 'newest')),
+    toggleSortOrder: () => setSortOrder(current => (current === 'newest' ? 'oldest' : 'newest')),
     totalElements,
   };
 };

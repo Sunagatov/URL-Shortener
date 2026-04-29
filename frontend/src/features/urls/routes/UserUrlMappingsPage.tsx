@@ -47,12 +47,12 @@ const UserUrlMappingsPage: React.FC = () => {
       <AccountPageHeader
         title="My URLs"
         description="Manage and track your shortened links"
-        actions={(
+        actions={
           <Button onClick={() => navigate(routes.home)} variant="primary" size="sm">
             <FaPlus className="w-3.5 h-3.5" />
             <span>New URL</span>
           </Button>
-        )}
+        }
       />
 
       <UrlMappingsToolbar

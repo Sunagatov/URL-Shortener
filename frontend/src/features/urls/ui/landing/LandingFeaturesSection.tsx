@@ -16,7 +16,8 @@ export function LandingFeaturesSection() {
             className="mb-4 text-4xl font-bold leading-tight text-white md:text-5xl"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            Everything you need,<br className="hidden md:block" /> nothing you don't
+            Everything you need,
+            <br className="hidden md:block" /> nothing you don't
           </h2>
           <p className="mx-auto max-w-xl text-lg text-white/40">
             Powerful tools designed to make link management simple, fast, and insightful.
@@ -24,7 +25,7 @@ export function LandingFeaturesSection() {
         </div>
 
         <div className="relative z-10 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
-          {landingFeatures.map((feature) => {
+          {landingFeatures.map(feature => {
             const Icon = feature.icon;
 
             return (

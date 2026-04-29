@@ -20,7 +20,7 @@ export function SecurityStatusCard() {
       </div>
 
       <div className="space-y-2">
-        {securityFeatures.map((feature) => {
+        {securityFeatures.map(feature => {
           const Icon = feature.icon;
 
           return (

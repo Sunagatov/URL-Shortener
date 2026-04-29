@@ -4,10 +4,7 @@ const namePattern = /^[a-zA-Z'-]+$/;
 const countryPattern = /^[a-zA-Z'-]+(\s[a-zA-Z'-]+)*$/;
 
 export const signInSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address'),
+  email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
   password: z
     .string()
     .min(1, 'Password is required')
@@ -44,11 +41,8 @@ export const signUpSchema = z.object({
     .min(1, 'Email is required')
     .email('Please enter a valid email address')
     .max(100),
-  password: z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(50),
-  acceptTerms: z.boolean().refine((value) => value, {
+  password: z.string().min(8, 'Password must be at least 8 characters').max(50),
+  acceptTerms: z.boolean().refine(value => value, {
     message: 'You must accept the terms to continue',
   }),
 });

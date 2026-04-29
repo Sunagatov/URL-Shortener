@@ -76,8 +76,8 @@ export function useChangePasswordForm() {
     showCurrentPassword,
     showNewPassword,
     submit,
-    toggleConfirmPassword: () => setShowConfirmPassword((value) => !value),
-    toggleCurrentPassword: () => setShowCurrentPassword((value) => !value),
-    toggleNewPassword: () => setShowNewPassword((value) => !value),
+    toggleConfirmPassword: () => setShowConfirmPassword(value => !value),
+    toggleCurrentPassword: () => setShowCurrentPassword(value => !value),
+    toggleNewPassword: () => setShowNewPassword(value => !value),
   };
 }

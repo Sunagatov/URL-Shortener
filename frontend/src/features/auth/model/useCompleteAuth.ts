@@ -21,6 +21,6 @@ export function useCompleteAuth() {
 
       navigate(destination, { replace: true });
     },
-    [login, navigate, updateUser],
+    [login, navigate, updateUser]
   );
 }

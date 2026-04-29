@@ -125,6 +125,8 @@ describe('UserUrlMappings', () => {
 
     await userEvent.click(await screen.findByTitle('Delete URL'));
 
-    expect(await screen.findByText('You are not allowed to delete this URL mapping')).toBeInTheDocument();
+    expect(
+      await screen.findByText('You are not allowed to delete this URL mapping')
+    ).toBeInTheDocument();
   });
 });

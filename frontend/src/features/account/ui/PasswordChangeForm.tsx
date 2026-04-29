@@ -26,13 +26,7 @@ const inputClassName =
   'w-full rounded-xl border border-white/[0.08] bg-[#0d0f1c] px-4 py-3 pr-12 text-sm text-white ' +
   'placeholder-white/25 transition-all duration-200 focus:border-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40';
 
-function PasswordVisibilityToggle({
-  onToggle,
-  show,
-}: {
-  onToggle: () => void;
-  show: boolean;
-}) {
+function PasswordVisibilityToggle({ onToggle, show }: { onToggle: () => void; show: boolean }) {
   return (
     <button
       type="button"
@@ -89,7 +83,7 @@ export function PasswordChangeForm({
             <input
               type={showCurrentPassword ? 'text' : 'password'}
               value={currentPassword}
-              onChange={(event) => setCurrentPassword(event.target.value)}
+              onChange={event => setCurrentPassword(event.target.value)}
               required
               className={inputClassName}
               placeholder="Enter your current password"
@@ -106,7 +100,7 @@ export function PasswordChangeForm({
             <input
               type={showNewPassword ? 'text' : 'password'}
               value={newPassword}
-              onChange={(event) => setNewPassword(event.target.value)}
+              onChange={event => setNewPassword(event.target.value)}
               required
               className={inputClassName}
               placeholder="Enter your new password"
@@ -117,7 +111,9 @@ export function PasswordChangeForm({
           {newPassword ? (
             <div className="mt-3 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] uppercase tracking-widest text-white/30">Strength</span>
+                <span className="text-[10px] uppercase tracking-widest text-white/30">
+                  Strength
+                </span>
                 <span className={`text-xs font-semibold ${passwordStrength.textClass}`}>
                   {passwordStrength.strength}
                 </span>
@@ -129,7 +125,7 @@ export function PasswordChangeForm({
                 />
               </div>
               <div className="grid grid-cols-2 gap-1.5 pt-1">
-                {passwordChecks.map((check) => {
+                {passwordChecks.map(check => {
                   const isValid = check.isValid(newPassword);
 
                   return (
@@ -155,7 +151,7 @@ export function PasswordChangeForm({
             <input
               type={showConfirmPassword ? 'text' : 'password'}
               value={confirmPassword}
-              onChange={(event) => setConfirmPassword(event.target.value)}
+              onChange={event => setConfirmPassword(event.target.value)}
               required
               className={`${inputClassName} ${!passwordsMatch ? 'border-red-500/30 focus:ring-red-500/30' : ''}`}
               placeholder="Confirm your new password"
