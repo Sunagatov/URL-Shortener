@@ -1,6 +1,6 @@
 import httpClient from '@/shared/api/httpClient';
 import { endpoints } from '@/shared/api/endpoints';
-import type { AuthTokens, RefreshTokenResponse, SignInRequest, SignUpRequest, User } from '@/shared/types';
+import type { AuthTokens, RefreshTokenResponse, SignInRequest, SignUpRequest } from '@/shared/types';
 
 export async function signIn(data: SignInRequest): Promise<AuthTokens> {
   const response = await httpClient.post(endpoints.auth.signIn, data);
@@ -14,10 +14,5 @@ export async function signUp(data: SignUpRequest): Promise<AuthTokens> {
 
 export async function refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
   const response = await httpClient.post(endpoints.auth.refresh, { refreshToken });
-  return response.data;
-}
-
-export async function getUserProfile(): Promise<User> {
-  const response = await httpClient.get(endpoints.user.profile);
   return response.data;
 }

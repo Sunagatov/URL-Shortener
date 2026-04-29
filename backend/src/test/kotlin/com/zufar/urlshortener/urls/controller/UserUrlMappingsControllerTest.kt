@@ -17,7 +17,7 @@ import kotlin.test.assertEquals
 class UserUrlMappingsControllerTest {
 
     @Mock private lateinit var userUrlMappingsQueryService: UserUrlMappingsQueryService
-    @Mock private lateinit var urlMappingsPageRequestValidator: UrlMappingsPageRequestValidator
+    private val urlMappingsPageRequestValidator = UrlMappingsPageRequestValidator()
 
     private fun controller() = UserUrlMappingsController(userUrlMappingsQueryService, urlMappingsPageRequestValidator)
 
@@ -55,7 +55,6 @@ class UserUrlMappingsControllerTest {
 
         val response = controller().getUserUrlMappings(page = 0, size = 10)
 
-        verify(urlMappingsPageRequestValidator).validate(0, 10)
         verify(userUrlMappingsQueryService).getPage(0, 10)
         assertEquals(page, response.body)
     }

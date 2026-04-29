@@ -1,0 +1,46 @@
+import { landingFeatures } from './landingContent';
+
+export function LandingFeaturesSection() {
+  return (
+    <section className="relative overflow-hidden bg-[#060612] py-28 bg-grid-dark">
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+      <div className="absolute top-0 left-1/3 h-[300px] w-[600px] rounded-full bg-blue-600/8 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 h-[200px] w-[400px] rounded-full bg-indigo-600/6 blur-[100px] pointer-events-none" />
+
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="relative z-10 mb-16 text-center">
+          <span className="mb-4 inline-block rounded-full border border-blue-400/15 bg-blue-500/10 px-4 py-1.5 text-sm font-semibold text-blue-300/80">
+            Why Shorty URL
+          </span>
+          <h2
+            className="mb-4 text-4xl font-bold leading-tight text-white md:text-5xl"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            Everything you need,<br className="hidden md:block" /> nothing you don't
+          </h2>
+          <p className="mx-auto max-w-xl text-lg text-white/40">
+            Powerful tools designed to make link management simple, fast, and insightful.
+          </p>
+        </div>
+
+        <div className="relative z-10 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+          {landingFeatures.map((feature) => {
+            const Icon = feature.icon;
+
+            return (
+              <div key={feature.title} className="gradient-border-card p-6">
+                <div
+                  className={`mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${feature.color} shadow-lg ${feature.glow}`}
+                >
+                  <Icon className="h-5 w-5 text-white" />
+                </div>
+                <h3 className="mb-2 text-base font-bold text-white">{feature.title}</h3>
+                <p className="text-sm leading-relaxed text-white/45">{feature.description}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}

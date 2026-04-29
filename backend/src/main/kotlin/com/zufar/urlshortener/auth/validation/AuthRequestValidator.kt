@@ -1,5 +1,16 @@
 package com.zufar.urlshortener.auth.validation
 
+import com.zufar.urlshortener.auth.dto.AGE_MUST_BE_BETWEEN_13_AND_120
+import com.zufar.urlshortener.auth.dto.AGE_MUST_NOT_BE_EMPTY
+import com.zufar.urlshortener.auth.dto.COUNTRY_MUST_NOT_BE_EMPTY
+import com.zufar.urlshortener.auth.dto.COUNTRY_NAME_CONTAINS_INVALID_CHARACTERS
+import com.zufar.urlshortener.auth.dto.COUNTRY_NAME_IS_TOO_LONG
+import com.zufar.urlshortener.auth.dto.FIRST_NAME_CONTAINS_INVALID_CHARACTERS
+import com.zufar.urlshortener.auth.dto.FIRST_NAME_IS_TOO_LONG
+import com.zufar.urlshortener.auth.dto.FIRST_NAME_MUST_NOT_BE_EMPTY
+import com.zufar.urlshortener.auth.dto.LAST_NAME_CONTAINS_INVALID_CHARACTERS
+import com.zufar.urlshortener.auth.dto.LAST_NAME_IS_TOO_LONG
+import com.zufar.urlshortener.auth.dto.LAST_NAME_MUST_NOT_BE_EMPTY
 import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
 import com.zufar.urlshortener.auth.dto.SignInRequest
 import com.zufar.urlshortener.auth.dto.SignUpRequest

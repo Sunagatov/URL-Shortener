@@ -4,7 +4,6 @@ import com.zufar.urlshortener.auth.dto.AuthResponse
 import com.zufar.urlshortener.auth.entity.UserDetails as AuthUserDetails
 import com.zufar.urlshortener.auth.security.JwtTokenProvider
 import com.zufar.urlshortener.auth.security.withTokenVersion
-import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 
@@ -25,6 +24,6 @@ class AuthTokenIssuer(
     fun issueAccessToken(userDetails: AuthUserDetails): String =
         jwtTokenProvider.generateAccessToken(userDetails.toSecurityUser())
 
-    private fun AuthUserDetails.toSecurityUser(): User =
-        User(email, password, emptyList()).withTokenVersion(tokenVersion)
+    private fun AuthUserDetails.toSecurityUser(): UserDetails =
+        org.springframework.security.core.userdetails.User(email, password, emptyList()).withTokenVersion(tokenVersion)
 }
