@@ -30,6 +30,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isAccountRoute = location.pathname.startsWith('/account');
+  const isSignInRoute = location.pathname === routes.signIn;
+  const isSignUpRoute = location.pathname === routes.signUp;
   const showMobileDrawerTrigger = isAuthenticated;
 
   const handleLogout = () => {
@@ -149,17 +151,19 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             ) : (
               <div className="flex items-center space-x-3">
                 <Link
-                  to={routes.signUp}
-                  className="text-white/70 hover:text-white font-medium transition-colors duration-200 hidden md:inline text-sm"
-                >
-                  Sign Up
-                </Link>
-                <Link
-                  to={routes.signIn}
+                  to={isSignInRoute ? routes.signUp : routes.signIn}
                   className="inline-flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-500 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:scale-105"
                 >
-                  Sign In
+                  {isSignInRoute ? 'Sign Up' : 'Sign In'}
                 </Link>
+                {!isSignUpRoute && !isSignInRoute && (
+                  <Link
+                    to={routes.signUp}
+                    className="text-white/70 hover:text-white font-medium transition-colors duration-200 hidden md:inline text-sm"
+                  >
+                    Sign Up
+                  </Link>
+                )}
               </div>
             )}
           </div>

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { MainLayout } from '@/app/layout/MainLayout';
 import SignInPage from '@/features/auth/routes/SignInPage';
@@ -28,6 +28,34 @@ vi.mock('@/features/auth/api/authApi', () => ({
 }));
 
 describe('placeholder flows', () => {
+  it('shows a sign up header CTA on the sign in route', () => {
+    render(
+      <MemoryRouter initialEntries={['/signin']}>
+        <MainLayout>
+          <div>Page content</div>
+        </MainLayout>
+      </MemoryRouter>
+    );
+
+    const header = screen.getByRole('banner');
+    expect(within(header).getByRole('link', { name: 'Sign Up' })).toHaveAttribute('href', '/signup');
+    expect(within(header).queryByRole('link', { name: 'Sign In' })).not.toBeInTheDocument();
+  });
+
+  it('shows a sign in header CTA on the sign up route', () => {
+    render(
+      <MemoryRouter initialEntries={['/signup']}>
+        <MainLayout>
+          <div>Page content</div>
+        </MainLayout>
+      </MemoryRouter>
+    );
+
+    const header = screen.getByRole('banner');
+    expect(within(header).getByRole('link', { name: 'Sign In' })).toHaveAttribute('href', '/signin');
+    expect(within(header).queryByRole('link', { name: 'Sign Up' })).not.toBeInTheDocument();
+  });
+
   it('disables forgot password instead of linking to a placeholder route', () => {
     render(
       <MemoryRouter>
