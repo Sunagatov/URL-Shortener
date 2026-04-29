@@ -136,7 +136,7 @@ const UrlMappingDetails: React.FC = () => {
                     {/* Main Card */}
                     <div className="rounded-2xl bg-white/5 border border-white/10 overflow-hidden">
                         {/* Gradient header */}
-                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-8">
+                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-8 sm:px-8">
                             <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                                 <div className="flex items-center gap-4">
                                     <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border-2 border-white/30">
@@ -161,8 +161,8 @@ const UrlMappingDetails: React.FC = () => {
                         </div>
 
                         {/* Content */}
-                        <div className="p-8">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div className="p-6 sm:p-8">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
 
                                 {/* URLs */}
                                 <div className="space-y-5">

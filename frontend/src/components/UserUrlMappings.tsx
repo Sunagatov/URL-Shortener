@@ -162,7 +162,7 @@ const UserUrlMappings: React.FC = () => {
                             {urlMappings.map((mapping, index) => (
                                 <div
                                     key={mapping.urlHash}
-                                    className="gradient-border-card overflow-hidden"
+                                    className="rounded-2xl overflow-hidden border border-white/10 bg-white/5 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-white/20"
                                 >
                                     {/* Card Header */}
                                     <div className="bg-white/5 px-5 py-4 border-b border-white/10 flex items-center gap-3">
@@ -170,8 +170,8 @@ const UserUrlMappings: React.FC = () => {
                                             <FaLink className="w-3.5 h-3.5 text-blue-400" />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold text-gray-900">URL #{index + 1 + page * size}</p>
-                                            <p className="text-xs text-gray-500 flex items-center gap-1">
+                                            <p className="text-sm font-bold text-white">URL #{index + 1 + page * size}</p>
+                                            <p className="text-xs text-white/35 flex items-center gap-1">
                                                 <FaCalendarAlt className="w-2.5 h-2.5" />
                                                 Created {formatDate(mapping.createdAt)}
                                             </p>
@@ -179,22 +179,22 @@ const UserUrlMappings: React.FC = () => {
                                     </div>
 
                                     {/* Card Content */}
-                                    <div className="p-5 space-y-4 bg-white">
+                                    <div className="p-5 space-y-4">
                                         {/* Short URL */}
                                         <div>
-                                            <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">Short URL</label>
-                                            <div className="flex items-center gap-2 p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+                                            <label className="block text-xs font-semibold text-white/40 mb-2 uppercase tracking-wider">Short URL</label>
+                                            <div className="flex items-center gap-2 p-3 bg-emerald-900/20 rounded-xl border border-emerald-500/25">
                                                 <a
                                                     href={mapping.shortUrl}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="flex-1 text-emerald-700 hover:text-emerald-800 font-medium truncate text-sm"
+                                                    className="flex-1 text-emerald-400 hover:text-emerald-300 font-medium truncate text-sm"
                                                 >
                                                     {mapping.shortUrl}
                                                 </a>
                                                 <button
                                                     onClick={() => handleCopyUrl(mapping.shortUrl)}
-                                                    className="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors"
+                                                    className="p-1.5 text-emerald-400/70 hover:bg-emerald-500/10 hover:text-emerald-300 rounded-lg transition-colors"
                                                     title="Copy short URL"
                                                 >
                                                     <FaCopy className="w-3.5 h-3.5" />
@@ -203,33 +203,33 @@ const UserUrlMappings: React.FC = () => {
                                                     href={mapping.shortUrl}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="p-1.5 text-emerald-600 hover:bg-emerald-100 rounded-lg transition-colors"
+                                                    className="p-1.5 text-emerald-400/70 hover:bg-emerald-500/10 hover:text-emerald-300 rounded-lg transition-colors"
                                                     title="Open short URL"
                                                 >
                                                     <FaExternalLinkAlt className="w-3.5 h-3.5" />
                                                 </a>
                                             </div>
                                             {copiedUrl === mapping.shortUrl && (
-                                                <p className="text-xs text-emerald-600 mt-1">✓ Copied!</p>
+                                                <p className="text-xs text-emerald-400 mt-1">✓ Copied!</p>
                                             )}
                                         </div>
 
                                         {/* Original URL */}
                                         <div>
-                                            <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">Original URL</label>
-                                            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                                            <label className="block text-xs font-semibold text-white/40 mb-2 uppercase tracking-wider">Original URL</label>
+                                            <div className="flex items-center gap-2 p-3 bg-blue-900/20 rounded-xl border border-blue-500/25">
                                                 <a
                                                     href={mapping.originalUrl}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="flex-1 text-gray-600 hover:text-gray-800 truncate text-sm"
+                                                    className="flex-1 text-blue-300 hover:text-blue-200 truncate text-sm"
                                                     title={mapping.originalUrl}
                                                 >
                                                     {truncateUrl(mapping.originalUrl, 50)}
                                                 </a>
                                                 <button
                                                     onClick={() => handleCopyUrl(mapping.originalUrl)}
-                                                    className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+                                                    className="p-1.5 text-blue-300/70 hover:bg-blue-500/10 hover:text-blue-200 rounded-lg transition-colors"
                                                     title="Copy original URL"
                                                 >
                                                     <FaCopy className="w-3.5 h-3.5" />
@@ -238,29 +238,29 @@ const UserUrlMappings: React.FC = () => {
                                                     href={mapping.originalUrl}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="p-1.5 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+                                                    className="p-1.5 text-blue-300/70 hover:bg-blue-500/10 hover:text-blue-200 rounded-lg transition-colors"
                                                     title="Open original URL"
                                                 >
                                                     <FaExternalLinkAlt className="w-3.5 h-3.5" />
                                                 </a>
                                             </div>
                                             {copiedUrl === mapping.originalUrl && (
-                                                <p className="text-xs text-emerald-600 mt-1">✓ Copied!</p>
+                                                <p className="text-xs text-emerald-400 mt-1">✓ Copied!</p>
                                             )}
                                         </div>
 
                                         {mapping.expirationDate && (
                                             <div>
-                                                <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">Expires</label>
-                                                <div className="p-3 bg-amber-50 rounded-xl border border-amber-200">
-                                                    <p className="text-amber-700 text-sm font-medium">{formatDate(mapping.expirationDate)}</p>
+                                                <label className="block text-xs font-semibold text-white/40 mb-2 uppercase tracking-wider">Expires</label>
+                                                <div className="p-3 bg-amber-900/20 rounded-xl border border-amber-500/25">
+                                                    <p className="text-amber-300 text-sm font-medium">{formatDate(mapping.expirationDate)}</p>
                                                 </div>
                                             </div>
                                         )}
                                     </div>
 
                                     {/* Card Actions */}
-                                    <div className="px-5 py-4 bg-gray-50 border-t border-gray-100 flex gap-3">
+                                    <div className="px-5 py-4 bg-white/5 border-t border-white/10 flex gap-3">
                                         <Button
                                             onClick={() => navigate(`/account/url-mappings/${mapping.urlHash}`)}
                                             className="flex-1"

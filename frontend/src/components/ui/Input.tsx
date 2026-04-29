@@ -13,14 +13,14 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>((
   const generatedId = useId();
   const inputId = id ?? generatedId;
   const errorId = `${inputId}-error`;
-  const baseStyles = 'w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200';
-  const errorStyles = error ? 'border-red-300 focus:ring-red-500' : '';
+  const baseStyles = 'w-full rounded-xl border border-white/12 bg-white/6 px-4 py-3 text-white placeholder-white/25 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-200';
+  const errorStyles = error ? 'border-red-500/40 focus:ring-red-500/40' : '';
   const iconStyles = icon ? 'pl-12' : '';
 
   return (
     <div className="space-y-2">
       {label && (
-        <label htmlFor={inputId} className="block text-gray-700 text-sm font-semibold">
+        <label htmlFor={inputId} className="block text-sm font-semibold text-white/70">
           {label}
         </label>
       )}
