@@ -10,7 +10,11 @@ import {
     FaHome,
 } from 'react-icons/fa';
 
-const SidePanel: React.FC = () => {
+interface SidePanelProps {
+    desktopVisible?: boolean;
+}
+
+const SidePanel: React.FC<SidePanelProps> = ({ desktopVisible = true }) => {
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
@@ -60,7 +64,7 @@ const SidePanel: React.FC = () => {
             {/* Sidebar */}
             <div className={`
                 ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-                md:translate-x-0
+                ${desktopVisible ? 'md:translate-x-0' : 'md:hidden'}
                 fixed top-0 left-0 h-full w-64
                 bg-[#0d0d20] border-r border-white/10
                 z-50 transition-transform duration-300 ease-in-out

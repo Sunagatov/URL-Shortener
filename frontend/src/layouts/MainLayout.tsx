@@ -17,6 +17,7 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import { ROUTES } from '../constants';
 import AuthService from '../services/AuthService';
+import SidePanel from '../components/SidePanel';
 
 
 interface MainLayoutProps {
@@ -29,8 +30,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isAccountRoute = location.pathname.startsWith('/account');
-  const showMobileAccountDrawerTrigger = isAuthenticated && isAccountRoute;
-  const showMobileHeaderAccountMenu = !(isAuthenticated && isAccountRoute);
+  const showMobileDrawerTrigger = isAuthenticated;
 
   const handleLogout = () => {
     AuthService.logout();
@@ -59,6 +59,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   return (
     <div className="flex flex-col min-h-screen">
+      {isAuthenticated && !isAccountRoute && <SidePanel desktopVisible={false} />}
+
       {/* Header */}
       <header className="bg-[#060612]/85 backdrop-blur-xl text-white py-4 fixed w-full z-50 border-b border-white/10">
         <div className="container mx-auto flex justify-between items-center px-4">
@@ -77,7 +79,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
           {/* Navigation */}
           <div className="flex items-center space-x-3">
-            {showMobileAccountDrawerTrigger && (
+            {showMobileDrawerTrigger && (
               <button
                 onClick={handleOpenMobileAccountNav}
                 className={mobileHeaderActionClassName}
@@ -87,18 +89,17 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               </button>
             )}
             {isAuthenticated ? (
-              <div className={`relative ${showMobileHeaderAccountMenu ? '' : 'hidden md:block'}`}>
+              <div className="relative hidden md:block">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center justify-center md:justify-start gap-2 md:px-4 w-10 h-10 md:w-auto md:h-auto md:py-2 bg-white/10 hover:bg-white/15 backdrop-blur-sm rounded-xl transition-all duration-200 border border-white/15 md:border-white/20 hover:border-white/30"
+                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 backdrop-blur-sm rounded-xl transition-all duration-200 border border-white/20 hover:border-white/30"
                   aria-label="Open account menu"
                 >
-                  <div className="hidden md:flex w-7 h-7 bg-white/15 rounded-lg items-center justify-center">
+                  <div className="flex w-7 h-7 bg-white/15 rounded-lg items-center justify-center">
                     <FaUserCircle className="w-4 h-4" />
                   </div>
-                  <FaBars className="md:hidden w-4 h-4 text-white" />
-                  <span className="hidden md:inline font-medium text-sm">Account</span>
-                  <FaChevronDown className={`hidden md:block w-3 h-3 transition-transform duration-200 ${
+                  <span className="font-medium text-sm">Account</span>
+                  <FaChevronDown className={`w-3 h-3 transition-transform duration-200 ${
                     isUserMenuOpen ? 'rotate-180' : ''
                   }`} />
                 </button>
