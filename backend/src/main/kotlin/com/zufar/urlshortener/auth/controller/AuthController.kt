@@ -276,7 +276,7 @@ class AuthController(
             email = normalizedEmail,
             password = passwordEncoder.encode(signUpRequest.password),
             country = signUpRequest.country,
-            age = signUpRequest.age.toInt(),
+            age = signUpRequest.age,
             createdAt = LocalDateTime.now(),
             updatedAt = LocalDateTime.now()
         )

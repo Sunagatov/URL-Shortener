@@ -15,7 +15,7 @@ data class SignUpRequest(
     val country: String = "",
 
     @Schema(description = "User's age.", example = "30", required = true, minimum = "1", maximum = "150")
-    val age: String = "",
+    val age: Int = 0,
 
     @Schema(description = "User's email address.", example = "john.doe@example.com", required = true, maxLength = 254)
     val email: String = "",

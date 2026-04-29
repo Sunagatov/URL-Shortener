@@ -52,7 +52,7 @@ class AuthControllerTest {
                 firstName = "Jane",
                 lastName = "Doe",
                 country = "USA",
-                age = "28",
+                age = 28,
                 email = "  Jane.Doe@Example.COM  ",
                 password = "SecurePassword123!"
             )
@@ -83,7 +83,7 @@ class AuthControllerTest {
                     firstName = "Jane",
                     lastName = "Doe",
                     country = "USA",
-                    age = "28",
+                    age = 28,
                     email = "Jane.Doe@Example.COM",
                     password = "SecurePassword123!"
                 )

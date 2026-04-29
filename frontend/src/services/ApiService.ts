@@ -57,11 +57,6 @@ export class ApiService {
     return response.data;
   }
 
-  static async updateUserProfile(data: Partial<User>): Promise<User> {
-    const response = await axiosInstance.put(API_ENDPOINTS.USER.UPDATE, data);
-    return response.data;
-  }
-
   static async changePassword(data: { currentPassword: string; newPassword: string }): Promise<void> {
     await axiosInstance.put(API_ENDPOINTS.USER.CHANGE_PASSWORD, data);
   }

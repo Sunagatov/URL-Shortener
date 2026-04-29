@@ -12,9 +12,8 @@ export const API_ENDPOINTS = {
     DELETE: (hash: string) => `/api/v1/urls/${hash}`,
   },
   USER: {
-    PROFILE: '/api/v1/user/profile',
-    UPDATE: '/api/v1/user/profile',
-    CHANGE_PASSWORD: '/api/v1/user/change-password',
+    PROFILE: '/api/v1/users',
+    CHANGE_PASSWORD: '/api/v1/users/change-password',
   },
 } as const;
 

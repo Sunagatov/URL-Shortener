@@ -2,6 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'react-router-dom';
+import { z } from 'zod';
 import { ApiService } from '../services/ApiService';
 import { useApi } from '../hooks/useApi';
 import { useAuth } from '../hooks/useAuth';
@@ -29,7 +30,7 @@ const UrlShortener: React.FC = () => {
         handleSubmit,
         reset,
         formState: { errors },
-    } = useForm<CreateUrlFormData>({
+    } = useForm<z.input<typeof createUrlSchema>, unknown, CreateUrlFormData>({
         resolver: zodResolver(createUrlSchema),
     });
 

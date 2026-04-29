@@ -1,5 +1,7 @@
 package com.zufar.urlshortener.shorten.controller
 
+import com.zufar.urlshortener.auth.dto.ChangePasswordRequest
+import com.zufar.urlshortener.auth.service.UserPasswordChanger
 import com.zufar.urlshortener.common.exception.ErrorResponse
 import com.zufar.urlshortener.shorten.dto.UserDetailsDto
 import com.zufar.urlshortener.shorten.service.UserDetailsProvider
@@ -12,6 +14,8 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -21,7 +25,10 @@ import org.springframework.web.bind.annotation.RestController
     name = "User Management",
     description = "Operations related to managing and retrieving user details."
 )
-class UserProviderController(private val userDetailsProvider: UserDetailsProvider) {
+class UserProviderController(
+    private val userDetailsProvider: UserDetailsProvider,
+    private val userPasswordChanger: UserPasswordChanger
+) {
 
     @Operation(
         summary = "Retrieve User Details",
@@ -103,5 +110,27 @@ class UserProviderController(private val userDetailsProvider: UserDetailsProvide
     fun getUserDetails(): ResponseEntity<UserDetailsDto> {
         val userDetails = userDetailsProvider.getUserDetails()
         return ResponseEntity.ok(userDetails)
+    }
+
+    @Operation(
+        summary = "Change Password",
+        description = "Changes the password of the authenticated user."
+    )
+    @ApiResponse(responseCode = "204", description = "Password changed successfully.")
+    @ApiResponse(
+        responseCode = "400",
+        description = "Invalid current or new password.",
+        content = [Content(
+            mediaType = MediaType.APPLICATION_JSON_VALUE,
+            schema = Schema(implementation = ErrorResponse::class)
+        )]
+    )
+    @PutMapping(
+        value = ["/change-password"],
+        consumes = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    fun changePassword(@RequestBody changePasswordRequest: ChangePasswordRequest): ResponseEntity<Void> {
+        userPasswordChanger.changePassword(changePasswordRequest)
+        return ResponseEntity.noContent().build()
     }
 }
