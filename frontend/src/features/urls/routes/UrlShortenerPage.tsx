@@ -93,7 +93,7 @@ const UrlShortenerPage: React.FC = () => {
 
                     {/* Headline */}
                     <h1 className="animate-fade-up-d1 text-4xl sm:text-5xl md:text-[72px] font-black text-white leading-[1.05] tracking-tight mb-5 md:mb-6">
-                        Turn long URLs into
+                        URL shortener for
                         <span className="block gradient-text-animated mt-1">powerful short links</span>
                     </h1>
 

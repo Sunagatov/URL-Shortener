@@ -134,6 +134,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                       </div>
                       <div className="border-t border-white/10 pt-1.5">
                         <button
+                          type="button"
                           onClick={handleLogout}
                           className="flex items-center space-x-3 w-full px-4 py-2.5 text-red-400/80 hover:bg-red-900/20 hover:text-red-300 transition-colors duration-200"
                         >

@@ -124,6 +124,8 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
                             <span className="text-sm font-medium">Home</span>
                         </Link>
                         <button
+                            type="button"
+                            aria-label="Log out from sidebar"
                             onClick={handleLogout}
                             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-red-400/70 hover:text-red-300 hover:bg-red-900/20 transition-all duration-200"
                         >

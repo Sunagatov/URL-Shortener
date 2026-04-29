@@ -48,10 +48,11 @@ const UserUrlMappingsPage: React.FC = () => {
             setTotalElements(data.totalElements);
         } catch (error: unknown) {
             if (getApiErrorStatus(error) === 401) {
-                navigate(routes.signIn);
-            } else {
-                setErrorMessage(getApiErrorMessage(error, 'Failed to fetch URL mappings.'));
+                navigate(routes.signIn, { replace: true });
+                return;
             }
+
+            setErrorMessage(getApiErrorMessage(error, 'Failed to fetch URL mappings.'));
         } finally {
             setIsLoading(false);
         }
@@ -77,7 +78,7 @@ const UserUrlMappingsPage: React.FC = () => {
             setErrorMessage('');
         } catch (error: unknown) {
             if (getApiErrorStatus(error) === 401) {
-                navigate(routes.signIn);
+                navigate(routes.signIn, { replace: true });
                 return;
             }
 

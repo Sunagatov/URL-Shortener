@@ -34,7 +34,7 @@ export default defineConfig({
       ...webServerEnv,
       VITE_BACKEND_REST_API_URL: BACKEND_URL,
     },
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 120000,
   },
 });

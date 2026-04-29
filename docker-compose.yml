@@ -30,7 +30,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        REACT_APP_BACKEND_REST_API_URL: http://localhost:8080
+        VITE_BACKEND_REST_API_URL: http://localhost:8080
     ports:
       - "3000:80"
     depends_on:

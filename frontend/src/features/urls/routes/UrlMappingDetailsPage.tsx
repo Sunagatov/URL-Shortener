@@ -39,10 +39,17 @@ const UrlMappingDetailsPage: React.FC = () => {
                 setUrlMapping(response);
             } catch (error: unknown) {
                 if (getApiErrorStatus(error) === 401) {
-                    navigate(routes.signIn);
-                } else {
-                    setErrorMessage(getApiErrorMessage(error, 'Failed to fetch URL mapping details.'));
+                    navigate(routes.signIn, { replace: true });
+                    return;
                 }
+
+                if (getApiErrorStatus(error) === 404) {
+                    setUrlMapping(null);
+                    setErrorMessage('The requested URL mapping could not be found.');
+                    return;
+                }
+
+                setErrorMessage(getApiErrorMessage(error, 'Failed to fetch URL mapping details.'));
             } finally {
                 setIsLoading(false);
             }
@@ -68,7 +75,10 @@ const UrlMappingDetailsPage: React.FC = () => {
             await deleteUrl(urlMapping.urlHash);
             navigate(routes.urlMappings);
         } catch (error: unknown) {
-            if (getApiErrorStatus(error) === 401) { navigate(routes.signIn); return; }
+            if (getApiErrorStatus(error) === 401) {
+                navigate(routes.signIn, { replace: true });
+                return;
+            }
             setErrorMessage(getApiErrorMessage(error, 'Failed to delete URL mapping.'));
         }
     };
