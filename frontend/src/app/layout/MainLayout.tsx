@@ -171,11 +171,16 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow flex items-center justify-center bg-[#060612] pt-[72px] md:pt-24">
+      <main
+        className={`flex-grow bg-[#060612] pt-[72px] md:pt-24 ${
+          isAccountRoute ? '' : 'flex items-center justify-center'
+        }`}
+      >
         {children}
       </main>
 
       {/* Footer */}
+      {!isAccountRoute && (
       <footer className="bg-[#060612] text-white border-t border-white/10 bg-grid-dark">
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -274,6 +279,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           </div>
         </div>
       </footer>
+      )}
     </div>
   );
 };

@@ -94,7 +94,7 @@ const UrlMappingDetailsPage: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className="flex min-h-screen bg-[#060612]">
+            <div className="flex min-h-[calc(100vh-72px)] bg-[#060612] md:min-h-[calc(100vh-96px)]">
                 <AccountSidebar />
                 <div className="flex-grow md:ml-64 flex items-center justify-center">
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500" />
@@ -105,7 +105,7 @@ const UrlMappingDetailsPage: React.FC = () => {
 
     if (!urlMapping) {
         return (
-            <div className="flex min-h-screen bg-[#060612]">
+            <div className="flex min-h-[calc(100vh-72px)] bg-[#060612] md:min-h-[calc(100vh-96px)]">
                 <AccountSidebar />
                 <div className="flex-grow md:ml-64 flex items-center justify-center px-6">
                     <div className="text-center">
@@ -119,7 +119,7 @@ const UrlMappingDetailsPage: React.FC = () => {
     }
 
     return (
-        <div className="flex min-h-screen bg-[#060612] bg-grid-dark">
+        <div className="flex min-h-[calc(100vh-72px)] bg-[#060612] bg-grid-dark md:min-h-[calc(100vh-96px)]">
             <AccountSidebar />
 
             <div className="flex-grow md:ml-64 px-4 pt-3 pb-8 sm:px-6 md:px-10 md:py-8">

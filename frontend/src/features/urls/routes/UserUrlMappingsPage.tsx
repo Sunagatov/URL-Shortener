@@ -122,7 +122,7 @@ const UserUrlMappingsPage: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className="flex min-h-screen bg-[#060612]">
+            <div className="flex min-h-[calc(100vh-72px)] bg-[#060612] md:min-h-[calc(100vh-96px)]">
                 <AccountSidebar />
                 <div className="flex-grow md:ml-64 flex items-center justify-center">
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500" />
@@ -132,10 +132,10 @@ const UserUrlMappingsPage: React.FC = () => {
     }
 
     return (
-        <div className="flex min-h-screen bg-[#060612] bg-grid-dark">
+        <div className="flex min-h-[calc(100vh-72px)] bg-[#060612] bg-grid-dark md:min-h-[calc(100vh-96px)]">
             <AccountSidebar />
             <div className="flex-grow md:ml-64 px-4 pt-3 pb-8 sm:px-6 md:px-10 md:py-8">
-                <div className="max-w-6xl mx-auto">
+                <div className="mx-auto flex min-h-full max-w-6xl flex-col">
                     {/* Header */}
                     <div className="mb-8 mt-3 md:mt-0">
                         <h1 className="text-3xl font-black text-white mb-1 tracking-tight">My URLs</h1>
@@ -284,15 +284,19 @@ const UserUrlMappingsPage: React.FC = () => {
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-20 rounded-2xl bg-white/5 border border-white/10">
-                            <div className="w-16 h-16 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                                <FaLink className="w-6 h-6 text-white/20" />
+                        <div className="flex flex-1 items-start justify-center pt-4 sm:items-center sm:pt-0">
+                            <div className="w-full rounded-2xl bg-white/5 border border-white/10 px-6 py-12 sm:max-w-md sm:px-8 sm:py-14">
+                                <div className="mx-auto flex max-w-sm flex-col items-center text-center">
+                                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+                                        <FaLink className="w-6 h-6 text-white/20" />
+                                    </div>
+                                    <h3 className="mb-2 text-lg font-bold text-white">No URLs yet</h3>
+                                    <p className="mb-6 text-sm text-white/35">Start by creating your first shortened URL</p>
+                                    <Button onClick={() => navigate(routes.home)} size="sm" className="mx-auto">
+                                        Create Short URL
+                                    </Button>
+                                </div>
                             </div>
-                            <h3 className="text-lg font-bold text-white mb-2">No URLs yet</h3>
-                            <p className="text-white/35 text-sm mb-6">Start by creating your first shortened URL</p>
-                            <Button onClick={() => navigate(routes.home)} size="sm">
-                                Create Short URL
-                            </Button>
                         </div>
                     )}
 

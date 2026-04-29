@@ -94,7 +94,7 @@ const SecurityPage: React.FC = () => {
     const inputClass = "w-full px-4 py-3 pr-12 bg-[#11182b] border border-white/7 text-white placeholder-white/30 rounded-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-200 text-sm";
 
     return (
-        <div className="flex min-h-screen bg-[#060612] bg-grid-dark">
+        <div className="flex min-h-[calc(100vh-72px)] bg-[#060612] bg-grid-dark md:min-h-[calc(100vh-96px)]">
             <AccountSidebar />
 
             <div className="flex-grow md:ml-64 px-4 pt-3 pb-8 sm:px-6 md:px-10 md:py-8">
