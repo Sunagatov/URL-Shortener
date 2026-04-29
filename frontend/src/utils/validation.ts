@@ -38,8 +38,7 @@ export const createUrlSchema = z.object({
     .string()
     .min(1, VALIDATION_RULES.URL.REQUIRED)
     .url(VALIDATION_RULES.URL.INVALID),
-  customAlias: z.string().optional(),
-  expiresAt: z.string().optional(),
+  daysCount: z.coerce.number().int().min(1).max(365).optional(),
 });
 
 export type SignInFormData = z.infer<typeof signInSchema>;
