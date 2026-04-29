@@ -17,6 +17,14 @@ export default defineConfig({
     outDir: 'build',
     rollupOptions: {
       output: {
+        entryFileNames: 'assets/app.js',
+        assetFileNames(assetInfo) {
+          if (assetInfo.names.some((name) => name.endsWith('.css'))) {
+            return 'assets/app.css';
+          }
+
+          return 'assets/[name]-[hash][extname]';
+        },
         manualChunks(id) {
           if (!id.includes('node_modules')) {
             return undefined;
