@@ -9,7 +9,7 @@ import { signUpSchema, type SignUpFormData, type SignUpFormInput } from '@/featu
 import { routes } from '@/app/routes';
 import type { AuthTokens } from '@/shared/types';
 import { Button, Card, Input } from '@/shared/ui';
-import { FaUser, FaEnvelope, FaLock, FaGlobe, FaCalendarAlt, FaUserPlus, FaGoogle, FaGithub } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaLock, FaGlobe, FaCalendarAlt, FaUserPlus, FaGoogle } from 'react-icons/fa';
 
 type AuthLocationState = {
     from?: {
@@ -193,24 +193,15 @@ const SignUpPage: React.FC = () => {
                 </div>
 
                 {/* Social Login */}
-                <div className="mt-6 grid grid-cols-2 gap-3">
+                <div className="mt-6">
                     <Button
                         variant="secondary"
                         className="w-full"
                         disabled
-                        title="Google sign-up is not implemented yet"
+                        title="Google sign-up is currently unavailable"
                     >
                         <FaGoogle className="w-4 h-4 text-red-500" />
-                        <span>Google (coming soon)</span>
-                    </Button>
-                    <Button
-                        variant="secondary"
-                        className="w-full"
-                        disabled
-                        title="GitHub sign-up is not implemented yet"
-                    >
-                        <FaGithub className="w-4 h-4" />
-                        <span>GitHub (coming soon)</span>
+                        <span>Google</span>
                     </Button>
                 </div>
             </Card>
