@@ -9,19 +9,17 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import java.util.concurrent.TimeUnit
 
 @Configuration
-class CorsConfig {
-
-    @Value("\${cors.allowed.origins}")
-    private lateinit var allowedOrigins: String
-
+class CorsConfig(
+    @Value("\${cors.allowed.origins}") private val allowedOrigins: String,
     @Value("\${cors.allowed.origin-patterns:http://localhost:*,http://127.0.0.1:*}")
-    private lateinit var allowedOriginPatterns: String
+    private val allowedOriginPatterns: String
+) {
 
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
-        configuration.allowedOrigins = allowedOrigins.split(",").map { it.trim() }
-        configuration.allowedOriginPatterns = allowedOriginPatterns.split(",").map { it.trim() }
+        configuration.allowedOrigins = parseCsv(allowedOrigins)
+        configuration.allowedOriginPatterns = parseCsv(allowedOriginPatterns)
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
         configuration.allowedHeaders = listOf("*")
         configuration.exposedHeaders = listOf("Authorization", "Content-Type")
@@ -32,4 +30,7 @@ class CorsConfig {
         source.registerCorsConfiguration("/**", configuration)
         return source
     }
+
+    private fun parseCsv(value: String): List<String> =
+        value.split(",").map(String::trim).filter(String::isNotEmpty)
 }

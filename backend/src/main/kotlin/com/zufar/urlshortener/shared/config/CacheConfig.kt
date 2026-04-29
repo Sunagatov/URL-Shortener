@@ -11,16 +11,11 @@ import java.time.Duration
 
 @Configuration
 @EnableCaching
-class CacheConfig {
-
-    @Value("\${cache.max.size:10000}")
-    private var maxSize: Long = 10000
-
-    @Value("\${cache.expire.minutes:30}")
-    private var expireMinutes: Long = 30
-
-    @Value("\${cache.names:urlMappings,userDetails}")
-    private lateinit var cacheNames: String
+class CacheConfig(
+    @Value("\${cache.max.size:10000}") private val maxSize: Long,
+    @Value("\${cache.expire.minutes:30}") private val expireMinutes: Long,
+    @Value("\${cache.names:urlMappings,userDetails}") private val cacheNames: String
+) {
 
     @Bean
     fun cacheManager(): CacheManager {
@@ -31,7 +26,11 @@ class CacheConfig {
                 .expireAfterWrite(Duration.ofMinutes(expireMinutes))
                 .recordStats()
         )
-        cacheManager.setCacheNames(cacheNames.split(",").map { it.trim() })
+        cacheManager.setCacheNames(
+            cacheNames.split(",")
+                .map(String::trim)
+                .filter(String::isNotEmpty)
+        )
         return cacheManager
     }
 }

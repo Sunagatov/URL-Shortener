@@ -15,9 +15,9 @@ import {
   FaHeart
 } from 'react-icons/fa';
 import { routes } from '@/app/routes';
-import { authSession } from '@/shared/auth/authSession';
 import { useAuth } from '@/shared/auth/useAuth';
 import AccountSidebar from '@/app/layout/AccountSidebar';
+import { layoutEvents } from '@/shared/lib/layoutEvents';
 
 
 interface MainLayoutProps {
@@ -25,7 +25,7 @@ interface MainLayoutProps {
 }
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -36,20 +36,20 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const showMobileDrawerTrigger = isAuthenticated;
 
   const handleLogout = () => {
-    authSession.logout();
+    logout();
     navigate(routes.home);
     setIsUserMenuOpen(false);
   };
 
   const handleOpenMobileAccountNav = () => {
     setIsUserMenuOpen(false);
-    window.dispatchEvent(new CustomEvent('shorty:toggle-account-drawer'));
+    window.dispatchEvent(new CustomEvent(layoutEvents.toggleAccountDrawer));
   };
 
   React.useEffect(() => {
     const handleCloseUserMenu = () => setIsUserMenuOpen(false);
-    window.addEventListener('shorty:close-user-menu', handleCloseUserMenu);
-    return () => window.removeEventListener('shorty:close-user-menu', handleCloseUserMenu);
+    window.addEventListener(layoutEvents.closeUserMenu, handleCloseUserMenu);
+    return () => window.removeEventListener(layoutEvents.closeUserMenu, handleCloseUserMenu);
   }, []);
 
   const userMenuItems = [

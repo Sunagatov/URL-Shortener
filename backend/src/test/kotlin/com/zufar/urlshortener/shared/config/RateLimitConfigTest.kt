@@ -3,14 +3,12 @@ package com.zufar.urlshortener.shared.config
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.junit.jupiter.api.Test
-import org.springframework.test.util.ReflectionTestUtils
 
 class RateLimitConfigTest {
 
     @Test
     fun `isTrustedProxy matches exact addresses and CIDR ranges`() {
-        val config = RateLimitConfig()
-        ReflectionTestUtils.setField(config, "trustedProxies", "10.0.0.5, 192.168.0.0/16")
+        val config = RateLimitConfig(100, "10.0.0.5, 192.168.0.0/16")
 
         assertTrue(config.isTrustedProxy("10.0.0.5"))
         assertTrue(config.isTrustedProxy("192.168.1.10"))
@@ -19,8 +17,7 @@ class RateLimitConfigTest {
 
     @Test
     fun `isTrustedProxy returns false when trusted proxy list is blank`() {
-        val config = RateLimitConfig()
-        ReflectionTestUtils.setField(config, "trustedProxies", "")
+        val config = RateLimitConfig(100, "")
 
         assertFalse(config.isTrustedProxy("10.0.0.5"))
     }

@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.urls.controller
 
 import com.zufar.urlshortener.shared.exception.ErrorResponse
+import com.zufar.urlshortener.urls.UrlHashFormat
 import com.zufar.urlshortener.urls.service.UrlMappingProvider
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -87,13 +88,13 @@ class UrlRedirectController(private val urlMappingProvider: UrlMappingProvider) 
             )
         ]
     )
-    @GetMapping("/{urlHash:[1-9A-HJ-NP-Za-km-z]{8}}")
+    @GetMapping(UrlHashFormat.PATH_VARIABLE_REGEX)
     fun redirect(
         @Parameter(
             description = "The unique identifier (hash) of the shortened URL.",
             required = true,
             example = "abcd1234",
-            schema = Schema(type = "string", maxLength = 15)
+            schema = Schema(type = "string", maxLength = UrlHashFormat.LENGTH)
         )
         @PathVariable urlHash: String,
         httpServletRequest: HttpServletRequest

@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.shared.filter
 
 import com.github.benmanes.caffeine.cache.Cache
+import com.zufar.urlshortener.shared.http.ErrorResponseWriter
 import com.zufar.urlshortener.shared.config.RateLimitConfig
 import io.github.bucket4j.Bucket
 import jakarta.servlet.FilterChain
@@ -13,12 +14,13 @@ import org.springframework.web.filter.OncePerRequestFilter
 
 private const val RETRY_AFTER_HEADER = "Retry-After"
 private const val RATE_LIMIT_RETRY_AFTER_SECONDS = "60"
-private const val RATE_LIMIT_ERROR_RESPONSE = """{"errorMessage":"Rate limit exceeded. Please try again later."}"""
+private const val RATE_LIMIT_ERROR_MESSAGE = "Rate limit exceeded. Please try again later."
 
 @Component
 class RateLimitFilter(
     private val rateLimitConfig: RateLimitConfig,
-    private val buckets: Cache<String, Bucket>
+    private val buckets: Cache<String, Bucket>,
+    private val errorResponseWriter: ErrorResponseWriter
 ) : OncePerRequestFilter() {
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
@@ -57,9 +59,7 @@ class RateLimitFilter(
     }
 
     private fun writeRateLimitExceededResponse(response: HttpServletResponse) {
-        response.status = HttpStatus.TOO_MANY_REQUESTS.value()
-        response.contentType = MediaType.APPLICATION_JSON_VALUE
         response.setHeader(RETRY_AFTER_HEADER, RATE_LIMIT_RETRY_AFTER_SECONDS)
-        response.writer.write(RATE_LIMIT_ERROR_RESPONSE)
+        errorResponseWriter.write(response, HttpStatus.TOO_MANY_REQUESTS, RATE_LIMIT_ERROR_MESSAGE)
     }
 }

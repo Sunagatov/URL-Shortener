@@ -9,18 +9,17 @@ private const val MAX_EMAIL_LENGTH = 254
 
 @Service
 class EmailOfUserValidator {
+    private val emailValidator = EmailValidator.getInstance()
 
     fun validate(email: String) {
-        if (email.isBlank()) {
-            throw InvalidRequestException(EMAIL_MUST_NOT_BE_EMPTY)
-        }
+        validate(email.isBlank(), EMAIL_MUST_NOT_BE_EMPTY)
+        validate(email.length > MAX_EMAIL_LENGTH, EMAIL_IS_TOO_LONG)
+        validate(!emailValidator.isValid(email), EMAIL_FORMAT_IS_INVALID)
+    }
 
-        if (email.length > MAX_EMAIL_LENGTH) {
-            throw InvalidRequestException(EMAIL_IS_TOO_LONG)
-        }
-
-        if (!EmailValidator.getInstance().isValid(email)) {
-            throw InvalidRequestException(EMAIL_FORMAT_IS_INVALID)
+    private fun validate(invalid: Boolean, message: String) {
+        if (invalid) {
+            throw InvalidRequestException(message)
         }
     }
 }

@@ -4,7 +4,7 @@ import AccountSidebar from '@/app/layout/AccountSidebar';
 import { routes } from '@/app/routes';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { deleteUrl, getUserUrls } from '@/features/urls/api/urlsApi';
-import { copyToClipboard } from '@/shared/lib/clipboard';
+import { useClipboard } from '@/shared/lib/useClipboard';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
 import { Button, useToast } from '@/shared/ui';
 import type { UrlMapping } from '@/shared/types';
@@ -183,11 +183,11 @@ const UserUrlMappingsPage: React.FC = () => {
     const [pageError, setPageError]         = useState<string | null>(null);
 
     // Copy + delete state
-    const [copiedUrl, setCopiedUrl]         = useState<string | null>(null);
     const [deletingHash, setDeletingHash]   = useState<string | null>(null);
 
     const navigate = useNavigate();
     const toast = useToast();
+    const { copiedValue, copyValue } = useClipboard();
     const redirectToSignIn = useCallback(() => {
         navigate(routes.signIn, { replace: true });
     }, [navigate]);
@@ -299,14 +299,11 @@ const UserUrlMappingsPage: React.FC = () => {
 
     const handleCopyUrl = async (url: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        const didCopy = await copyToClipboard(url);
+        const didCopy = await copyValue(url);
         if (!didCopy) {
             toast.error('Unable to copy URL.');
             return;
         }
-
-        setCopiedUrl(url);
-        setTimeout(() => setCopiedUrl(null), 2000);
         toast.success('Copied to clipboard');
     };
 
@@ -407,7 +404,7 @@ const UserUrlMappingsPage: React.FC = () => {
                                     mapping={mapping}
                                     index={displayPage * PAGE_SIZE + index + 1}
                                     onCopy={handleCopyUrl}
-                                    copiedUrl={copiedUrl}
+                                    copiedUrl={copiedValue}
                                     onDetails={() => { navigate(`/account/url-mappings/${mapping.urlHash}`); }}
                                     onDelete={e => { e.stopPropagation(); void deleteMapping(mapping.urlHash); }}
                                     isDeleting={deletingHash === mapping.urlHash}

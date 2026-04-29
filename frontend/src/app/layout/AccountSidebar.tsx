@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { routes } from '@/app/routes';
-import { authSession } from '@/shared/auth/authSession';
 import { useAuth } from '@/shared/auth/useAuth';
+import { layoutEvents } from '@/shared/lib/layoutEvents';
 import {
     FaTachometerAlt,
     FaUser,
@@ -20,26 +20,26 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
 
     React.useEffect(() => {
         const handleToggleDrawer = () => setIsOpen((prev) => !prev);
         const handleCloseDrawer  = () => setIsOpen(false);
-        window.addEventListener('shorty:toggle-account-drawer', handleToggleDrawer);
-        window.addEventListener('shorty:close-account-drawer',  handleCloseDrawer);
+        window.addEventListener(layoutEvents.toggleAccountDrawer, handleToggleDrawer);
+        window.addEventListener(layoutEvents.closeAccountDrawer, handleCloseDrawer);
         return () => {
-            window.removeEventListener('shorty:toggle-account-drawer', handleToggleDrawer);
-            window.removeEventListener('shorty:close-account-drawer',  handleCloseDrawer);
+            window.removeEventListener(layoutEvents.toggleAccountDrawer, handleToggleDrawer);
+            window.removeEventListener(layoutEvents.closeAccountDrawer, handleCloseDrawer);
         };
     }, []);
 
     React.useEffect(() => {
         setIsOpen(false);
-        window.dispatchEvent(new CustomEvent('shorty:close-user-menu'));
+        window.dispatchEvent(new CustomEvent(layoutEvents.closeUserMenu));
     }, [location.pathname]);
 
     const handleLogout = () => {
-        authSession.logout();
+        logout();
         navigate(routes.home);
     };
 

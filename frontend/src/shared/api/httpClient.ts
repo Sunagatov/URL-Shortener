@@ -2,6 +2,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { authSession } from '@/shared/auth/authSession';
 import { storage } from '@/shared/auth/storage';
 import { endpoints } from '@/shared/api/endpoints';
+import { redirectToSignIn } from '@/shared/lib/authRedirect';
 import type { AuthTokens } from '@/shared/types';
 
 const backendRestApiUrl = import.meta.env.VITE_BACKEND_REST_API_URL;
@@ -76,10 +77,7 @@ axiosInstance.interceptors.response.use(
 
             if (!newAccessToken) {
                 authSession.logout();
-
-                if (!['/', '/signin', '/signup'].includes(window.location.pathname)) {
-                    window.location.replace('/signin');
-                }
+                redirectToSignIn();
 
                 return Promise.reject(new Error('Refresh endpoint did not return a new access token'));
             }
@@ -97,10 +95,7 @@ axiosInstance.interceptors.response.use(
             return axiosInstance(originalRequest);
         } catch (refreshError) {
             authSession.logout();
-
-            if (!['/', '/signin', '/signup'].includes(window.location.pathname)) {
-                window.location.replace('/signin');
-            }
+            redirectToSignIn();
 
             return Promise.reject(refreshError);
         }

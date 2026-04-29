@@ -8,6 +8,7 @@ import { useApi } from '@/shared/api/useApi';
 import { useAuth } from '@/shared/auth/useAuth';
 import { createUrlSchema, type CreateUrlFormData } from '@/features/urls/model/urlValidation';
 import { routes } from '@/app/routes';
+import { useClipboard } from '@/shared/lib/useClipboard';
 import { Button, useToast } from '@/shared/ui';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import {
@@ -29,6 +30,7 @@ const UrlShortenerPage: React.FC = () => {
     const { isAuthenticated } = useAuth();
     const { execute, loading, error } = useApi<{ shortUrl: string }>();
     const toast = useToast();
+    const { copiedValue, copyValue, clearCopiedValue } = useClipboard();
     const {
         register,
         handleSubmit,
@@ -39,28 +41,34 @@ const UrlShortenerPage: React.FC = () => {
     });
 
     const [shortUrl, setShortUrl] = React.useState('');
-    const [copied, setCopied] = React.useState(false);
 
     const onSubmit = async (data: CreateUrlFormData) => {
         const result = await execute(() => createUrl(data));
         if (result) {
             setShortUrl(result.shortUrl);
-        } else if (error) {
-            toast.error(error.errorMessage);
         }
     };
 
-    const handleClear = () => { reset(); setShortUrl(''); setCopied(false); };
+    React.useEffect(() => {
+        if (error) {
+            toast.error(error.errorMessage);
+        }
+    }, [error, toast]);
+
+    const handleClear = () => {
+        reset();
+        setShortUrl('');
+        clearCopiedValue();
+    };
 
     const handleCopy = async () => {
-        try {
-            await navigator.clipboard.writeText(shortUrl);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-            toast.success('Copied to clipboard');
-        } catch (err) {
-            console.error('Failed to copy:', err);
+        const didCopy = await copyValue(shortUrl);
+        if (!didCopy) {
+            toast.error('Unable to copy URL.');
+            return;
         }
+
+        toast.success('Copied to clipboard');
     };
 
     const features = [
@@ -162,15 +170,16 @@ const UrlShortenerPage: React.FC = () => {
                                 </a>
                                 <div className="flex gap-2 flex-shrink-0">
                                     <button
+                                        type="button"
                                         onClick={handleCopy}
                                         className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 border ${
-                                            copied
+                                            copiedValue === shortUrl
                                                 ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
                                                 : 'bg-white/10 text-white/60 border-white/10 hover:bg-white/20'
                                         }`}
                                     >
-                                        {copied ? <FaCheck className="w-3 h-3" /> : <FaCopy className="w-3 h-3" />}
-                                        <span className="hidden sm:inline">{copied ? 'Copied!' : 'Copy'}</span>
+                                        {copiedValue === shortUrl ? <FaCheck className="w-3 h-3" /> : <FaCopy className="w-3 h-3" />}
+                                        <span className="hidden sm:inline">{copiedValue === shortUrl ? 'Copied!' : 'Copy'}</span>
                                     </button>
                                     <a
                                         href={shortUrl}
@@ -181,6 +190,7 @@ const UrlShortenerPage: React.FC = () => {
                                         <FaExternalLinkAlt className="w-3 h-3" />
                                     </a>
                                     <button
+                                        type="button"
                                         onClick={handleClear}
                                         className="px-3 py-2 bg-white/10 text-white/50 hover:bg-white/20 border border-white/10 rounded-lg text-xs font-medium transition-all duration-200"
                                     >

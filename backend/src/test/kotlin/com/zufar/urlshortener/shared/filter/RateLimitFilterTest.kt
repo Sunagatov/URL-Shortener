@@ -1,8 +1,10 @@
 package com.zufar.urlshortener.shared.filter
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.zufar.urlshortener.shared.config.RateLimitConfig
+import com.zufar.urlshortener.shared.http.ErrorResponseWriter
 import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.Bucket
 import jakarta.servlet.FilterChain
@@ -35,7 +37,7 @@ class RateLimitFilterTest {
     @BeforeEach
     fun setup() {
         buckets = Caffeine.newBuilder().build()
-        filter = RateLimitFilter(rateLimitConfig, buckets)
+        filter = RateLimitFilter(rateLimitConfig, buckets, ErrorResponseWriter(ObjectMapper()))
     }
 
     private fun bucketWithCapacity(capacity: Long): Bucket {

@@ -4,6 +4,7 @@ import com.zufar.urlshortener.auth.service.CustomUserDetailsService
 import com.zufar.urlshortener.auth.service.JwtAuthenticationFilter
 import com.zufar.urlshortener.shared.security.RestAccessDeniedHandler
 import com.zufar.urlshortener.shared.security.RestAuthenticationEntryPoint
+import com.zufar.urlshortener.urls.UrlHashFormat
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -47,7 +48,7 @@ class SecurityConfig(
         http: HttpSecurity,
         passwordEncoder: PasswordEncoder
     ): SecurityFilterChain {
-        val publicShortUrlMatcher = RegexRequestMatcher("^/[1-9A-HJ-NP-Za-km-z]{8}$", HttpMethod.GET.name())
+        val publicShortUrlMatcher = RegexRequestMatcher(UrlHashFormat.SECURITY_REGEX, HttpMethod.GET.name())
 
         http
             .csrf { it.disable() }

@@ -10,6 +10,10 @@ import type { User } from '@/shared/types';
 import { routes } from '@/app/routes';
 import { FaLock, FaUser, FaEnvelope, FaGlobe, FaCalendarAlt, FaShieldAlt, FaDownload } from 'react-icons/fa';
 
+type QuickAction =
+    | { icon: typeof FaLock; label: string; soon: true }
+    | { icon: typeof FaShieldAlt | typeof FaDownload; label: string; soon: false; path: string };
+
 const UserAccountPage: React.FC = () => {
     usePageTitle('My Profile');
     const [userDetails, setUserDetails] = useState<User | null>(null);
@@ -87,6 +91,12 @@ const UserAccountPage: React.FC = () => {
         { icon: FaEnvelope,    label: 'Email',       value: userDetails.email,              wide: true },
         { icon: FaGlobe,       label: 'Country',     value: userDetails.country    ?? '—' },
         { icon: FaCalendarAlt, label: 'Age',         value: typeof userDetails.age === 'number' ? `${userDetails.age} years old` : '—' },
+    ];
+
+    const quickActions: QuickAction[] = [
+        { icon: FaLock,      label: 'Edit Profile',    soon: true },
+        { icon: FaShieldAlt, label: 'Change Password', soon: false, path: routes.security },
+        { icon: FaDownload,  label: 'Export Data',     soon: true },
     ];
 
     return (
@@ -184,18 +194,14 @@ const UserAccountPage: React.FC = () => {
                             <div className="rounded-2xl bg-white/[0.04] border border-white/[0.07] p-5">
                                 <p className="text-[10px] font-semibold text-white/25 uppercase tracking-widest mb-3">Quick Actions</p>
                                 <div className="space-y-1">
-                                    {[
-                                        { icon: FaLock,      label: 'Edit Profile',    soon: true  },
-                                        { icon: FaShieldAlt, label: 'Change Password', soon: false, path: routes.security },
-                                        { icon: FaDownload,  label: 'Export Data',     soon: true  },
-                                    ].map((a, i) => {
+                                    {quickActions.map((a, i) => {
                                         const Icon = a.icon;
                                         return (
                                             <button
                                                 key={i}
                                                 type="button"
                                                 disabled={a.soon}
-                                                onClick={!a.soon && a.path ? () => navigate(a.path!) : undefined}
+                                                onClick={a.soon ? undefined : () => navigate(a.path)}
                                                 className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all ${
                                                     a.soon
                                                         ? 'text-white/20 cursor-not-allowed border border-dashed border-white/[0.06]'

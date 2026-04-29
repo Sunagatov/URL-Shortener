@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import AccountSidebar from '@/app/layout/AccountSidebar';
 import { routes } from '@/app/routes';
 import { deleteUrl, getUrlDetails } from '@/features/urls/api/urlsApi';
-import { copyToClipboard } from '@/shared/lib/clipboard';
+import { useClipboard } from '@/shared/lib/useClipboard';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { Button, useToast, ConfirmModal } from '@/shared/ui';
@@ -27,11 +27,11 @@ const UrlMappingDetailsPage: React.FC = () => {
     const [urlMapping, setUrlMapping]     = useState<UrlMapping | null>(null);
     const [isLoading, setIsLoading]       = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [copiedUrl, setCopiedUrl]       = useState<string | null>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, setIsDeleting]     = useState(false);
     const navigate = useNavigate();
     const toast = useToast();
+    const { copiedValue, copyValue } = useClipboard();
 
     useEffect(() => {
         const fetchUrlMapping = async () => {
@@ -62,14 +62,11 @@ const UrlMappingDetailsPage: React.FC = () => {
     }, [navigate, toast, urlHash]);
 
     const handleCopyUrl = async (url: string) => {
-        const didCopy = await copyToClipboard(url);
+        const didCopy = await copyValue(url);
         if (!didCopy) {
             toast.error('Unable to copy URL.');
             return;
         }
-
-        setCopiedUrl(url);
-        setTimeout(() => setCopiedUrl(null), 2000);
         toast.success('Copied to clipboard');
     };
 
@@ -199,7 +196,7 @@ const UrlMappingDetailsPage: React.FC = () => {
                                                     className="p-2 text-white/30 hover:text-blue-300 hover:bg-blue-500/10 rounded-lg transition-all"
                                                     title="Copy"
                                                 >
-                                                    {copiedUrl === urlMapping.shortUrl
+                                                    {copiedValue === urlMapping.shortUrl
                                                         ? <FaCheck className="w-3.5 h-3.5 text-blue-400" />
                                                         : <FaCopy className="w-3.5 h-3.5" />}
                                                 </button>
@@ -234,7 +231,7 @@ const UrlMappingDetailsPage: React.FC = () => {
                                                     className="p-2 text-white/30 hover:text-white/60 hover:bg-white/5 rounded-lg transition-all"
                                                     title="Copy"
                                                 >
-                                                    {copiedUrl === urlMapping.originalUrl
+                                                    {copiedValue === urlMapping.originalUrl
                                                         ? <FaCheck className="w-3.5 h-3.5 text-white/60" />
                                                         : <FaCopy className="w-3.5 h-3.5" />}
                                                 </button>

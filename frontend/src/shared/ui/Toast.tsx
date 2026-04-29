@@ -111,24 +111,41 @@ const DURATION = 3500;
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [toasts, setToasts] = useState<ToastItem[]>([]);
     const timers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+    const removalTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+    const nextToastId = useRef(0);
 
     const dismiss = useCallback((id: string) => {
         // Mark as leaving to trigger exit animation
         setToasts(prev => prev.map(t => t.id === id ? { ...t, leaving: true } : t));
         // Remove after animation completes
-        setTimeout(() => {
+        const removalTimer = setTimeout(() => {
             setToasts(prev => prev.filter(t => t.id !== id));
+            removalTimers.current.delete(id);
         }, 250);
+        removalTimers.current.set(id, removalTimer);
         const timer = timers.current.get(id);
         if (timer) { clearTimeout(timer); timers.current.delete(id); }
     }, []);
 
     const push = useCallback((type: ToastType, message: string) => {
-        const id = `${Date.now()}-${Math.random()}`;
+        nextToastId.current += 1;
+        const id = `toast-${nextToastId.current}`;
         setToasts(prev => [...prev.slice(-3), { id, type, message, leaving: false }]);
         const timer = setTimeout(() => dismiss(id), DURATION);
         timers.current.set(id, timer);
     }, [dismiss]);
+
+    React.useEffect(() => {
+        const toastTimers = timers.current;
+        const toastRemovalTimers = removalTimers.current;
+
+        return () => {
+            toastTimers.forEach(clearTimeout);
+            toastRemovalTimers.forEach(clearTimeout);
+            toastTimers.clear();
+            toastRemovalTimers.clear();
+        };
+    }, []);
 
     const api: ToastContextValue = {
         success: (msg) => push('success', msg),

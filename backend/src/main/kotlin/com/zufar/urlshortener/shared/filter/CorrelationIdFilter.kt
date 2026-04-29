@@ -16,20 +16,15 @@ class CorrelationIdFilter : Filter {
 
     override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
         val httpResponse = response as HttpServletResponse
-        val correlationId = generateCorrelationId()
+        val correlationId = UUID.randomUUID().toString()
 
         MDC.put("correlationId", correlationId)
-
         httpResponse.setHeader("X-Correlation-ID", correlationId)
 
         try {
             chain.doFilter(request, response)
         } finally {
-            MDC.clear()
+            MDC.remove("correlationId")
         }
-    }
-
-    private fun generateCorrelationId(): String {
-        return UUID.randomUUID().toString()
     }
 }

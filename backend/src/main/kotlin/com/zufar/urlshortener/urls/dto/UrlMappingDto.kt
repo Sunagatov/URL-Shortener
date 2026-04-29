@@ -23,14 +23,12 @@ data class UrlMappingDto(
     val expirationDate: LocalDateTime
 ) {
     companion object {
-        fun fromEntity(entity: UrlMapping): UrlMappingDto {
-            return UrlMappingDto(
-                urlHash = entity.urlHash,
-                shortUrl = entity.shortUrl,
-                originalUrl = entity.originalUrl,
-                createdAt = entity.createdAt,
-                expirationDate = entity.expirationDate
-            )
-        }
+        fun fromEntity(entity: UrlMapping): UrlMappingDto = UrlMappingDto(
+            urlHash = entity.urlHash,
+            shortUrl = entity.shortUrl,
+            originalUrl = entity.originalUrl,
+            createdAt = entity.createdAt,
+            expirationDate = entity.expirationDate
+        )
     }
 }

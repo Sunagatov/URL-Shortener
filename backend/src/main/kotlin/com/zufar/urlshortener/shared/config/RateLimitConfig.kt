@@ -11,13 +11,15 @@ import org.springframework.security.web.util.matcher.IpAddressMatcher
 import java.time.Duration
 
 @Configuration
-class RateLimitConfig {
-
-    @Value("\${rate.limit.requests:100}")
-    private var requestsPerMinute: Long = 100
-
-    @Value("\${rate.limit.trusted-proxies:}")
-    private lateinit var trustedProxies: String
+class RateLimitConfig(
+    @Value("\${rate.limit.requests:100}") private val requestsPerMinute: Long,
+    @Value("\${rate.limit.trusted-proxies:}") trustedProxies: String
+) {
+    private val trustedProxyMatchers = trustedProxies
+        .split(",")
+        .map(String::trim)
+        .filter(String::isNotEmpty)
+        .map(::IpAddressMatcher)
 
     @Bean
     fun rateLimitBuckets(): Cache<String, Bucket> = Caffeine.newBuilder()
@@ -36,14 +38,10 @@ class RateLimitConfig {
     }
 
     fun isTrustedProxy(remoteAddress: String?): Boolean {
-        if (remoteAddress.isNullOrBlank() || trustedProxies.isBlank()) {
+        if (remoteAddress.isNullOrBlank() || trustedProxyMatchers.isEmpty()) {
             return false
         }
 
-        return trustedProxies
-            .split(",")
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
-            .any { proxy -> IpAddressMatcher(proxy).matches(remoteAddress) }
+        return trustedProxyMatchers.any { it.matches(remoteAddress) }
     }
 }
