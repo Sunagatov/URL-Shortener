@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { signOutUser } from './helpers';
 
 // Generate unique email for each test run to avoid conflicts
 const generateUniqueEmail = () => `test.user.${Date.now()}@example.com`;
@@ -83,6 +84,8 @@ test.describe('Authentication Flow', () => {
     
     await page.waitForURL('**/', { timeout: 10000 });
     
+    await signOutUser(page);
+
     // Navigate to sign in page
     await page.goto('/signin');
     

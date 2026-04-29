@@ -49,6 +49,9 @@ export const signUpSchema = z.object({
     .string()
     .min(8, VALIDATION_RULES.PASSWORD.MIN_LENGTH)
     .max(50),
+  acceptTerms: z.boolean().refine((value) => value, {
+    message: 'You must accept the terms to continue',
+  }),
 });
 
 export const createUrlSchema = z.object({

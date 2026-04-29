@@ -34,6 +34,15 @@ export async function signInUser(page: Page, email: string, password: string = '
 }
 
 /**
+ * Helper function to sign out the current user through the account menu
+ */
+export async function signOutUser(page: Page) {
+  await page.getByRole('button', { name: /account/i }).click();
+  await page.getByRole('button', { name: /sign out/i }).click();
+  await page.waitForURL('**/', { timeout: 10000 });
+}
+
+/**
  * Helper function to respect rate limiter
  */
 export async function waitForRateLimiter(page: Page, ms: number = 2000) {

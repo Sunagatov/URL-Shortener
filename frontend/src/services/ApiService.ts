@@ -5,6 +5,7 @@ import type {
   SignUpRequest,
   CreateUrlRequest,
   AuthTokens,
+  RefreshTokenResponse,
   User,
   UrlMapping,
   PaginatedResponse,
@@ -22,7 +23,7 @@ export class ApiService {
     return response.data;
   }
 
-  static async refreshToken(refreshToken: string): Promise<AuthTokens> {
+  static async refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
     const response = await axiosInstance.post(API_ENDPOINTS.AUTH.REFRESH, {
       refreshToken,
     });

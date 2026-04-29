@@ -138,14 +138,29 @@ const SignUp: React.FC = () => {
 
                     {/* Terms */}
                     <div className="flex items-start">
-                        <input type="checkbox" className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500" required />
+                        <input
+                            {...register('acceptTerms')}
+                            id="accept-terms"
+                            type="checkbox"
+                            className="mt-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            aria-invalid={Boolean(errors.acceptTerms)}
+                            aria-describedby={errors.acceptTerms ? 'accept-terms-error' : undefined}
+                        />
                         <span className="ml-2 text-sm text-gray-600">
-                            I agree to the{' '}
+                            <label htmlFor="accept-terms" className="cursor-pointer">
+                                I agree to the{' '}
+                            </label>
                             <span className="text-gray-400">Terms of Service (coming soon)</span>
                             {' '}and{' '}
                             <span className="text-gray-400">Privacy Policy (coming soon)</span>
                         </span>
                     </div>
+                    {errors.acceptTerms && (
+                        <p id="accept-terms-error" className="text-red-500 text-sm flex items-center">
+                            <span className="mr-1">!</span>
+                            {errors.acceptTerms.message}
+                        </p>
+                    )}
 
                     {error && (
                         <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center">
