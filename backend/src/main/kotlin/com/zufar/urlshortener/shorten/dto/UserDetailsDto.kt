@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.shorten.dto
 
 import io.swagger.v3.oas.annotations.media.Schema
+import java.time.LocalDateTime
 
 @Schema(description = "Details about a user")
 data class UserDetailsDto(
@@ -18,5 +19,8 @@ data class UserDetailsDto(
     val country: String,
 
     @Schema(description = "User's age", example = "30")
-    val age: Int
+    val age: Int,
+
+    @Schema(description = "Timestamp when the user account was created", example = "2024-01-15T10:00:00")
+    val createdAt: LocalDateTime?
 )

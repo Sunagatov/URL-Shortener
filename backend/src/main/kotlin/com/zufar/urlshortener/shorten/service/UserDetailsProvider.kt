@@ -26,7 +26,8 @@ class UserDetailsProvider(private val userRepository: UserRepository) {
             lastName = user.lastName,
             email = user.email,
             country = user.country,
-            age = user.age
+            age = user.age,
+            createdAt = user.createdAt
         )
     }
 }

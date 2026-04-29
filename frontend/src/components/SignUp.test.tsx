@@ -95,6 +95,30 @@ describe('SignUp', () => {
     expect(mockSignUp).not.toHaveBeenCalled();
   });
 
+  it('rejects ages outside the backend-supported range', async () => {
+    renderSignUp();
+
+    await fillRequiredFields();
+    await userEvent.type(screen.getByLabelText(/country/i), 'United States');
+    await userEvent.type(screen.getByLabelText(/age/i), '12');
+    await userEvent.click(screen.getByRole('button', { name: /create account/i }));
+
+    expect(await screen.findByText(/age must be between 13 and 120/i)).toBeInTheDocument();
+    expect(mockSignUp).not.toHaveBeenCalled();
+  });
+
+  it('rejects country names with backend-invalid characters', async () => {
+    renderSignUp();
+
+    await fillRequiredFields();
+    await userEvent.type(screen.getByLabelText(/country/i), 'USA123');
+    await userEvent.type(screen.getByLabelText(/age/i), '25');
+    await userEvent.click(screen.getByRole('button', { name: /create account/i }));
+
+    expect(await screen.findByText(/country contains invalid characters/i)).toBeInTheDocument();
+    expect(mockSignUp).not.toHaveBeenCalled();
+  });
+
   it('submits country and numeric age in the signup payload', async () => {
     renderSignUp();
 
