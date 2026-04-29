@@ -20,14 +20,20 @@ interface ToastContextValue {
 
 // ─── Context ─────────────────────────────────────────────────────────────────
 
-const ToastContext = createContext<ToastContextValue | null>(null);
+const noop = () => {};
+
+const defaultToastContext: ToastContextValue = {
+    success: noop,
+    error: noop,
+    info: noop,
+};
+
+const ToastContext = createContext<ToastContextValue>(defaultToastContext);
 
 // ─── Hook ────────────────────────────────────────────────────────────────────
 
 export const useToast = (): ToastContextValue => {
-    const ctx = useContext(ToastContext);
-    if (!ctx) throw new Error('useToast must be used within ToastProvider');
-    return ctx;
+    return useContext(ToastContext);
 };
 
 // ─── Single toast component ───────────────────────────────────────────────────

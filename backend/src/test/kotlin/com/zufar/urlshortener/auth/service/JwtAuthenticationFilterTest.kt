@@ -71,6 +71,18 @@ class JwtAuthenticationFilterTest {
         verifyNoInteractions(customUserDetailsService)
     }
 
+    @Test
+    fun `request without bearer token skips authentication lookup`() {
+        val request = MockHttpServletRequest().apply {
+            addHeader("Authorization", "Basic abc123")
+        }
+
+        filter.doFilter(request, MockHttpServletResponse(), MockFilterChain())
+
+        assertNull(SecurityContextHolder.getContext().authentication)
+        verifyNoInteractions(jwtTokenProvider, customUserDetailsService)
+    }
+
     private fun requestWithBearerToken(token: String): MockHttpServletRequest {
         val request = MockHttpServletRequest()
         request.addHeader("Authorization", "Bearer $token")

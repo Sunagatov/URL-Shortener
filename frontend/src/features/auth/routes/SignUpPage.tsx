@@ -129,18 +129,22 @@ const SignUpPage: React.FC = () => {
                         {/* Name row */}
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <label className="block text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">First Name</label>
+                                <label htmlFor="sign-up-first-name" className="block text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">
+                                    First Name
+                                </label>
                                 <div className="relative">
                                     <FieldIcon icon={FaUser} />
-                                    <input {...register('firstName')} type="text" placeholder="John" className={inputClass} />
+                                    <input {...register('firstName')} id="sign-up-first-name" type="text" placeholder="John" className={inputClass} />
                                 </div>
                                 {errors.firstName && <p className="mt-1 text-xs text-red-400">{errors.firstName.message}</p>}
                             </div>
                             <div>
-                                <label className="block text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">Last Name</label>
+                                <label htmlFor="sign-up-last-name" className="block text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">
+                                    Last Name
+                                </label>
                                 <div className="relative">
                                     <FieldIcon icon={FaUser} />
-                                    <input {...register('lastName')} type="text" placeholder="Doe" className={inputClass} />
+                                    <input {...register('lastName')} id="sign-up-last-name" type="text" placeholder="Doe" className={inputClass} />
                                 </div>
                                 {errors.lastName && <p className="mt-1 text-xs text-red-400">{errors.lastName.message}</p>}
                             </div>
@@ -148,20 +152,24 @@ const SignUpPage: React.FC = () => {
 
                         {/* Email */}
                         <div>
-                            <label className="block text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">Email</label>
+                            <label htmlFor="sign-up-email" className="block text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">
+                                Email Address
+                            </label>
                             <div className="relative">
                                 <FieldIcon icon={FaEnvelope} />
-                                <input {...register('email')} type="email" placeholder="john@example.com" className={inputClass} autoComplete="email" />
+                                <input {...register('email')} id="sign-up-email" type="email" placeholder="john@example.com" className={inputClass} autoComplete="email" />
                             </div>
                             {errors.email && <p className="mt-1 text-xs text-red-400">{errors.email.message}</p>}
                         </div>
 
                         {/* Password */}
                         <div>
-                            <label className="block text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">Password</label>
+                            <label htmlFor="sign-up-password" className="block text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">
+                                Password
+                            </label>
                             <div className="relative">
                                 <FieldIcon icon={FaLock} />
-                                <input {...register('password')} type="password" placeholder="Create a strong password" className={inputClass} autoComplete="new-password" />
+                                <input {...register('password')} id="sign-up-password" type="password" placeholder="Create a strong password" className={inputClass} autoComplete="new-password" />
                             </div>
                             {errors.password && <p className="mt-1 text-xs text-red-400">{errors.password.message}</p>}
                         </div>
@@ -169,18 +177,22 @@ const SignUpPage: React.FC = () => {
                         {/* Country + Age row */}
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <label className="block text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">Country</label>
+                                <label htmlFor="sign-up-country" className="block text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">
+                                    Country
+                                </label>
                                 <div className="relative">
                                     <FieldIcon icon={FaGlobe} />
-                                    <input {...register('country')} type="text" placeholder="United States" className={inputClass} />
+                                    <input {...register('country')} id="sign-up-country" type="text" placeholder="United States" className={inputClass} />
                                 </div>
                                 {errors.country && <p className="mt-1 text-xs text-red-400">{errors.country.message}</p>}
                             </div>
                             <div>
-                                <label className="block text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">Age</label>
+                                <label htmlFor="sign-up-age" className="block text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">
+                                    Age
+                                </label>
                                 <div className="relative">
                                     <FieldIcon icon={FaCalendarAlt} />
-                                    <input {...register('age')} type="number" placeholder="25" min="1" max="150" className={inputClass} />
+                                    <input {...register('age')} id="sign-up-age" type="number" placeholder="25" min="1" max="150" className={inputClass} />
                                 </div>
                                 {errors.age && <p className="mt-1 text-xs text-red-400">{errors.age.message}</p>}
                             </div>
@@ -197,9 +209,9 @@ const SignUpPage: React.FC = () => {
                                 />
                                 <span className="text-sm text-white/40 leading-snug">
                                     I agree to the{' '}
-                                    <span className="text-white/20">Terms of Service</span>
+                                    <span className="text-white/20">Terms of Service (coming soon)</span>
                                     {' '}and{' '}
-                                    <span className="text-white/20">Privacy Policy</span>
+                                    <span className="text-white/20">Privacy Policy (coming soon)</span>
                                 </span>
                             </label>
                             {errors.acceptTerms && (

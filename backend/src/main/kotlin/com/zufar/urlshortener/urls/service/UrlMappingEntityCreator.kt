@@ -22,13 +22,14 @@ class UrlMappingEntityCreator(private val currentUserProvider: CurrentUserProvid
         shortUrl: String
     ): UrlMapping {
         val normalizedOriginalUrl = shortenUrlRequest.originalUrl.trim()
+        val now = LocalDateTime.now()
 
         val urlMapping = UrlMapping(
             urlHash = urlHash,
             shortUrl = shortUrl,
             originalUrl = normalizedOriginalUrl,
-            createdAt = LocalDateTime.now(),
-            expirationDate = LocalDateTime.now().plusDays(shortenUrlRequest.daysCount ?: DEFAULT_EXPIRATION_URL_DAYS),
+            createdAt = now,
+            expirationDate = now.plusDays(shortenUrlRequest.daysCount ?: DEFAULT_EXPIRATION_URL_DAYS),
             requestIp = httpServletRequest.remoteAddr,
             userAgent = httpServletRequest.getHeader("User-Agent"),
             userId = currentUserProvider.getCurrentUserIdOrNull()

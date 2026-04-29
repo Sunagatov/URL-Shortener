@@ -39,6 +39,8 @@ class UrlController(
 ) {
     private companion object {
         const val MAX_PAGE_SIZE = 100
+        const val DEFAULT_PAGE = 0
+        const val DEFAULT_SIZE = 10
     }
 
     @Operation(
@@ -252,7 +254,7 @@ class UrlController(
             required = true
         )
         @PathVariable urlHash: String
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<Void> {
         urlDeleter.deleteUrl(urlHash)
         return ResponseEntity.noContent().build()
     }
@@ -355,23 +357,16 @@ class UrlController(
             example = "0",
             required = false
         )
-        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "$DEFAULT_PAGE") page: Int,
         @Parameter(
             description = "Page size.",
             example = "10",
             required = false
         )
-        @RequestParam(defaultValue = "10") size: Int
+        @RequestParam(defaultValue = "$DEFAULT_SIZE") size: Int
     ): ResponseEntity<UrlMappingPageDto> {
-        if (page < 0) {
-            throw InvalidRequestException("Page must be greater than or equal to 0")
-        }
-        if (size !in 1..MAX_PAGE_SIZE) {
-            throw InvalidRequestException("Size must be between 1 and $MAX_PAGE_SIZE")
-        }
-
-        val urlMappingsPage = pageableUrlMappingsProvider.getUrlMappingsPage(page, size)
-        return ResponseEntity.ok(urlMappingsPage)
+        validatePagination(page, size)
+        return ResponseEntity.ok(pageableUrlMappingsProvider.getUrlMappingsPage(page, size))
     }
 
     @Operation(
@@ -522,7 +517,15 @@ class UrlController(
         )
         @PathVariable urlHash: String
     ): ResponseEntity<UrlMappingDto> {
-        val urlMapping = urlMappingProvider.getOwnedUrlMappingByHash(urlHash)
-        return ResponseEntity.ok(urlMapping)
+        return ResponseEntity.ok(urlMappingProvider.getOwnedUrlMappingByHash(urlHash))
+    }
+
+    private fun validatePagination(page: Int, size: Int) {
+        if (page < 0) {
+            throw InvalidRequestException("Page must be greater than or equal to 0")
+        }
+        if (size !in 1..MAX_PAGE_SIZE) {
+            throw InvalidRequestException("Size must be between 1 and $MAX_PAGE_SIZE")
+        }
     }
 }

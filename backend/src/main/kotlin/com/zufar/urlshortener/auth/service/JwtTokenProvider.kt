@@ -49,20 +49,10 @@ class JwtTokenProvider(
             else -> null
         }
 
-    fun getUsernameFromValidAccessToken(token: String): String? {
-        return try {
-            val claims = parseClaims(token)
-            if ((claims[TOKEN_TYPE_CLAIM] as? String) == ACCESS_TOKEN_TYPE) {
-                claims.subject
-            } else {
-                null
-            }
-        } catch (_: JwtException) {
-            null
-        } catch (_: IllegalArgumentException) {
-            null
-        }
-    }
+    fun getUsernameFromValidAccessToken(token: String): String? =
+        parseClaimsOrNull(token)
+            ?.takeIf { (it[TOKEN_TYPE_CLAIM] as? String) == ACCESS_TOKEN_TYPE }
+            ?.subject
 
     fun validateAccessToken(token: String): Boolean = validateTokenByType(token, ACCESS_TOKEN_TYPE)
 
@@ -89,16 +79,17 @@ class JwtTokenProvider(
         .parseSignedClaims(token)
         .payload
 
-    private fun validateTokenByType(token: String, expectedType: String): Boolean {
-        return try {
-            val claims = parseClaims(token)
-            (claims[TOKEN_TYPE_CLAIM] as? String) == expectedType
+    private fun validateTokenByType(token: String, expectedType: String): Boolean =
+        parseClaimsOrNull(token)?.let { (it[TOKEN_TYPE_CLAIM] as? String) == expectedType } ?: false
+
+    private fun parseClaimsOrNull(token: String) =
+        try {
+            parseClaims(token)
         } catch (_: JwtException) {
-            false
+            null
         } catch (_: IllegalArgumentException) {
-            false
+            null
         }
-    }
 
     private fun extractTokenVersion(userDetails: UserDetails): Int {
         return (userDetails as? UserDetailsWithTokenVersion)?.tokenVersion ?: 0

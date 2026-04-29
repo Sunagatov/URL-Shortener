@@ -29,59 +29,50 @@ class GlobalExceptionHandler {
     @ExceptionHandler(InvalidRequestException::class)
     fun handleInvalidRequestException(ex: InvalidRequestException): ResponseEntity<ErrorResponse> {
         log.warn("Invalid request: {}", ex.message)
-        val errorResponse = ErrorResponse(errorMessage = ex.message ?: "Invalid request")
-        return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
+        return errorResponse(HttpStatus.BAD_REQUEST, ex.message ?: "Invalid request")
     }
 
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgumentException(ex: IllegalArgumentException): ResponseEntity<ErrorResponse> {
         log.warn("Invalid input: {}", ex.message)
-        val errorResponse = ErrorResponse(errorMessage = ex.message ?: "Invalid input")
-        return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
+        return errorResponse(HttpStatus.BAD_REQUEST, ex.message ?: "Invalid input")
     }
 
     @ExceptionHandler(UrlNotFoundException::class)
     fun handleUrlNotFound(ex: UrlNotFoundException): ResponseEntity<ErrorResponse> {
         log.warn("URL not found: {}", ex.message)
-        val errorResponse = ErrorResponse(errorMessage = ex.message ?: "URL not found")
-        return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
+        return errorResponse(HttpStatus.NOT_FOUND, ex.message ?: "URL not found")
     }
 
     @ExceptionHandler(InvalidTokenException::class)
     fun handleInvalidTokenException(ex: InvalidTokenException): ResponseEntity<ErrorResponse> {
         log.warn("Invalid token: {}", ex.message)
-        val errorResponse = ErrorResponse(errorMessage = ex.message ?: "Invalid token")
-        return ResponseEntity(errorResponse, HttpStatus.UNAUTHORIZED)
+        return errorResponse(HttpStatus.UNAUTHORIZED, ex.message ?: "Invalid token")
     }
 
     @ExceptionHandler(BadCredentialsException::class)
     fun handleBadCredentialsException(ex: BadCredentialsException): ResponseEntity<ErrorResponse> {
-        val errorResponse = ErrorResponse(errorMessage = "Invalid email or password")
-        return ResponseEntity(errorResponse, HttpStatus.UNAUTHORIZED)
+        return errorResponse(HttpStatus.UNAUTHORIZED, "Invalid email or password")
     }
 
     @ExceptionHandler(AuthenticationException::class)
     fun handleAuthenticationException(ex: AuthenticationException): ResponseEntity<ErrorResponse> {
-        val errorResponse = ErrorResponse(errorMessage = "Authentication failed")
-        return ResponseEntity(errorResponse, HttpStatus.UNAUTHORIZED)
+        return errorResponse(HttpStatus.UNAUTHORIZED, "Authentication failed")
     }
 
     @ExceptionHandler(AccessDeniedException::class)
     fun handleAccessDeniedException(ex: AccessDeniedException): ResponseEntity<ErrorResponse> {
-        val errorResponse = ErrorResponse(errorMessage = ex.message ?: "Access denied")
-        return ResponseEntity(errorResponse, HttpStatus.FORBIDDEN)
+        return errorResponse(HttpStatus.FORBIDDEN, ex.message ?: "Access denied")
     }
 
     @ExceptionHandler(EmailAlreadyExistsException::class)
     fun handleEmailAlreadyExistsException(ex: EmailAlreadyExistsException): ResponseEntity<ErrorResponse> {
-        val errorResponse = ErrorResponse(errorMessage = ex.message ?: "Email already in use")
-        return ResponseEntity(errorResponse, HttpStatus.CONFLICT)
+        return errorResponse(HttpStatus.CONFLICT, ex.message ?: "Email already in use")
     }
 
     @ExceptionHandler(UserNotFoundException::class)
     fun handleUserNotFoundException(ex: UserNotFoundException): ResponseEntity<ErrorResponse> {
-        val errorResponse = ErrorResponse(errorMessage = ex.message ?: "User not found")
-        return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
+        return errorResponse(HttpStatus.NOT_FOUND, ex.message ?: "User not found")
     }
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
@@ -93,8 +84,7 @@ class GlobalExceptionHandler {
             }
         } ?: "Request validation failed"
 
-        val errorResponse = ErrorResponse(errorMessage = message)
-        return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
+        return errorResponse(HttpStatus.BAD_REQUEST, message)
     }
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
@@ -107,15 +97,13 @@ class GlobalExceptionHandler {
             else -> "Malformed JSON request"
         }
 
-        val errorResponse = ErrorResponse(errorMessage = message)
-        return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
+        return errorResponse(HttpStatus.BAD_REQUEST, message)
     }
 
     @ExceptionHandler(Exception::class)
     fun handleException(ex: Exception): ResponseEntity<ErrorResponse> {
         log.error(LOG_ERROR_MESSAGE, ex)
-        val errorResponse = ErrorResponse(errorMessage = "An unexpected error occurred")
-        return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
+        return errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred")
     }
 
     private fun MismatchedInputException.isMissingRequiredField(): Boolean {
@@ -123,4 +111,7 @@ class GlobalExceptionHandler {
         return detail.contains("missing", ignoreCase = true) ||
             detail.contains("creator parameter", ignoreCase = true)
     }
+
+    private fun errorResponse(status: HttpStatus, message: String): ResponseEntity<ErrorResponse> =
+        ResponseEntity.status(status).body(ErrorResponse(errorMessage = message))
 }

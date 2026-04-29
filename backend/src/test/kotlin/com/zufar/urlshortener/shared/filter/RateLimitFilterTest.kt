@@ -132,6 +132,22 @@ class RateLimitFilterTest {
     }
 
     @Test
+    fun `blank forwarded client entries fall back to remote address`() {
+        whenever(rateLimitConfig.createBucket()).thenReturn(bucketWithCapacity(100))
+        whenever(rateLimitConfig.isTrustedProxy("10.0.0.99")).thenReturn(true)
+
+        val request = MockHttpServletRequest().apply {
+            remoteAddr = "10.0.0.99"
+            addHeader("X-Forwarded-For", "   ,   ")
+        }
+        val response = MockHttpServletResponse()
+
+        filter.doFilter(request, response, filterChain)
+
+        assertTrue(buckets.getIfPresent("10.0.0.99") != null, "Bucket should fall back to remote address")
+    }
+
+    @Test
     fun `health endpoint bypasses rate limiting`() {
         val request = MockHttpServletRequest().apply {
             method = "GET"

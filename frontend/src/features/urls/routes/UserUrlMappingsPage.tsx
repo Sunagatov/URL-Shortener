@@ -4,8 +4,9 @@ import AccountSidebar from '@/app/layout/AccountSidebar';
 import { routes } from '@/app/routes';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { deleteUrl, getUserUrls } from '@/features/urls/api/urlsApi';
+import { copyToClipboard } from '@/shared/lib/clipboard';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
-import { Button, useToast, ConfirmModal } from '@/shared/ui';
+import { Button, useToast } from '@/shared/ui';
 import type { UrlMapping } from '@/shared/types';
 import {
     FaTrash,
@@ -179,11 +180,11 @@ const UserUrlMappingsPage: React.FC = () => {
     const [allMappings, setAllMappings]     = useState<UrlMapping[]>([]);
     const [allLoaded, setAllLoaded]         = useState(false);
     const [clientPage, setClientPage]       = useState(0);
+    const [pageError, setPageError]         = useState<string | null>(null);
 
     // Copy + delete state
     const [copiedUrl, setCopiedUrl]         = useState<string | null>(null);
-    const [deleteTarget, setDeleteTarget]   = useState<string | null>(null);
-    const [isDeleting, setIsDeleting]       = useState(false);
+    const [deletingHash, setDeletingHash]   = useState<string | null>(null);
 
     const navigate = useNavigate();
     const toast = useToast();
@@ -199,12 +200,15 @@ const UserUrlMappingsPage: React.FC = () => {
             setServerPage(data.page);
             setTotalPages(data.totalPages);
             setTotalElements(data.totalElements);
+            setPageError(null);
         } catch (error: unknown) {
             if (getApiErrorStatus(error) === 401) {
                 redirectToSignIn();
                 return;
             }
-            toast.error(getApiErrorMessage(error, 'Failed to fetch URL mappings.'));
+            const message = getApiErrorMessage(error, 'Failed to fetch URL mappings.');
+            setPageError(message);
+            toast.error(message);
         } finally {
             setIsLoading(false);
         }
@@ -263,39 +267,47 @@ const UserUrlMappingsPage: React.FC = () => {
         }
     };
 
-    const handleDelete = async () => {
-        if (!deleteTarget) return;
-        setIsDeleting(true);
+    const deleteMapping = async (urlHash: string) => {
+        if (!window.confirm('This short link will stop working immediately and cannot be restored.')) {
+            return;
+        }
+
+        setDeletingHash(urlHash);
         try {
-            await deleteUrl(deleteTarget);
+            await deleteUrl(urlHash);
             toast.success('URL deleted successfully.');
+            setPageError(null);
             if (isSearchMode) {
-                setAllMappings(prev => prev.filter(m => m.urlHash !== deleteTarget));
+                setAllMappings(prev => prev.filter(m => m.urlHash !== urlHash));
             } else {
                 const nextPage = urlMappings.length === 1 && serverPage > 0 ? serverPage - 1 : serverPage;
                 await fetchPage(nextPage);
             }
             setTotalElements(prev => prev - 1);
-            setDeleteTarget(null);
         } catch (error: unknown) {
             if (getApiErrorStatus(error) === 401) {
                 redirectToSignIn();
                 return;
             }
-            toast.error(getApiErrorMessage(error, 'Failed to delete URL mapping.'));
+            const message = getApiErrorMessage(error, 'Failed to delete URL mapping.');
+            setPageError(message);
+            toast.error(message);
         } finally {
-            setIsDeleting(false);
+            setDeletingHash(null);
         }
     };
 
     const handleCopyUrl = async (url: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        try {
-            await navigator.clipboard.writeText(url);
-            setCopiedUrl(url);
-            setTimeout(() => setCopiedUrl(null), 2000);
-            toast.success('Copied to clipboard');
-        } catch (err) { console.error('Failed to copy URL:', err); }
+        const didCopy = await copyToClipboard(url);
+        if (!didCopy) {
+            toast.error('Unable to copy URL.');
+            return;
+        }
+
+        setCopiedUrl(url);
+        setTimeout(() => setCopiedUrl(null), 2000);
+        toast.success('Copied to clipboard');
     };
 
     const formatDate = (dateString: string) =>
@@ -380,6 +392,12 @@ const UserUrlMappingsPage: React.FC = () => {
                         )}
                     </div>
 
+                    {pageError && (
+                        <div className="mb-6 rounded-xl border border-red-500/20 bg-red-900/15 px-4 py-3 text-sm text-red-300">
+                            {pageError}
+                        </div>
+                    )}
+
                     {/* URL Cards Grid */}
                     {displayMappings.length > 0 ? (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
@@ -391,8 +409,8 @@ const UserUrlMappingsPage: React.FC = () => {
                                     onCopy={handleCopyUrl}
                                     copiedUrl={copiedUrl}
                                     onDetails={() => { navigate(`/account/url-mappings/${mapping.urlHash}`); }}
-                                    onDelete={e => { e.stopPropagation(); setDeleteTarget(mapping.urlHash); }}
-                                    isDeleting={isDeleting && deleteTarget === mapping.urlHash}
+                                    onDelete={e => { e.stopPropagation(); void deleteMapping(mapping.urlHash); }}
+                                    isDeleting={deletingHash === mapping.urlHash}
                                     formatDate={formatDate}
                                 />
                             ))}
@@ -480,15 +498,6 @@ const UserUrlMappingsPage: React.FC = () => {
                 </div>
             </div>
 
-            <ConfirmModal
-                isOpen={!!deleteTarget}
-                title="Delete URL?"
-                message="This short link will stop working immediately and cannot be restored."
-                confirmLabel="Delete"
-                isLoading={isDeleting}
-                onConfirm={handleDelete}
-                onCancel={() => setDeleteTarget(null)}
-            />
         </div>
     );
 };

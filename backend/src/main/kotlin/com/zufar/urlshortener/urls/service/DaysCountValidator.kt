@@ -10,11 +10,9 @@ private const val MAX_ALLOWED_DAYS_COUNT = 365L
 class DaysCountValidator {
 
     fun validateDaysCount(daysCount: Long?) {
-        if (daysCount == null) {
-            return
-        }
-        validate(daysCount >= MIN_ALLOWED_DAYS_COUNT, "Days count must be at least $MIN_ALLOWED_DAYS_COUNT day(s).")
-        validate(daysCount <= MAX_ALLOWED_DAYS_COUNT, "Days count must not exceed $MAX_ALLOWED_DAYS_COUNT day(s).")
+        val value = daysCount ?: return
+        validate(value >= MIN_ALLOWED_DAYS_COUNT, "Days count must be at least $MIN_ALLOWED_DAYS_COUNT day(s).")
+        validate(value <= MAX_ALLOWED_DAYS_COUNT, "Days count must not exceed $MAX_ALLOWED_DAYS_COUNT day(s).")
     }
 
     private fun validate(condition: Boolean, message: String) {

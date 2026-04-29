@@ -9,6 +9,17 @@ import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { Button, useToast } from '@/shared/ui';
 import { FaShieldAlt, FaLock, FaEye, FaEyeSlash, FaCheck, FaTimes, FaKey, FaClock, FaExclamationTriangle } from 'react-icons/fa';
 
+const PasswordVisibilityToggle: React.FC<{ show: boolean; onToggle: () => void }> = ({ show, onToggle }) => (
+    <button
+        type="button"
+        onClick={onToggle}
+        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-white/25 transition-colors hover:text-white/55"
+        aria-label={show ? 'Hide password' : 'Show password'}
+    >
+        {show ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
+    </button>
+);
+
 const SecurityPage: React.FC = () => {
     usePageTitle('Security');
     const [currentPassword, setCurrentPassword]         = useState('');
@@ -60,16 +71,6 @@ const SecurityPage: React.FC = () => {
         'w-full px-4 py-3 pr-12 bg-[#0d0f1c] border border-white/[0.08] text-white ' +
         'placeholder-white/25 rounded-xl transition-all duration-200 text-sm ' +
         'focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/30';
-
-    const EyeToggle: React.FC<{ show: boolean; onToggle: () => void }> = ({ show, onToggle }) => (
-        <button
-            type="button"
-            onClick={onToggle}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/55 transition-colors p-1"
-        >
-            {show ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
-        </button>
-    );
 
     return (
         <div className="flex min-h-[calc(100vh-72px)] bg-[#060612] bg-grid-dark md:min-h-[calc(100vh-96px)]">
@@ -161,7 +162,7 @@ const SecurityPage: React.FC = () => {
                                             className={inputClass}
                                             placeholder="Enter your current password"
                                         />
-                                        <EyeToggle show={showCurrentPassword} onToggle={() => setShowCurrentPassword(v => !v)} />
+                                        <PasswordVisibilityToggle show={showCurrentPassword} onToggle={() => setShowCurrentPassword(v => !v)} />
                                     </div>
                                 </div>
 
@@ -179,7 +180,7 @@ const SecurityPage: React.FC = () => {
                                             className={inputClass}
                                             placeholder="Enter a new strong password"
                                         />
-                                        <EyeToggle show={showNewPassword} onToggle={() => setShowNewPassword(v => !v)} />
+                                        <PasswordVisibilityToggle show={showNewPassword} onToggle={() => setShowNewPassword(v => !v)} />
                                     </div>
 
                                     {newPassword && (
@@ -227,7 +228,7 @@ const SecurityPage: React.FC = () => {
                                             className={`${inputClass} ${confirmPassword && newPassword !== confirmPassword ? 'border-red-500/30 focus:ring-red-500/30' : ''}`}
                                             placeholder="Confirm your new password"
                                         />
-                                        <EyeToggle show={showConfirmPassword} onToggle={() => setShowConfirmPassword(v => !v)} />
+                                        <PasswordVisibilityToggle show={showConfirmPassword} onToggle={() => setShowConfirmPassword(v => !v)} />
                                     </div>
                                     {confirmPassword && newPassword !== confirmPassword && (
                                         <p className="mt-2 text-xs text-red-400 flex items-center gap-1.5">

@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import java.io.IOException
 
+private const val BEARER_PREFIX = "Bearer "
+
 @Component
 class JwtAuthenticationFilter(
     private val customUserDetailsService: CustomUserDetailsService,
@@ -25,7 +27,7 @@ class JwtAuthenticationFilter(
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        val jwt = getJwtFromRequest(request)
+        val jwt = extractBearerToken(request)
 
         if (jwt != null && SecurityContextHolder.getContext().authentication == null) {
             try {
@@ -44,11 +46,8 @@ class JwtAuthenticationFilter(
         filterChain.doFilter(request, response)
     }
 
-    private fun getJwtFromRequest(request: HttpServletRequest): String? {
-        val bearerToken = request.getHeader("Authorization")
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7)
-        }
-        return null
-    }
+    private fun extractBearerToken(request: HttpServletRequest): String? =
+        request.getHeader("Authorization")
+            ?.takeIf { it.startsWith(BEARER_PREFIX) }
+            ?.removePrefix(BEARER_PREFIX)
 }

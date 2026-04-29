@@ -11,6 +11,10 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
+private const val RETRY_AFTER_HEADER = "Retry-After"
+private const val RATE_LIMIT_RETRY_AFTER_SECONDS = "60"
+private const val RATE_LIMIT_ERROR_RESPONSE = """{"errorMessage":"Rate limit exceeded. Please try again later."}"""
+
 @Component
 class RateLimitFilter(
     private val rateLimitConfig: RateLimitConfig,
@@ -39,19 +43,23 @@ class RateLimitFilter(
         if (bucket.tryConsume(1)) {
             filterChain.doFilter(request, response)
         } else {
-            response.status = HttpStatus.TOO_MANY_REQUESTS.value()
-            response.contentType = MediaType.APPLICATION_JSON_VALUE
-            response.setHeader("Retry-After", "60")
-            response.writer.write("""{"errorMessage":"Rate limit exceeded. Please try again later."}""")
+            writeRateLimitExceededResponse(response)
         }
     }
 
     private fun resolveClientIp(request: HttpServletRequest): String {
-        val forwarded = request.getHeader("X-Forwarded-For")
-        return if (!forwarded.isNullOrBlank() && rateLimitConfig.isTrustedProxy(request.remoteAddr)) {
-            forwarded.split(",").firstNotNullOfOrNull { it.trim().takeIf(String::isNotEmpty) } ?: request.remoteAddr
-        } else {
-            request.remoteAddr
-        }
+        val forwardedFor = request.getHeader("X-Forwarded-For")
+            ?.takeIf { rateLimitConfig.isTrustedProxy(request.remoteAddr) }
+            ?.split(",")
+            ?.firstNotNullOfOrNull { it.trim().takeIf(String::isNotEmpty) }
+
+        return forwardedFor ?: request.remoteAddr
+    }
+
+    private fun writeRateLimitExceededResponse(response: HttpServletResponse) {
+        response.status = HttpStatus.TOO_MANY_REQUESTS.value()
+        response.contentType = MediaType.APPLICATION_JSON_VALUE
+        response.setHeader(RETRY_AFTER_HEADER, RATE_LIMIT_RETRY_AFTER_SECONDS)
+        response.writer.write(RATE_LIMIT_ERROR_RESPONSE)
     }
 }

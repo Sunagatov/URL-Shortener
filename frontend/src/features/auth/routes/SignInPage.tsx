@@ -130,11 +130,14 @@ const SignInPage: React.FC = () => {
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                         {/* Email */}
                         <div>
-                            <label className="block text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">Email</label>
+                            <label htmlFor="sign-in-email" className="block text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">
+                                Email Address
+                            </label>
                             <div className="relative">
                                 <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/25" />
                                 <input
                                     {...register('email')}
+                                    id="sign-in-email"
                                     type="email"
                                     placeholder="your@email.com"
                                     className={inputClass}
@@ -146,11 +149,14 @@ const SignInPage: React.FC = () => {
 
                         {/* Password */}
                         <div>
-                            <label className="block text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">Password</label>
+                            <label htmlFor="sign-in-password" className="block text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-2">
+                                Password
+                            </label>
                             <div className="relative">
                                 <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/25" />
                                 <input
                                     {...register('password')}
+                                    id="sign-in-password"
                                     type="password"
                                     placeholder="Enter your password"
                                     className={inputClass}
@@ -165,7 +171,14 @@ const SignInPage: React.FC = () => {
                                 <input type="checkbox" className="w-3.5 h-3.5 rounded border-white/20 bg-white/5 accent-blue-500" />
                                 <span className="text-sm text-white/40">Remember me</span>
                             </label>
-                            <span className="text-sm text-white/20 cursor-not-allowed">Forgot password?</span>
+                            <button
+                                type="button"
+                                disabled
+                                className="text-sm text-white/20 cursor-not-allowed"
+                                title="Forgot password coming soon"
+                            >
+                                Forgot password
+                            </button>
                         </div>
 
                         {error && (
@@ -211,7 +224,7 @@ const SignInPage: React.FC = () => {
                     <p className="text-center mt-8 text-sm text-white/40">
                         Don't have an account?{' '}
                         <Link to={routes.signUp} state={location.state} className="text-blue-400 hover:text-blue-300 font-semibold transition-colors">
-                            Sign up free
+                            Sign up for free
                         </Link>
                     </p>
                 </div>

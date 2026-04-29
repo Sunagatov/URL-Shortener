@@ -1,13 +1,10 @@
 package com.zufar.urlshortener.auth.service.validator
 
-import com.zufar.urlshortener.auth.dto.SignInRequest
-import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
-import com.zufar.urlshortener.auth.dto.SignUpRequest
+import com.zufar.urlshortener.auth.dto.*
 import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import com.zufar.urlshortener.auth.dto.*
 
 private const val MAX_NAME_LENGTH = 50
 private const val MIN_JWT_TOKEN_LENGTH = 20
@@ -19,16 +16,16 @@ private val COUNTRY_NAME_REGEX = Regex("^[a-zA-Z'\\-]+(\\s[a-zA-Z'\\-]+)*$")
 
 @Service
 class AuthRequestValidator(
-    val emailOfUserValidator: EmailOfUserValidator,
-    val passwordOfUserValidator: PasswordOfUserValidator
+    private val emailOfUserValidator: EmailOfUserValidator,
+    private val passwordOfUserValidator: PasswordOfUserValidator
 ) {
 
     private val log = LoggerFactory.getLogger(AuthRequestValidator::class.java)
 
     fun validateAuthRequest(signInRequest: SignInRequest) {
         log.debug("Validating AuthRequest: {}", signInRequest)
-        if (signInRequest.email.isBlank()) throw InvalidRequestException(EMAIL_MUST_NOT_BE_EMPTY)
-        if (signInRequest.password.isBlank()) throw InvalidRequestException(PASSWORD_MUST_NOT_BE_EMPTY)
+        validate(signInRequest.email.isBlank(), EMAIL_MUST_NOT_BE_EMPTY)
+        validate(signInRequest.password.isBlank(), PASSWORD_MUST_NOT_BE_EMPTY)
     }
 
     fun validateSignUpRequest(signUpRequest: SignUpRequest) {
@@ -44,34 +41,36 @@ class AuthRequestValidator(
     fun validateRefreshTokenRequest(refreshTokenRequest: RefreshTokenRequest) {
         log.debug("Validating RefreshTokenRequest: {}", refreshTokenRequest)
         val token = refreshTokenRequest.refreshToken
-        if (token.isBlank()) throw InvalidRequestException("Refresh token must not be empty")
-        if (token.length < MIN_JWT_TOKEN_LENGTH || token.length > MAX_JWT_TOKEN_LENGTH) {
-            throw InvalidRequestException("Refresh token length is invalid")
-        }
+        validate(token.isBlank(), "Refresh token must not be empty")
+        validate(token.length < MIN_JWT_TOKEN_LENGTH || token.length > MAX_JWT_TOKEN_LENGTH, "Refresh token length is invalid")
     }
 
     fun validateChangePasswordRequest(changePasswordRequest: ChangePasswordRequest) {
         log.debug("Validating ChangePasswordRequest")
-        if (changePasswordRequest.currentPassword.isBlank()) {
-            throw InvalidRequestException(PASSWORD_MUST_NOT_BE_EMPTY)
-        }
+        validate(changePasswordRequest.currentPassword.isBlank(), PASSWORD_MUST_NOT_BE_EMPTY)
         passwordOfUserValidator.validate(changePasswordRequest.newPassword)
     }
 
     private fun validateName(name: String, emptyMsg: String, tooLongMsg: String, invalidCharsMsg: String) {
-        if (name.isBlank()) throw InvalidRequestException(emptyMsg)
-        if (name.length > MAX_NAME_LENGTH) throw InvalidRequestException(tooLongMsg)
-        if (!name.matches(SIMPLE_NAME_REGEX)) throw InvalidRequestException(invalidCharsMsg)
+        validate(name.isBlank(), emptyMsg)
+        validate(name.length > MAX_NAME_LENGTH, tooLongMsg)
+        validate(!name.matches(SIMPLE_NAME_REGEX), invalidCharsMsg)
     }
 
     private fun validateCountry(country: String) {
-        if (country.isBlank()) throw InvalidRequestException(COUNTRY_MUST_NOT_BE_EMPTY)
-        if (country.length > MAX_NAME_LENGTH) throw InvalidRequestException(COUNTRY_NAME_IS_TOO_LONG)
-        if (!country.matches(COUNTRY_NAME_REGEX)) throw InvalidRequestException(COUNTRY_NAME_CONTAINS_INVALID_CHARACTERS)
+        validate(country.isBlank(), COUNTRY_MUST_NOT_BE_EMPTY)
+        validate(country.length > MAX_NAME_LENGTH, COUNTRY_NAME_IS_TOO_LONG)
+        validate(!country.matches(COUNTRY_NAME_REGEX), COUNTRY_NAME_CONTAINS_INVALID_CHARACTERS)
     }
 
     private fun validateAge(age: Int) {
-        if (age == 0) throw InvalidRequestException(AGE_MUST_NOT_BE_EMPTY)
-        if (age < MIN_AGE || age > MAX_AGE) throw InvalidRequestException(AGE_MUST_BE_BETWEEN_13_AND_120)
+        validate(age == 0, AGE_MUST_NOT_BE_EMPTY)
+        validate(age < MIN_AGE || age > MAX_AGE, AGE_MUST_BE_BETWEEN_13_AND_120)
+    }
+
+    private fun validate(invalid: Boolean, message: String) {
+        if (invalid) {
+            throw InvalidRequestException(message)
+        }
     }
 }

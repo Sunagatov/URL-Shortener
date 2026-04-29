@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import AccountSidebar from '@/app/layout/AccountSidebar';
 import { routes } from '@/app/routes';
 import { deleteUrl, getUrlDetails } from '@/features/urls/api/urlsApi';
+import { copyToClipboard } from '@/shared/lib/clipboard';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { Button, useToast, ConfirmModal } from '@/shared/ui';
@@ -25,6 +26,7 @@ const UrlMappingDetailsPage: React.FC = () => {
     const { urlHash } = useParams<{ urlHash: string }>();
     const [urlMapping, setUrlMapping]     = useState<UrlMapping | null>(null);
     const [isLoading, setIsLoading]       = useState(true);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [copiedUrl, setCopiedUrl]       = useState<string | null>(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, setIsDeleting]     = useState(false);
@@ -33,29 +35,42 @@ const UrlMappingDetailsPage: React.FC = () => {
 
     useEffect(() => {
         const fetchUrlMapping = async () => {
-            if (!urlHash) { toast.error('URL mapping id is missing.'); setIsLoading(false); return; }
+            if (!urlHash) {
+                const message = 'URL mapping id is missing.';
+                setUrlMapping(null);
+                setErrorMessage(message);
+                toast.error(message);
+                setIsLoading(false);
+                return;
+            }
             try {
                 setIsLoading(true);
                 const response = await getUrlDetails(urlHash);
                 setUrlMapping(response);
+                setErrorMessage(null);
             } catch (error: unknown) {
                 if (getApiErrorStatus(error) === 401) { navigate(routes.signIn, { replace: true }); return; }
-                if (getApiErrorStatus(error) === 404) { setUrlMapping(null); return; }
-                toast.error(getApiErrorMessage(error, 'Failed to fetch URL mapping details.'));
+                const message = getApiErrorMessage(error, 'Failed to fetch URL mapping details.');
+                setUrlMapping(null);
+                setErrorMessage(message);
+                toast.error(message);
             } finally {
                 setIsLoading(false);
             }
         };
         fetchUrlMapping();
-    }, [navigate, urlHash]);
+    }, [navigate, toast, urlHash]);
 
     const handleCopyUrl = async (url: string) => {
-        try {
-            await navigator.clipboard.writeText(url);
-            setCopiedUrl(url);
-            setTimeout(() => setCopiedUrl(null), 2000);
-            toast.success('Copied to clipboard');
-        } catch (err) { console.error('Failed to copy URL:', err); }
+        const didCopy = await copyToClipboard(url);
+        if (!didCopy) {
+            toast.error('Unable to copy URL.');
+            return;
+        }
+
+        setCopiedUrl(url);
+        setTimeout(() => setCopiedUrl(null), 2000);
+        toast.success('Copied to clipboard');
     };
 
     const handleDelete = async () => {
@@ -102,7 +117,8 @@ const UrlMappingDetailsPage: React.FC = () => {
                             <FaLink className="w-5 h-5 text-white/15" />
                         </div>
                         <h2 className="text-xl font-bold text-white mb-2">URL Not Found</h2>
-                        <p className="text-white/35 text-sm mb-6">The requested URL mapping could not be found.</p>
+                        <p className="text-white/35 text-sm mb-2">The requested URL mapping could not be found.</p>
+                        {errorMessage && <p className="text-sm text-red-400 mb-6">{errorMessage}</p>}
                         <Button onClick={() => navigate(routes.urlMappings)} size="sm">Back to My URLs</Button>
                     </div>
                 </div>

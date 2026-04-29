@@ -14,6 +14,7 @@ const UserAccountPage: React.FC = () => {
     usePageTitle('My Profile');
     const [userDetails, setUserDetails] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const navigate = useNavigate();
     const { logout } = useAuth();
     const toast = useToast();
@@ -24,17 +25,24 @@ const UserAccountPage: React.FC = () => {
             try {
                 setIsLoading(true);
                 const response = await getUserProfile();
-                if (isMounted) { setUserDetails(response); }
+                if (isMounted) {
+                    setUserDetails(response);
+                    setErrorMessage(null);
+                }
             } catch (error: unknown) {
                 if (isMounted && isSessionInvalidError(error)) { logout(); navigate(routes.signIn, { replace: true }); return; }
-                if (isMounted) toast.error(getApiErrorMessage(error, 'Failed to fetch user details.'));
+                if (isMounted) {
+                    const message = getApiErrorMessage(error, 'Failed to fetch user details.');
+                    setErrorMessage(message);
+                    toast.error(message);
+                }
             } finally {
                 if (isMounted) setIsLoading(false);
             }
         };
         fetchUserDetails();
         return () => { isMounted = false; };
-    }, [logout, navigate]);
+    }, [logout, navigate, toast]);
 
     const getInitials = (u: User) =>
         `${u.firstName?.charAt(0) ?? ''}${u.lastName?.charAt(0) ?? ''}`.toUpperCase() || 'U';
@@ -64,7 +72,10 @@ const UserAccountPage: React.FC = () => {
             <div className="flex min-h-[calc(100vh-72px)] bg-[#060612] md:min-h-[calc(100vh-96px)]">
                 <AccountSidebar />
                 <div className="flex-grow md:ml-64 flex items-center justify-center px-6">
-                    <p className="text-white/35 text-sm">Unable to load user details</p>
+                    <div className="text-center">
+                        <p className="text-white/35 text-sm">Unable to load user details</p>
+                        {errorMessage && <p className="mt-2 text-sm text-red-400">{errorMessage}</p>}
+                    </div>
                 </div>
             </div>
         );
