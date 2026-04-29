@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController
     name = "User Management",
     description = "Operations related to managing and retrieving user details."
 )
-class UserProviderController(
+class UserController(
     private val userDetailsProvider: UserDetailsProvider,
     private val userPasswordChanger: UserPasswordChanger
 ) {
@@ -107,10 +107,8 @@ class UserProviderController(
     @GetMapping(
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
-    fun getUserDetails(): ResponseEntity<UserDetailsDto> {
-        val userDetails = userDetailsProvider.getUserDetails()
-        return ResponseEntity.ok(userDetails)
-    }
+    fun getUserDetails(): ResponseEntity<UserDetailsDto> =
+        ResponseEntity.ok(userDetailsProvider.getUserDetails())
 
     @Operation(
         summary = "Change Password",

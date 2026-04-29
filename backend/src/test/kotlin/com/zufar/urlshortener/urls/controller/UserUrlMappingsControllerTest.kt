@@ -3,9 +3,6 @@ package com.zufar.urlshortener.urls.controller
 import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.urls.dto.UrlMappingPageDto
 import com.zufar.urlshortener.urls.service.PageableUrlMappingsProvider
-import com.zufar.urlshortener.urls.service.UrlDeleter
-import com.zufar.urlshortener.urls.service.UrlMappingProvider
-import com.zufar.urlshortener.urls.service.UrlShortener
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -16,19 +13,11 @@ import org.mockito.kotlin.whenever
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
-class UrlControllerTest {
+class UserUrlMappingsControllerTest {
 
-    @Mock private lateinit var urlShortener: UrlShortener
-    @Mock private lateinit var urlDeleter: UrlDeleter
     @Mock private lateinit var pageableUrlMappingsProvider: PageableUrlMappingsProvider
-    @Mock private lateinit var urlMappingProvider: UrlMappingProvider
 
-    private fun controller() = UrlController(
-        urlShortener = urlShortener,
-        urlDeleter = urlDeleter,
-        pageableUrlMappingsProvider = pageableUrlMappingsProvider,
-        urlMappingProvider = urlMappingProvider
-    )
+    private fun controller() = UserUrlMappingsController(pageableUrlMappingsProvider)
 
     @Test
     fun `getUserUrlMappings rejects negative page`() {
