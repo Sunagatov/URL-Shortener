@@ -13,6 +13,8 @@ html, body {
 
 body {
   font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 main {
@@ -36,4 +38,114 @@ a {
 
 input:focus {
   outline: none;
+}
+
+/* ─── Animated orbs ─────────────────────────────── */
+@keyframes orb-float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(30px, -40px) scale(1.06); }
+}
+
+@keyframes orb-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(-40px, 20px) scale(0.94); }
+}
+
+@keyframes orb-float-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(20px, 30px) scale(1.08); }
+}
+
+.orb-1 { animation: orb-float-1  8s ease-in-out infinite; }
+.orb-2 { animation: orb-float-2 11s ease-in-out infinite; }
+.orb-3 { animation: orb-float-3 14s ease-in-out infinite; }
+
+/* ─── Fade-up entrance ──────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up    { animation: fade-up 0.65s ease-out 0s    both; }
+.animate-fade-up-d1 { animation: fade-up 0.65s ease-out 0.12s both; }
+.animate-fade-up-d2 { animation: fade-up 0.65s ease-out 0.24s both; }
+.animate-fade-up-d3 { animation: fade-up 0.65s ease-out 0.36s both; }
+
+/* ─── Shimmer (animated gradient text) ─────────── */
+@keyframes shimmer {
+  0%   { background-position: 0 center; }
+  100% { background-position: 200% center; }
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-animated {
+  background: linear-gradient(90deg, #60a5fa 0%, #a78bfa 40%, #f472b6 70%, #60a5fa 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+/* ─── Glassmorphism ─────────────────────────────── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+}
+
+/* ─── Gradient border cards ─────────────────────── */
+.gradient-border-card {
+  position: relative;
+  background: white;
+  border-radius: 20px;
+  isolation: isolate;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.gradient-border-card::before {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border-radius: 21.5px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.gradient-border-card:hover::before { opacity: 1; }
+
+.gradient-border-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 24px 48px -12px rgba(59, 130, 246, 0.18);
+}
+
+/* ─── Background patterns ───────────────────────── */
+.bg-grid-dark {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.bg-dots-light {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.07) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* ─── Scrollbar ─────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #0d0d1f; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #3b82f6, #8b5cf6);
+  border-radius: 3px;
 }

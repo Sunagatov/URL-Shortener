@@ -59,8 +59,8 @@ const SignIn: React.FC = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <FaSignInAlt className="w-8 h-8 text-white" />
                 </div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
-                <p className="text-gray-600">Sign in to your account to continue</p>
+                <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
+                <p className="text-white/60">Sign in to your account to continue</p>
             </div>
 
             <Card className="p-8">
@@ -153,12 +153,12 @@ const SignIn: React.FC = () => {
 
             {/* Sign Up Link */}
             <div className="text-center mt-6">
-                <p className="text-gray-600">
+                <p className="text-white/60">
                     Don't have an account?{' '}
                     <Link
                         to={ROUTES.SIGNUP}
                         state={location.state}
-                        className="text-blue-600 hover:text-blue-800 font-semibold"
+                        className="text-blue-400 hover:text-blue-300 font-semibold"
                     >
                         Sign up for free
                     </Link>

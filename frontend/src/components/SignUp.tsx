@@ -68,8 +68,8 @@ const SignUp: React.FC = () => {
                 <div className="w-16 h-16 bg-gradient-to-r from-green-600 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <FaUserPlus className="w-8 h-8 text-white" />
                 </div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
-                <p className="text-gray-600">Join us and start shortening your URLs today</p>
+                <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
+                <p className="text-white/60">Join us and start shortening your URLs today</p>
             </div>
 
             <Card className="p-8">
@@ -217,12 +217,12 @@ const SignUp: React.FC = () => {
 
             {/* Sign In Link */}
             <div className="text-center mt-6">
-                <p className="text-gray-600">
+                <p className="text-white/60">
                     Already have an account?{' '}
                     <Link
                         to={ROUTES.SIGNIN}
                         state={location.state}
-                        className="text-blue-600 hover:text-blue-800 font-semibold"
+                        className="text-blue-400 hover:text-blue-300 font-semibold"
                     >
                         Sign in here
                     </Link>

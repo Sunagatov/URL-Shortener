@@ -8,7 +8,7 @@ import { useApi } from '../hooks/useApi';
 import { useAuth } from '../hooks/useAuth';
 import { createUrlSchema, type CreateUrlFormData } from '../utils/validation';
 import { ROUTES } from '../constants';
-import { Button, Card, Input } from './ui';
+import { Button } from './ui';
 import {
     FaLink,
     FaCopy,
@@ -19,7 +19,8 @@ import {
     FaChartLine,
     FaQrcode,
     FaArrowRight,
-    FaGlobe
+    FaGlobe,
+    FaBolt,
 } from 'react-icons/fa';
 
 const UrlShortener: React.FC = () => {
@@ -34,251 +35,274 @@ const UrlShortener: React.FC = () => {
         resolver: zodResolver(createUrlSchema),
     });
 
-    const [shortUrl, setShortUrl] = React.useState<string>('');
+    const [shortUrl, setShortUrl] = React.useState('');
     const [copied, setCopied] = React.useState(false);
 
     const onSubmit = async (data: CreateUrlFormData) => {
         const result = await execute(() => ApiService.createUrl(data));
-        if (result) {
-            setShortUrl(result.shortUrl);
-        }
+        if (result) setShortUrl(result.shortUrl);
     };
 
-    const handleClear = () => {
-        reset();
-        setShortUrl('');
-        setCopied(false);
-    };
+    const handleClear = () => { reset(); setShortUrl(''); setCopied(false); };
 
     const handleCopy = async () => {
         try {
             await navigator.clipboard.writeText(shortUrl);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
-        } catch (error) {
-            console.error('Failed to copy:', error);
+        } catch (err) {
+            console.error('Failed to copy:', err);
         }
     };
 
     const features = [
-        {
-            icon: FaRocket,
-            title: 'Lightning Fast',
-            description: 'Create short URLs in seconds with our optimized platform'
-        },
-        {
-            icon: FaShieldAlt,
-            title: 'Secure & Reliable',
-            description: 'Your links are protected with enterprise-grade security'
-        },
-        {
-            icon: FaChartLine,
-            title: 'Analytics & Insights',
-            description: 'Track clicks, analyze traffic, and measure performance'
-        },
-        {
-            icon: FaQrcode,
-            title: 'QR Code Generation',
-            description: 'Generate QR codes for easy mobile sharing'
-        }
+        { icon: FaRocket,    title: 'Lightning Fast',       description: 'Create short URLs in seconds with our optimized platform',  color: 'from-blue-500 to-blue-700',    glow: 'shadow-blue-500/20'    },
+        { icon: FaShieldAlt, title: 'Secure & Reliable',    description: 'Your links are protected with enterprise-grade security',    color: 'from-violet-500 to-purple-700', glow: 'shadow-purple-500/20'  },
+        { icon: FaChartLine, title: 'Analytics & Insights', description: 'Track clicks, analyze traffic, and measure performance',      color: 'from-emerald-500 to-teal-700',  glow: 'shadow-emerald-500/20' },
+        { icon: FaQrcode,    title: 'QR Code Generation',   description: 'Generate QR codes for effortless mobile sharing',           color: 'from-rose-500 to-pink-700',    glow: 'shadow-rose-500/20'    },
     ];
 
     const stats = [
-        { number: '10M+', label: 'URLs Shortened' },
-        { number: '500K+', label: 'Happy Users' },
-        { number: '99.9%', label: 'Uptime' },
-        { number: '24/7', label: 'Support' }
+        { number: '10M+',  label: 'URLs Shortened', gradient: 'from-blue-400 to-cyan-300'    },
+        { number: '500K+', label: 'Happy Users',    gradient: 'from-violet-400 to-purple-300' },
+        { number: '99.9%', label: 'Uptime SLA',     gradient: 'from-emerald-400 to-teal-300'  },
+        { number: '24/7',  label: 'Support',        gradient: 'from-rose-400 to-pink-300'     },
     ];
 
     return (
-        <div className="w-full max-w-7xl mx-auto px-4 py-8">
-            {/* Hero Section */}
-            <div className="text-center mb-16">
-                <div className="mb-8">
-                    <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-                        Shorten URLs with
-                        <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent block">
-                            Style & Analytics
-                        </span>
+        <div className="w-full">
+
+            {/* ── Hero ──────────────────────────────────────────── */}
+            <section className="relative min-h-screen bg-[#060612] flex flex-col items-center justify-center overflow-hidden">
+                {/* Animated orbs */}
+                <div className="absolute top-1/4 -left-32 w-[560px] h-[560px] bg-blue-600/20 rounded-full blur-[130px] orb-1 pointer-events-none" />
+                <div className="absolute bottom-1/4 -right-32 w-[560px] h-[560px] bg-purple-600/20 rounded-full blur-[130px] orb-2 pointer-events-none" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-indigo-900/20 rounded-full blur-[120px] orb-3 pointer-events-none" />
+
+                {/* Grid overlay */}
+                <div className="absolute inset-0 bg-grid-dark pointer-events-none" />
+
+                {/* Content */}
+                <div className="relative z-10 w-full max-w-3xl mx-auto px-6 text-center">
+
+                    {/* Trust badge */}
+                    <div className="animate-fade-up inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-8 text-sm text-white/70">
+                        <FaBolt className="w-3 h-3 text-amber-400" />
+                        Trusted by 500K+ users worldwide
+                    </div>
+
+                    {/* Headline */}
+                    <h1 className="animate-fade-up-d1 text-5xl md:text-[72px] font-black text-white leading-[1.05] tracking-tight mb-6">
+                        Turn long URLs into
+                        <span className="block gradient-text-animated mt-1">powerful short links</span>
                     </h1>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-                        Transform long, complex URLs into short, memorable links. 
-                        Track performance, analyze clicks, and share with confidence.
+
+                    {/* Subtitle */}
+                    <p className="animate-fade-up-d2 text-lg md:text-xl text-white/55 max-w-xl mx-auto mb-10 leading-relaxed">
+                        Create memorable links, track performance, and share with confidence.
+                        Free forever — no sign-up required.
                     </p>
-                </div>
 
-                {/* URL Shortener Form */}
-                <div className="max-w-2xl mx-auto mb-12">
-                    <Card className="p-8">
-                        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                            <Input
-                                {...register('originalUrl')}
-                                type="url"
-                                placeholder="Paste your long URL here..."
-                                icon={<FaGlobe className="h-5 w-5 text-gray-400" />}
-                                error={errors.originalUrl?.message}
-                                className="text-lg py-4 bg-gray-50 focus:bg-white"
-                            />
-
-                            <div className="flex flex-col sm:flex-row gap-3">
-                                <Button
-                                    type="submit"
-                                    loading={loading}
-                                    size="lg"
-                                    className="flex-1"
-                                >
-                                    <FaLink className="w-5 h-5" />
-                                    <span>{loading ? 'Shortening...' : 'Shorten URL'}</span>
-                                </Button>
-                                <Button
-                                    type="button"
-                                    onClick={handleClear}
-                                    disabled={loading}
-                                    variant="secondary"
-                                    size="lg"
-                                >
-                                    Clear
+                    {/* Form */}
+                    <div className="animate-fade-up-d3 glass-card p-2.5 mb-6">
+                        <form onSubmit={handleSubmit(onSubmit)}>
+                            <div className="flex flex-col sm:flex-row gap-2">
+                                <div className="flex-1 relative">
+                                    <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                                        <FaGlobe className="w-4 h-4 text-white/35" />
+                                    </div>
+                                    <input
+                                        {...register('originalUrl')}
+                                        type="url"
+                                        placeholder="Paste your long URL here…"
+                                        className="w-full h-full bg-transparent text-white placeholder-white/30 pl-11 pr-4 py-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 text-base"
+                                    />
+                                </div>
+                                <Button type="submit" loading={loading} size="lg" className="flex-shrink-0">
+                                    <FaLink className="w-4 h-4" />
+                                    <span>{loading ? 'Shortening…' : 'Shorten'}</span>
                                 </Button>
                             </div>
                         </form>
-
-                        {/* Error Message */}
-                        {error && (
-                            <div className="mt-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl flex items-center">
-                                <span className="mr-2">❌</span>
-                                <p className="text-sm">{error.errorMessage}</p>
-                            </div>
+                        {errors.originalUrl && (
+                            <p className="mt-2 px-3 pb-2 text-red-400 text-sm flex items-center gap-1.5">
+                                <span>⚠</span> {errors.originalUrl.message}
+                            </p>
                         )}
+                    </div>
 
-                        {/* Success Result */}
-                        {shortUrl && (
-                            <div className="mt-8 p-6 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-2xl">
-                                <div className="flex items-center mb-4">
-                                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                                        <FaCheck className="w-5 h-5 text-green-600" />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-gray-900">Success!</h3>
-                                        <p className="text-sm text-gray-600">Your short URL is ready to use</p>
-                                    </div>
-                                </div>
-                                
-                                <div className="bg-white rounded-xl p-4 border border-gray-200">
-                                    <div className="flex items-center justify-between">
-                                        <a
-                                            href={shortUrl}
-                                            className="text-blue-600 hover:text-blue-800 font-medium break-all flex-1 mr-4"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                        >
-                                            {shortUrl}
-                                        </a>
-                                        <div className="flex space-x-2">
-                                            <button
-                                                onClick={handleCopy}
-                                                className={`p-3 rounded-lg transition-all duration-200 flex items-center space-x-2 ${
-                                                    copied 
-                                                        ? 'bg-green-100 text-green-600' 
-                                                        : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
-                                                }`}
-                                                title="Copy to clipboard"
-                                            >
-                                                {copied ? <FaCheck className="w-4 h-4" /> : <FaCopy className="w-4 h-4" />}
-                                                <span className="text-sm font-medium hidden sm:inline">
-                                                    {copied ? 'Copied!' : 'Copy'}
-                                                </span>
-                                            </button>
-                                            <a
-                                                href={shortUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="p-3 bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-lg transition-all duration-200"
-                                                title="Open link"
-                                            >
-                                                <FaExternalLinkAlt className="w-4 h-4" />
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
+                    {/* API error */}
+                    {error && (
+                        <div className="mb-6 p-4 bg-red-900/30 border border-red-500/30 text-red-300 rounded-2xl backdrop-blur-sm flex items-center gap-2 text-sm">
+                            ❌ {error.errorMessage}
+                        </div>
+                    )}
 
-                                {isAuthenticated && (
-                                    <div className="mt-4 text-center">
-                                        <Link
-                                            to={ROUTES.URL_MAPPINGS}
-                                            className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-800 font-medium transition-colors"
-                                        >
-                                            <span>View in Dashboard</span>
-                                            <FaArrowRight className="w-4 h-4" />
-                                        </Link>
-                                    </div>
-                                )}
+                    {/* Success result */}
+                    {shortUrl && (
+                        <div className="glass-card p-5 mb-6 text-left">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-9 h-9 bg-emerald-500/20 border border-emerald-500/30 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <FaCheck className="w-4 h-4 text-emerald-400" />
+                                </div>
+                                <div>
+                                    <p className="text-white font-semibold text-sm">Your link is ready!</p>
+                                    <p className="text-white/40 text-xs">Copy the short URL below</p>
+                                </div>
                             </div>
-                        )}
-                    </Card>
+                            <div className="bg-white/5 border border-white/10 rounded-xl p-3.5 flex items-center justify-between gap-3">
+                                <a
+                                    href={shortUrl}
+                                    className="text-blue-400 hover:text-blue-300 font-medium text-sm break-all flex-1 transition-colors"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    {shortUrl}
+                                </a>
+                                <div className="flex gap-2 flex-shrink-0">
+                                    <button
+                                        onClick={handleCopy}
+                                        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 border ${
+                                            copied
+                                                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                                                : 'bg-white/10 text-white/60 border-white/10 hover:bg-white/20'
+                                        }`}
+                                    >
+                                        {copied ? <FaCheck className="w-3 h-3" /> : <FaCopy className="w-3 h-3" />}
+                                        <span className="hidden sm:inline">{copied ? 'Copied!' : 'Copy'}</span>
+                                    </button>
+                                    <a
+                                        href={shortUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="p-2 bg-white/10 text-white/60 hover:bg-white/20 border border-white/10 rounded-lg transition-all duration-200"
+                                    >
+                                        <FaExternalLinkAlt className="w-3 h-3" />
+                                    </a>
+                                    <button
+                                        onClick={handleClear}
+                                        className="px-3 py-2 bg-white/10 text-white/50 hover:bg-white/20 border border-white/10 rounded-lg text-xs font-medium transition-all duration-200"
+                                    >
+                                        Clear
+                                    </button>
+                                </div>
+                            </div>
+                            {isAuthenticated && (
+                                <div className="mt-3 text-center">
+                                    <Link
+                                        to={ROUTES.URL_MAPPINGS}
+                                        className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+                                    >
+                                        View in Dashboard <FaArrowRight className="w-3 h-3" />
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Trust signals */}
+                    <div className="flex flex-wrap justify-center gap-5 text-white/35 text-sm">
+                        <span className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+                            No account needed
+                        </span>
+                        <span className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block" />
+                            Free to use
+                        </span>
+                        <span className="flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-purple-400 inline-block" />
+                            Links never expire
+                        </span>
+                    </div>
                 </div>
+            </section>
 
-                {/* Call to Action for Non-Authenticated Users */}
-                {!isAuthenticated && (
-                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white mb-16">
-                        <h3 className="text-2xl font-bold mb-4">Want more features?</h3>
-                        <p className="text-blue-100 mb-6">Sign up for free to track analytics, manage your URLs, and access advanced features!</p>
+            {/* ── Features ──────────────────────────────────────── */}
+            <section className="py-28 bg-white bg-dots-light relative">
+                <div className="max-w-6xl mx-auto px-6">
+                    <div className="text-center mb-16">
+                        <span className="inline-block bg-blue-50 text-blue-600 text-sm font-semibold px-4 py-1.5 rounded-full mb-4 border border-blue-100">
+                            Why Shorty URL
+                        </span>
+                        <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 tracking-tight leading-tight">
+                            Everything you need,<br className="hidden md:block" /> nothing you don't
+                        </h2>
+                        <p className="text-lg text-gray-500 max-w-xl mx-auto">
+                            Powerful tools designed to make link management simple, fast, and insightful.
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                        {features.map((feature, i) => {
+                            const Icon = feature.icon;
+                            return (
+                                <div key={i} className="gradient-border-card p-6">
+                                    <div className={`w-12 h-12 bg-gradient-to-br ${feature.color} rounded-2xl flex items-center justify-center mb-5 shadow-lg ${feature.glow}`}>
+                                        <Icon className="w-5 h-5 text-white" />
+                                    </div>
+                                    <h3 className="text-base font-bold text-gray-900 mb-2">{feature.title}</h3>
+                                    <p className="text-sm text-gray-500 leading-relaxed">{feature.description}</p>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </section>
+
+            {/* ── Stats ─────────────────────────────────────────── */}
+            <section className="py-28 bg-[#060612] bg-grid-dark relative overflow-hidden">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[300px] bg-blue-700/10 rounded-full blur-[120px] pointer-events-none" />
+                <div className="relative z-10 max-w-6xl mx-auto px-6">
+                    <div className="text-center mb-16">
+                        <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">
+                            Trusted by millions
+                        </h2>
+                        <p className="text-white/45 text-lg max-w-lg mx-auto">
+                            Join a global community of developers, marketers, and creators
+                        </p>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+                        {stats.map((stat, i) => (
+                            <div key={i} className="text-center p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
+                                <div className={`text-4xl md:text-5xl font-black bg-gradient-to-br ${stat.gradient} bg-clip-text text-transparent mb-2`}>
+                                    {stat.number}
+                                </div>
+                                <div className="text-white/45 text-sm font-medium">{stat.label}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ── CTA (non-auth only) ───────────────────────────── */}
+            {!isAuthenticated && (
+                <section className="relative py-24 overflow-hidden bg-gradient-to-br from-blue-700 via-indigo-700 to-purple-700">
+                    <div className="absolute inset-0 bg-grid-dark opacity-30 pointer-events-none" />
+                    <div className="absolute -top-48 -right-48 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
+                    <div className="absolute -bottom-48 -left-48 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
+                    <div className="relative z-10 max-w-2xl mx-auto px-6 text-center">
+                        <h2 className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight">
+                            Unlock more power
+                        </h2>
+                        <p className="text-white/65 text-lg mb-10">
+                            Sign up free to track analytics, manage all your URLs, and access advanced features.
+                        </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <Link to={ROUTES.SIGNUP}>
-                                <Button variant="secondary" className="bg-white text-blue-600 hover:bg-blue-50">
-                                    Sign Up Free
-                                </Button>
+                                <button className="inline-flex items-center gap-2 bg-white text-indigo-700 font-bold px-8 py-4 rounded-2xl hover:bg-blue-50 transition-all duration-200 hover:scale-105 shadow-xl text-base">
+                                    Sign Up Free <FaArrowRight className="w-4 h-4" />
+                                </button>
                             </Link>
                             <Link to={ROUTES.SIGNIN}>
-                                <Button variant="ghost">
+                                <button className="inline-flex items-center gap-2 bg-white/10 border border-white/25 text-white font-semibold px-8 py-4 rounded-2xl hover:bg-white/20 transition-all duration-200 backdrop-blur-sm text-base">
                                     Sign In
-                                </Button>
+                                </button>
                             </Link>
                         </div>
                     </div>
-                )}
-            </div>
-
-            {/* Features Section */}
-            <div className="mb-16">
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Why Choose Shorty URL?</h2>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        Powerful features designed to make link management simple and effective
-                    </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {features.map((feature, index) => {
-                        const Icon = feature.icon;
-                        return (
-                            <Card key={index} hover className="p-6">
-                                <div className="w-12 h-12 bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl flex items-center justify-center mb-4">
-                                    <Icon className="w-6 h-6 text-blue-600" />
-                                </div>
-                                <h3 className="text-xl font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                                <p className="text-gray-600">{feature.description}</p>
-                            </Card>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* Stats Section */}
-            <div className="bg-gradient-to-r from-gray-900 to-blue-900 rounded-3xl p-8 md:p-12 text-white">
-                <div className="text-center mb-8">
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4">Trusted by Millions</h2>
-                    <p className="text-blue-100 text-lg">Join thousands of users who trust Shorty URL for their link management needs</p>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                    {stats.map((stat, index) => (
-                        <div key={index} className="text-center">
-                            <div className="text-3xl md:text-4xl font-bold text-blue-300 mb-2">{stat.number}</div>
-                            <div className="text-blue-100">{stat.label}</div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+                </section>
+            )}
         </div>
     );
 };
