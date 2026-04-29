@@ -1,6 +1,6 @@
 import type { MouseEvent } from 'react';
 import { FaChevronRight, FaCopy, FaExternalLinkAlt, FaLink, FaTrash } from 'react-icons/fa';
-import { getDomainLabel } from '@/features/urls/lib/urlMappings';
+import { getDomainLabel, getShortUrlSlug } from '@/features/urls/lib/urlMappings';
 import type { UrlMapping } from '@/shared/types';
 import { Button } from '@/shared/ui';
 
@@ -26,7 +26,7 @@ export const UrlMappingCard = ({
   onDetails,
 }: UrlMappingCardProps) => {
   const domain = getDomainLabel(mapping.originalUrl);
-  const shortSlug = mapping.shortUrl.split('/').pop() ?? mapping.shortUrl;
+  const shortSlug = getShortUrlSlug(mapping.shortUrl);
 
   const stopPropagation = (event: MouseEvent) => {
     event.stopPropagation();

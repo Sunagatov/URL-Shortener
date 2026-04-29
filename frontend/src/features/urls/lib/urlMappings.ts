@@ -1,5 +1,7 @@
 export const PAGE_SIZE = 6;
 
+const backendRestApiUrl = import.meta.env.VITE_BACKEND_REST_API_URL;
+
 export const getVisiblePages = (page: number, totalPages: number, maxVisiblePages = 5) => {
   const startPage = Math.max(
     0,
@@ -14,6 +16,53 @@ export const getDomainLabel = (url: string) => {
     return new URL(url).hostname.replace('www.', '');
   } catch {
     return url.slice(0, 20);
+  }
+};
+
+export const getShortUrlSlug = (shortUrl: string) => {
+  try {
+    const parsedUrl = new URL(shortUrl);
+    return parsedUrl.pathname.split('/').filter(Boolean).pop() ?? shortUrl;
+  } catch {
+    return shortUrl.split('/').filter(Boolean).pop() ?? shortUrl;
+  }
+};
+
+export const getPublicShortUrlBase = () => {
+  if (!backendRestApiUrl) {
+    return null;
+  }
+
+  try {
+    const parsedBackendUrl = new URL(backendRestApiUrl);
+    const trimmedPathname = parsedBackendUrl.pathname.replace(/\/+$/, '');
+    const publicPathname = trimmedPathname.replace(/\/api(?:\/v\d+)?$/, '');
+    const normalizedPathname = publicPathname ? `${publicPathname}/` : '/';
+    return new URL(normalizedPathname, parsedBackendUrl.origin).toString().replace(/\/$/, '');
+  } catch {
+    return null;
+  }
+};
+
+export const normalizeShortUrl = (shortUrl: string) => {
+  const publicBase = getPublicShortUrlBase();
+  const shortUrlSlug = getShortUrlSlug(shortUrl);
+
+  if (!publicBase || !shortUrlSlug) {
+    return shortUrl;
+  }
+
+  try {
+    const parsedShortUrl = new URL(shortUrl);
+    const parsedBackendUrl = backendRestApiUrl ? new URL(backendRestApiUrl) : null;
+
+    if (parsedBackendUrl && parsedShortUrl.origin !== parsedBackendUrl.origin) {
+      return shortUrl;
+    }
+
+    return new URL(`/${shortUrlSlug}`, `${publicBase}/`).toString();
+  } catch {
+    return shortUrl;
   }
 };
 
