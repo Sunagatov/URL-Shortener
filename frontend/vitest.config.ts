@@ -1,13 +1,8 @@
-import type { UserConfig } from 'vite';
-import type { InlineConfig } from 'vitest';
+import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
 
-type VitestConfig = UserConfig & {
-  test: InlineConfig;
-};
-
-export default {
+export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
@@ -21,4 +16,4 @@ export default {
     css: true,
     exclude: ['e2e/**', 'node_modules/**', 'dist/**', 'build/**'],
   },
-} satisfies VitestConfig;
+});

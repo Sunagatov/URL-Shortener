@@ -1,10 +1,5 @@
 /* src/index.css */
-/*noinspection CssInvalidAtRule,CssUnknownAtRule*/
-@tailwind base;
-/*noinspection CssInvalidAtRule,CssUnknownAtRule*/
-@tailwind components;
-/*noinspection CssInvalidAtRule,CssUnknownAtRule*/
-@tailwind utilities;
+@import "tailwindcss";
 
 html, body {
   margin: 0;
