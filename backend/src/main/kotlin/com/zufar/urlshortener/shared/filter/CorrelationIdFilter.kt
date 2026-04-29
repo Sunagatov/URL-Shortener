@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.common.filter
+package com.zufar.urlshortener.shared.filter
 
 import jakarta.servlet.Filter
 import jakarta.servlet.FilterChain

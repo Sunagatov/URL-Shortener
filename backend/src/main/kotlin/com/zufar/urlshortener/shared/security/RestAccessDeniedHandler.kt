@@ -1,7 +1,7 @@
-package com.zufar.urlshortener.common.security
+package com.zufar.urlshortener.shared.security
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.zufar.urlshortener.common.exception.ErrorResponse
+import com.zufar.urlshortener.shared.exception.ErrorResponse
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.MediaType

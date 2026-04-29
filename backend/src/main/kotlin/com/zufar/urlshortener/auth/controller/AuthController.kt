@@ -10,7 +10,7 @@ import com.zufar.urlshortener.auth.repository.UserRepository
 import com.zufar.urlshortener.auth.service.EmailNormalizer
 import com.zufar.urlshortener.auth.service.JwtTokenProvider
 import com.zufar.urlshortener.auth.service.validator.AuthRequestValidator
-import com.zufar.urlshortener.common.exception.ErrorResponse
+import com.zufar.urlshortener.shared.exception.ErrorResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.ExampleObject

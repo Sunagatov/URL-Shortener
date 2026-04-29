@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.common.config
+package com.zufar.urlshortener.shared.config
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean

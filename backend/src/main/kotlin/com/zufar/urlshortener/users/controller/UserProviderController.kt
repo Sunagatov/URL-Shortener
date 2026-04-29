@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.users.controller
 
-import com.zufar.urlshortener.common.exception.ErrorResponse
+import com.zufar.urlshortener.shared.exception.ErrorResponse
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
 import com.zufar.urlshortener.users.dto.UserDetailsDto
 import com.zufar.urlshortener.users.service.UserDetailsProvider

@@ -3,7 +3,7 @@ package com.zufar.urlshortener.users.service
 import com.zufar.urlshortener.auth.entity.UserDetails
 import com.zufar.urlshortener.auth.repository.UserRepository
 import com.zufar.urlshortener.auth.service.validator.AuthRequestValidator
-import com.zufar.urlshortener.common.exception.InvalidRequestException
+import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test

@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.common.config
+package com.zufar.urlshortener.shared.config
 
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue

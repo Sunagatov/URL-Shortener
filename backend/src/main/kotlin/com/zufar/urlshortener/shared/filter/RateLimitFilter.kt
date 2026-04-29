@@ -1,7 +1,7 @@
-package com.zufar.urlshortener.common.filter
+package com.zufar.urlshortener.shared.filter
 
 import com.github.benmanes.caffeine.cache.Cache
-import com.zufar.urlshortener.common.config.RateLimitConfig
+import com.zufar.urlshortener.shared.config.RateLimitConfig
 import io.github.bucket4j.Bucket
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest

@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.common.config
+package com.zufar.urlshortener.shared.config
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import org.springframework.beans.factory.annotation.Value

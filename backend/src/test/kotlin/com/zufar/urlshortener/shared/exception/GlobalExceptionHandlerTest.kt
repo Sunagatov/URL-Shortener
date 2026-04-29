@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.common.exception
+package com.zufar.urlshortener.shared.exception
 
 import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper

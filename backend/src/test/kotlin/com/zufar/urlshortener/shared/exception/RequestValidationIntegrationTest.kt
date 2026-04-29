@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.common.exception
+package com.zufar.urlshortener.shared.exception
 
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

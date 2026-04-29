@@ -3,7 +3,7 @@ package com.zufar.urlshortener.auth.service.validator
 import com.zufar.urlshortener.auth.dto.SignInRequest
 import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
 import com.zufar.urlshortener.auth.dto.SignUpRequest
-import com.zufar.urlshortener.common.exception.InvalidRequestException
+import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

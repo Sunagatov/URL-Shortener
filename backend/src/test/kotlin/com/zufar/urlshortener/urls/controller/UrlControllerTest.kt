@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.urls.controller
 
-import com.zufar.urlshortener.common.exception.InvalidRequestException
+import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.urls.dto.UrlMappingPageDto
 import com.zufar.urlshortener.urls.service.PageableUrlMappingsProvider
 import com.zufar.urlshortener.urls.service.UrlDeleter

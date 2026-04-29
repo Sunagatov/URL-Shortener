@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.common.security
+package com.zufar.urlshortener.shared.security
 
 import com.zufar.urlshortener.urls.service.UrlShortener
 import org.junit.jupiter.api.Test

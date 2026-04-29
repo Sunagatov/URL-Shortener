@@ -1,3 +1,3 @@
-package com.zufar.urlshortener.common.exception
+package com.zufar.urlshortener.shared.exception
 
 class InvalidRequestException(message: String) : RuntimeException(message)

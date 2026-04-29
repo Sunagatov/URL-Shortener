@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.common.config
+package com.zufar.urlshortener.shared.config
 
 import org.springdoc.core.models.GroupedOpenApi
 import org.springframework.context.annotation.Bean

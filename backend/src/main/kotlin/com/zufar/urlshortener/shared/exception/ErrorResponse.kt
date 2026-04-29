@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.common.exception
+package com.zufar.urlshortener.shared.exception
 
 import io.swagger.v3.oas.annotations.media.Schema
 

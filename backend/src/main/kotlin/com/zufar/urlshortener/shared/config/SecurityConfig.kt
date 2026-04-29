@@ -1,9 +1,9 @@
-package com.zufar.urlshortener.common.config
+package com.zufar.urlshortener.shared.config
 
 import com.zufar.urlshortener.auth.service.CustomUserDetailsService
 import com.zufar.urlshortener.auth.service.JwtAuthenticationFilter
-import com.zufar.urlshortener.common.security.RestAccessDeniedHandler
-import com.zufar.urlshortener.common.security.RestAuthenticationEntryPoint
+import com.zufar.urlshortener.shared.security.RestAccessDeniedHandler
+import com.zufar.urlshortener.shared.security.RestAuthenticationEntryPoint
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod

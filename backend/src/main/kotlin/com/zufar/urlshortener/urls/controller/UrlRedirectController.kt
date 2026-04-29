@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.urls.controller
 
-import com.zufar.urlshortener.common.exception.ErrorResponse
+import com.zufar.urlshortener.shared.exception.ErrorResponse
 import com.zufar.urlshortener.urls.service.UrlMappingProvider
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
