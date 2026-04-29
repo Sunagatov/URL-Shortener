@@ -5,10 +5,12 @@ import { routes } from '@/app/routes';
 import { changePassword } from '@/features/account/api/accountApi';
 import { useAuth } from '@/shared/auth/useAuth';
 import { getApiErrorMessage, isSessionInvalidError } from '@/shared/lib/apiErrors';
+import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { Button, useToast } from '@/shared/ui';
 import { FaShieldAlt, FaLock, FaEye, FaEyeSlash, FaCheck, FaTimes, FaKey, FaClock, FaExclamationTriangle } from 'react-icons/fa';
 
 const SecurityPage: React.FC = () => {
+    usePageTitle('Security');
     const [currentPassword, setCurrentPassword]         = useState('');
     const [newPassword, setNewPassword]                 = useState('');
     const [confirmPassword, setConfirmPassword]         = useState('');

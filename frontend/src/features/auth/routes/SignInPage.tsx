@@ -9,6 +9,7 @@ import { signInSchema, type SignInFormData } from '@/features/auth/model/authVal
 import { routes } from '@/app/routes';
 import type { AuthTokens } from '@/shared/types';
 import { Button } from '@/shared/ui';
+import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { FaEnvelope, FaLock, FaLink, FaRocket, FaShieldAlt, FaChartLine } from 'react-icons/fa';
 
 type AuthLocationState = {
@@ -82,6 +83,7 @@ const inputClass =
     'focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/30';
 
 const SignInPage: React.FC = () => {
+    usePageTitle('Sign In');
     const navigate = useNavigate();
     const location = useLocation();
     const { login, updateUser } = useAuth();

@@ -21,7 +21,7 @@ This document describes all configurable environment variables for the URL Short
 
 | Variable | Description | Default | Example |
 |----------|-------------|---------|---------|
-| `MONGODB_URI` | MongoDB connection URI | - | `mongodb://localhost:27017` |
+| `MONGODB_URI` | MongoDB connection URI | - | `mongodb://localhost:27018` |
 | `MONGODB_DATABASE` | MongoDB database name | - | `urlshortener` |
 
 ## CORS
@@ -76,7 +76,7 @@ This document describes all configurable environment variables for the URL Short
 SERVER_BASE_URL=http://localhost:8080
 SERVER_PORT=8080
 JWT_SECRET=mySecretKey123456789012345678901234567890
-MONGODB_URI=mongodb://localhost:27017
+MONGODB_URI=mongodb://localhost:27018
 MONGODB_DATABASE=urlshortener
 CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
 CORS_ALLOWED_ORIGIN_PATTERNS=http://localhost:*,http://127.0.0.1:*

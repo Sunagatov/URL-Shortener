@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AccountSidebar from '@/app/layout/AccountSidebar';
 import { Button } from '@/shared/ui';
 import { routes } from '@/app/routes';
+import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { FaLink, FaPlus, FaEye, FaChartBar, FaMousePointer, FaClock, FaArrowUp } from 'react-icons/fa';
 
 const StatCard: React.FC<{
@@ -29,6 +30,7 @@ const StatCard: React.FC<{
 );
 
 const DashboardPage: React.FC = () => {
+    usePageTitle('Dashboard');
     const navigate = useNavigate();
 
     const stats = [

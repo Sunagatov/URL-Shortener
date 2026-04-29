@@ -4,12 +4,14 @@ import { getUserProfile } from '@/features/account/api/accountApi';
 import AccountSidebar from '@/app/layout/AccountSidebar';
 import { useAuth } from '@/shared/auth/useAuth';
 import { getApiErrorMessage, isSessionInvalidError } from '@/shared/lib/apiErrors';
+import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { useToast } from '@/shared/ui';
 import type { User } from '@/shared/types';
 import { routes } from '@/app/routes';
-import { FaEdit, FaUser, FaEnvelope, FaGlobe, FaCalendarAlt, FaShieldAlt, FaDownload } from 'react-icons/fa';
+import { FaLock, FaUser, FaEnvelope, FaGlobe, FaCalendarAlt, FaShieldAlt, FaDownload } from 'react-icons/fa';
 
 const UserAccountPage: React.FC = () => {
+    usePageTitle('My Profile');
     const [userDetails, setUserDetails] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
@@ -115,15 +117,19 @@ const UserAccountPage: React.FC = () => {
                                         )}
                                     </div>
                                 </div>
-                                <button
-                                    type="button"
-                                    disabled
-                                    title="Profile editing is not available yet"
-                                    className="absolute top-5 right-5 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.06] border border-white/[0.08] text-white/30 cursor-not-allowed text-xs"
-                                >
-                                    <FaEdit className="w-3 h-3" />
-                                    <span className="hidden sm:inline">Edit (coming soon)</span>
-                                </button>
+                                <div className="group absolute top-5 right-5">
+                                    <button
+                                        type="button"
+                                        disabled
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-dashed border-white/[0.12] bg-white/[0.03] text-white/25 cursor-not-allowed text-xs"
+                                    >
+                                        <FaLock className="w-3 h-3" />
+                                        <span className="hidden sm:inline">Edit</span>
+                                    </button>
+                                    <div className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/10 bg-[#0d0f1e] px-2.5 py-1.5 text-xs text-white/55 opacity-0 shadow-xl transition-opacity duration-150 group-hover:opacity-100 z-20">
+                                        Coming soon
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Fields */}
@@ -168,26 +174,30 @@ const UserAccountPage: React.FC = () => {
                                 <p className="text-[10px] font-semibold text-white/25 uppercase tracking-widest mb-3">Quick Actions</p>
                                 <div className="space-y-1">
                                     {[
-                                        { icon: FaEdit,      label: 'Edit Profile',     note: 'coming soon' },
-                                        { icon: FaShieldAlt, label: 'Change Password',  note: 'use Security page', path: routes.security },
-                                        { icon: FaDownload,  label: 'Export Data',      note: 'coming soon' },
+                                        { icon: FaLock,      label: 'Edit Profile',    soon: true  },
+                                        { icon: FaShieldAlt, label: 'Change Password', soon: false, path: routes.security },
+                                        { icon: FaDownload,  label: 'Export Data',     soon: true  },
                                     ].map((a, i) => {
                                         const Icon = a.icon;
                                         return (
                                             <button
                                                 key={i}
                                                 type="button"
-                                                disabled={!a.path}
-                                                onClick={a.path ? () => navigate(a.path!) : undefined}
+                                                disabled={a.soon}
+                                                onClick={!a.soon && a.path ? () => navigate(a.path!) : undefined}
                                                 className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all ${
-                                                    a.path
-                                                        ? 'text-white/50 hover:text-white/80 hover:bg-white/[0.06]'
-                                                        : 'text-white/20 cursor-not-allowed'
+                                                    a.soon
+                                                        ? 'text-white/20 cursor-not-allowed border border-dashed border-white/[0.06]'
+                                                        : 'text-white/50 hover:text-white/80 hover:bg-white/[0.06]'
                                                 }`}
                                             >
                                                 <Icon className="w-3.5 h-3.5 flex-shrink-0" />
                                                 <span className="text-xs font-medium">{a.label}</span>
-                                                <span className="text-[10px] text-white/20 ml-auto">{a.note}</span>
+                                                {a.soon && (
+                                                    <span className="ml-auto text-[10px] font-medium text-white/25 bg-white/[0.05] border border-white/[0.08] rounded-full px-2 py-0.5">
+                                                        Soon
+                                                    </span>
+                                                )}
                                             </button>
                                         );
                                     })}
