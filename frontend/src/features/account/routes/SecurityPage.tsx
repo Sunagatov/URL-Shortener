@@ -43,9 +43,9 @@ const SecurityPage: React.FC = () => {
             special:   /[!@#$%^&*(),.?":{}|<>]/.test(password),
         };
         Object.values(checks).forEach(c => c && score++);
-        if (score < 2) return { strength: 'Weak',   width: '20%', textClass: 'text-red-400',   barClass: 'bg-red-500'   };
-        if (score < 4) return { strength: 'Medium', width: '60%', textClass: 'text-amber-400', barClass: 'bg-amber-500' };
-        return              { strength: 'Strong', width: '100%', textClass: 'text-blue-400',  barClass: 'bg-blue-500'  };
+        if (score < 2) return { strength: 'Weak',   width: '20%', textClass: 'text-red-400',     barClass: 'bg-red-500' };
+        if (score < 4) return { strength: 'Medium', width: '60%', textClass: 'text-amber-400',   barClass: 'bg-amber-500' };
+        return              { strength: 'Strong', width: '100%', textClass: 'text-emerald-400', barClass: 'bg-emerald-500' };
     };
 
     const passwordStrength = getPasswordStrength(newPassword);
@@ -117,7 +117,7 @@ const SecurityPage: React.FC = () => {
                                                     <p className="text-xs font-semibold text-white/75 truncate">{f.label}</p>
                                                     <p className="text-[10px] text-white/30 truncate">{f.desc}</p>
                                                 </div>
-                                                <span className="text-[10px] font-medium text-blue-400/80 bg-blue-900/25 border border-blue-500/15 px-2 py-0.5 rounded-full flex-shrink-0">
+                                                <span className="text-[10px] font-medium text-emerald-400 bg-emerald-900/30 border border-emerald-500/20 px-2 py-0.5 rounded-full flex-shrink-0">
                                                     Active
                                                 </span>
                                             </div>
@@ -129,7 +129,7 @@ const SecurityPage: React.FC = () => {
                                     <FaClock className="w-3.5 h-3.5 text-white/25 flex-shrink-0" />
                                     <div>
                                         <p className="text-[10px] font-semibold text-white/30 uppercase tracking-widest">Last Password Change</p>
-                                        <p className="text-xs text-white/25 mt-0.5">History not available yet.</p>
+                                        <p className="text-xs text-white/25 mt-0.5">Password change history is not available yet.</p>
                                     </div>
                                 </div>
                             </div>
@@ -178,7 +178,7 @@ const SecurityPage: React.FC = () => {
                                             onChange={e => setNewPassword(e.target.value)}
                                             required
                                             className={inputClass}
-                                            placeholder="Enter a new strong password"
+                                            placeholder="Enter your new password"
                                         />
                                         <PasswordVisibilityToggle show={showNewPassword} onToggle={() => setShowNewPassword(v => !v)} />
                                     </div>

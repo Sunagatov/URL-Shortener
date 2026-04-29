@@ -1,16 +1,7 @@
 package com.zufar.urlshortener.auth.controller
 
 import com.zufar.urlshortener.auth.dto.*
-import com.zufar.urlshortener.auth.entity.UserDetails
-import com.zufar.urlshortener.auth.exception.EmailAlreadyExistsException
-import com.zufar.urlshortener.auth.exception.InvalidTokenException
-import com.zufar.urlshortener.auth.exception.UserNotFoundException
-import org.springframework.dao.DuplicateKeyException
-import com.zufar.urlshortener.auth.repository.UserRepository
-import com.zufar.urlshortener.auth.service.EmailNormalizer
-import com.zufar.urlshortener.auth.service.JwtTokenProvider
-import com.zufar.urlshortener.auth.service.withTokenVersion
-import com.zufar.urlshortener.auth.service.validator.AuthRequestValidator
+import com.zufar.urlshortener.auth.service.AuthService
 import com.zufar.urlshortener.shared.exception.ErrorResponse
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
@@ -21,13 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import io.swagger.v3.oas.annotations.parameters.RequestBody as SwaggerRequestBody
 import org.springframework.http.ResponseEntity
-import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.userdetails.User
-import org.springframework.security.core.userdetails.UserDetails as SpringUserDetails
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.*
-import java.time.LocalDateTime
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -36,11 +21,7 @@ import java.time.LocalDateTime
     description = "Endpoints for user authentication, registration, and token management."
 )
 class AuthController(
-    private val authenticationManager: AuthenticationManager,
-    private val jwtTokenProvider: JwtTokenProvider,
-    private val authRequestValidator: AuthRequestValidator,
-    private val userRepository: UserRepository,
-    private val passwordEncoder: PasswordEncoder
+    private val authService: AuthService
 ) {
 
     @Operation(
@@ -138,23 +119,10 @@ class AuthController(
                     ]
                 )
             ]
-        )
-        @RequestBody signInRequest: SignInRequest
-    ): ResponseEntity<AuthResponse> {
-        val normalizedRequest = signInRequest.normalizeEmail()
-
-        authRequestValidator.validateAuthRequest(normalizedRequest)
-
-        val authentication = authenticationManager.authenticate(
-            UsernamePasswordAuthenticationToken(
-                normalizedRequest.email,
-                signInRequest.password
-            )
-        )
-
-        val userDetails = authentication.principal as User
-        return ResponseEntity.ok(createAuthResponse(userDetails))
-    }
+    )
+    @RequestBody signInRequest: SignInRequest
+    ): ResponseEntity<AuthResponse> =
+        ResponseEntity.ok(authService.authenticateUser(signInRequest))
 
     @Operation(
         summary = "User Sign-up",
@@ -255,17 +223,10 @@ class AuthController(
                     ]
                 )
             ]
-        )
-        @RequestBody signUpRequest: SignUpRequest
-    ): ResponseEntity<AuthResponse> {
-        val normalizedRequest = signUpRequest.normalizeEmail()
-
-        authRequestValidator.validateSignUpRequest(normalizedRequest)
-        ensureEmailIsAvailable(normalizedRequest.email)
-
-        val user = saveUser(buildUser(normalizedRequest))
-        return ResponseEntity.ok(createAuthResponse(user.toSpringUser().withTokenVersion(user.tokenVersion)))
-    }
+    )
+    @RequestBody signUpRequest: SignUpRequest
+    ): ResponseEntity<AuthResponse> =
+        ResponseEntity.ok(authService.registerUser(signUpRequest))
 
     @Operation(
         summary = "Refresh Access Token",
@@ -381,76 +342,8 @@ class AuthController(
                     ]
                 )
             ]
-        )
-        @RequestBody refreshTokenRequest: RefreshTokenRequest
-    ): ResponseEntity<RefreshTokenResponse> {
-        authRequestValidator.validateRefreshTokenRequest(refreshTokenRequest)
-
-        val refreshToken = refreshTokenRequest.refreshToken
-        validateRefreshToken(refreshToken)
-
-        val normalizedEmail = EmailNormalizer.normalize(jwtTokenProvider.getUsernameFromJWT(refreshToken))
-        val userDetails = userRepository.findByEmailIgnoreCase(normalizedEmail)
-            ?: throw UserNotFoundException("User not found for the provided refresh token")
-        val tokenVersion = jwtTokenProvider.getTokenVersionFromJWT(refreshToken)
-            ?: throw InvalidTokenException("Invalid or expired refresh token")
-        if (tokenVersion != userDetails.tokenVersion) {
-            throw InvalidTokenException("Invalid or expired refresh token")
-        }
-
-        val newAccessToken =
-            jwtTokenProvider.generateAccessToken(userDetails.toSpringUser().withTokenVersion(userDetails.tokenVersion))
-
-        return ResponseEntity.ok(RefreshTokenResponse(newAccessToken))
-    }
-
-    private fun SignInRequest.normalizeEmail(): SignInRequest =
-        copy(email = EmailNormalizer.normalize(email))
-
-    private fun SignUpRequest.normalizeEmail(): SignUpRequest =
-        copy(email = EmailNormalizer.normalize(email))
-
-    private fun ensureEmailIsAvailable(email: String) {
-        if (userRepository.findByEmailIgnoreCase(email) != null) {
-            throw EmailAlreadyExistsException("Email is already in use")
-        }
-    }
-
-    private fun buildUser(signUpRequest: SignUpRequest): UserDetails {
-        val now = LocalDateTime.now()
-
-        return UserDetails(
-            firstName = signUpRequest.firstName,
-            lastName = signUpRequest.lastName,
-            email = signUpRequest.email,
-            password = passwordEncoder.encode(signUpRequest.password),
-            country = signUpRequest.country,
-            age = signUpRequest.age,
-            createdAt = now,
-            updatedAt = now
-        )
-    }
-
-    private fun saveUser(user: UserDetails): UserDetails {
-        return try {
-            userRepository.save(user)
-        } catch (_: DuplicateKeyException) {
-            throw EmailAlreadyExistsException("Email is already in use")
-        }
-    }
-
-    private fun createAuthResponse(userDetails: SpringUserDetails): AuthResponse {
-        val accessToken = jwtTokenProvider.generateAccessToken(userDetails)
-        val refreshToken = jwtTokenProvider.generateRefreshToken(userDetails)
-        return AuthResponse(accessToken, refreshToken)
-    }
-
-    private fun validateRefreshToken(refreshToken: String) {
-        if (!jwtTokenProvider.validateRefreshToken(refreshToken)) {
-            throw InvalidTokenException("Invalid or expired refresh token")
-        }
-    }
-
-    private fun UserDetails.toSpringUser(): User =
-        User(email, password, emptyList())
+    )
+    @RequestBody refreshTokenRequest: RefreshTokenRequest
+    ): ResponseEntity<RefreshTokenResponse> =
+        ResponseEntity.ok(authService.refreshAccessToken(refreshTokenRequest))
 }

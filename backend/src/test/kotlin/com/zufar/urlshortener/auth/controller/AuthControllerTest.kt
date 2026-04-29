@@ -1,153 +1,66 @@
 package com.zufar.urlshortener.auth.controller
 
+import com.zufar.urlshortener.auth.dto.AuthResponse
 import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
+import com.zufar.urlshortener.auth.dto.RefreshTokenResponse
 import com.zufar.urlshortener.auth.dto.SignInRequest
 import com.zufar.urlshortener.auth.dto.SignUpRequest
-import com.zufar.urlshortener.auth.entity.UserDetails
-import com.zufar.urlshortener.auth.exception.EmailAlreadyExistsException
-import com.zufar.urlshortener.auth.exception.InvalidTokenException
-import com.zufar.urlshortener.auth.repository.UserRepository
-import com.zufar.urlshortener.auth.service.JwtTokenProvider
-import com.zufar.urlshortener.auth.service.validator.AuthRequestValidator
+import com.zufar.urlshortener.auth.service.AuthService
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.userdetails.User
-import org.springframework.security.crypto.password.PasswordEncoder
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
 class AuthControllerTest {
 
-    @Mock private lateinit var authenticationManager: AuthenticationManager
-    @Mock private lateinit var jwtTokenProvider: JwtTokenProvider
-    @Mock private lateinit var authRequestValidator: AuthRequestValidator
-    @Mock private lateinit var userRepository: UserRepository
-    @Mock private lateinit var passwordEncoder: PasswordEncoder
+    @Mock private lateinit var authService: AuthService
 
-    private fun controller() = AuthController(
-        authenticationManager = authenticationManager,
-        jwtTokenProvider = jwtTokenProvider,
-        authRequestValidator = authRequestValidator,
-        userRepository = userRepository,
-        passwordEncoder = passwordEncoder
-    )
+    private fun controller() = AuthController(authService)
 
     @Test
-    fun `registerUser lowercases and trims email before save`() {
-        whenever(passwordEncoder.encode("SecurePassword123!")).thenReturn("hashed-password")
-        whenever(userRepository.save(any<UserDetails>())).thenAnswer { it.arguments[0] }
-        whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access-token")
-        whenever(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh-token")
+    fun `authenticateUser delegates to auth service`() {
+        val request = SignInRequest("user@example.com", "password")
+        val response = AuthResponse("access-token", "refresh-token")
+        whenever(authService.authenticateUser(request)).thenReturn(response)
 
-        controller().registerUser(
-            SignUpRequest(
-                firstName = "Jane",
-                lastName = "Doe",
-                country = "USA",
-                age = 28,
-                email = "  Jane.Doe@Example.COM  ",
-                password = "SecurePassword123!"
-            )
-        )
+        val result = controller().authenticateUser(request)
 
-        verify(userRepository).findByEmailIgnoreCase("jane.doe@example.com")
-        val captor = ArgumentCaptor.forClass(UserDetails::class.java)
-        verify(userRepository).save(captor.capture())
-        assertEquals("jane.doe@example.com", captor.value.email)
+        verify(authService).authenticateUser(request)
+        assertEquals(response, result.body)
     }
 
     @Test
-    fun `registerUser duplicate check is case-insensitive`() {
-        whenever(userRepository.findByEmailIgnoreCase("jane.doe@example.com")).thenReturn(
-            UserDetails(
-                firstName = "Jane",
-                lastName = "Doe",
-                email = "jane.doe@example.com",
-                password = "hashed",
-                country = "USA",
-                age = 28
-            )
-        )
-
-        assertThrows<EmailAlreadyExistsException> {
-            controller().registerUser(
-                SignUpRequest(
-                    firstName = "Jane",
-                    lastName = "Doe",
-                    country = "USA",
-                    age = 28,
-                    email = "Jane.Doe@Example.COM",
-                    password = "SecurePassword123!"
-                )
-            )
-        }
-    }
-
-    @Test
-    fun `authenticateUser passes normalized email to authentication manager`() {
-        val principal = User("user@example.com", "hashed", emptyList())
-        whenever(authenticationManager.authenticate(any())).thenReturn(
-            UsernamePasswordAuthenticationToken(principal, null, principal.authorities)
-        )
-        whenever(jwtTokenProvider.generateAccessToken(principal)).thenReturn("access-token")
-        whenever(jwtTokenProvider.generateRefreshToken(principal)).thenReturn("refresh-token")
-
-        controller().authenticateUser(SignInRequest("  User@Example.COM  ", "password"))
-
-        val captor = ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken::class.java)
-        verify(authenticationManager).authenticate(captor.capture())
-        assertEquals("user@example.com", captor.value.principal)
-    }
-
-    @Test
-    fun `refreshAccessToken looks up normalized email from token subject`() {
-        val user = UserDetails(
-            firstName = "User",
-            lastName = "Test",
-            email = "user@example.com",
-            password = "hashed",
+    fun `registerUser delegates to auth service`() {
+        val request = SignUpRequest(
+            firstName = "Jane",
+            lastName = "Doe",
             country = "USA",
-            age = 30
+            age = 28,
+            email = "jane@example.com",
+            password = "SecurePassword123!"
         )
-        whenever(jwtTokenProvider.validateRefreshToken("refresh-token")).thenReturn(true)
-        whenever(jwtTokenProvider.getUsernameFromJWT("refresh-token")).thenReturn("  User@Example.COM  ")
-        whenever(jwtTokenProvider.getTokenVersionFromJWT("refresh-token")).thenReturn(0)
-        whenever(userRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
-        whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("new-access-token")
+        val response = AuthResponse("access-token", "refresh-token")
+        whenever(authService.registerUser(request)).thenReturn(response)
 
-        val response = controller().refreshAccessToken(RefreshTokenRequest("refresh-token"))
+        val result = controller().registerUser(request)
 
-        verify(userRepository).findByEmailIgnoreCase("user@example.com")
-        assertEquals("new-access-token", response.body?.accessToken)
+        verify(authService).registerUser(request)
+        assertEquals(response, result.body)
     }
 
     @Test
-    fun `refreshAccessToken rejects token version mismatch`() {
-        val user = UserDetails(
-            firstName = "User",
-            lastName = "Test",
-            email = "user@example.com",
-            password = "hashed",
-            country = "USA",
-            age = 30,
-            tokenVersion = 2
-        )
-        whenever(jwtTokenProvider.validateRefreshToken("refresh-token")).thenReturn(true)
-        whenever(jwtTokenProvider.getUsernameFromJWT("refresh-token")).thenReturn("user@example.com")
-        whenever(jwtTokenProvider.getTokenVersionFromJWT("refresh-token")).thenReturn(1)
-        whenever(userRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
+    fun `refreshAccessToken delegates to auth service`() {
+        val request = RefreshTokenRequest("refresh-token")
+        val response = RefreshTokenResponse("new-access-token")
+        whenever(authService.refreshAccessToken(request)).thenReturn(response)
 
-        assertThrows<InvalidTokenException> {
-            controller().refreshAccessToken(RefreshTokenRequest("refresh-token"))
-        }
+        val result = controller().refreshAccessToken(request)
+
+        verify(authService).refreshAccessToken(request)
+        assertEquals(response, result.body)
     }
 }
