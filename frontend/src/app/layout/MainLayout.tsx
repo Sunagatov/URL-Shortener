@@ -65,7 +65,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       {isAuthenticated && !isAccountRoute && <AccountSidebar desktopVisible={false} />}
 
       {/* Header */}
-      <header className="bg-[#060612]/85 backdrop-blur-xl text-white py-4 fixed w-full z-50 border-b border-white/10">
+      <header className="bg-[#060612]/85 backdrop-blur-xl text-white py-4 fixed w-full z-[60] border-b border-white/10">
         <div className="container mx-auto flex justify-between items-center px-4">
           {/* Logo */}
           <Link

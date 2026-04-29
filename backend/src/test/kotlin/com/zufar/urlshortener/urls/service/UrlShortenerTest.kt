@@ -97,7 +97,7 @@ class UrlShortenerTest {
 
         val shortUrl = urlShortener.shortenUrl(ShortenUrlRequest("http://example.com", null), httpRequest)
 
-        assertTrue(shortUrl.startsWith("http://localhost:8080/url/"))
+        assertTrue(shortUrl.startsWith("http://localhost:8080/"))
         verify(urlRepository, times(2)).insert(any<UrlMapping>())
         verify(urlRepository, never()).findByUrlHash(any())
     }
@@ -131,7 +131,7 @@ class UrlShortenerTest {
 
         val shortUrl = urlShortener.shortenUrl(ShortenUrlRequest("http://example.com", null), httpRequest)
 
-        assertTrue(shortUrl.startsWith("http://localhost:8080/url/"))
-        assertTrue(!shortUrl.contains("//url/"))
+        assertTrue(shortUrl.startsWith("http://localhost:8080/"))
+        assertTrue(!shortUrl.removePrefix("http://localhost:8080").contains("//"))
     }
 }

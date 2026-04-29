@@ -43,7 +43,7 @@ class UrlShortener(
 
         repeat(MAX_CODE_GENERATION_ATTEMPTS) { attempt ->
             val urlHash = StringEncoder.generate()
-            val shortUrl = "$normalizedBaseUrl/url/$urlHash"
+            val shortUrl = "$normalizedBaseUrl/$urlHash"
             val urlMapping = urlMappingEntityCreator.create(normalizedRequest, httpServletRequest, urlHash, shortUrl)
 
             try {

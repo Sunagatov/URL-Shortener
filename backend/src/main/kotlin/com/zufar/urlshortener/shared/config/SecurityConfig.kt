@@ -63,7 +63,7 @@ class SecurityConfig(
                         "/api/v1/health",
                         "/api/v1/auth/**",
                         "/v1/auth/**",
-                        "/url/**",
+                        "/{urlHash:[1-9A-HJ-NP-Za-km-z]{8}}",
                         "/api/v1/swagger-ui/**",
                         "/api/v1/api-docs/**"
                     ).permitAll()

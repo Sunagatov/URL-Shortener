@@ -54,7 +54,7 @@ class PageableUrlMappingsProviderTest {
 
     private fun mapping(urlHash: String, expiration: LocalDateTime) = UrlMapping(
         urlHash = urlHash,
-        shortUrl = "http://localhost:8080/url/$urlHash",
+        shortUrl = "http://localhost:8080/$urlHash",
         originalUrl = "http://example.com/$urlHash",
         createdAt = LocalDateTime.now().minusDays(1),
         expirationDate = expiration,

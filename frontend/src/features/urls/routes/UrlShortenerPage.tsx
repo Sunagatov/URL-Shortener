@@ -219,17 +219,21 @@ const UrlShortenerPage: React.FC = () => {
             </section>
 
             {/* ── Features ──────────────────────────────────────── */}
-            <section className="py-28 bg-[#0d1324] bg-grid-soft relative overflow-hidden">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(96,165,250,0.08),transparent_36%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.08),transparent_34%)] pointer-events-none" />
+            <section className="py-28 bg-[#060612] bg-grid-dark relative overflow-hidden">
+                {/* Subtle top separator glow */}
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+                <div className="absolute top-0 left-1/3 w-[600px] h-[300px] bg-blue-600/8 rounded-full blur-[120px] pointer-events-none" />
+                <div className="absolute bottom-0 right-1/4 w-[400px] h-[200px] bg-indigo-600/6 rounded-full blur-[100px] pointer-events-none" />
+
                 <div className="max-w-6xl mx-auto px-6">
                     <div className="relative z-10 text-center mb-16">
-                        <span className="inline-block bg-blue-500/10 text-blue-300 text-sm font-semibold px-4 py-1.5 rounded-full mb-4 border border-blue-400/20">
+                        <span className="inline-block bg-blue-500/10 text-blue-300/80 text-sm font-semibold px-4 py-1.5 rounded-full mb-4 border border-blue-400/15">
                             Why Shorty URL
                         </span>
                         <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight leading-tight" style={{ fontFamily: 'var(--font-display)' }}>
                             Everything you need,<br className="hidden md:block" /> nothing you don't
                         </h2>
-                        <p className="text-lg text-white/50 max-w-xl mx-auto">
+                        <p className="text-lg text-white/40 max-w-xl mx-auto">
                             Powerful tools designed to make link management simple, fast, and insightful.
                         </p>
                     </div>
@@ -243,7 +247,7 @@ const UrlShortenerPage: React.FC = () => {
                                         <Icon className="w-5 h-5 text-white" />
                                     </div>
                                     <h3 className="text-base font-bold text-white mb-2">{feature.title}</h3>
-                                    <p className="text-sm text-white/50 leading-relaxed">{feature.description}</p>
+                                    <p className="text-sm text-white/45 leading-relaxed">{feature.description}</p>
                                 </div>
                             );
                         })}
@@ -252,25 +256,26 @@ const UrlShortenerPage: React.FC = () => {
             </section>
 
             {/* ── Stats ─────────────────────────────────────────── */}
-            <section className="py-28 bg-[#060612] bg-grid-dark relative overflow-hidden">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[300px] bg-blue-700/10 rounded-full blur-[120px] pointer-events-none" />
-                <div className="relative z-10 max-w-6xl mx-auto px-6">
-                    <div className="text-center mb-16">
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
-                            Trusted by millions
-                        </h2>
-                        <p className="text-white/45 text-lg max-w-lg mx-auto">
-                            Join a global community of developers, marketers, and creators
-                        </p>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+            <section className="py-20 bg-[#060612] relative overflow-hidden">
+                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent pointer-events-none" />
+                <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent pointer-events-none" />
+                <div className="relative z-10 max-w-4xl mx-auto px-6">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-8 sm:gap-0">
                         {stats.map((stat, i) => (
-                            <div key={i} className="text-center p-8 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
-                                <div className={`text-4xl md:text-5xl font-black bg-gradient-to-br ${stat.gradient} bg-clip-text text-transparent mb-2`}>
-                                    {stat.number}
+                            <React.Fragment key={i}>
+                                <div className="text-center">
+                                    <div
+                                        className={`text-4xl md:text-5xl font-bold bg-gradient-to-br ${stat.gradient} bg-clip-text text-transparent mb-1.5`}
+                                        style={{ fontFamily: 'var(--font-display)' }}
+                                    >
+                                        {stat.number}
+                                    </div>
+                                    <div className="text-white/30 text-sm tracking-wide">{stat.label}</div>
                                 </div>
-                                <div className="text-white/45 text-sm font-medium">{stat.label}</div>
-                            </div>
+                                {i < stats.length - 1 && (
+                                    <div className="hidden sm:block w-px h-12 bg-white/[0.08]" />
+                                )}
+                            </React.Fragment>
                         ))}
                     </div>
                 </div>
@@ -278,25 +283,29 @@ const UrlShortenerPage: React.FC = () => {
 
             {/* ── CTA (non-auth only) ───────────────────────────── */}
             {!isAuthenticated && (
-                <section className="relative py-24 overflow-hidden bg-gradient-to-br from-blue-700 via-indigo-700 to-purple-700">
-                    <div className="absolute inset-0 bg-grid-dark opacity-30 pointer-events-none" />
-                    <div className="absolute -top-48 -right-48 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
-                    <div className="absolute -bottom-48 -left-48 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
+                <section className="py-28 bg-[#060612] bg-grid-dark relative overflow-hidden">
+                    <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent pointer-events-none" />
+                    {/* Blue glow centre */}
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-blue-600/12 rounded-full blur-[130px] pointer-events-none" />
+
                     <div className="relative z-10 max-w-2xl mx-auto px-6 text-center">
+                        <span className="inline-block bg-blue-500/10 text-blue-300/80 text-sm font-semibold px-4 py-1.5 rounded-full mb-6 border border-blue-400/15">
+                            Get started free
+                        </span>
                         <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
                             Unlock more power
                         </h2>
-                        <p className="text-white/65 text-lg mb-10">
+                        <p className="text-white/45 text-lg mb-10 max-w-lg mx-auto">
                             Sign up free to track analytics, manage all your URLs, and access advanced features.
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
                             <Link to={routes.signUp}>
-                                <button className="inline-flex items-center gap-2 bg-white text-indigo-700 font-bold px-8 py-4 rounded-2xl hover:bg-blue-50 transition-all duration-200 hover:scale-105 shadow-xl text-base">
+                                <button className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold px-8 py-3.5 rounded-xl transition-all duration-200 hover:shadow-[0_0_24px_rgba(59,130,246,0.35)] text-base">
                                     Sign Up Free <FaArrowRight className="w-4 h-4" />
                                 </button>
                             </Link>
                             <Link to={routes.signIn}>
-                                <button className="inline-flex items-center gap-2 bg-white/10 border border-white/25 text-white font-semibold px-8 py-4 rounded-2xl hover:bg-white/20 transition-all duration-200 backdrop-blur-sm text-base">
+                                <button className="inline-flex items-center gap-2 bg-white/[0.06] border border-white/[0.12] hover:bg-white/[0.10] text-white/80 hover:text-white font-semibold px-8 py-3.5 rounded-xl transition-all duration-200 text-base">
                                     Sign In
                                 </button>
                             </Link>

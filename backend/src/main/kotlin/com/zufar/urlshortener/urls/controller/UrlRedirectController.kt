@@ -87,7 +87,7 @@ class UrlRedirectController(private val urlMappingProvider: UrlMappingProvider) 
             )
         ]
     )
-    @GetMapping("/url/{urlHash}")
+    @GetMapping("/{urlHash:[1-9A-HJ-NP-Za-km-z]{8}}")
     fun redirect(
         @Parameter(
             description = "The unique identifier (hash) of the shortened URL.",

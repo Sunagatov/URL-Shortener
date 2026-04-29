@@ -62,25 +62,26 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
 
     return (
         <>
-            {/* Mobile backdrop */}
+            {/* Mobile backdrop — sits below the header */}
             {isOpen && (
                 <div
-                    className="md:hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
+                    className="md:hidden fixed top-[72px] inset-x-0 bottom-0 bg-black/70 backdrop-blur-sm z-40"
                     onClick={() => setIsOpen(false)}
                 />
             )}
 
-            {/* Sidebar */}
+            {/* Sidebar — starts below the header on both mobile and desktop */}
             <div className={`
                 ${isOpen ? 'translate-x-0' : '-translate-x-full'}
                 ${desktopVisible ? 'md:translate-x-0' : 'md:hidden'}
-                fixed top-0 left-0 h-full w-64
+                fixed top-[72px] md:top-24 left-0
+                h-[calc(100vh-72px)] md:h-[calc(100vh-96px)] w-64
                 bg-[#0a0c1b] border-r border-white/[0.07]
-                z-50 transition-transform duration-300 ease-in-out
+                z-[55] transition-transform duration-300 ease-in-out
                 flex flex-col
             `}>
                 {/* User profile section */}
-                <div className="px-4 mt-[76px] pb-4">
+                <div className="px-4 pt-4 pb-3">
                     <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.07]">
                         <div className="w-9 h-9 rounded-xl bg-blue-600/25 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
                             <span className="text-sm font-bold text-blue-300" style={{ fontFamily: 'var(--font-display)' }}>
@@ -102,9 +103,6 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
 
                 {/* Nav */}
                 <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
-                    <p className="px-3 pb-2 pt-1 text-[10px] font-semibold text-white/25 uppercase tracking-widest">
-                        Navigation
-                    </p>
                     {menuItems.map((item) => {
                         const Icon = item.icon;
                         const active = isActive(item.path);

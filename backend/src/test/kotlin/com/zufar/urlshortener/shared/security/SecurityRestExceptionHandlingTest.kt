@@ -47,7 +47,7 @@ class SecurityRestExceptionHandlingTest {
 
     @Test
     fun `shorten url endpoint remains publicly accessible`() {
-        whenever(urlShortener.shortenUrl(any(), any())).thenReturn("http://localhost:8080/url/abc123")
+        whenever(urlShortener.shortenUrl(any(), any())).thenReturn("http://localhost:8080/abc12345")
 
         mockMvc.perform(
             post("/api/v1/urls")
@@ -55,7 +55,7 @@ class SecurityRestExceptionHandlingTest {
                 .content("""{"originalUrl":"https://example.com","daysCount":1}""")
         )
             .andExpect(status().isOk)
-            .andExpect(jsonPath("$.shortUrl").value("http://localhost:8080/url/abc123"))
+            .andExpect(jsonPath("$.shortUrl").value("http://localhost:8080/abc12345"))
     }
 
     @TestConfiguration
