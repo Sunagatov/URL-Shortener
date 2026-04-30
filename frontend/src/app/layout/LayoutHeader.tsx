@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FaBars, FaChevronDown, FaLink, FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
+import { FaChevronDown, FaLink, FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
 import { accountNavigationItems } from '@/app/layout/layoutNavigation';
 import { routes } from '@/app/routes';
 
@@ -10,14 +10,9 @@ interface LayoutHeaderProps {
   isUserMenuOpen: boolean;
   pathname: string;
   onLogout: () => void;
-  onOpenMobileAccountNav: () => void;
   onToggleUserMenu: () => void;
   onCloseUserMenu: () => void;
 }
-
-const mobileHeaderActionClassName =
-  'flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-white/10 ' +
-  'backdrop-blur-sm transition-all duration-200 hover:bg-white/15 md:hidden';
 
 export const LayoutHeader = ({
   isAuthenticated,
@@ -26,24 +21,13 @@ export const LayoutHeader = ({
   isUserMenuOpen,
   pathname,
   onLogout,
-  onOpenMobileAccountNav,
   onToggleUserMenu,
   onCloseUserMenu,
 }: LayoutHeaderProps) => {
   return (
     <header className="fixed z-[60] w-full border-b border-white/10 bg-[#060612]/85 py-4 text-white backdrop-blur-xl">
       <div className="container relative mx-auto flex items-center justify-between px-4">
-        <div className="flex w-10 items-center md:hidden">
-          {isAuthenticated && (
-            <button
-              onClick={onOpenMobileAccountNav}
-              className={mobileHeaderActionClassName}
-              aria-label="Open navigation"
-            >
-              <FaBars className="h-4 w-4 text-white" />
-            </button>
-          )}
-        </div>
+        <div className="w-10 md:hidden" />
 
         <Link
           to={routes.home}
@@ -62,18 +46,18 @@ export const LayoutHeader = ({
 
         <div className="flex items-center space-x-3">
           {isAuthenticated ? (
-            <div className="relative hidden md:block">
+            <div className="relative">
               <button
                 onClick={onToggleUserMenu}
-                className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2 transition-all duration-200 hover:border-white/30 hover:bg-white/15"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 bg-white/10 transition-all duration-200 hover:border-white/30 hover:bg-white/15 md:h-auto md:w-auto md:gap-2 md:px-4 md:py-2"
                 aria-label="Open account menu"
               >
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/15">
                   <FaUserCircle className="h-4 w-4" />
                 </div>
-                <span className="text-sm font-medium">Account</span>
+                <span className="hidden text-sm font-medium md:inline">Account</span>
                 <FaChevronDown
-                  className={`h-3 w-3 transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`}
+                  className={`hidden h-3 w-3 transition-transform duration-200 md:block ${isUserMenuOpen ? 'rotate-180' : ''}`}
                 />
               </button>
 

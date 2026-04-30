@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import AccountSidebar from '@/app/layout/AccountSidebar';
 import { LayoutFooter } from '@/app/layout/LayoutFooter';
 import { LayoutHeader } from '@/app/layout/LayoutHeader';
+import { MobileTabBar } from '@/app/layout/MobileTabBar';
 import { routes } from '@/app/routes';
 import { useAuth } from '@/shared/auth/useAuth';
 import { layoutEvents } from '@/shared/lib/layoutEvents';
@@ -28,11 +28,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     setIsUserMenuOpen(false);
   };
 
-  const handleOpenMobileAccountNav = () => {
-    setIsUserMenuOpen(false);
-    window.dispatchEvent(new CustomEvent(layoutEvents.toggleAccountDrawer));
-  };
-
   React.useEffect(() => {
     const handleCloseUserMenu = () => setIsUserMenuOpen(false);
     window.addEventListener(layoutEvents.closeUserMenu, handleCloseUserMenu);
@@ -41,8 +36,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   return (
     <div className="flex min-h-screen flex-col">
-      {isAuthenticated && !isAccountRoute && <AccountSidebar desktopVisible={false} />}
-
       <LayoutHeader
         isAuthenticated={isAuthenticated}
         isSignInRoute={isSignInRoute}
@@ -50,19 +43,19 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         isUserMenuOpen={isUserMenuOpen}
         pathname={pathname}
         onLogout={handleLogout}
-        onOpenMobileAccountNav={handleOpenMobileAccountNav}
         onToggleUserMenu={() => setIsUserMenuOpen((current) => !current)}
         onCloseUserMenu={() => setIsUserMenuOpen(false)}
       />
 
       <main
-        className={`flex-grow bg-[#060612] pt-[72px] md:pt-24 ${
+        className={`flex-grow bg-[#060612] pt-[72px] md:pt-24 ${isAuthenticated ? 'pb-24 md:pb-0' : ''} ${
           isAccountRoute || isAuthRoute ? '' : 'flex items-center justify-center'
         }`}
       >
         {children}
       </main>
 
+      {isAuthenticated && <MobileTabBar />}
       {!isAccountRoute && <LayoutFooter isAuthenticated={isAuthenticated} />}
     </div>
   );

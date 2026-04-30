@@ -1,17 +1,16 @@
 import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { MainLayout } from '@/app/layout/MainLayout';
+import { useAuth } from '@/shared/auth/useAuth';
 import SignInPage from '@/features/auth/routes/SignInPage';
 import SignUpPage from '@/features/auth/routes/SignUpPage';
 
 vi.mock('@/shared/auth/useAuth', () => ({
-  useAuth: () => ({
-    isAuthenticated: false,
-    login: vi.fn(),
-    logout: vi.fn(),
-    user: null,
-    loading: false,
-  }),
+  useAuth: vi.fn(),
+}));
+
+vi.mock('@/app/layout/AccountSidebar', () => ({
+  default: () => <aside>Side Panel</aside>,
 }));
 
 vi.mock('@/shared/api/useApi', () => ({
@@ -27,7 +26,20 @@ vi.mock('@/features/auth/api/authApi', () => ({
   signUp: vi.fn(),
 }));
 
+const mockUseAuth = vi.mocked(useAuth);
+
 describe('placeholder flows', () => {
+  beforeEach(() => {
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: false,
+      login: vi.fn(),
+      logout: vi.fn(),
+      updateUser: vi.fn(),
+      user: null,
+      loading: false,
+    });
+  });
+
   it('shows a sign up header CTA on the sign in route', () => {
     render(
       <MemoryRouter initialEntries={['/signin']}>
@@ -56,15 +68,17 @@ describe('placeholder flows', () => {
     expect(within(header).queryByRole('link', { name: 'Sign Up' })).not.toBeInTheDocument();
   });
 
-  it('disables forgot password instead of linking to a placeholder route', () => {
+  it('links forgot password to the recovery flow', () => {
     render(
       <MemoryRouter>
         <SignInPage />
       </MemoryRouter>
     );
 
-    expect(screen.getByRole('button', { name: /forgot password/i })).toBeDisabled();
-    expect(screen.queryByRole('link', { name: /forgot password/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /forgot password/i })).toHaveAttribute(
+      'href',
+      '/forgot-password'
+    );
   });
 
   it('renders terms and privacy as non-clickable coming-soon text', () => {
@@ -95,5 +109,32 @@ describe('placeholder flows', () => {
     expect(screen.queryByRole('link', { name: /privacy policy/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /terms of service/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /support/i })).not.toBeInTheDocument();
+  });
+
+  it('renders a mobile bottom tab bar for authenticated users', () => {
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      login: vi.fn(),
+      logout: vi.fn(),
+      updateUser: vi.fn(),
+      user: { email: 'test@example.com' },
+      loading: false,
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/account/dashboard']}>
+        <MainLayout>
+          <div>Page content</div>
+        </MainLayout>
+      </MemoryRouter>
+    );
+
+    expect(screen.getByRole('navigation', { name: 'Mobile navigation' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: 'My URLs' })).toHaveAttribute(
+      'href',
+      '/account/url-mappings'
+    );
+    expect(screen.getByRole('link', { name: 'Account' })).toHaveAttribute('href', '/account');
   });
 });

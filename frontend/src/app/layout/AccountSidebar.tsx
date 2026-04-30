@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { accountNavigationItems } from '@/app/layout/layoutNavigation';
 import { routes } from '@/app/routes';
 import { useAuth } from '@/shared/auth/useAuth';
-import { layoutEvents } from '@/shared/lib/layoutEvents';
 import {
     FaSignOutAlt,
     FaHome,
@@ -14,26 +13,9 @@ interface SidePanelProps {
 }
 
 const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => {
-    const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const { user, logout } = useAuth();
-
-    React.useEffect(() => {
-        const handleToggleDrawer = () => setIsOpen((prev) => !prev);
-        const handleCloseDrawer  = () => setIsOpen(false);
-        window.addEventListener(layoutEvents.toggleAccountDrawer, handleToggleDrawer);
-        window.addEventListener(layoutEvents.closeAccountDrawer, handleCloseDrawer);
-        return () => {
-            window.removeEventListener(layoutEvents.toggleAccountDrawer, handleToggleDrawer);
-            window.removeEventListener(layoutEvents.closeAccountDrawer, handleCloseDrawer);
-        };
-    }, []);
-
-    React.useEffect(() => {
-        setIsOpen(false);
-        window.dispatchEvent(new CustomEvent(layoutEvents.closeUserMenu));
-    }, [location.pathname]);
 
     const handleLogout = () => {
         logout();
@@ -51,25 +33,14 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
         : 'U';
 
     return (
-        <>
-            {/* Mobile backdrop — sits below the header */}
-            {isOpen && (
-                <div
-                    className="md:hidden fixed top-[72px] inset-x-0 bottom-0 bg-black/70 backdrop-blur-sm z-40"
-                    onClick={() => setIsOpen(false)}
-                />
-            )}
-
-            {/* Sidebar — starts below the header on both mobile and desktop */}
-            <div className={`
-                ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-                ${desktopVisible ? 'md:translate-x-0' : 'md:hidden'}
-                fixed top-[72px] md:top-24 left-0
-                h-[calc(100vh-72px)] md:h-[calc(100vh-96px)] w-64
-                bg-[#0a0c1b] border-r border-white/[0.07]
-                z-[55] transition-transform duration-300 ease-in-out
-                flex flex-col
-            `}>
+        <div
+            className={`
+                hidden
+                ${desktopVisible ? 'md:flex' : 'md:hidden'}
+                fixed left-0 top-24 h-[calc(100vh-96px)] w-64
+                flex-col border-r border-white/[0.07] bg-[#0a0c1b] z-[55]
+            `}
+        >
                 {/* User profile section */}
                 <div className="px-4 pt-4 pb-3">
                     <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.07]">
@@ -100,7 +71,6 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
                             <Link
                                 key={item.path}
                                 to={item.path}
-                                onClick={() => setIsOpen(false)}
                                 className={`
                                     group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
                                     ${active ? 'sidebar-item-active' : 'text-white/45 hover:text-white hover:bg-white/[0.06]'}
@@ -120,7 +90,6 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
                     <div className="border-t border-white/[0.06] pt-3 space-y-0.5">
                         <Link
                             to={routes.home}
-                            onClick={() => setIsOpen(false)}
                             className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/30 hover:text-white/70 hover:bg-white/[0.06] transition-all duration-200"
                         >
                             <FaHome className="w-4 h-4" />
@@ -138,7 +107,6 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
                     </div>
                 </div>
             </div>
-        </>
     );
 };
 
