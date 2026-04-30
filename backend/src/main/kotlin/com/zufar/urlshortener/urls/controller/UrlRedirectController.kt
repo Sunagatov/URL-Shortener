@@ -2,6 +2,7 @@ package com.zufar.urlshortener.urls.controller
 
 import com.zufar.urlshortener.shared.exception.ErrorResponse
 import com.zufar.urlshortener.urls.UrlHashFormat
+import com.zufar.urlshortener.urls.service.command.TrackUrlClickService
 import com.zufar.urlshortener.urls.service.query.UrlQueryService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -35,7 +36,10 @@ private const val REFERRER_POLICY_VALUE = "no-referrer"
     name = "URL Redirection",
     description = "Operations related to redirecting shortened URLs to their original destinations."
 )
-class UrlRedirectController(private val urlQueryService: UrlQueryService) {
+class UrlRedirectController(
+    private val urlQueryService: UrlQueryService,
+    private val trackUrlClickService: TrackUrlClickService
+) {
 
     private val log = LoggerFactory.getLogger(UrlRedirectController::class.java)
 
@@ -109,6 +113,7 @@ class UrlRedirectController(private val urlQueryService: UrlQueryService) {
     ): ResponseEntity<Unit> {
         log.info("Redirect request for urlHash='{}' from IP='{}'", urlHash, httpServletRequest.remoteAddr)
         val urlMapping = urlQueryService.getPublicByHash(urlHash)
+        trackUrlClickService.increment(urlHash)
         log.info("Redirecting to originalUrl='{}'", urlMapping.originalUrl)
         return ResponseEntity.status(HttpStatus.FOUND)
             .cacheControl(buildCacheControl(urlMapping.expirationDate))

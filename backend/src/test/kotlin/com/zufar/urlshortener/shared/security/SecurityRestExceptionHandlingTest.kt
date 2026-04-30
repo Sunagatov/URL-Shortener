@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.shared.security
 
 import com.zufar.urlshortener.urls.dto.UrlMappingDto
+import com.zufar.urlshortener.urls.service.command.TrackUrlClickService
 import com.zufar.urlshortener.urls.service.command.ShortenUrlService
 import com.zufar.urlshortener.urls.service.query.UrlQueryService
 import org.junit.jupiter.api.Test
@@ -35,6 +36,9 @@ class SecurityRestExceptionHandlingTest {
 
     @Autowired
     private lateinit var urlQueryService: UrlQueryService
+
+    @Autowired
+    private lateinit var trackUrlClickService: TrackUrlClickService
 
     @Test
     fun `users endpoint without auth returns 401 JSON`() {
@@ -72,6 +76,7 @@ class SecurityRestExceptionHandlingTest {
                 urlHash = "abc12345",
                 shortUrl = "http://localhost:8080/abc12345",
                 originalUrl = "https://example.com/original",
+                clickCount = 0,
                 createdAt = LocalDateTime.now(),
                 expirationDate = LocalDateTime.now().plusHours(1)
             )
@@ -82,6 +87,8 @@ class SecurityRestExceptionHandlingTest {
             .andExpect(header().string("Location", "https://example.com/original"))
             .andExpect(header().string("Referrer-Policy", "no-referrer"))
             .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("public")))
+
+        org.mockito.kotlin.verify(trackUrlClickService).increment("abc12345")
     }
 
     @Test
@@ -100,5 +107,9 @@ class SecurityRestExceptionHandlingTest {
         @Bean
         @Primary
         fun urlQueryService(): UrlQueryService = mock()
+
+        @Bean
+        @Primary
+        fun trackUrlClickService(): TrackUrlClickService = mock()
     }
 }

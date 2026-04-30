@@ -24,6 +24,7 @@ describe('UrlMappingDetails', () => {
       urlHash: 'abc123',
       shortUrl: 'https://sho.rt/abc123',
       originalUrl: 'https://example.com/a-long-url',
+      clickCount: 0,
       createdAt: '2024-01-01T00:00:00.000Z',
       expirationDate: '2024-02-01T00:00:00.000Z',
     });

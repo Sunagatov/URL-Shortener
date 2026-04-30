@@ -12,6 +12,7 @@ export interface UrlMapping {
   urlHash: string;
   shortUrl: string;
   originalUrl: string;
+  clickCount: number;
   createdAt: string;
   expirationDate: string;
 }

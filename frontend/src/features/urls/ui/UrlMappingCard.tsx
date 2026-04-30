@@ -1,5 +1,5 @@
 import type { MouseEvent } from 'react';
-import { FaChevronRight, FaCopy, FaExternalLinkAlt, FaLink, FaTrash } from 'react-icons/fa';
+import { FaCheck, FaChevronRight, FaCopy, FaExternalLinkAlt, FaLink, FaTrash } from 'react-icons/fa';
 import { getDomainLabel, getShortUrlSlug } from '@/features/urls/lib/urlMappings';
 import type { UrlMapping } from '@/shared/types';
 import { Button } from '@/shared/ui';
@@ -27,6 +27,7 @@ export const UrlMappingCard = ({
 }: UrlMappingCardProps) => {
   const domain = getDomainLabel(mapping.originalUrl);
   const shortSlug = getShortUrlSlug(mapping.shortUrl);
+  const clickCountLabel = `${mapping.clickCount} ${mapping.clickCount === 1 ? 'click' : 'clicks'}`;
 
   const stopPropagation = (event: MouseEvent) => {
     event.stopPropagation();
@@ -49,7 +50,23 @@ export const UrlMappingCard = ({
           </div>
           <p className="mt-0.5 text-xs text-white/25">{formatDate(mapping.createdAt)}</p>
         </div>
-        <FaChevronRight className="h-3 w-3 flex-shrink-0 text-white/15 transition-colors group-hover:text-white/40" />
+        <div className="flex items-center gap-1.5">
+          <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45">
+            {clickCountLabel}
+          </span>
+          <a
+            href={mapping.shortUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={stopPropagation}
+            className="rounded-lg p-2 text-white/30 transition-all hover:bg-blue-500/10 hover:text-blue-300"
+            title="Open short URL"
+            aria-label={`Open short URL ${mapping.shortUrl}`}
+          >
+            <FaExternalLinkAlt className="h-3 w-3" />
+          </a>
+          <FaChevronRight className="h-3 w-3 flex-shrink-0 text-white/15 transition-colors group-hover:text-white/40" />
+        </div>
       </div>
 
       <div className="space-y-3 px-5 py-4">
@@ -74,7 +91,7 @@ export const UrlMappingCard = ({
                 title="Copy"
               >
                 {copiedUrl === mapping.shortUrl ? (
-                  <FaChevronRight className="h-3 w-3 text-blue-400" />
+                  <FaCheck className="h-3 w-3 text-blue-400" />
                 ) : (
                   <FaCopy className="h-3 w-3" />
                 )}

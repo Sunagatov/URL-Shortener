@@ -21,6 +21,7 @@ const mapping = {
   urlHash: 'abc123',
   shortUrl: 'https://sho.rt/abc123',
   originalUrl: 'https://example.com/a-long-url',
+  clickCount: 0,
   createdAt: '2024-01-01T00:00:00.000Z',
   expirationDate: '2024-02-01T00:00:00.000Z',
 };
@@ -58,6 +59,28 @@ describe('UserUrlMappings', () => {
     );
 
     expect(await screen.findByText(/Feb 1, 2024/i)).toBeInTheDocument();
+  });
+
+  it('shows click counts and an inline open-short-url action in the card header', async () => {
+    mockGetUserUrls.mockResolvedValue({
+      content: [{ ...mapping, clickCount: 12 }],
+      page: 0,
+      size: 6,
+      totalElements: 1,
+      totalPages: 1,
+    });
+
+    render(
+      <MemoryRouter>
+        <UserUrlMappingsPage />
+      </MemoryRouter>
+    );
+
+    expect(await screen.findByText('12 clicks')).toBeInTheDocument();
+    expect(screen.getByLabelText('Open short URL https://sho.rt/abc123')).toHaveAttribute(
+      'href',
+      'https://sho.rt/abc123'
+    );
   });
 
   it('refetches the previous page after deleting the only item on a non-first page', async () => {

@@ -23,6 +23,7 @@ class UrlDeleterTest {
             urlHash = "abc12345",
             shortUrl = "http://localhost:8080/abc12345",
             originalUrl = "https://example.com",
+            clickCount = 0,
             createdAt = LocalDateTime.parse("2023-12-31T10:15:30"),
             expirationDate = LocalDateTime.parse("2024-01-02T10:15:30"),
             requestIp = "127.0.0.1",

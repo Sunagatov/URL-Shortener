@@ -16,6 +16,9 @@ data class UrlMappingDto(
     @Schema(description = "Original URL", example = "http://example.com")
     val originalUrl: String,
 
+    @Schema(description = "Number of successful redirects for this shortened URL", example = "42")
+    val clickCount: Long,
+
     @Schema(description = "Creation timestamp", example = "2023-10-15T12:34:56")
     val createdAt: LocalDateTime,
 
@@ -27,6 +30,7 @@ data class UrlMappingDto(
             urlHash = entity.urlHash,
             shortUrl = entity.shortUrl,
             originalUrl = entity.originalUrl,
+            clickCount = entity.clickCount,
             createdAt = entity.createdAt,
             expirationDate = entity.expirationDate
         )

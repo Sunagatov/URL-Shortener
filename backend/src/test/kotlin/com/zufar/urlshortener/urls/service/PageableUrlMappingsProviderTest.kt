@@ -43,6 +43,7 @@ class PageableUrlMappingsProviderTest {
         urlHash = urlHash,
         shortUrl = "http://localhost:8080/$urlHash",
         originalUrl = "http://example.com/$urlHash",
+        clickCount = 0,
         createdAt = LocalDateTime.now().minusDays(1),
         expirationDate = expiration,
         requestIp = "127.0.0.1",

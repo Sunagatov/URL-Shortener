@@ -32,6 +32,7 @@ class UrlMappingEntityCreator(
             urlHash = urlHash,
             shortUrl = shortUrl,
             originalUrl = normalizedOriginalUrl,
+            clickCount = 0,
             createdAt = now,
             expirationDate = now.plusDays(shortenUrlRequest.daysCount ?: DEFAULT_EXPIRATION_URL_DAYS),
             requestIp = httpServletRequest.remoteAddr,

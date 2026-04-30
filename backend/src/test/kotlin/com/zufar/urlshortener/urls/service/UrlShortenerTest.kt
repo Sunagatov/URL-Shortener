@@ -34,6 +34,7 @@ class UrlShortenerTest {
         urlHash = urlHash,
         shortUrl = shortUrl,
         originalUrl = original,
+        clickCount = 0,
         createdAt = LocalDateTime.now(),
         expirationDate = LocalDateTime.now().plusDays(365),
         requestIp = "127.0.0.1",
