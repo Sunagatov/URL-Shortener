@@ -22,6 +22,6 @@ class CustomUserDetailsService(
             .password(user.password)
             .authorities(emptyList())
             .build()
-            .withTokenVersion(user.tokenVersion, user.id)
+            .withTokenVersion(user.tokenVersion, user.id, user.emailVerified)
     }
 }

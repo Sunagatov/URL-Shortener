@@ -47,6 +47,7 @@ dependencies {
 
     // Security
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-mail")
 
     // JWT
     implementation("io.jsonwebtoken:jjwt-api:$jjwtApiVersion")

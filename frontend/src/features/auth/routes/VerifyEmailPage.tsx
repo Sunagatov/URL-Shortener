@@ -19,7 +19,13 @@ import { Button } from '@/shared/ui';
 
 const CODE_LENGTH = 6;
 
-type LocationState = { email?: string; destination?: string } | null;
+type LocationState = {
+  email?: string;
+  destination?: string;
+  expiresInSeconds?: number;
+  resendAvailableInSeconds?: number;
+  deliveryMode?: 'email' | 'log';
+} | null;
 
 const VerifyEmailPage: React.FC = () => {
   usePageTitle('Verify Email');
@@ -30,8 +36,10 @@ const VerifyEmailPage: React.FC = () => {
   const destination = locationState?.destination ?? routes.dashboard;
   const {
     countdown,
+    deliveryMode,
     digits,
     error,
+    expiresInSeconds,
     handleChange,
     handleKeyDown,
     handlePaste,
@@ -40,7 +48,14 @@ const VerifyEmailPage: React.FC = () => {
     isResending,
     resendCode,
     verifyCode,
-  } = useVerificationCodeFlow({ completeAuth, destination, email });
+  } = useVerificationCodeFlow({
+    completeAuth,
+    destination,
+    email,
+    initialExpiresInSeconds: locationState?.expiresInSeconds,
+    initialResendAvailableInSeconds: locationState?.resendAvailableInSeconds,
+    initialDeliveryMode: locationState?.deliveryMode,
+  });
 
   if (!email) {
     return (
@@ -77,6 +92,15 @@ const VerifyEmailPage: React.FC = () => {
       brandPanel={verifyEmailBrandPanel}
     >
       <div className="space-y-6">
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-[color:var(--text-secondary)]">
+          <p>Code expires in {Math.max(1, Math.ceil(expiresInSeconds / 60))} minute(s).</p>
+          {deliveryMode === 'log' ? (
+            <p className="mt-1 text-amber-200/80">
+              Local development mode is active. The latest verification code is written to the backend logs.
+            </p>
+          ) : null}
+        </div>
+
         <div>
           <p className="mb-4 text-center text-[10px] font-semibold uppercase tracking-widest text-white/30">
             Verification Code

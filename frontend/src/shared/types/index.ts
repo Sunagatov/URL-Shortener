@@ -30,6 +30,13 @@ export interface AuthTokens {
   refreshToken: string;
 }
 
+export interface VerificationChallengeResponse {
+  email: string;
+  expiresInSeconds: number;
+  resendAvailableInSeconds: number;
+  deliveryMode: 'email' | 'log';
+}
+
 export interface RefreshTokenResponse {
   accessToken: string;
   refreshToken?: string;

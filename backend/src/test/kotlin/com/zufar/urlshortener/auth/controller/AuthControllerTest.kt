@@ -3,8 +3,11 @@ package com.zufar.urlshortener.auth.controller
 import com.zufar.urlshortener.auth.dto.AuthResponse
 import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
 import com.zufar.urlshortener.auth.dto.RefreshTokenResponse
+import com.zufar.urlshortener.auth.dto.ResendVerificationRequest
 import com.zufar.urlshortener.auth.dto.SignInRequest
 import com.zufar.urlshortener.auth.dto.SignUpRequest
+import com.zufar.urlshortener.auth.dto.VerificationChallengeResponse
+import com.zufar.urlshortener.auth.dto.VerifyEmailRequest
 import com.zufar.urlshortener.auth.service.AuthService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -43,7 +46,12 @@ class AuthControllerTest {
             email = "jane@example.com",
             password = "SecurePassword123!"
         )
-        val response = AuthResponse("access-token", "refresh-token")
+        val response = VerificationChallengeResponse(
+            email = "jane@example.com",
+            expiresInSeconds = 600,
+            resendAvailableInSeconds = 60,
+            deliveryMode = "log"
+        )
         whenever(authService.signUp(request)).thenReturn(response)
 
         val result = controller.registerUser(request)
@@ -62,6 +70,37 @@ class AuthControllerTest {
         val result = controller.refreshAccessToken(request)
 
         verify(authService).refreshAccessToken(request)
+        assertEquals(response, result.body)
+    }
+
+    @Test
+    fun `verifyEmail delegates to auth service`() {
+        val controller = AuthController(authService)
+        val request = VerifyEmailRequest("user@example.com", "123456")
+        val response = AuthResponse("access-token", "refresh-token")
+        whenever(authService.verifyEmail(request)).thenReturn(response)
+
+        val result = controller.verifyEmail(request)
+
+        verify(authService).verifyEmail(request)
+        assertEquals(response, result.body)
+    }
+
+    @Test
+    fun `resendVerificationCode delegates to auth service`() {
+        val controller = AuthController(authService)
+        val request = ResendVerificationRequest("user@example.com")
+        val response = VerificationChallengeResponse(
+            email = "user@example.com",
+            expiresInSeconds = 600,
+            resendAvailableInSeconds = 60,
+            deliveryMode = "email"
+        )
+        whenever(authService.resendVerificationCode(request)).thenReturn(response)
+
+        val result = controller.resendVerificationCode(request)
+
+        verify(authService).resendVerificationCode(request)
         assertEquals(response, result.body)
     }
 }

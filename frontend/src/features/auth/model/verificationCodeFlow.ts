@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { resendVerificationCode, verifyEmail } from '@/features/auth/api/emailVerificationApi';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';
-import type { AuthTokens } from '@/shared/types';
+import type { AuthTokens, VerificationChallengeResponse } from '@/shared/types';
 
 const VERIFICATION_CODE_LENGTH = 6;
 
@@ -9,16 +9,26 @@ export function useVerificationCodeFlow({
   completeAuth,
   destination,
   email,
+  initialExpiresInSeconds,
+  initialResendAvailableInSeconds,
+  initialDeliveryMode,
 }: {
   completeAuth: (tokens: AuthTokens, destination: string) => Promise<void>;
   destination: string;
   email: string;
+  initialExpiresInSeconds?: number;
+  initialResendAvailableInSeconds?: number;
+  initialDeliveryMode?: VerificationChallengeResponse['deliveryMode'];
 }) {
   const [digits, setDigits] = useState<string[]>(Array(VERIFICATION_CODE_LENGTH).fill(''));
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [error, setError] = useState('');
-  const [countdown, setCountdown] = useState(0);
+  const [countdown, setCountdown] = useState(initialResendAvailableInSeconds ?? 0);
+  const [expiresInSeconds, setExpiresInSeconds] = useState(initialExpiresInSeconds ?? 600);
+  const [deliveryMode, setDeliveryMode] = useState<VerificationChallengeResponse['deliveryMode']>(
+    initialDeliveryMode ?? 'email'
+  );
   const inputRefs = useRef<Array<HTMLInputElement | null>>(Array(VERIFICATION_CODE_LENGTH).fill(null));
 
   useEffect(() => {
@@ -33,6 +43,15 @@ export function useVerificationCodeFlow({
   useEffect(() => {
     inputRefs.current[0]?.focus();
   }, []);
+
+  useEffect(() => {
+    if (expiresInSeconds <= 0) {
+      return;
+    }
+
+    const timer = setTimeout(() => setExpiresInSeconds((value) => value - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [expiresInSeconds]);
 
   const focusFirstInput = () => {
     setTimeout(() => inputRefs.current[0]?.focus(), 0);
@@ -144,8 +163,10 @@ export function useVerificationCodeFlow({
     setError('');
 
     try {
-      await resendVerificationCode(email);
-      setCountdown(60);
+      const response = await resendVerificationCode(email);
+      setCountdown(response.resendAvailableInSeconds);
+      setExpiresInSeconds(response.expiresInSeconds);
+      setDeliveryMode(response.deliveryMode);
       setDigits(Array(VERIFICATION_CODE_LENGTH).fill(''));
       focusFirstInput();
     } catch (err: unknown) {
@@ -157,8 +178,10 @@ export function useVerificationCodeFlow({
 
   return {
     countdown,
+    deliveryMode,
     digits,
     error,
+    expiresInSeconds,
     handleChange,
     handleKeyDown,
     handlePaste,

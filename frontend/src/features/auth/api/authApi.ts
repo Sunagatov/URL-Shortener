@@ -5,6 +5,7 @@ import type {
   RefreshTokenResponse,
   SignInRequest,
   SignUpRequest,
+  VerificationChallengeResponse,
 } from '@/shared/types';
 
 export async function signIn(data: SignInRequest): Promise<AuthTokens> {
@@ -12,7 +13,7 @@ export async function signIn(data: SignInRequest): Promise<AuthTokens> {
   return response.data;
 }
 
-export async function signUp(data: SignUpRequest): Promise<AuthTokens> {
+export async function signUp(data: SignUpRequest): Promise<VerificationChallengeResponse> {
   const response = await httpClient.post(endpoints.auth.signUp, data);
   return response.data;
 }

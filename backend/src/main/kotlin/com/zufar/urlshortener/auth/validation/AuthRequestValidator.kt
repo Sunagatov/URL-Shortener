@@ -12,8 +12,10 @@ import com.zufar.urlshortener.auth.dto.LAST_NAME_CONTAINS_INVALID_CHARACTERS
 import com.zufar.urlshortener.auth.dto.LAST_NAME_IS_TOO_LONG
 import com.zufar.urlshortener.auth.dto.LAST_NAME_MUST_NOT_BE_EMPTY
 import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
+import com.zufar.urlshortener.auth.dto.ResendVerificationRequest
 import com.zufar.urlshortener.auth.dto.SignInRequest
 import com.zufar.urlshortener.auth.dto.SignUpRequest
+import com.zufar.urlshortener.auth.dto.VerifyEmailRequest
 import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
 import org.slf4j.LoggerFactory
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service
 private const val MAX_NAME_LENGTH = 50
 private const val MIN_JWT_TOKEN_LENGTH = 20
 private const val MAX_JWT_TOKEN_LENGTH = 500
+private const val VERIFICATION_CODE_LENGTH = 6
 private const val MIN_AGE = 13
 private const val MAX_AGE = 120
 private val SIMPLE_NAME_REGEX = Regex("^[a-zA-Z'-]+$")
@@ -72,6 +75,20 @@ class AuthRequestValidator(
         log.debug("user.password_change.validating")
         validate(changePasswordRequest.currentPassword.isBlank(), PASSWORD_MUST_NOT_BE_EMPTY)
         passwordOfUserValidator.validate(changePasswordRequest.newPassword)
+    }
+
+    fun validateVerifyEmailRequest(verifyEmailRequest: VerifyEmailRequest) {
+        log.debug("auth.email_verification.validating: email={}", verifyEmailRequest.email)
+        emailOfUserValidator.validate(verifyEmailRequest.email)
+        validate(
+            !verifyEmailRequest.code.matches(Regex("^\\d{$VERIFICATION_CODE_LENGTH}$")),
+            "Verification code must contain exactly 6 digits"
+        )
+    }
+
+    fun validateResendVerificationRequest(resendVerificationRequest: ResendVerificationRequest) {
+        log.debug("auth.email_verification.resend_validating: email={}", resendVerificationRequest.email)
+        emailOfUserValidator.validate(resendVerificationRequest.email)
     }
 
     private fun validateName(name: String, emptyMsg: String, tooLongMsg: String, invalidCharsMsg: String) {

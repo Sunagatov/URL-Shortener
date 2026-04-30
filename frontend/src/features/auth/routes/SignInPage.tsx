@@ -1,7 +1,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { signIn } from '@/features/auth/api/authApi';
 import { useApi } from '@/shared/api/useApi';
 import { signInSchema, type SignInFormData } from '@/features/auth/model/authValidation';
@@ -20,6 +20,7 @@ import { AuthTextField } from '@/features/auth/ui/AuthTextField';
 const SignInPage: React.FC = () => {
   usePageTitle('Sign In');
   const location = useLocation();
+  const navigate = useNavigate();
   const completeAuth = useCompleteAuth();
   const { execute, loading, error } = useApi<AuthTokens>();
   const destination = getAuthDestination(location.state);
@@ -32,7 +33,21 @@ const SignInPage: React.FC = () => {
   });
 
   const onSubmit = async (data: SignInFormData) => {
-    const result = await execute(() => signIn(data), { action: 'auth.sign_in' });
+    const result = await execute(() => signIn(data), {
+      action: 'auth.sign_in',
+      onError: (apiError) => {
+        if (apiError.code !== 'EMAIL_NOT_VERIFIED') {
+          return;
+        }
+
+        navigate(routes.verifyEmail, {
+          state: {
+            email: data.email.trim(),
+            destination,
+          },
+        });
+      },
+    });
 
     if (result) {
       await completeAuth(result, destination);

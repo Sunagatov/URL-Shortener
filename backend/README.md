@@ -111,7 +111,7 @@ URL Shortener Backend is a REST API that generates short URLs from long ones, ha
 
 | Feature | Description | Spec |
 |---|---|---|
-| 🔐 **Sign Up** | User registration with email/password, JWT tokens | [docs/features/auth-signup.md](docs/features/auth-signup.md) |
+| 🔐 **Sign Up** | User registration with email/password and 6-digit email verification | [docs/features/auth-signup.md](docs/features/auth-signup.md) |
 | 🔑 **Sign In** | Authentication with credentials, token generation | [docs/features/auth-signin.md](docs/features/auth-signin.md) |
 | 🔄 **Token Refresh** | Refresh access tokens without re-authentication | [docs/features/auth-refresh-token.md](docs/features/auth-refresh-token.md) |
 | 🔗 **Shorten URL** | Generate short URLs with optional expiration | [docs/features/url-shorten.md](docs/features/url-shorten.md) |
@@ -146,6 +146,9 @@ src/main/kotlin/com/zufar/urlshortener/
 | `MONGODB_DATABASE_NAME` | ❌ | Optional. Defaults to `urlshortener`. Legacy `MONGODB_DATABASE` is also supported. |
 | `SERVER_BASE_URL` | ❌ | Defaults to `http://localhost:8080` |
 | `SERVER_PORT` | ❌ | Defaults to `8080` |
+| `APP_AUTH_EMAIL_VERIFICATION_EXPIRATION_MINUTES` | ❌ | Defaults to `10` |
+| `APP_AUTH_EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS` | ❌ | Defaults to `60` |
+| `APP_AUTH_EMAIL_VERIFICATION_MAIL_FROM` | ❌ | Defaults to `noreply@shorty.local` |
 | `APP_URLS_EXPIRATION_DEFAULT_DAYS` | ❌ | Defaults to `365` |
 | `APP_URLS_EXPIRATION_MAX_DAYS` | ❌ | Defaults to `365` |
 | `APP_URLS_SHORT_CODE_MAX_GENERATION_ATTEMPTS` | ❌ | Defaults to `10` |
@@ -194,6 +197,8 @@ Rate limiting is policy-based rather than global:
 - `authenticated_api`: authenticated API traffic, keyed by `userId` when available, otherwise by client IP
 
 429 responses include `Retry-After`, `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, and structured JSON metadata including `code`, `requestId`, and `retryAfterSeconds`.
+
+Email verification uses a 6-digit code with a default 10-minute lifetime. If no SMTP sender is configured, the backend falls back to local development mode and writes the current code to the backend logs so the `/verify-email` flow still works locally.
 
 For structured JSON logs in production, enable the `json-logs` Spring profile. Example:
 

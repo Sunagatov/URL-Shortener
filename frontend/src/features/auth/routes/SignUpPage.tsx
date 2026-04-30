@@ -10,7 +10,7 @@ import {
   type SignUpFormInput,
 } from '@/features/auth/model/authValidation';
 import { routes } from '@/app/routes';
-import type { AuthTokens } from '@/shared/types';
+import type { VerificationChallengeResponse } from '@/shared/types';
 import { Button } from '@/shared/ui';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { FaCalendarAlt, FaEnvelope, FaGlobe, FaLock, FaUser } from 'react-icons/fa';
@@ -24,7 +24,7 @@ const SignUpPage: React.FC = () => {
   usePageTitle('Sign Up');
   const location = useLocation();
   const navigate = useNavigate();
-  const { execute, loading, error } = useApi<AuthTokens>();
+  const { execute, loading, error } = useApi<VerificationChallengeResponse>();
   const destination = getAuthDestination(location.state);
   const {
     register,
@@ -47,9 +47,15 @@ const SignUpPage: React.FC = () => {
       { action: 'auth.sign_up' },
     );
 
-    if (result !== undefined) {
+    if (result) {
       navigate(routes.verifyEmail, {
-        state: { email: data.email.trim(), destination },
+        state: {
+          email: result.email,
+          destination,
+          expiresInSeconds: result.expiresInSeconds,
+          resendAvailableInSeconds: result.resendAvailableInSeconds,
+          deliveryMode: result.deliveryMode,
+        },
         replace: true,
       });
     }

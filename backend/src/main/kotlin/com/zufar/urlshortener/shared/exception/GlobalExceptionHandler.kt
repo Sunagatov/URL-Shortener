@@ -1,8 +1,11 @@
 package com.zufar.urlshortener.shared.exception
 
 import com.zufar.urlshortener.auth.exception.EmailAlreadyExistsException
+import com.zufar.urlshortener.auth.exception.EmailNotVerifiedException
 import com.zufar.urlshortener.auth.exception.InvalidTokenException
+import com.zufar.urlshortener.auth.exception.InvalidVerificationCodeException
 import com.zufar.urlshortener.auth.exception.UserNotFoundException
+import com.zufar.urlshortener.auth.exception.VerificationResendTooSoonException
 import com.zufar.urlshortener.urls.exception.UrlNotFoundException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpMethod
@@ -28,7 +31,10 @@ private const val INVALID_CREDENTIALS_CODE = "INVALID_CREDENTIALS"
 private const val AUTHENTICATION_FAILED_CODE = "AUTHENTICATION_FAILED"
 private const val ACCESS_DENIED_CODE = "ACCESS_DENIED"
 private const val EMAIL_ALREADY_EXISTS_CODE = "EMAIL_ALREADY_EXISTS"
+private const val EMAIL_NOT_VERIFIED_CODE = "EMAIL_NOT_VERIFIED"
 private const val USER_NOT_FOUND_CODE = "USER_NOT_FOUND"
+private const val INVALID_VERIFICATION_CODE = "INVALID_VERIFICATION_CODE"
+private const val VERIFICATION_RESEND_TOO_SOON_CODE = "VERIFICATION_RESEND_TOO_SOON"
 private const val REQUEST_VALIDATION_FAILED_CODE = "REQUEST_VALIDATION_FAILED"
 private const val MALFORMED_JSON_CODE = "MALFORMED_JSON"
 private const val INTERNAL_SERVER_ERROR_CODE = "INTERNAL_SERVER_ERROR"
@@ -83,9 +89,29 @@ class GlobalExceptionHandler {
         return errorResponse(HttpStatus.CONFLICT, ex.message ?: "Email already in use", EMAIL_ALREADY_EXISTS_CODE)
     }
 
+    @ExceptionHandler(EmailNotVerifiedException::class)
+    fun handleEmailNotVerifiedException(ex: EmailNotVerifiedException): ResponseEntity<ErrorResponse> {
+        return errorResponse(HttpStatus.FORBIDDEN, ex.message ?: "Email is not verified", EMAIL_NOT_VERIFIED_CODE)
+    }
+
     @ExceptionHandler(UserNotFoundException::class)
     fun handleUserNotFoundException(ex: UserNotFoundException): ResponseEntity<ErrorResponse> {
         return errorResponse(HttpStatus.NOT_FOUND, ex.message ?: "User not found", USER_NOT_FOUND_CODE)
+    }
+
+    @ExceptionHandler(InvalidVerificationCodeException::class)
+    fun handleInvalidVerificationCodeException(ex: InvalidVerificationCodeException): ResponseEntity<ErrorResponse> {
+        return errorResponse(HttpStatus.BAD_REQUEST, ex.message ?: "Invalid verification code", INVALID_VERIFICATION_CODE)
+    }
+
+    @ExceptionHandler(VerificationResendTooSoonException::class)
+    fun handleVerificationResendTooSoonException(ex: VerificationResendTooSoonException): ResponseEntity<ErrorResponse> {
+        return errorResponse(
+            HttpStatus.TOO_MANY_REQUESTS,
+            ex.message ?: "Verification code was sent recently",
+            VERIFICATION_RESEND_TOO_SOON_CODE,
+            ex.retryAfterSeconds
+        )
     }
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
@@ -147,6 +173,13 @@ class GlobalExceptionHandler {
             detail.contains("required creator property", ignoreCase = true)
     }
 
-    private fun errorResponse(status: HttpStatus, message: String, code: String): ResponseEntity<ErrorResponse> =
-        ResponseEntity.status(status).body(ErrorResponse.of(currentRequestAttributes()?.request, status, message, code))
+    private fun errorResponse(
+        status: HttpStatus,
+        message: String,
+        code: String,
+        retryAfterSeconds: Long? = null
+    ): ResponseEntity<ErrorResponse> =
+        ResponseEntity.status(status).body(
+            ErrorResponse.of(currentRequestAttributes()?.request, status, message, code, retryAfterSeconds)
+        )
 }

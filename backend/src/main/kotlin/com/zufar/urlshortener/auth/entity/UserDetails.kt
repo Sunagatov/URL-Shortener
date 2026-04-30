@@ -19,6 +19,12 @@ data class UserDetails(
     @Indexed(unique = true)
     val email: String,
 
+    val emailVerified: Boolean = false,
+    val emailVerifiedAt: LocalDateTime? = null,
+    val emailVerificationCodeHash: String? = null,
+    val emailVerificationCodeExpiresAt: LocalDateTime? = null,
+    val emailVerificationCodeSentAt: LocalDateTime? = null,
+
     val tokenVersion: Int = 0,
 
     val createdAt: LocalDateTime? = null,

@@ -28,7 +28,22 @@ vi.mock('@/shared/auth/useAuth', () => ({
 
 vi.mock('@/shared/api/useApi', () => ({
   useApi: () => ({
-    execute: (apiCall: () => Promise<unknown>) => apiCall(),
+    execute: async (
+      apiCall: () => Promise<unknown>,
+      options?: { onError?: (error: { code?: string; errorMessage: string; status: number }) => void }
+    ) => {
+      try {
+        return await apiCall();
+      } catch (error: unknown) {
+        const response = (error as { response?: { status?: number; data?: { code?: string; errorMessage?: string } } }).response;
+        options?.onError?.({
+          code: response?.data?.code,
+          errorMessage: response?.data?.errorMessage ?? 'An error occurred',
+          status: response?.status ?? 500,
+        });
+        return null;
+      }
+    },
     loading: false,
     error: null,
     data: null,
@@ -44,6 +59,7 @@ const renderSignInWithRoutes = (state?: unknown) =>
     <MemoryRouter initialEntries={[{ pathname: '/signin', state }]}>
       <Routes>
         <Route path="/signin" element={<SignInPage />} />
+        <Route path="/verify-email" element={<div>Verify Email Destination</div>} />
         <Route path="/" element={<div>Home Destination</div>} />
         <Route path="/account/profile" element={<div>Profile Destination</div>} />
       </Routes>
@@ -106,5 +122,30 @@ describe('SignIn', () => {
     await user.click(screen.getByRole('button', { name: /sign in/i }));
 
     expect(await screen.findByText('Home Destination')).toBeInTheDocument();
+  });
+
+  it('redirects unverified users into the verification flow', async () => {
+    const user = userEvent.setup();
+    mockSignIn.mockRejectedValue({
+      response: {
+        status: 403,
+        data: {
+          code: 'EMAIL_NOT_VERIFIED',
+          errorMessage: 'Please verify your email before signing in',
+        },
+      },
+    });
+
+    renderSignInWithRoutes({
+      from: {
+        pathname: '/account/profile',
+      },
+    });
+
+    await user.type(screen.getByLabelText(/email address/i), 'test@example.com');
+    await user.type(screen.getByLabelText(/^password$/i), 'TestPassword123!');
+    await user.click(screen.getByRole('button', { name: /sign in/i }));
+
+    expect(await screen.findByText('Verify Email Destination')).toBeInTheDocument();
   });
 });
