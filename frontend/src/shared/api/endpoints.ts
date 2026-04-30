@@ -4,6 +4,8 @@ export const endpoints = {
     signUp: '/api/v1/auth/signup',
     refresh: '/api/v1/auth/refresh-token',
     logout: '/api/v1/auth/logout',
+    forgotPassword: '/api/v1/auth/forgot-password',
+    resetPassword: '/api/v1/auth/reset-password',
   },
   urls: {
     create: '/api/v1/urls',

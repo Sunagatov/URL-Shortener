@@ -96,14 +96,12 @@ const SignInPage: React.FC = () => {
             />
             <span className="text-sm text-white/40">Remember me</span>
           </label>
-          <button
-            type="button"
-            disabled
-            className="cursor-not-allowed text-sm text-white/20"
-            title="Forgot password coming soon"
+          <Link
+            to={routes.forgotPassword}
+            className="text-sm text-white/40 transition-colors hover:text-white/70"
           >
-            Forgot password
-          </button>
+            Forgot password?
+          </Link>
         </div>
 
         {error ? (

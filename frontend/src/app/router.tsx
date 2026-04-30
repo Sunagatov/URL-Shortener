@@ -5,6 +5,8 @@ import { GuestOnlyRoute } from '@/features/auth/routes/GuestOnlyRoute';
 import { ProtectedRoute } from '@/features/auth/routes/ProtectedRoute';
 import SignInPage from '@/features/auth/routes/SignInPage';
 import SignUpPage from '@/features/auth/routes/SignUpPage';
+import ForgotPasswordPage from '@/features/auth/routes/ForgotPasswordPage';
+import ResetPasswordPage from '@/features/auth/routes/ResetPasswordPage';
 import DashboardPage from '@/features/account/routes/DashboardPage';
 import UserAccountPage from '@/features/account/routes/UserAccountPage';
 import SecurityPage from '@/features/account/routes/SecurityPage';
@@ -31,6 +33,22 @@ const AppRouter = () => {
             element={(
               <GuestOnlyRoute>
                 <SignUpPage />
+              </GuestOnlyRoute>
+            )}
+          />
+          <Route
+            path={routes.forgotPassword}
+            element={(
+              <GuestOnlyRoute>
+                <ForgotPasswordPage />
+              </GuestOnlyRoute>
+            )}
+          />
+          <Route
+            path={routes.resetPassword}
+            element={(
+              <GuestOnlyRoute>
+                <ResetPasswordPage />
               </GuestOnlyRoute>
             )}
           />

@@ -2,6 +2,8 @@ export const routes = {
   home: '/',
   signIn: '/signin',
   signUp: '/signup',
+  forgotPassword: '/forgot-password',
+  resetPassword: '/reset-password',
   account: '/account',
   dashboard: '/account/dashboard',
   profile: '/account/profile',
