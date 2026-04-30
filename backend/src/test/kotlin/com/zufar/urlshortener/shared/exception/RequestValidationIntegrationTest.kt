@@ -60,4 +60,46 @@ class RequestValidationIntegrationTest {
             .andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.errorMessage").value("Request field has an invalid value or type"))
     }
+
+    @Test
+    fun `invalid frontend log level returns 400 instead of 500`() {
+        mockMvc.perform(
+            post("/api/v1/frontend/logs")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "level":"fatal",
+                      "message":"frontend.runtime.window_error",
+                      "runtime":"browser",
+                      "sessionId":"session-123",
+                      "timestamp":"2026-04-30T13:00:00Z"
+                    }
+                    """.trimIndent()
+                )
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.errorMessage").value("Log level must be one of debug, info, warn, or error"))
+    }
+
+    @Test
+    fun `invalid frontend log timestamp returns 400 instead of 500`() {
+        mockMvc.perform(
+            post("/api/v1/frontend/logs")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "level":"warn",
+                      "message":"frontend.runtime.window_error",
+                      "runtime":"browser",
+                      "sessionId":"session-123",
+                      "timestamp":"not-a-timestamp"
+                    }
+                    """.trimIndent()
+                )
+        )
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.errorMessage").value("Timestamp must be a valid ISO-8601 instant"))
+    }
 }

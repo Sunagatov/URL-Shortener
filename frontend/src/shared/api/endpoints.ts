@@ -19,4 +19,7 @@ export const endpoints = {
     profile: '/api/v1/users',
     changePassword: '/api/v1/users/change-password',
   },
+  telemetry: {
+    frontendLogs: '/api/v1/frontend/logs',
+  },
 } as const;

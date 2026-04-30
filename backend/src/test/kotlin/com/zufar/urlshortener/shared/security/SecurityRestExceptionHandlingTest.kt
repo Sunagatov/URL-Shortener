@@ -63,6 +63,27 @@ class SecurityRestExceptionHandlingTest {
     }
 
     @Test
+    fun `frontend logs endpoint remains publicly accessible`() {
+        mockMvc.perform(
+            post("/api/v1/frontend/logs")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "level":"warn",
+                      "message":"frontend.api.request_failed",
+                      "runtime":"browser",
+                      "sessionId":"session-123",
+                      "timestamp":"2026-04-30T13:00:00Z",
+                      "context":{"status":500}
+                    }
+                    """.trimIndent()
+                )
+        )
+            .andExpect(status().isAccepted)
+    }
+
+    @Test
     fun `public short url redirect remains accessible without auth`() {
         whenever(urlManagementService.getPublicUrlMapping("abc12345")).thenReturn(
             UrlMappingDto(

@@ -22,6 +22,11 @@ export type LogEntry = {
 
 type LogReporter = (entry: LogEntry) => void;
 type LogMethod = (message: string, context?: LogContext) => void;
+type ReporterLevel = LogLevel;
+type CreateHttpLogReporterOptions = {
+  endpoint: string;
+  minLevel?: ReporterLevel;
+};
 
 const REDACTED_VALUE = '[REDACTED]';
 const MAX_DEPTH = 5;
@@ -146,6 +151,34 @@ function createLogEntry(level: LogLevel, message: string, context?: LogContext):
   };
 }
 
+function shouldReportEntry(level: LogLevel, minLevel: ReporterLevel) {
+  return consoleThresholdByLevel[level] >= consoleThresholdByLevel[minLevel];
+}
+
+function sendWithBeacon(endpoint: string, body: string) {
+  if (typeof navigator.sendBeacon !== 'function') {
+    return false;
+  }
+
+  const payload = new Blob([body], { type: 'application/json' });
+  return navigator.sendBeacon(endpoint, payload);
+}
+
+async function sendWithFetch(endpoint: string, body: string) {
+  if (typeof fetch !== 'function') {
+    return;
+  }
+
+  await fetch(endpoint, {
+    body,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    keepalive: true,
+    method: 'POST',
+  });
+}
+
 function log(level: LogLevel, message: string, context?: LogContext) {
   const entry = createLogEntry(level, message, context);
   emitToConsole(entry);
@@ -154,6 +187,27 @@ function log(level: LogLevel, message: string, context?: LogContext) {
 
 export function setLogReporter(nextReporter: LogReporter | null) {
   reporter = nextReporter;
+}
+
+export function createHttpLogReporter({
+  endpoint,
+  minLevel = 'warn',
+}: CreateHttpLogReporterOptions): LogReporter {
+  const normalizedEndpoint = endpoint.trim();
+
+  return (entry) => {
+    if (!normalizedEndpoint || !shouldReportEntry(entry.level, minLevel)) {
+      return;
+    }
+
+    const body = JSON.stringify(entry);
+
+    if (sendWithBeacon(normalizedEndpoint, body)) {
+      return;
+    }
+
+    void sendWithFetch(normalizedEndpoint, body);
+  };
 }
 
 const debug: LogMethod = (message, context) => log('debug', message, context);

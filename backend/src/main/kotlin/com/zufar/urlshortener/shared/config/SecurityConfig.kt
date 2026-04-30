@@ -63,6 +63,7 @@ class SecurityConfig(
             .authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/v1/frontend/logs").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/v1/urls").permitAll()
                     .requestMatchers(withDefaults().matcher(HttpMethod.GET, "/favicon.ico")).permitAll()
                     .requestMatchers(publicShortUrlMatcher).permitAll()

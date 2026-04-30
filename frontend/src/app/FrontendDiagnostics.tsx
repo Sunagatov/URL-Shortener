@@ -1,8 +1,23 @@
+import { endpoints } from '@/shared/api/endpoints';
 import { useEffect } from 'react';
-import { logger } from '@/shared/lib/logger';
+import { createHttpLogReporter, logger, setLogReporter } from '@/shared/lib/logger';
+
+const backendRestApiUrl = import.meta.env.VITE_BACKEND_REST_API_URL;
+const frontendLogEndpoint =
+  import.meta.env.VITE_FRONTEND_LOG_ENDPOINT?.trim() ||
+  new URL(endpoints.telemetry.frontendLogs, backendRestApiUrl).toString();
 
 export function FrontendDiagnostics() {
   useEffect(() => {
+    if (frontendLogEndpoint) {
+      setLogReporter(
+        createHttpLogReporter({
+          endpoint: frontendLogEndpoint,
+          minLevel: 'warn',
+        }),
+      );
+    }
+
     logger.info('frontend.runtime.started', {
       pathname: window.location.pathname,
       userAgent: navigator.userAgent,
@@ -31,6 +46,7 @@ export function FrontendDiagnostics() {
     return () => {
       window.removeEventListener('error', handleWindowError);
       window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      setLogReporter(null);
     };
   }, []);
 
