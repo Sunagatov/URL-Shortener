@@ -5,39 +5,48 @@ export type PasswordStrength = {
   width: string;
 };
 
+const MIN_PASSWORD_LENGTH = 15;
+const STRONG_PASSWORD_LENGTH = 20;
+
 export const passwordChecks = [
-  { getLabel: () => '8+ characters', isValid: (value: string) => value.length >= 8 },
-  { getLabel: () => 'Uppercase letter', isValid: (value: string) => /[A-Z]/.test(value) },
-  { getLabel: () => 'Number', isValid: (value: string) => /\d/.test(value) },
   {
-    getLabel: () => 'Special char',
-    isValid: (value: string) => /[!@#$%^&*(),.?":{}|<>]/.test(value),
+    getLabel: () => '15+ characters',
+    isValid: (value: string) => value.length >= MIN_PASSWORD_LENGTH,
+  },
+  {
+    getLabel: () => '20+ for extra margin',
+    isValid: (value: string) => value.length >= STRONG_PASSWORD_LENGTH,
+  },
+  {
+    getLabel: () => 'More than one unique character',
+    isValid: (value: string) => new Set(value).size > 1,
+  },
+  {
+    getLabel: () => 'Passphrase-friendly spacing or separators',
+    isValid: (value: string) => /[\s\-_.]/.test(value),
   },
 ] as const;
 
 export function getPasswordStrength(password: string): PasswordStrength {
-  const checks = [
-    password.length >= 8,
-    /[A-Z]/.test(password),
-    /[a-z]/.test(password),
-    /\d/.test(password),
-    /[!@#$%^&*(),.?":{}|<>]/.test(password),
-  ];
-  const score = checks.filter(Boolean).length;
+  const uniqueCharacters = new Set(password).size;
+  const hasPassphrasePattern = /[\s\-_.]/.test(password);
+  const longEnough = password.length >= MIN_PASSWORD_LENGTH;
+  const longAndVaried =
+    password.length >= STRONG_PASSWORD_LENGTH && (uniqueCharacters >= 10 || hasPassphrasePattern);
 
-  if (score < 2) {
+  if (!longEnough) {
     return {
       strength: 'Weak',
-      width: '20%',
+      width: '28%',
       textClass: 'text-red-400',
       barClass: 'bg-red-500',
     };
   }
 
-  if (score < 4) {
+  if (!longAndVaried) {
     return {
       strength: 'Medium',
-      width: '60%',
+      width: '68%',
       textClass: 'text-amber-400',
       barClass: 'bg-amber-500',
     };

@@ -57,5 +57,5 @@ export function useUserProfile() {
     };
   }, [logout, navigate, toast]);
 
-  return { errorMessage, isLoading, userDetails };
+  return { errorMessage, isLoading, setUserDetails, userDetails };
 }

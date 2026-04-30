@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AccountPageHeader,
@@ -7,15 +7,18 @@ import {
   AccountPageMessageState,
 } from '@/app/layout/AccountPageLayout';
 import { AccountSidebarCards } from '@/features/account/ui/AccountSidebarCards';
+import { EditProfileForm } from '@/features/account/ui/EditProfileForm';
 import { UserProfileCard } from '@/features/account/ui/UserProfileCard';
 import { useUserProfile } from '@/features/account/model/useUserProfile';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { routes } from '@/app/routes';
+import type { User } from '@/shared/types';
 
 const UserAccountPage: React.FC = () => {
   usePageTitle('My Profile');
   const navigate = useNavigate();
-  const { errorMessage, isLoading, userDetails } = useUserProfile();
+  const { errorMessage, isLoading, userDetails, setUserDetails } = useUserProfile();
+  const [isEditing, setIsEditing] = useState(false);
 
   if (isLoading) {
     return <AccountPageLoadingState message="Loading profile…" />;
@@ -31,6 +34,11 @@ const UserAccountPage: React.FC = () => {
     );
   }
 
+  const handleEditSuccess = (updated: User) => {
+    setUserDetails(updated);
+    setIsEditing(false);
+  };
+
   return (
     <AccountPageLayout>
       <AccountPageHeader
@@ -39,9 +47,18 @@ const UserAccountPage: React.FC = () => {
       />
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-        <UserProfileCard user={userDetails} />
+        {isEditing ? (
+          <EditProfileForm
+            user={userDetails}
+            onSuccess={handleEditSuccess}
+            onCancel={() => setIsEditing(false)}
+          />
+        ) : (
+          <UserProfileCard user={userDetails} onEdit={() => setIsEditing(true)} />
+        )}
         <AccountSidebarCards
           user={userDetails}
+          onEditProfile={() => setIsEditing(true)}
           onNavigate={path => navigate(path || routes.security)}
         />
       </div>

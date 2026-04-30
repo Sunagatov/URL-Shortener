@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   FaArrowLeft,
@@ -36,14 +36,14 @@ const brandPanel = (
     }
     description="Pick something you'll remember but others won't guess. We'll keep it safe."
     features={[
-      { icon: FaLock, text: 'Minimum 8 characters' },
-      { icon: FaShieldAlt, text: 'Mix letters, numbers & symbols' },
-      { icon: FaKey, text: 'Never reuse previous passwords' },
+      { icon: FaLock, text: '15+ characters supported' },
+      { icon: FaShieldAlt, text: 'Passphrases and password managers welcome' },
+      { icon: FaKey, text: 'Only the latest recovery link stays active' },
     ]}
     stats={[
-      { value: '256-bit', label: 'Encryption' },
-      { value: 'Hashed', label: 'Storage' },
-      { value: '99.9%', label: 'Uptime' },
+      { value: '64 char', label: 'Password support' },
+      { value: '1 link', label: 'Active recovery link' },
+      { value: 'Private', label: 'Recovery flow' },
     ]}
   />
 );
@@ -69,8 +69,8 @@ function PasswordVisibilityToggle({
 
 const ResetPasswordPage: React.FC = () => {
   usePageTitle('Reset Password');
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get('token');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [token] = useState(() => searchParams.get('token')?.trim() ?? '');
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -83,11 +83,21 @@ const ResetPasswordPage: React.FC = () => {
   const passwordStrength = getPasswordStrength(newPassword);
   const passwordsMatch = confirmPassword.length === 0 || newPassword === confirmPassword;
 
+  useEffect(() => {
+    if (!searchParams.get('token')) {
+      return;
+    }
+
+    const nextSearchParams = new URLSearchParams(searchParams);
+    nextSearchParams.delete('token');
+    setSearchParams(nextSearchParams, { replace: true });
+  }, [searchParams, setSearchParams]);
+
   if (!token) {
     return (
       <AuthPageShell
-        title="Invalid reset link"
-        description="This link is missing a reset token"
+        title="Recovery link unavailable"
+        description="This page needs a valid recovery token before you can choose a new password."
         brandPanel={brandPanel}
       >
         <div className="animate-fade-up space-y-5">
@@ -96,7 +106,8 @@ const ResetPasswordPage: React.FC = () => {
               <FaExclamationTriangle className="h-8 w-8 text-red-400" />
             </div>
             <p className="text-center text-sm text-white/45">
-              The reset link you followed is invalid or incomplete. Please request a new one.
+              The recovery link you followed is missing information or has already been cleaned up.
+              Request a fresh one to continue.
             </p>
           </div>
 
@@ -123,8 +134,8 @@ const ResetPasswordPage: React.FC = () => {
   if (success) {
     return (
       <AuthPageShell
-        title="Password updated!"
-        description="Your account password has been changed successfully"
+        title="Password updated"
+        description="Your new password is ready to use the next time you sign in."
         brandPanel={brandPanel}
       >
         <div className="animate-fade-up space-y-5">
@@ -138,14 +149,18 @@ const ResetPasswordPage: React.FC = () => {
               </div>
             </div>
             <p className="text-center text-sm text-white/45">
-              You can now sign in with your new password. This reset link has been invalidated.
+              You can now sign in with your new password. Older recovery links no longer work.
             </p>
+          </div>
+
+          <div className="rounded-xl border border-white/[0.07] bg-white/[0.04] p-4 text-sm text-white/55">
+            Your password manager can now save this update the next time you sign in.
           </div>
 
           <Link to={routes.signIn}>
             <Button className="w-full" size="lg">
               <FaLock className="h-4 w-4" />
-              Sign In Now
+              Continue to Sign In
             </Button>
           </Link>
         </div>
@@ -163,7 +178,7 @@ const ResetPasswordPage: React.FC = () => {
     }
 
     if (passwordStrength.strength === 'Weak') {
-      setError('Please choose a stronger password.');
+      setError('Use at least 15 characters. A passphrase or password manager works well.');
       return;
     }
 
@@ -181,31 +196,46 @@ const ResetPasswordPage: React.FC = () => {
 
   return (
     <AuthPageShell
-      title="Set a new password"
-      description="Choose a strong password to secure your account"
+      title="Create a new password"
+      description="Use a long password or passphrase. Password managers work especially well here."
       brandPanel={brandPanel}
     >
       <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="rounded-xl border border-white/[0.07] bg-white/[0.04] p-4 text-sm text-white/55">
+          Use 15 or more characters. Spaces are supported, and the browser can suggest a generated
+          password if you prefer.
+        </div>
+
         <div>
           <label
-            htmlFor="reset-new"
+            htmlFor="new-password"
             className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-white/30"
           >
             New Password
           </label>
           <div className="relative">
             <input
-              id="reset-new"
+              id="new-password"
+              name="newPassword"
               type={showNew ? 'text' : 'password'}
               required
               value={newPassword}
               onChange={event => setNewPassword(event.target.value)}
               placeholder="Create a strong password"
               autoComplete="new-password"
+              spellCheck={false}
               autoFocus
               className={`${authInputClassName} pr-12`}
+              aria-describedby="reset-password-guidance"
             />
             <PasswordVisibilityToggle show={showNew} onToggle={() => setShowNew(v => !v)} />
+          </div>
+          <div
+            id="reset-password-guidance"
+            className="mt-2 flex items-center justify-between text-xs text-white/35"
+          >
+            <span>Long passphrases and password-manager generated passwords are supported.</span>
+            <span>{newPassword.length}/64</span>
           </div>
 
           {newPassword ? (
@@ -244,20 +274,22 @@ const ResetPasswordPage: React.FC = () => {
 
         <div>
           <label
-            htmlFor="reset-confirm"
+            htmlFor="confirm-new-password"
             className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-white/30"
           >
             Confirm New Password
           </label>
           <div className="relative">
             <input
-              id="reset-confirm"
+              id="confirm-new-password"
+              name="confirmNewPassword"
               type={showConfirm ? 'text' : 'password'}
               required
               value={confirmPassword}
               onChange={event => setConfirmPassword(event.target.value)}
               placeholder="Confirm your new password"
               autoComplete="new-password"
+              spellCheck={false}
               className={`${authInputClassName} pr-12 ${
                 confirmPassword && !passwordsMatch ? 'border-red-500/30 focus:ring-red-500/30' : ''
               }`}
@@ -295,7 +327,7 @@ const ResetPasswordPage: React.FC = () => {
           size="lg"
         >
           <FaLock className="h-4 w-4" />
-          <span>{isLoading ? 'Updating…' : 'Reset Password'}</span>
+          <span>{isLoading ? 'Updating…' : 'Save New Password'}</span>
         </Button>
       </form>
 

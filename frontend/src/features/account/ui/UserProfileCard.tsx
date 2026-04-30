@@ -1,4 +1,4 @@
-import { FaCalendarAlt, FaEnvelope, FaGlobe, FaLock, FaUser } from 'react-icons/fa';
+import { FaCalendarAlt, FaEnvelope, FaGlobe, FaPencilAlt, FaUser } from 'react-icons/fa';
 import type { User } from '@/shared/types';
 import {
   formatUserDate,
@@ -8,9 +8,10 @@ import {
 
 interface UserProfileCardProps {
   user: User;
+  onEdit: () => void;
 }
 
-export function UserProfileCard({ user }: UserProfileCardProps) {
+export function UserProfileCard({ user, onEdit }: UserProfileCardProps) {
   const infoFields = [
     { icon: FaUser, label: 'First Name', value: user.firstName ?? '—' },
     { icon: FaUser, label: 'Last Name', value: user.lastName ?? '—' },
@@ -50,19 +51,14 @@ export function UserProfileCard({ user }: UserProfileCardProps) {
             ) : null}
           </div>
         </div>
-        <div className="group absolute right-5 top-5">
-          <button
-            type="button"
-            disabled
-            className="flex items-center gap-1.5 rounded-xl border border-dashed border-white/[0.12] bg-white/[0.03] px-3 py-1.5 text-xs text-white/25 cursor-not-allowed"
-          >
-            <FaLock className="h-3 w-3" />
-            <span className="hidden sm:inline">Edit</span>
-          </button>
-          <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/10 bg-[#0d0f1e] px-2.5 py-1.5 text-xs text-white/55 opacity-0 shadow-xl transition-opacity duration-150 group-hover:opacity-100">
-            Coming soon
-          </div>
-        </div>
+        <button
+          type="button"
+          onClick={onEdit}
+          className="absolute right-5 top-5 flex items-center gap-1.5 rounded-xl border border-white/[0.12] bg-white/[0.05] px-3 py-1.5 text-xs text-white/50 transition-all hover:border-blue-500/30 hover:bg-blue-500/10 hover:text-blue-300"
+        >
+          <FaPencilAlt className="h-3 w-3" />
+          <span className="hidden sm:inline">Edit</span>
+        </button>
       </div>
 
       <div className="p-5">

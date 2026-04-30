@@ -38,7 +38,7 @@ export function useChangePasswordForm() {
     }
 
     if (passwordStrength.strength === 'Weak') {
-      toast.error('Please choose a stronger password.');
+      toast.error('Use at least 15 characters. A passphrase or password manager works well.');
       setIsLoading(false);
       return false;
     }

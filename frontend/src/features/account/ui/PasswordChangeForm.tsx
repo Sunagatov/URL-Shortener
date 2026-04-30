@@ -81,12 +81,15 @@ export function PasswordChangeForm({
           </label>
           <div className="relative">
             <input
+              id="current-password"
+              name="currentPassword"
               type={showCurrentPassword ? 'text' : 'password'}
               value={currentPassword}
               onChange={event => setCurrentPassword(event.target.value)}
               required
               className={inputClassName}
               placeholder="Enter your current password"
+              autoComplete="current-password"
             />
             <PasswordVisibilityToggle show={showCurrentPassword} onToggle={toggleCurrentPassword} />
           </div>
@@ -98,15 +101,23 @@ export function PasswordChangeForm({
           </label>
           <div className="relative">
             <input
+              id="new-password"
+              name="newPassword"
               type={showNewPassword ? 'text' : 'password'}
               value={newPassword}
               onChange={event => setNewPassword(event.target.value)}
               required
               className={inputClassName}
               placeholder="Enter your new password"
+              autoComplete="new-password"
+              aria-describedby="change-password-guidance"
             />
             <PasswordVisibilityToggle show={showNewPassword} onToggle={toggleNewPassword} />
           </div>
+          <p id="change-password-guidance" className="mt-2 text-xs text-white/35">
+            Use 15 or more characters. Spaces and password-manager generated passwords are
+            supported.
+          </p>
 
           {newPassword ? (
             <div className="mt-3 space-y-2">
@@ -149,12 +160,15 @@ export function PasswordChangeForm({
           </label>
           <div className="relative">
             <input
+              id="confirm-new-password"
+              name="confirmNewPassword"
               type={showConfirmPassword ? 'text' : 'password'}
               value={confirmPassword}
               onChange={event => setConfirmPassword(event.target.value)}
               required
               className={`${inputClassName} ${!passwordsMatch ? 'border-red-500/30 focus:ring-red-500/30' : ''}`}
               placeholder="Confirm your new password"
+              autoComplete="new-password"
             />
             <PasswordVisibilityToggle show={showConfirmPassword} onToggle={toggleConfirmPassword} />
           </div>

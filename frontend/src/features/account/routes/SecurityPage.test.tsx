@@ -67,15 +67,15 @@ describe('Security', () => {
 
     const newPasswordInput = screen.getByPlaceholderText('Enter your new password');
 
-    await user.type(newPasswordInput, 'a');
+    await user.type(newPasswordInput, 'short password');
     expect(screen.getByText('Weak')).toHaveClass('text-red-400');
 
     await user.clear(newPasswordInput);
-    await user.type(newPasswordInput, 'abcdefgH');
+    await user.type(newPasswordInput, 'correct horse bat');
     expect(screen.getByText('Medium')).toHaveClass('text-amber-400');
 
     await user.clear(newPasswordInput);
-    await user.type(newPasswordInput, 'Abcdefg1!');
+    await user.type(newPasswordInput, 'correct horse battery staple 2026');
     expect(screen.getByText('Strong')).toHaveClass('text-emerald-400');
   });
 
@@ -83,14 +83,14 @@ describe('Security', () => {
     const user = userEvent.setup();
     renderSecurity();
 
-    await user.type(screen.getByPlaceholderText('Enter your current password'), 'OldPassword1!');
-    await user.type(screen.getByPlaceholderText('Enter your new password'), 'NewPassword1!');
-    await user.type(screen.getByPlaceholderText('Confirm your new password'), 'NewPassword1!');
+    await user.type(screen.getByPlaceholderText('Enter your current password'), 'OldPassword123!');
+    await user.type(screen.getByPlaceholderText('Enter your new password'), 'correct horse battery staple');
+    await user.type(screen.getByPlaceholderText('Confirm your new password'), 'correct horse battery staple');
     await user.click(screen.getByRole('button', { name: /update password/i }));
 
     expect(accountApi.changePassword).toHaveBeenCalledWith({
-      currentPassword: 'OldPassword1!',
-      newPassword: 'NewPassword1!',
+      currentPassword: 'OldPassword123!',
+      newPassword: 'correct horse battery staple',
     });
   });
 
@@ -107,9 +107,9 @@ describe('Security', () => {
 
     renderSecurity();
 
-    await user.type(screen.getByPlaceholderText('Enter your current password'), 'OldPassword1!');
-    await user.type(screen.getByPlaceholderText('Enter your new password'), 'NewPassword1!');
-    await user.type(screen.getByPlaceholderText('Confirm your new password'), 'NewPassword1!');
+    await user.type(screen.getByPlaceholderText('Enter your current password'), 'OldPassword123!');
+    await user.type(screen.getByPlaceholderText('Enter your new password'), 'correct horse battery staple');
+    await user.type(screen.getByPlaceholderText('Confirm your new password'), 'correct horse battery staple');
     await user.click(screen.getByRole('button', { name: /update password/i }));
 
     expect(await screen.findByText('Sign In Destination')).toBeInTheDocument();

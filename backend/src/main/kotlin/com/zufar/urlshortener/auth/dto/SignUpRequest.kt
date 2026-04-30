@@ -20,6 +20,6 @@ data class SignUpRequest(
     @Schema(description = "User's email address.", example = "john.doe@example.com", required = true, maxLength = 254)
     val email: String = "",
 
-    @Schema(description = "User's password.", example = "password123", required = true, minLength = 8, maxLength = 50)
+    @Schema(description = "User's password.", example = "correct horse battery staple", required = true, minLength = 15, maxLength = 64)
     val password: String = ""
 )

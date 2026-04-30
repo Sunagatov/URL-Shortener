@@ -53,6 +53,7 @@ const renderAuthRoutes = (initialPath: '/signin' | '/signup', state?: unknown) =
       <Routes>
         <Route path="/signin" element={<SignInPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/verify-email" element={<div>Verify Email Destination</div>} />
         <Route path="/" element={<div>Home Destination</div>} />
         <Route path="/account/profile" element={<div>Profile Destination</div>} />
       </Routes>
@@ -141,7 +142,7 @@ describe('SignUp', () => {
     );
   });
 
-  it('returns to the protected route after successful sign-up', async () => {
+  it('redirects to email verification after successful sign-up', async () => {
     renderAuthRoutes('/signup', {
       from: {
         pathname: '/account/profile',
@@ -155,10 +156,10 @@ describe('SignUp', () => {
     await userEvent.type(screen.getByLabelText(/age/i), '25');
     await userEvent.click(screen.getByRole('button', { name: /create account/i }));
 
-    expect(await screen.findByText('Profile Destination')).toBeInTheDocument();
+    expect(await screen.findByText('Verify Email Destination')).toBeInTheDocument();
   });
 
-  it('preserves the protected route when switching from sign-in to sign-up', async () => {
+  it('keeps the sign-up flow intact when switching from sign-in to sign-up', async () => {
     renderAuthRoutes('/signin', {
       from: {
         pathname: '/account/profile',
@@ -173,6 +174,6 @@ describe('SignUp', () => {
     await userEvent.type(screen.getByLabelText(/age/i), '25');
     await userEvent.click(screen.getByRole('button', { name: /create account/i }));
 
-    expect(await screen.findByText('Profile Destination')).toBeInTheDocument();
+    expect(await screen.findByText('Verify Email Destination')).toBeInTheDocument();
   });
 });
