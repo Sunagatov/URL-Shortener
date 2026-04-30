@@ -35,10 +35,16 @@ export const getPublicShortUrlBase = () => {
 
   try {
     const parsedBackendUrl = new URL(backendRestApiUrl);
+    const publicHost = parsedBackendUrl.hostname.startsWith('api.')
+      ? parsedBackendUrl.hostname.slice(4)
+      : parsedBackendUrl.hostname;
     const trimmedPathname = parsedBackendUrl.pathname.replace(/\/+$/, '');
     const publicPathname = trimmedPathname.replace(/\/api(?:\/v\d+)?$/, '');
     const normalizedPathname = publicPathname ? `${publicPathname}/` : '/';
-    return new URL(normalizedPathname, parsedBackendUrl.origin).toString().replace(/\/$/, '');
+    return new URL(
+      normalizedPathname,
+      `${parsedBackendUrl.protocol}//${publicHost}`,
+    ).toString().replace(/\/$/, '');
   } catch {
     return null;
   }
@@ -55,9 +61,13 @@ export const normalizeShortUrl = (shortUrl: string) => {
   try {
     const parsedShortUrl = new URL(shortUrl);
     const parsedBackendUrl = backendRestApiUrl ? new URL(backendRestApiUrl) : null;
+    const normalizedPathname = parsedShortUrl.pathname.replace(/\/+$/, '');
+    const apiStylePathPattern = /^\/(?:api(?:\/v\d+)?)?\/[1-9A-HJ-NP-Za-km-z]{8}$/;
 
     if (parsedBackendUrl && parsedShortUrl.origin !== parsedBackendUrl.origin) {
-      return shortUrl;
+      if (!apiStylePathPattern.test(normalizedPathname)) {
+        return shortUrl;
+      }
     }
 
     return new URL(`/${shortUrlSlug}`, `${publicBase}/`).toString();

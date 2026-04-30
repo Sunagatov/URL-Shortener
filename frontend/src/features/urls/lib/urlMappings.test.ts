@@ -31,4 +31,16 @@ describe('urlMappings helpers', () => {
 
     expect(helpers.normalizeShortUrl('https://sho.rt/FkMwSG2B')).toBe('https://sho.rt/FkMwSG2B');
   });
+
+  it('normalizes legacy ip-based api short urls into the current public redirect url', async () => {
+    vi.stubEnv('VITE_BACKEND_REST_API_URL', 'https://api.zuf.uk/api/v1');
+    vi.resetModules();
+
+    const helpers = await import('@/features/urls/lib/urlMappings');
+
+    expect(helpers.getPublicShortUrlBase()).toBe('https://zuf.uk');
+    expect(helpers.normalizeShortUrl('http://116.203.197.65/api/a7kvs1gB')).toBe(
+      'https://zuf.uk/a7kvs1gB',
+    );
+  });
 });
