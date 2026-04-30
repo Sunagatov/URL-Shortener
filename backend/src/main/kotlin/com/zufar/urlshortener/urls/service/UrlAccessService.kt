@@ -3,7 +3,6 @@ package com.zufar.urlshortener.urls.service
 import com.zufar.urlshortener.auth.service.user.CurrentUserService
 import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.exception.UrlNotFoundException
-import com.zufar.urlshortener.urls.repository.UrlRepository
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import java.time.Clock
@@ -13,7 +12,7 @@ private const val URL_MAPPING_NOT_FOUND_MESSAGE = "URL mapping not found"
 
 @Service
 class UrlAccessService(
-    private val urlRepository: UrlRepository,
+    private val cachedUrlMappingLookupService: CachedUrlMappingLookupService,
     private val currentUserService: CurrentUserService,
     private val clock: Clock
 ) {
@@ -21,9 +20,9 @@ class UrlAccessService(
     fun getActiveUrlMapping(urlHash: String): UrlMapping {
         val now = LocalDateTime.now(clock)
 
-        return urlRepository.findByUrlHash(urlHash)
-            .filter { it.expirationDate.isAfter(now) }
-            .orElseThrow { UrlNotFoundException(URL_MAPPING_NOT_FOUND_MESSAGE) }
+        return cachedUrlMappingLookupService.getByUrlHash(urlHash)
+            .takeIf { it.expirationDate.isAfter(now) }
+            ?: throw UrlNotFoundException(URL_MAPPING_NOT_FOUND_MESSAGE)
     }
 
     fun getOwnedActiveUrlMapping(urlHash: String, accessDeniedMessage: String): UrlMapping {

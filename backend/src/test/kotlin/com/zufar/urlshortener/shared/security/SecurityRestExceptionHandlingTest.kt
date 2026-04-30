@@ -80,6 +80,8 @@ class SecurityRestExceptionHandlingTest {
         mockMvc.perform(get("/abc12345"))
             .andExpect(status().isFound)
             .andExpect(header().string("Location", "https://example.com/original"))
+            .andExpect(header().string("Referrer-Policy", "no-referrer"))
+            .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("public")))
     }
 
     @Test

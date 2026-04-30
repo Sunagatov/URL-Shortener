@@ -54,6 +54,15 @@ input:-webkit-autofill:active {
   box-shadow: 0 0 0 1000px #0d0f1c inset;
 }
 
+/* Prevent iPhone Safari from zooming focused form fields under 16px. */
+@media (hover: none) and (pointer: coarse) {
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']),
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
 /* ─── Animated orbs ─────────────────────────────── */
 @keyframes orb-float-1 {
   0%, 100% { transform: translate(0, 0) scale(1); }

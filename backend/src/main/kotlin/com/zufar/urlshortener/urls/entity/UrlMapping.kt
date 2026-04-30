@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.urls.entity
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 
@@ -13,10 +14,12 @@ data class UrlMapping(
     val originalUrl: String,
 
     val createdAt: LocalDateTime,
+    @Indexed(name = "expiration_date_ttl_idx", expireAfterSeconds = 0)
     val expirationDate: LocalDateTime,
 
     val requestIp: String?,
     val userAgent: String?,
 
+    @Indexed(name = "user_id_idx")
     val userId: String?
 )
