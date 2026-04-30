@@ -57,6 +57,7 @@ class AuthenticationServicesTest {
         passwordEncoder = passwordEncoder,
         jwtTokenProvider = jwtTokenProvider,
         emailVerificationNotifier = emailVerificationNotifier,
+        emailVerificationEnabled = true,
         verificationExpirationMinutes = 10,
         verificationResendCooldownSeconds = 60,
         clock = clock
@@ -96,6 +97,7 @@ class AuthenticationServicesTest {
         assertEquals(600, response.expiresInSeconds)
         assertEquals(60, response.resendAvailableInSeconds)
         assertEquals("log", response.deliveryMode)
+        assertTrue(response.verificationRequired)
     }
 
     @Test
@@ -123,6 +125,42 @@ class AuthenticationServicesTest {
                 )
             )
         }
+    }
+
+    @Test
+    fun `register returns tokens immediately when email verification is disabled`() {
+        val authService = AuthService(
+            authenticationManager = authenticationManager,
+            authRequestValidator = authRequestValidator,
+            userRepository = userRepository,
+            passwordEncoder = passwordEncoder,
+            jwtTokenProvider = jwtTokenProvider,
+            emailVerificationNotifier = emailVerificationNotifier,
+            emailVerificationEnabled = false,
+            verificationExpirationMinutes = 10,
+            verificationResendCooldownSeconds = 60,
+            clock = clock
+        )
+        whenever(passwordEncoder.encode("SecurePassword123!")).thenReturn("hashed-password")
+        whenever(userRepository.save(any<UserEntity>())).thenAnswer { it.arguments[0] }
+        whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access-token")
+        whenever(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh-token")
+
+        val response = authService.signUp(
+            SignUpRequest(
+                firstName = "Jane",
+                lastName = "Doe",
+                country = "USA",
+                age = 28,
+                email = "jane@example.com",
+                password = "SecurePassword123!"
+            )
+        )
+
+        assertFalse(response.verificationRequired)
+        assertEquals("access-token", response.accessToken)
+        assertEquals("refresh-token", response.refreshToken)
+        verify(emailVerificationNotifier, never()).sendCode(any(), any(), any())
     }
 
     @Test

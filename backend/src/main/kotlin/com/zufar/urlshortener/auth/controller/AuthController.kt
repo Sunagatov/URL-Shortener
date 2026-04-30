@@ -6,6 +6,7 @@ import com.zufar.urlshortener.auth.dto.RefreshTokenResponse
 import com.zufar.urlshortener.auth.dto.ResendVerificationRequest
 import com.zufar.urlshortener.auth.dto.SignInRequest
 import com.zufar.urlshortener.auth.dto.SignUpRequest
+import com.zufar.urlshortener.auth.dto.SignUpResponse
 import com.zufar.urlshortener.auth.dto.VerificationChallengeResponse
 import com.zufar.urlshortener.auth.dto.VerifyEmailRequest
 import com.zufar.urlshortener.auth.service.AuthService
@@ -30,7 +31,7 @@ class AuthController(
     @PostMapping("/signup")
     fun registerUser(
         @RequestBody signUpRequest: SignUpRequest
-    ): ResponseEntity<VerificationChallengeResponse> =
+    ): ResponseEntity<SignUpResponse> =
         ResponseEntity.ok(authService.signUp(signUpRequest))
 
     @PostMapping("/refresh-token")

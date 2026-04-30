@@ -37,6 +37,16 @@ export interface VerificationChallengeResponse {
   deliveryMode: 'email' | 'log';
 }
 
+export interface SignUpResponse {
+  verificationRequired: boolean;
+  accessToken?: string;
+  refreshToken?: string;
+  email?: string;
+  expiresInSeconds?: number;
+  resendAvailableInSeconds?: number;
+  deliveryMode?: 'email' | 'log';
+}
+
 export interface RefreshTokenResponse {
   accessToken: string;
   refreshToken?: string;

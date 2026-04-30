@@ -10,11 +10,12 @@ import {
   type SignUpFormInput,
 } from '@/features/auth/model/authValidation';
 import { routes } from '@/app/routes';
-import type { VerificationChallengeResponse } from '@/shared/types';
+import type { AuthTokens, SignUpResponse } from '@/shared/types';
 import { Button } from '@/shared/ui';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { FaCalendarAlt, FaEnvelope, FaGlobe, FaLock, FaUser } from 'react-icons/fa';
 import { getAuthDestination } from '@/features/auth/lib/authRouting';
+import { useCompleteAuth } from '@/features/auth/model/useCompleteAuth';
 import { AuthAlert } from '@/features/auth/ui/AuthFlowElements';
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
 import { signUpBrandPanel } from '@/features/auth/ui/AuthRoutePanels';
@@ -24,7 +25,8 @@ const SignUpPage: React.FC = () => {
   usePageTitle('Sign Up');
   const location = useLocation();
   const navigate = useNavigate();
-  const { execute, loading, error } = useApi<VerificationChallengeResponse>();
+  const completeAuth = useCompleteAuth();
+  const { execute, loading, error } = useApi<SignUpResponse>();
   const destination = getAuthDestination(location.state);
   const {
     register,
@@ -47,7 +49,22 @@ const SignUpPage: React.FC = () => {
       { action: 'auth.sign_up' },
     );
 
-    if (result) {
+    if (!result) {
+      return;
+    }
+
+    if (!result.verificationRequired && result.accessToken && result.refreshToken) {
+      await completeAuth(
+        {
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+        } satisfies AuthTokens,
+        destination
+      );
+      return;
+    }
+
+    if (result.email && result.expiresInSeconds && result.resendAvailableInSeconds && result.deliveryMode) {
       navigate(routes.verifyEmail, {
         state: {
           email: result.email,

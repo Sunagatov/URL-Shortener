@@ -6,6 +6,7 @@ import com.zufar.urlshortener.auth.dto.RefreshTokenResponse
 import com.zufar.urlshortener.auth.dto.ResendVerificationRequest
 import com.zufar.urlshortener.auth.dto.SignInRequest
 import com.zufar.urlshortener.auth.dto.SignUpRequest
+import com.zufar.urlshortener.auth.dto.SignUpResponse
 import com.zufar.urlshortener.auth.dto.VerificationChallengeResponse
 import com.zufar.urlshortener.auth.dto.VerifyEmailRequest
 import com.zufar.urlshortener.auth.entity.UserDetails
@@ -51,6 +52,7 @@ class AuthService(
     private val passwordEncoder: PasswordEncoder,
     private val jwtTokenProvider: JwtTokenProvider,
     private val emailVerificationNotifier: EmailVerificationNotifier,
+    @Value("\${app.auth.email-verification.enabled:false}") private val emailVerificationEnabled: Boolean,
     @Value("\${app.auth.email-verification.expiration-minutes:10}") private val verificationExpirationMinutes: Long,
     @Value("\${app.auth.email-verification.resend-cooldown-seconds:60}") private val verificationResendCooldownSeconds: Long,
     private val clock: Clock
@@ -76,7 +78,7 @@ class AuthService(
         return issueAuthentication(principal)
     }
 
-    fun signUp(request: SignUpRequest): VerificationChallengeResponse {
+    fun signUp(request: SignUpRequest): SignUpResponse {
         val normalizedRequest = request.copy(email = EmailNormalizer.normalize(request.email))
         log.info("auth.sign_up.requested: email={}", normalizedRequest.email)
         authRequestValidator.validateSignUpRequest(normalizedRequest)
@@ -97,11 +99,22 @@ class AuthService(
             updatedAt = now
         )
 
+        if (!emailVerificationEnabled) {
+            val savedUser = saveUser(user.copy(emailVerified = true, emailVerifiedAt = now))
+            log.info("auth.sign_up.succeeded_without_verification: user_id={}, email={}", savedUser.id, savedUser.email)
+            val authResponse = issueAuthentication(savedUser)
+            return SignUpResponse(
+                verificationRequired = false,
+                accessToken = authResponse.accessToken,
+                refreshToken = authResponse.refreshToken
+            )
+        }
+
         val (pendingUser, verificationCode) = withFreshVerificationChallenge(user, now)
         val savedUser = saveUser(pendingUser)
         val deliveryMode = sendVerificationCode(savedUser.email, verificationCode)
         log.info("auth.sign_up.succeeded: user_id={}, email={}", savedUser.id, savedUser.email)
-        return toVerificationChallengeResponse(savedUser, deliveryMode, now)
+        return toSignUpResponse(savedUser, deliveryMode, now)
     }
 
     fun refreshAccessToken(request: RefreshTokenRequest): RefreshTokenResponse {
@@ -126,6 +139,7 @@ class AuthService(
     }
 
     fun verifyEmail(request: VerifyEmailRequest): AuthResponse {
+        requireEmailVerificationEnabled()
         val normalizedRequest = request.copy(
             email = EmailNormalizer.normalize(request.email),
             code = request.code.trim()
@@ -164,6 +178,7 @@ class AuthService(
     }
 
     fun resendVerificationCode(request: ResendVerificationRequest): VerificationChallengeResponse {
+        requireEmailVerificationEnabled()
         val normalizedRequest = request.copy(email = EmailNormalizer.normalize(request.email))
         log.info("auth.email_verification.resend_requested: email={}", normalizedRequest.email)
         authRequestValidator.validateResendVerificationRequest(normalizedRequest)
@@ -253,6 +268,27 @@ class AuthService(
             resendAvailableInSeconds = verificationResendCooldownSeconds,
             deliveryMode = deliveryMode
         )
+    }
+
+    private fun toSignUpResponse(
+        user: UserDetails,
+        deliveryMode: String,
+        now: LocalDateTime
+    ): SignUpResponse {
+        val challenge = toVerificationChallengeResponse(user, deliveryMode, now)
+        return SignUpResponse(
+            verificationRequired = true,
+            email = challenge.email,
+            expiresInSeconds = challenge.expiresInSeconds,
+            resendAvailableInSeconds = challenge.resendAvailableInSeconds,
+            deliveryMode = challenge.deliveryMode
+        )
+    }
+
+    private fun requireEmailVerificationEnabled() {
+        if (!emailVerificationEnabled) {
+            throw InvalidRequestException("Email verification is currently disabled")
+        }
     }
 
     private fun remainingResendCooldownSeconds(user: UserDetails, now: LocalDateTime): Long {

@@ -6,6 +6,7 @@ import com.zufar.urlshortener.auth.dto.RefreshTokenResponse
 import com.zufar.urlshortener.auth.dto.ResendVerificationRequest
 import com.zufar.urlshortener.auth.dto.SignInRequest
 import com.zufar.urlshortener.auth.dto.SignUpRequest
+import com.zufar.urlshortener.auth.dto.SignUpResponse
 import com.zufar.urlshortener.auth.dto.VerificationChallengeResponse
 import com.zufar.urlshortener.auth.dto.VerifyEmailRequest
 import com.zufar.urlshortener.auth.service.AuthService
@@ -46,7 +47,8 @@ class AuthControllerTest {
             email = "jane@example.com",
             password = "SecurePassword123!"
         )
-        val response = VerificationChallengeResponse(
+        val response = SignUpResponse(
+            verificationRequired = true,
             email = "jane@example.com",
             expiresInSeconds = 600,
             resendAvailableInSeconds = 60,

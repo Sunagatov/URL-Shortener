@@ -146,9 +146,16 @@ src/main/kotlin/com/zufar/urlshortener/
 | `MONGODB_DATABASE_NAME` | ❌ | Optional. Defaults to `urlshortener`. Legacy `MONGODB_DATABASE` is also supported. |
 | `SERVER_BASE_URL` | ❌ | Defaults to `http://localhost:8080` |
 | `SERVER_PORT` | ❌ | Defaults to `8080` |
+| `APP_AUTH_EMAIL_VERIFICATION_ENABLED` | ❌ | Defaults to `false` |
 | `APP_AUTH_EMAIL_VERIFICATION_EXPIRATION_MINUTES` | ❌ | Defaults to `10` |
 | `APP_AUTH_EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS` | ❌ | Defaults to `60` |
 | `APP_AUTH_EMAIL_VERIFICATION_MAIL_FROM` | ❌ | Defaults to `noreply@shorty.local` |
+| `MAIL_HOST` | ❌ | Defaults to `smtp.postmarkapp.com` for Postmark SMTP |
+| `MAIL_PORT` | ❌ | Defaults to `587` |
+| `MAIL_USERNAME` | ❌ | Postmark SMTP username |
+| `MAIL_PASSWORD` | ❌ | Postmark SMTP password |
+| `MAIL_SMTP_AUTH` | ❌ | Defaults to `true` |
+| `MAIL_SMTP_STARTTLS_ENABLE` | ❌ | Defaults to `true` |
 | `APP_URLS_EXPIRATION_DEFAULT_DAYS` | ❌ | Defaults to `365` |
 | `APP_URLS_EXPIRATION_MAX_DAYS` | ❌ | Defaults to `365` |
 | `APP_URLS_SHORT_CODE_MAX_GENERATION_ATTEMPTS` | ❌ | Defaults to `10` |
@@ -198,7 +205,7 @@ Rate limiting is policy-based rather than global:
 
 429 responses include `Retry-After`, `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, and structured JSON metadata including `code`, `requestId`, and `retryAfterSeconds`.
 
-Email verification uses a 6-digit code with a default 10-minute lifetime. If no SMTP sender is configured, the backend falls back to local development mode and writes the current code to the backend logs so the `/verify-email` flow still works locally.
+Email verification uses a 6-digit code with a default 10-minute lifetime when `APP_AUTH_EMAIL_VERIFICATION_ENABLED=true`. The default SMTP shape targets Postmark (`smtp.postmarkapp.com:587` with STARTTLS). If the feature is enabled but `MAIL_USERNAME` or `MAIL_PASSWORD` are not configured, the backend falls back to local development mode and writes the current code to the backend logs so the `/verify-email` flow still works locally.
 
 For structured JSON logs in production, enable the `json-logs` Spring profile. Example:
 

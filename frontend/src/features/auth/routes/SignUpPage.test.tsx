@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import * as authApi from '@/features/auth/api/authApi';
+import * as userProfileApi from '@/features/users/api/userProfileApi';
 import SignInPage from '@/features/auth/routes/SignInPage';
 import SignUpPage from '@/features/auth/routes/SignUpPage';
 
@@ -9,6 +10,10 @@ const login = vi.fn();
 
 vi.mock('@/features/auth/api/authApi', () => ({
   signUp: vi.fn(),
+}));
+
+vi.mock('@/features/users/api/userProfileApi', () => ({
+  getUserProfile: vi.fn(),
 }));
 
 vi.mock('@/shared/auth/useAuth', () => ({
@@ -33,6 +38,7 @@ vi.mock('@/shared/api/useApi', () => ({
 }));
 
 const mockSignUp = vi.mocked(authApi.signUp);
+const mockGetUserProfile = vi.mocked(userProfileApi.getUserProfile);
 
 const renderSignUp = () =>
   render(
@@ -65,10 +71,18 @@ const fillRequiredFields = async () => {
 describe('SignUp', () => {
   beforeEach(() => {
     mockSignUp.mockResolvedValue({
+      verificationRequired: true,
       email: 'test@example.com',
       expiresInSeconds: 600,
       resendAvailableInSeconds: 60,
       deliveryMode: 'log',
+    });
+    mockGetUserProfile.mockResolvedValue({
+      email: 'test@example.com',
+      firstName: 'Test',
+      lastName: 'User',
+      country: 'USA',
+      age: 25,
     });
   });
 
@@ -164,5 +178,24 @@ describe('SignUp', () => {
     await userEvent.click(screen.getByRole('button', { name: /create account/i }));
 
     expect(await screen.findByText('Verify Email Destination')).toBeInTheDocument();
+  });
+
+  it('completes authentication immediately when verification is disabled', async () => {
+    mockSignUp.mockResolvedValueOnce({
+      verificationRequired: false,
+      accessToken: 'access-token',
+      refreshToken: 'refresh-token',
+    });
+
+    renderAuthRoutes('/signup');
+
+    await fillRequiredFields();
+    await userEvent.type(screen.getByLabelText(/country/i), 'United States');
+    await userEvent.type(screen.getByLabelText(/age/i), '25');
+    await userEvent.click(screen.getByRole('button', { name: /create account/i }));
+
+    expect(await screen.findByText('Home Destination')).toBeInTheDocument();
+    await waitFor(() => expect(login).toHaveBeenCalled());
+    await waitFor(() => expect(mockGetUserProfile).toHaveBeenCalled());
   });
 });
