@@ -2,6 +2,8 @@ import type { InternalAxiosRequestConfig } from 'axios';
 import { endpoints } from '@/shared/api/endpoints';
 import { STORAGE_KEYS } from '@/shared/auth/storage';
 
+const CLIENT_TRACE_ID = 'trace-id-123';
+
 type InterceptorPair = {
   fulfilled?: (value: unknown) => unknown;
   rejected?: (value: unknown) => unknown;
@@ -43,6 +45,9 @@ describe('httpClient auth interceptors', () => {
   const loadHttpClient = async () => {
     vi.resetModules();
     localStorage.clear();
+    vi.stubGlobal('crypto', {
+      randomUUID: vi.fn(() => CLIENT_TRACE_ID),
+    });
 
     const raw = createMockAxiosInstance();
     const api = createMockAxiosInstance();
@@ -65,6 +70,7 @@ describe('httpClient auth interceptors', () => {
   afterEach(() => {
     vi.doUnmock('axios');
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   it('does not attach Authorization to auth endpoints', async () => {
@@ -79,6 +85,7 @@ describe('httpClient auth interceptors', () => {
       const config = api.requestInterceptor.fulfilled?.({ url, headers: {} }) as InternalAxiosRequestConfig;
 
       expect(config.headers.Authorization).toBeUndefined();
+      expect(config.headers['X-Trace-ID']).toBe(CLIENT_TRACE_ID);
     }
   });
 
@@ -89,6 +96,15 @@ describe('httpClient auth interceptors', () => {
     const config = api.requestInterceptor.fulfilled?.({ url: endpoints.urls.list, headers: {} }) as InternalAxiosRequestConfig;
 
     expect(config.headers.Authorization).toBe('Bearer access-token');
+    expect(config.headers['X-Trace-ID']).toBe(CLIENT_TRACE_ID);
+  });
+
+  it('attaches trace header to raw refresh client requests', async () => {
+    const { raw } = await loadHttpClient();
+
+    const config = raw.requestInterceptor.fulfilled?.({ url: endpoints.auth.refresh, headers: {} }) as InternalAxiosRequestConfig;
+
+    expect(config.headers['X-Trace-ID']).toBe(CLIENT_TRACE_ID);
   });
 
   it('does not refresh when an auth endpoint returns 401', async () => {

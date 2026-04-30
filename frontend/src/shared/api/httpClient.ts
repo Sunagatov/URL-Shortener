@@ -6,6 +6,7 @@ import { redirectToSignIn } from '@/shared/lib/authRedirect';
 import type { AuthTokens } from '@/shared/types';
 
 const backendRestApiUrl = import.meta.env.VITE_BACKEND_REST_API_URL;
+const CLIENT_TRACE_ID_HEADER = 'X-Trace-ID';
 
 if (!backendRestApiUrl) {
     throw new Error('VITE_BACKEND_REST_API_URL environment variable is not set');
@@ -26,6 +27,8 @@ const isAuthRequest = (url?: string): boolean => {
     return AUTH_PATHS.some((path) => url === path || url.endsWith(path));
 };
 
+const clientTraceId = crypto.randomUUID();
+
 const defaultConfig = {
     baseURL: backendRestApiUrl,
     timeout: 10000,
@@ -37,15 +40,31 @@ const defaultConfig = {
 const rawAxios = axios.create(defaultConfig);
 const axiosInstance = axios.create(defaultConfig);
 
-// Request interceptor to add access token to headers
+const attachRequestContext = (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
+    if (config.headers) {
+        config.headers[CLIENT_TRACE_ID_HEADER] = clientTraceId;
+    }
+
+    return config;
+};
+
+rawAxios.interceptors.request.use(
+    (config: InternalAxiosRequestConfig) => attachRequestContext(config),
+    (error: AxiosError) => Promise.reject(error)
+);
+
+// Request interceptor to add shared trace context and access token headers
 axiosInstance.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
+        attachRequestContext(config);
+
         if (!isAuthRequest(config.url)) {
             const accessToken = storage.getAccessToken();
             if (accessToken && config.headers) {
                 config.headers.Authorization = `Bearer ${accessToken}`;
             }
         }
+
         return config;
     },
     (error: AxiosError) => Promise.reject(error)
