@@ -24,11 +24,7 @@ import org.springframework.stereotype.Service
 import java.time.Clock
 import java.time.LocalDateTime
 
-private const val DEFAULT_EXPIRATION_URL_DAYS = 365L
 private const val MIN_ALLOWED_DAYS_COUNT = 1L
-private const val MAX_ALLOWED_DAYS_COUNT = 365L
-private const val MAX_CODE_GENERATION_ATTEMPTS = 10
-private const val MAX_PAGE_SIZE = 100
 private const val URL_MAPPING_NOT_FOUND_MESSAGE = "URL mapping not found"
 private const val ACCESS_URL_MAPPING_DENIED_MESSAGE = "You are not allowed to access this URL mapping"
 private const val DELETE_URL_MAPPING_DENIED_MESSAGE = "You are not allowed to delete this URL mapping"
@@ -40,6 +36,10 @@ class UrlManagementService(
     private val currentUserService: CurrentUserService,
     private val mongoTemplate: MongoTemplate,
     @Value("\${app.base-url}") private val baseUrl: String,
+    @Value("\${app.urls.expiration.default-days:365}") private val defaultExpirationDays: Long,
+    @Value("\${app.urls.expiration.max-days:365}") private val maxAllowedDaysCount: Long,
+    @Value("\${app.urls.short-code.max-generation-attempts:10}") private val maxCodeGenerationAttempts: Int,
+    @Value("\${app.urls.pagination.max-size:100}") private val maxPageSize: Int,
     private val clock: Clock
 ) {
     private val log = LoggerFactory.getLogger(UrlManagementService::class.java)
@@ -53,7 +53,7 @@ class UrlManagementService(
         urlValidator.validateUrl(normalizedRequest.originalUrl)
         validateDaysCount(normalizedRequest.daysCount)
 
-        repeat(MAX_CODE_GENERATION_ATTEMPTS) { attempt ->
+        repeat(maxCodeGenerationAttempts) { attempt ->
             val urlHash = StringEncoder.generate()
             val shortUrl = "$normalizedBaseUrl/$urlHash"
 
@@ -73,7 +73,7 @@ class UrlManagementService(
             }
         }
 
-        throw IllegalStateException("Failed to generate a unique short code after $MAX_CODE_GENERATION_ATTEMPTS attempts")
+        throw IllegalStateException("Failed to generate a unique short code after $maxCodeGenerationAttempts attempts")
     }
 
     fun getPublicUrlMapping(urlHash: String): UrlMappingDto =
@@ -149,7 +149,7 @@ class UrlManagementService(
             originalUrl = request.originalUrl,
             clickCount = 0,
             createdAt = now,
-            expirationDate = now.plusDays(request.daysCount ?: DEFAULT_EXPIRATION_URL_DAYS),
+            expirationDate = now.plusDays(request.daysCount ?: defaultExpirationDays),
             requestIp = httpRequest.remoteAddr,
             userAgent = httpRequest.getHeader("User-Agent"),
             userId = currentUserService.getCurrentUserIdOrNull()
@@ -174,8 +174,8 @@ class UrlManagementService(
         if (page < 0) {
             throw InvalidRequestException("Page must be greater than or equal to 0")
         }
-        if (size !in 1..MAX_PAGE_SIZE) {
-            throw InvalidRequestException("Size must be between 1 and $MAX_PAGE_SIZE")
+        if (size !in 1..maxPageSize) {
+            throw InvalidRequestException("Size must be between 1 and $maxPageSize")
         }
     }
 
@@ -184,8 +184,8 @@ class UrlManagementService(
         if (value < MIN_ALLOWED_DAYS_COUNT) {
             throw InvalidRequestException("Days count must be at least $MIN_ALLOWED_DAYS_COUNT day(s).")
         }
-        if (value > MAX_ALLOWED_DAYS_COUNT) {
-            throw InvalidRequestException("Days count must not exceed $MAX_ALLOWED_DAYS_COUNT day(s).")
+        if (value > maxAllowedDaysCount) {
+            throw InvalidRequestException("Days count must not exceed $maxAllowedDaysCount day(s).")
         }
     }
 

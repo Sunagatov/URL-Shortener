@@ -47,6 +47,10 @@ class UrlDeleterTest {
             currentUserService = currentUserService,
             mongoTemplate = mongoTemplate,
             baseUrl = "http://localhost:8080",
+            defaultExpirationDays = 365,
+            maxAllowedDaysCount = 365,
+            maxCodeGenerationAttempts = 10,
+            maxPageSize = 100,
             clock = clock
         ).delete("abc12345")
 

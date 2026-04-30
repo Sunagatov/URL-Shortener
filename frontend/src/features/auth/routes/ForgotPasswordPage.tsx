@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaCheck, FaClock, FaEnvelope, FaInbox, FaLock, FaShieldAlt } from 'react-icons/fa';
+import { FaCheck, FaEnvelope, FaInbox } from 'react-icons/fa';
 import { routes } from '@/app/routes';
-import { requestPasswordReset } from '@/features/auth/api/passwordResetApi';
-import { AuthBrandPanel } from '@/features/auth/ui/AuthBrandPanel';
+import { maskEmailAddress, useForgotPasswordFlow } from '@/features/auth/model/passwordRecoveryFlows';
 import {
   AuthAlert,
   AuthBackLink,
@@ -11,53 +10,11 @@ import {
   AuthStatusView,
   AuthSupportCard,
 } from '@/features/auth/ui/AuthFlowElements';
+import { forgotPasswordBrandPanel } from '@/features/auth/ui/AuthRoutePanels';
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
 import { authInputClassName } from '@/features/auth/ui/authStyles';
-import { getApiErrorStatus } from '@/shared/lib/apiErrors';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { Button } from '@/shared/ui';
-
-const RESEND_COOLDOWN_SECONDS = 30;
-
-const brandPanel = (
-  <AuthBrandPanel
-    className="auth-brand-panel relative hidden flex-shrink-0 flex-col overflow-hidden px-12 py-16 lg:flex lg:w-[480px] xl:w-[520px]"
-    heading={
-      <>
-        Reset your password,
-        <br />
-        <span className="gradient-text-animated">securely.</span>
-      </>
-    }
-    description="We'll email you a one-time reset link. It takes less than a minute to regain access."
-    features={[
-      { icon: FaLock, text: 'Private, one-time recovery link' },
-      { icon: FaClock, text: 'Latest link wins automatically' },
-      { icon: FaShieldAlt, text: 'Neutral responses protect your privacy' },
-    ]}
-    stats={[
-      { value: '<1 min', label: 'Recovery time' },
-      { value: '15 min', label: 'Link lifetime' },
-      { value: '1 link', label: 'Active at a time' },
-    ]}
-  />
-);
-
-function maskEmailAddress(email: string): string {
-  const [localPart, domain] = email.split('@');
-
-  if (!localPart || !domain) {
-    return email;
-  }
-
-  const visibleLocal = localPart.slice(0, 2);
-  const hiddenLocal = '•'.repeat(Math.max(localPart.length - visibleLocal.length, 1));
-  const [domainName, ...domainTail] = domain.split('.');
-  const visibleDomain = domainName.slice(0, 1);
-  const hiddenDomain = '•'.repeat(Math.max(domainName.length - visibleDomain.length, 1));
-
-  return `${visibleLocal}${hiddenLocal}@${visibleDomain}${hiddenDomain}${domainTail.length ? `.${domainTail.join('.')}` : ''}`;
-}
 
 const recoveryHints = [
   'Look in your inbox, spam, and promotions folders',
@@ -67,75 +24,24 @@ const recoveryHints = [
 
 const ForgotPasswordPage: React.FC = () => {
   usePageTitle('Forgot Password');
-  const [email, setEmail] = useState('');
-  const [submittedEmail, setSubmittedEmail] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isResending, setIsResending] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [cooldownSeconds, setCooldownSeconds] = useState(0);
-  const [error, setError] = useState('');
-  const [inlineNotice, setInlineNotice] = useState('');
-
-  useEffect(() => {
-    if (!submitted || cooldownSeconds <= 0) {
-      return;
-    }
-
-    const timer = window.setInterval(() => {
-      setCooldownSeconds((seconds) => (seconds <= 1 ? 0 : seconds - 1));
-    }, 1000);
-
-    return () => window.clearInterval(timer);
-  }, [cooldownSeconds, submitted]);
-
-  const completeSubmission = (targetEmail: string, notice = '') => {
-    setSubmittedEmail(targetEmail);
-    setSubmitted(true);
-    setInlineNotice(notice);
-    setCooldownSeconds(RESEND_COOLDOWN_SECONDS);
-  };
-
-  const sendRecoveryLink = async (targetEmail: string, mode: 'initial' | 'resend') => {
-    if (mode === 'initial') {
-      setError('');
-      setIsLoading(true);
-    } else {
-      setInlineNotice('');
-      setIsResending(true);
-    }
-
-    try {
-      await requestPasswordReset(targetEmail);
-      completeSubmission(
-        targetEmail,
-        mode === 'resend' ? 'If that account exists, we sent a fresh recovery email.' : '',
-      );
-    } catch (err: unknown) {
-      if (getApiErrorStatus(err) !== undefined) {
-        completeSubmission(
-          targetEmail,
-          mode === 'resend' ? 'If that account exists, we sent a fresh recovery email.' : '',
-        );
-        return;
-      }
-
-      if (mode === 'initial') {
-        setError('We could not reach the server. Please check your connection and try again.');
-      } else {
-        setInlineNotice('We could not send another email right now. Please try again shortly.');
-      }
-    } finally {
-      if (mode === 'initial') {
-        setIsLoading(false);
-      } else {
-        setIsResending(false);
-      }
-    }
-  };
+  const {
+    cooldownSeconds,
+    email,
+    error,
+    inlineNotice,
+    isLoading,
+    isResending,
+    resend,
+    reset,
+    setEmail,
+    submit,
+    submitted,
+    submittedEmail,
+  } = useForgotPasswordFlow();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    await sendRecoveryLink(email.trim(), 'initial');
+    await submit();
   };
 
   if (submitted) {
@@ -143,7 +49,7 @@ const ForgotPasswordPage: React.FC = () => {
       <AuthPageShell
         title="Check your email"
         description={`If an account exists for ${maskEmailAddress(submittedEmail)}, recovery instructions are on the way.`}
-        brandPanel={brandPanel}
+        brandPanel={forgotPasswordBrandPanel}
       >
         <AuthStatusView
           title="Recovery requested"
@@ -183,7 +89,7 @@ const ForgotPasswordPage: React.FC = () => {
                   variant="secondary"
                   size="lg"
                   className="w-full"
-                  onClick={() => void sendRecoveryLink(submittedEmail, 'resend')}
+                  onClick={() => void resend(submittedEmail)}
                   loading={isResending}
                   disabled={cooldownSeconds > 0}
                 >
@@ -196,11 +102,7 @@ const ForgotPasswordPage: React.FC = () => {
                   variant="ghost"
                   size="lg"
                   className="w-full"
-                  onClick={() => {
-                    setSubmitted(false);
-                    setEmail(submittedEmail);
-                    setInlineNotice('');
-                  }}
+                  onClick={() => reset(submittedEmail)}
                 >
                   Try a different email
                 </Button>
@@ -220,7 +122,7 @@ const ForgotPasswordPage: React.FC = () => {
     <AuthPageShell
       title="Recover your account"
       description="Enter your email and, if an account exists, we'll send recovery instructions."
-      brandPanel={brandPanel}
+      brandPanel={forgotPasswordBrandPanel}
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>

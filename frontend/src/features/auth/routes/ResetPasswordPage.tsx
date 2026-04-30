@@ -1,16 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import {
-  FaCheck,
-  FaExclamationTriangle,
-  FaKey,
-  FaLock,
-  FaShieldAlt,
-} from 'react-icons/fa';
+import React from 'react';
+import { FaCheck, FaExclamationTriangle, FaLock, FaShieldAlt } from 'react-icons/fa';
 import { routes } from '@/app/routes';
-import { resetPassword } from '@/features/auth/api/passwordResetApi';
-import { getPasswordStrength, passwordChecks } from '@/shared/lib/passwordStrength';
-import { AuthBrandPanel } from '@/features/auth/ui/AuthBrandPanel';
+import { useResetPasswordFlow } from '@/features/auth/model/passwordRecoveryFlows';
 import {
   AuthAlert,
   AuthBackLink,
@@ -21,69 +12,45 @@ import {
   AuthSupportCard,
   PasswordVisibilityToggle,
 } from '@/features/auth/ui/AuthFlowElements';
+import { resetPasswordBrandPanel } from '@/features/auth/ui/AuthRoutePanels';
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
 import { authInputClassName } from '@/features/auth/ui/authStyles';
-import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
+import { passwordChecks } from '@/shared/lib/passwordStrength';
 import { Button } from '@/shared/ui';
-
-const brandPanel = (
-  <AuthBrandPanel
-    className="auth-brand-panel relative hidden flex-shrink-0 flex-col overflow-hidden px-12 py-16 lg:flex lg:w-[480px] xl:w-[520px]"
-    heading={
-      <>
-        Choose a strong
-        <br />
-        <span className="gradient-text-animated">new password.</span>
-      </>
-    }
-    description="Pick something you'll remember but others won't guess. We'll keep it safe."
-    features={[
-      { icon: FaLock, text: '15+ characters supported' },
-      { icon: FaShieldAlt, text: 'Passphrases and password managers welcome' },
-      { icon: FaKey, text: 'Only the latest recovery link stays active' },
-    ]}
-    stats={[
-      { value: '64 char', label: 'Password support' },
-      { value: '1 link', label: 'Active recovery link' },
-      { value: 'Private', label: 'Recovery flow' },
-    ]}
-  />
-);
 
 const ResetPasswordPage: React.FC = () => {
   usePageTitle('Reset Password');
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [token] = useState(() => searchParams.get('token')?.trim() ?? '');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showNew, setShowNew] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
+  const {
+    confirmPassword,
+    error,
+    isLoading,
+    isSubmitDisabled,
+    newPassword,
+    passwordStrength,
+    passwordsMatch,
+    setConfirmPassword,
+    setNewPassword,
+    showConfirm,
+    showNew,
+    submit,
+    success,
+    toggleConfirmVisibility,
+    toggleNewVisibility,
+    token,
+  } = useResetPasswordFlow();
 
-  const passwordStrength = getPasswordStrength(newPassword);
-  const passwordsMatch = confirmPassword.length === 0 || newPassword === confirmPassword;
-  const isWeakPassword = passwordStrength.strength === 'Weak';
-  const isSubmitDisabled = isWeakPassword || (confirmPassword.length > 0 && !passwordsMatch);
-
-  useEffect(() => {
-    if (!searchParams.get('token')) {
-      return;
-    }
-
-    const nextSearchParams = new URLSearchParams(searchParams);
-    nextSearchParams.delete('token');
-    setSearchParams(nextSearchParams, { replace: true });
-  }, [searchParams, setSearchParams]);
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    await submit();
+  };
 
   if (!token) {
     return (
       <AuthPageShell
         title="Recovery link unavailable"
         description="This page needs a valid recovery token before you can choose a new password."
-        brandPanel={brandPanel}
+        brandPanel={resetPasswordBrandPanel}
       >
         <AuthStatusView
           title="Token missing"
@@ -111,7 +78,7 @@ const ResetPasswordPage: React.FC = () => {
       <AuthPageShell
         title="Password updated"
         description="Your new password is ready to use the next time you sign in."
-        brandPanel={brandPanel}
+        brandPanel={resetPasswordBrandPanel}
       >
         <AuthStatusView
           title="You can sign in now"
@@ -141,37 +108,11 @@ const ResetPasswordPage: React.FC = () => {
     );
   }
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setError('');
-
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
-
-    if (isWeakPassword) {
-      setError('Use at least 15 characters. A passphrase or password manager works well.');
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      await resetPassword({ token, newPassword });
-      setSuccess(true);
-    } catch (err: unknown) {
-      setError(getApiErrorMessage(err, 'Failed to reset password. The link may have expired.'));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <AuthPageShell
       title="Create a new password"
       description="Use a long password or passphrase. Password managers work especially well here."
-      brandPanel={brandPanel}
+      brandPanel={resetPasswordBrandPanel}
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         <AuthSupportCard>
@@ -203,7 +144,7 @@ const ResetPasswordPage: React.FC = () => {
               className={`${authInputClassName} pr-12`}
               aria-describedby="reset-password-guidance"
             />
-            <PasswordVisibilityToggle show={showNew} onToggle={() => setShowNew((value) => !value)} />
+            <PasswordVisibilityToggle show={showNew} onToggle={toggleNewVisibility} />
           </div>
           <div
             id="reset-password-guidance"
@@ -259,10 +200,7 @@ const ResetPasswordPage: React.FC = () => {
                 confirmPassword && !passwordsMatch ? 'border-red-500/30 focus:ring-red-500/30' : ''
               }`}
             />
-            <PasswordVisibilityToggle
-              show={showConfirm}
-              onToggle={() => setShowConfirm((value) => !value)}
-            />
+            <PasswordVisibilityToggle show={showConfirm} onToggle={toggleConfirmVisibility} />
           </div>
           {confirmPassword && !passwordsMatch ? (
             <p className="mt-2 flex items-center gap-1.5 text-xs text-red-400">

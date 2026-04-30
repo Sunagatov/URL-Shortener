@@ -7,6 +7,7 @@ import com.zufar.urlshortener.urls.dto.UrlResponse
 import com.zufar.urlshortener.urls.service.UrlManagementService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -18,13 +19,12 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
-private const val DEFAULT_PAGE = 0
-private const val DEFAULT_SIZE = 10
-
 @RestController
 @RequestMapping("/api/v1/urls")
 class UrlController(
-    private val urlManagementService: UrlManagementService
+    private val urlManagementService: UrlManagementService,
+    @Value("\${app.urls.pagination.default-page:0}") private val defaultPage: Int,
+    @Value("\${app.urls.pagination.default-size:10}") private val defaultSize: Int
 ) {
 
     @PostMapping(
@@ -39,10 +39,10 @@ class UrlController(
 
     @GetMapping
     fun getUserUrlMappings(
-        @RequestParam(defaultValue = "$DEFAULT_PAGE") page: Int,
-        @RequestParam(defaultValue = "$DEFAULT_SIZE") size: Int
+        @RequestParam(required = false) page: Int?,
+        @RequestParam(required = false) size: Int?
     ): ResponseEntity<UrlMappingPageDto> =
-        ResponseEntity.ok(urlManagementService.getUserUrlMappings(page, size))
+        ResponseEntity.ok(urlManagementService.getUserUrlMappings(page ?: defaultPage, size ?: defaultSize))
 
     @GetMapping("/{urlHash}")
     fun getUrlMappingByHash(

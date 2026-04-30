@@ -17,9 +17,14 @@ class UrlControllerTest {
 
     @Mock private lateinit var urlManagementService: UrlManagementService
 
+    private fun controller(
+        defaultPage: Int = 0,
+        defaultSize: Int = 10
+    ) = UrlController(urlManagementService, defaultPage, defaultSize)
+
     @Test
     fun `getUserUrlMappings delegates for pagination`() {
-        val controller = UrlController(urlManagementService)
+        val controller = controller()
         val page = UrlMappingPageDto(
             content = emptyList(),
             page = 0,
@@ -37,7 +42,7 @@ class UrlControllerTest {
 
     @Test
     fun `getUrlMappingByHash delegates to url service`() {
-        val controller = UrlController(urlManagementService)
+        val controller = controller()
         val urlMapping = UrlMappingDto(
             urlHash = "abc12345",
             shortUrl = "http://localhost:8080/abc12345",
@@ -56,7 +61,7 @@ class UrlControllerTest {
 
     @Test
     fun `deleteUrlMapping delegates to url service`() {
-        val controller = UrlController(urlManagementService)
+        val controller = controller()
 
         val response = controller.deleteUrlMapping("abc12345")
 
