@@ -1,7 +1,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { signUp } from '@/features/auth/api/authApi';
 import { useApi } from '@/shared/api/useApi';
 import {
@@ -15,7 +15,6 @@ import { Button } from '@/shared/ui';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { FaCalendarAlt, FaEnvelope, FaGlobe, FaLock, FaUser } from 'react-icons/fa';
 import { getAuthDestination } from '@/features/auth/lib/authRouting';
-import { useCompleteAuth } from '@/features/auth/model/useCompleteAuth';
 import { AuthBrandPanel } from '@/features/auth/ui/AuthBrandPanel';
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
 import { AuthTextField } from '@/features/auth/ui/AuthTextField';
@@ -23,7 +22,7 @@ import { AuthTextField } from '@/features/auth/ui/AuthTextField';
 const SignUpPage: React.FC = () => {
   usePageTitle('Sign Up');
   const location = useLocation();
-  const completeAuth = useCompleteAuth();
+  const navigate = useNavigate();
   const { execute, loading, error } = useApi<AuthTokens>();
   const destination = getAuthDestination(location.state);
   const {
@@ -46,8 +45,11 @@ const SignUpPage: React.FC = () => {
       })
     );
 
-    if (result) {
-      await completeAuth(result, destination);
+    if (result !== undefined) {
+      navigate(routes.verifyEmail, {
+        state: { email: data.email.trim(), destination },
+        replace: true,
+      });
     }
   };
 

@@ -7,6 +7,7 @@ import SignInPage from '@/features/auth/routes/SignInPage';
 import SignUpPage from '@/features/auth/routes/SignUpPage';
 import ForgotPasswordPage from '@/features/auth/routes/ForgotPasswordPage';
 import ResetPasswordPage from '@/features/auth/routes/ResetPasswordPage';
+import VerifyEmailPage from '@/features/auth/routes/VerifyEmailPage';
 import DashboardPage from '@/features/account/routes/DashboardPage';
 import UserAccountPage from '@/features/account/routes/UserAccountPage';
 import SecurityPage from '@/features/account/routes/SecurityPage';
@@ -33,6 +34,14 @@ const AppRouter = () => {
             element={(
               <GuestOnlyRoute>
                 <SignUpPage />
+              </GuestOnlyRoute>
+            )}
+          />
+          <Route
+            path={routes.verifyEmail}
+            element={(
+              <GuestOnlyRoute>
+                <VerifyEmailPage />
               </GuestOnlyRoute>
             )}
           />
