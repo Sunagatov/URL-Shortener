@@ -1,5 +1,63 @@
-import { FaClock, FaEnvelope, FaKey, FaLock, FaShieldAlt } from 'react-icons/fa';
+import {
+  FaChartLine,
+  FaClock,
+  FaEnvelope,
+  FaKey,
+  FaLock,
+  FaRocket,
+  FaShieldAlt,
+} from 'react-icons/fa';
 import { AuthBrandPanel } from '@/features/auth/ui/AuthBrandPanel';
+
+export const signInBrandPanel = (
+  <AuthBrandPanel
+    className="auth-brand-panel relative hidden flex-shrink-0 flex-col overflow-hidden px-12 py-16 lg:flex lg:w-[480px] xl:w-[520px]"
+    heading={
+      <>
+        Your links,
+        <br />
+        <span className="gradient-text-animated">amplified.</span>
+      </>
+    }
+    description="Shorten URLs, track performance, and share with confidence — all in one place."
+    features={[
+      { icon: FaRocket, text: 'Create short links in seconds' },
+      { icon: FaChartLine, text: 'Track clicks and analyze traffic' },
+      { icon: FaShieldAlt, text: 'Enterprise-grade link security' },
+    ]}
+    stats={[
+      { value: '10M+', label: 'Links' },
+      { value: '500K+', label: 'Users' },
+      { value: '99.9%', label: 'Uptime' },
+    ]}
+  />
+);
+
+export const signUpBrandPanel = (
+  <AuthBrandPanel
+    className="auth-brand-panel relative hidden flex-shrink-0 flex-col overflow-hidden px-10 py-16 lg:flex lg:w-[420px] xl:w-[460px]"
+    heading={
+      <>
+        Join 500K+
+        <br />
+        <span className="gradient-text-animated">link creators.</span>
+      </>
+    }
+    description="Free forever. No credit card required. Start shortening and tracking your links in seconds."
+    features={[
+      { text: 'Create unlimited short links' },
+      { text: 'Track clicks and performance' },
+      { text: 'Secure & reliable infrastructure' },
+      { text: 'Export your data anytime' },
+    ]}
+    footer={
+      <div className="rounded-2xl border border-white/[0.07] bg-white/[0.04] p-4">
+        <p className="mb-1 text-xs text-white/25">Trusted by teams at</p>
+        <p className="text-sm font-semibold text-white/45">Startups · Agencies · Developers</p>
+      </div>
+    }
+  />
+);
 
 export const forgotPasswordBrandPanel = (
   <AuthBrandPanel

@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.ServletException
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.slf4j.MDC
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.AuthenticationException
@@ -14,6 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter
 import java.io.IOException
 
 private const val BEARER_PREFIX = "Bearer "
+private const val AUTHENTICATED_USER_ID_ATTRIBUTE = "authenticatedUserId"
 
 @Component
 class JwtAuthenticationFilter(
@@ -37,13 +39,20 @@ class JwtAuthenticationFilter(
                     val authentication = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
                     authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
                     SecurityContextHolder.getContext().authentication = authentication
+                    MDC.put("userId", userDetails.username)
+                    request.setAttribute(AUTHENTICATED_USER_ID_ATTRIBUTE, userDetails.username)
                 }
             } catch (_: AuthenticationException) {
                 SecurityContextHolder.clearContext()
             }
         }
 
-        filterChain.doFilter(request, response)
+        try {
+            filterChain.doFilter(request, response)
+        } finally {
+            MDC.remove("userId")
+            request.removeAttribute(AUTHENTICATED_USER_ID_ATTRIBUTE)
+        }
     }
 
     private fun extractBearerToken(request: HttpServletRequest): String? =

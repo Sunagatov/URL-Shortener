@@ -1,6 +1,7 @@
 :root {
   --bg-base: #07111f;
   --bg-base-rgb: 7 17 31;
+  --bg-alt: #0d1a2b;
   --surface: rgba(12, 24, 43, 0.78);
   --surface-raised: rgba(17, 32, 57, 0.92);
   --surface-overlay: rgba(9, 18, 34, 0.96);
@@ -22,6 +23,7 @@
   --font-body: "DM Sans", sans-serif;
   --font-mono: "DM Mono", monospace;
   --surface-shadow: 0 18px 45px rgba(4, 10, 24, 0.32);
+  --focus-outline: 2px solid rgba(125, 211, 252, 0.55);
 }
 
 html,
@@ -89,8 +91,17 @@ select {
   font: inherit;
 }
 
+button {
+  cursor: pointer;
+}
+
 input:focus {
   outline: none;
+}
+
+:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: 2px;
 }
 
 main {

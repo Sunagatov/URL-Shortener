@@ -15,9 +15,9 @@ import { Button } from '@/shared/ui';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { FaCalendarAlt, FaEnvelope, FaGlobe, FaLock, FaUser } from 'react-icons/fa';
 import { getAuthDestination } from '@/features/auth/lib/authRouting';
-import { AuthBrandPanel } from '@/features/auth/ui/AuthBrandPanel';
 import { AuthAlert } from '@/features/auth/ui/AuthFlowElements';
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
+import { signUpBrandPanel } from '@/features/auth/ui/AuthRoutePanels';
 import { AuthTextField } from '@/features/auth/ui/AuthTextField';
 
 const SignUpPage: React.FC = () => {
@@ -59,33 +59,7 @@ const SignUpPage: React.FC = () => {
       title="Create your account"
       description="Free forever — no credit card required"
       width="lg"
-      brandPanel={
-        <AuthBrandPanel
-          className="auth-brand-panel relative hidden flex-shrink-0 flex-col overflow-hidden px-10 py-16 lg:flex lg:w-[420px] xl:w-[460px]"
-          heading={
-            <>
-              Join 500K+
-              <br />
-              <span className="gradient-text-animated">link creators.</span>
-            </>
-          }
-          description="Free forever. No credit card required. Start shortening and tracking your links in seconds."
-          features={[
-            { text: 'Create unlimited short links' },
-            { text: 'Track clicks and performance' },
-            { text: 'Secure & reliable infrastructure' },
-            { text: 'Export your data anytime' },
-          ]}
-          footer={
-            <div className="rounded-2xl border border-white/[0.07] bg-white/[0.04] p-4">
-              <p className="mb-1 text-xs text-white/25">Trusted by teams at</p>
-              <p className="text-sm font-semibold text-white/45">
-                Startups · Agencies · Developers
-              </p>
-            </div>
-          }
-        />
-      }
+      brandPanel={signUpBrandPanel}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid grid-cols-2 gap-3">

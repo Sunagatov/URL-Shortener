@@ -146,8 +146,25 @@ src/main/kotlin/com/zufar/urlshortener/
 | `MONGODB_DATABASE_NAME` | ❌ | Optional. Defaults to `urlshortener`. Legacy `MONGODB_DATABASE` is also supported. |
 | `SERVER_BASE_URL` | ❌ | Defaults to `http://localhost:8080` |
 | `SERVER_PORT` | ❌ | Defaults to `8080` |
+| `APP_URLS_EXPIRATION_DEFAULT_DAYS` | ❌ | Defaults to `365` |
+| `APP_URLS_EXPIRATION_MAX_DAYS` | ❌ | Defaults to `365` |
+| `APP_URLS_SHORT_CODE_MAX_GENERATION_ATTEMPTS` | ❌ | Defaults to `10` |
+| `APP_URLS_PAGINATION_DEFAULT_PAGE` | ❌ | Defaults to `0` |
+| `APP_URLS_PAGINATION_DEFAULT_SIZE` | ❌ | Defaults to `10` |
+| `APP_URLS_PAGINATION_MAX_SIZE` | ❌ | Defaults to `100` |
+| `APP_URLS_REDIRECT_MAX_CACHE_SECONDS` | ❌ | Defaults to `3600` |
 | `CORS_ALLOWED_ORIGINS` | ❌ | Defaults to `http://localhost:3000` |
 | `RATE_LIMIT_REQUESTS` | ❌ | Defaults to `100` (per minute per IP) |
+| `RATE_LIMIT_TRUSTED_PROXIES` | ❌ | Comma-separated trusted proxy CIDRs/IPs for `X-Forwarded-For` handling |
+| `CACHE_MAX_SIZE` | ❌ | Defaults to `10000` |
+| `CACHE_EXPIRE_MINUTES` | ❌ | Defaults to `30` |
+| `CACHE_NAMES` | ❌ | Defaults to `urlMappings` |
+| `LOG_LEVEL_ROOT` | ❌ | Defaults to `WARN` |
+| `LOG_LEVEL_APP` | ❌ | Defaults to `INFO` |
+| `LOG_LEVEL_HTTP_ACCESS` | ❌ | Defaults to `INFO` |
+| `LOG_SLOW_REQUEST_THRESHOLD_MS` | ❌ | Defaults to `1000` |
+| `LOG_MAX_FILE_SIZE` | ❌ | Defaults to `10MB` |
+| `LOG_MAX_HISTORY` | ❌ | Defaults to `30` |
 
 See `.env.example` for local defaults and `.env.prod` for the production template.
 

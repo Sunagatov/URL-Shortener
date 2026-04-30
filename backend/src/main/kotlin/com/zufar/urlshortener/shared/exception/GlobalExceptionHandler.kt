@@ -5,6 +5,7 @@ import com.zufar.urlshortener.auth.exception.InvalidTokenException
 import com.zufar.urlshortener.auth.exception.UserNotFoundException
 import com.zufar.urlshortener.urls.exception.UrlNotFoundException
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -15,6 +16,8 @@ import org.springframework.validation.FieldError
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.context.request.ServletRequestAttributes
 
 private const val LOG_ERROR_MESSAGE = "An unexpected error occurred"
 
@@ -26,25 +29,25 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidRequestException::class)
     fun handleInvalidRequestException(ex: InvalidRequestException): ResponseEntity<ErrorResponse> {
-        log.warn("Invalid request: {}", ex.message)
+        log.warn("request.invalid: method={}, path={}, message={}", currentMethod(), currentPath(), ex.message)
         return errorResponse(HttpStatus.BAD_REQUEST, ex.message ?: "Invalid request")
     }
 
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgumentException(ex: IllegalArgumentException): ResponseEntity<ErrorResponse> {
-        log.warn("Invalid input: {}", ex.message)
+        log.warn("request.invalid_input: method={}, path={}, message={}", currentMethod(), currentPath(), ex.message)
         return errorResponse(HttpStatus.BAD_REQUEST, ex.message ?: "Invalid input")
     }
 
     @ExceptionHandler(UrlNotFoundException::class)
     fun handleUrlNotFound(ex: UrlNotFoundException): ResponseEntity<ErrorResponse> {
-        log.warn("URL not found: {}", ex.message)
+        log.warn("url.not_found: method={}, path={}, message={}", currentMethod(), currentPath(), ex.message)
         return errorResponse(HttpStatus.NOT_FOUND, ex.message ?: "URL not found")
     }
 
     @ExceptionHandler(InvalidTokenException::class)
     fun handleInvalidTokenException(ex: InvalidTokenException): ResponseEntity<ErrorResponse> {
-        log.warn("Invalid token: {}", ex.message)
+        log.warn("auth.invalid_token: method={}, path={}, message={}", currentMethod(), currentPath(), ex.message)
         return errorResponse(HttpStatus.UNAUTHORIZED, ex.message ?: "Invalid token")
     }
 
@@ -103,9 +106,24 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception::class)
     fun handleException(ex: Exception): ResponseEntity<ErrorResponse> {
-        log.error(LOG_ERROR_MESSAGE, ex)
+        log.error(
+            "request.failed: method={}, path={}, message={}",
+            currentMethod(),
+            currentPath(),
+            LOG_ERROR_MESSAGE,
+            ex
+        )
         return errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred")
     }
+
+    private fun currentMethod(): String =
+        currentRequestAttributes()?.request?.method ?: HttpMethod.GET.name()
+
+    private fun currentPath(): String =
+        currentRequestAttributes()?.request?.requestURI ?: "-"
+
+    private fun currentRequestAttributes(): ServletRequestAttributes? =
+        RequestContextHolder.getRequestAttributes() as? ServletRequestAttributes
 
     private fun Throwable.isMissingRequiredField(): Boolean {
         val detail = message ?: return false

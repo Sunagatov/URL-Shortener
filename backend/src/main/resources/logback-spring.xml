@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <springProperty scope="context" name="application_name" source="spring.application.name" defaultValue="URL-Shortener"/>
+    <springProperty scope="context" name="environment" source="spring.profiles.active" defaultValue="local"/>
+    <springProperty scope="context" name="log_file_name" source="logging.file.name" defaultValue="logs/application.log"/>
+    <springProperty scope="context" name="log_max_file_size" source="logging.logback.rollingpolicy.max-file-size" defaultValue="10MB"/>
+    <springProperty scope="context" name="log_max_history" source="logging.logback.rollingpolicy.max-history" defaultValue="30"/>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS,UTC} level=%-5level logger=%logger{36} correlationId=%X{correlationId} requestId=%X{requestId} userId=%X{userId} clientTraceId=%X{clientTraceId} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_file_name}</file>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS,UTC} level=%-5level logger=%logger{36} correlationId=%X{correlationId} requestId=%X{requestId} userId=%X{userId} clientTraceId=%X{clientTraceId} - %msg%n</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/application-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>${log_max_file_size}</maxFileSize>
+            <maxHistory>${log_max_history}</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <root level="WARN">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+    <logger name="http.access" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+
+</configuration>
