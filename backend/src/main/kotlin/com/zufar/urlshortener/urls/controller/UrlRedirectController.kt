@@ -1,9 +1,7 @@
 package com.zufar.urlshortener.urls.controller
 
-import com.zufar.urlshortener.shared.exception.ErrorResponse
 import com.zufar.urlshortener.urls.UrlHashFormat
-import com.zufar.urlshortener.urls.service.command.TrackUrlClickService
-import com.zufar.urlshortener.urls.service.query.UrlQueryService
+import com.zufar.urlshortener.urls.service.UrlManagementService
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.http.CacheControl
@@ -25,8 +23,7 @@ private const val REFERRER_POLICY_VALUE = "no-referrer"
 @RestController
 @RequestMapping
 class UrlRedirectController(
-    private val urlQueryService: UrlQueryService,
-    private val trackUrlClickService: TrackUrlClickService
+    private val urlManagementService: UrlManagementService
 ) {
 
     private val log = LoggerFactory.getLogger(UrlRedirectController::class.java)
@@ -37,8 +34,8 @@ class UrlRedirectController(
         httpServletRequest: HttpServletRequest
     ): ResponseEntity<Unit> {
         log.info("Redirect request for urlHash='{}' from IP='{}'", urlHash, httpServletRequest.remoteAddr)
-        val urlMapping = urlQueryService.getPublicByHash(urlHash)
-        trackUrlClickService.increment(urlHash)
+        val urlMapping = urlManagementService.getPublicUrlMapping(urlHash)
+        urlManagementService.incrementClickCount(urlHash)
         log.info("Redirecting to originalUrl='{}'", urlMapping.originalUrl)
         return ResponseEntity.status(HttpStatus.FOUND)
             .cacheControl(buildCacheControl(urlMapping.expirationDate))

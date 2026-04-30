@@ -1,25 +1,28 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import {
-  FaArrowLeft,
   FaCheck,
   FaExclamationTriangle,
-  FaEye,
-  FaEyeSlash,
   FaKey,
   FaLock,
   FaShieldAlt,
-  FaTimes,
 } from 'react-icons/fa';
 import { routes } from '@/app/routes';
 import { resetPassword } from '@/features/auth/api/passwordResetApi';
+import { getPasswordStrength, passwordChecks } from '@/shared/lib/passwordStrength';
 import { AuthBrandPanel } from '@/features/auth/ui/AuthBrandPanel';
+import {
+  AuthAlert,
+  AuthBackLink,
+  AuthChecklist,
+  AuthPrimaryLink,
+  AuthStatusIcon,
+  AuthStatusView,
+  AuthSupportCard,
+  PasswordVisibilityToggle,
+} from '@/features/auth/ui/AuthFlowElements';
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
 import { authInputClassName } from '@/features/auth/ui/authStyles';
-import {
-  getPasswordStrength,
-  passwordChecks,
-} from '@/features/account/model/passwordStrength';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { Button } from '@/shared/ui';
@@ -48,30 +51,10 @@ const brandPanel = (
   />
 );
 
-function PasswordVisibilityToggle({
-  show,
-  onToggle,
-}: {
-  show: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-white/25 transition-colors hover:text-white/55"
-      aria-label={show ? 'Hide password' : 'Show password'}
-    >
-      {show ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
-    </button>
-  );
-}
-
 const ResetPasswordPage: React.FC = () => {
   usePageTitle('Reset Password');
   const [searchParams, setSearchParams] = useSearchParams();
   const [token] = useState(() => searchParams.get('token')?.trim() ?? '');
-
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNew, setShowNew] = useState(false);
@@ -82,6 +65,8 @@ const ResetPasswordPage: React.FC = () => {
 
   const passwordStrength = getPasswordStrength(newPassword);
   const passwordsMatch = confirmPassword.length === 0 || newPassword === confirmPassword;
+  const isWeakPassword = passwordStrength.strength === 'Weak';
+  const isSubmitDisabled = isWeakPassword || (confirmPassword.length > 0 && !passwordsMatch);
 
   useEffect(() => {
     if (!searchParams.get('token')) {
@@ -100,33 +85,23 @@ const ResetPasswordPage: React.FC = () => {
         description="This page needs a valid recovery token before you can choose a new password."
         brandPanel={brandPanel}
       >
-        <div className="animate-fade-up space-y-5">
-          <div className="flex flex-col items-center py-6">
-            <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-3xl border border-red-500/25 bg-red-500/10">
+        <AuthStatusView
+          title="Token missing"
+          description="The recovery link you followed is missing information or has already been cleaned up. Request a fresh one to continue."
+          icon={(
+            <AuthStatusIcon badge="error">
               <FaExclamationTriangle className="h-8 w-8 text-red-400" />
-            </div>
-            <p className="text-center text-sm text-white/45">
-              The recovery link you followed is missing information or has already been cleaned up.
-              Request a fresh one to continue.
-            </p>
-          </div>
-
-          <Link to={routes.forgotPassword}>
-            <Button className="w-full" size="lg">
-              Request a new reset link
-            </Button>
-          </Link>
-
-          <div className="text-center">
-            <Link
-              to={routes.signIn}
-              className="inline-flex items-center gap-2 text-sm text-white/35 transition-colors hover:text-white/65"
-            >
-              <FaArrowLeft className="h-3 w-3" />
-              Back to Sign In
-            </Link>
-          </div>
-        </div>
+            </AuthStatusIcon>
+          )}
+          action={(
+            <>
+              <AuthPrimaryLink to={routes.forgotPassword}>Request a new reset link</AuthPrimaryLink>
+              <div className="text-center">
+                <AuthBackLink to={routes.signIn}>Back to Sign In</AuthBackLink>
+              </div>
+            </>
+          )}
+        />
       </AuthPageShell>
     );
   }
@@ -138,32 +113,30 @@ const ResetPasswordPage: React.FC = () => {
         description="Your new password is ready to use the next time you sign in."
         brandPanel={brandPanel}
       >
-        <div className="animate-fade-up space-y-5">
-          <div className="flex flex-col items-center py-4">
-            <div className="relative mb-5">
-              <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-emerald-500/25 bg-emerald-500/12">
-                <FaShieldAlt className="h-8 w-8 text-emerald-400" />
-              </div>
-              <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full border border-emerald-500/40 bg-emerald-500/20">
-                <FaCheck className="h-3 w-3 text-emerald-400" />
-              </div>
-            </div>
-            <p className="text-center text-sm text-white/45">
-              You can now sign in with your new password. Older recovery links no longer work.
-            </p>
-          </div>
-
-          <div className="rounded-xl border border-white/[0.07] bg-white/[0.04] p-4 text-sm text-white/55">
-            Your password manager can now save this update the next time you sign in.
-          </div>
-
-          <Link to={routes.signIn}>
-            <Button className="w-full" size="lg">
-              <FaLock className="h-4 w-4" />
-              Continue to Sign In
-            </Button>
-          </Link>
-        </div>
+        <AuthStatusView
+          title="You can sign in now"
+          description="You can now sign in with your new password. Older recovery links no longer work."
+          icon={(
+            <AuthStatusIcon badge="success">
+              <FaShieldAlt className="h-8 w-8 text-emerald-400" />
+            </AuthStatusIcon>
+          )}
+          action={(
+            <>
+              <AuthSupportCard>
+                <p className="text-sm text-[color:var(--text-secondary)]">
+                  Your password manager can now save this update the next time you sign in.
+                </p>
+              </AuthSupportCard>
+              <AuthPrimaryLink to={routes.signIn}>
+                <>
+                  <FaLock className="h-4 w-4" />
+                  Continue to Sign In
+                </>
+              </AuthPrimaryLink>
+            </>
+          )}
+        />
       </AuthPageShell>
     );
   }
@@ -177,7 +150,7 @@ const ResetPasswordPage: React.FC = () => {
       return;
     }
 
-    if (passwordStrength.strength === 'Weak') {
+    if (isWeakPassword) {
       setError('Use at least 15 characters. A passphrase or password manager works well.');
       return;
     }
@@ -201,10 +174,12 @@ const ResetPasswordPage: React.FC = () => {
       brandPanel={brandPanel}
     >
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="rounded-xl border border-white/[0.07] bg-white/[0.04] p-4 text-sm text-white/55">
-          Use 15 or more characters. Spaces are supported, and the browser can suggest a generated
-          password if you prefer.
-        </div>
+        <AuthSupportCard>
+          <p className="text-sm text-[color:var(--text-secondary)]">
+            Use 15 or more characters. Spaces are supported, and the browser can suggest a
+            generated password if you prefer.
+          </p>
+        </AuthSupportCard>
 
         <div>
           <label
@@ -220,7 +195,7 @@ const ResetPasswordPage: React.FC = () => {
               type={showNew ? 'text' : 'password'}
               required
               value={newPassword}
-              onChange={event => setNewPassword(event.target.value)}
+              onChange={(event) => setNewPassword(event.target.value)}
               placeholder="Create a strong password"
               autoComplete="new-password"
               spellCheck={false}
@@ -228,7 +203,7 @@ const ResetPasswordPage: React.FC = () => {
               className={`${authInputClassName} pr-12`}
               aria-describedby="reset-password-guidance"
             />
-            <PasswordVisibilityToggle show={showNew} onToggle={() => setShowNew(v => !v)} />
+            <PasswordVisibilityToggle show={showNew} onToggle={() => setShowNew((value) => !value)} />
           </div>
           <div
             id="reset-password-guidance"
@@ -241,9 +216,7 @@ const ResetPasswordPage: React.FC = () => {
           {newPassword ? (
             <div className="mt-3 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] uppercase tracking-widest text-white/30">
-                  Strength
-                </span>
+                <span className="text-[10px] uppercase tracking-widest text-white/30">Strength</span>
                 <span className={`text-xs font-semibold ${passwordStrength.textClass}`}>
                   {passwordStrength.strength}
                 </span>
@@ -254,20 +227,12 @@ const ResetPasswordPage: React.FC = () => {
                   style={{ width: passwordStrength.width }}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-1.5 pt-1">
-                {passwordChecks.map(check => {
-                  const isValid = check.isValid(newPassword);
-                  return (
-                    <div
-                      key={check.getLabel()}
-                      className={`flex items-center gap-1.5 text-xs ${isValid ? 'text-blue-400' : 'text-white/20'}`}
-                    >
-                      {isValid ? <FaCheck size={9} /> : <FaTimes size={9} />}
-                      <span>{check.getLabel()}</span>
-                    </div>
-                  );
-                })}
-              </div>
+              <AuthChecklist
+                items={passwordChecks.map((check) => ({
+                  label: check.getLabel(),
+                  passes: check.isValid(newPassword),
+                }))}
+              />
             </div>
           ) : null}
         </div>
@@ -286,7 +251,7 @@ const ResetPasswordPage: React.FC = () => {
               type={showConfirm ? 'text' : 'password'}
               required
               value={confirmPassword}
-              onChange={event => setConfirmPassword(event.target.value)}
+              onChange={(event) => setConfirmPassword(event.target.value)}
               placeholder="Confirm your new password"
               autoComplete="new-password"
               spellCheck={false}
@@ -296,7 +261,7 @@ const ResetPasswordPage: React.FC = () => {
             />
             <PasswordVisibilityToggle
               show={showConfirm}
-              onToggle={() => setShowConfirm(v => !v)}
+              onToggle={() => setShowConfirm((value) => !value)}
             />
           </div>
           {confirmPassword && !passwordsMatch ? (
@@ -304,7 +269,7 @@ const ResetPasswordPage: React.FC = () => {
               <FaExclamationTriangle size={10} />
               Passwords do not match
             </p>
-          ) : confirmPassword && passwordsMatch ? (
+          ) : confirmPassword ? (
             <p className="mt-2 flex items-center gap-1.5 text-xs text-emerald-400">
               <FaCheck size={10} />
               Passwords match
@@ -312,16 +277,11 @@ const ResetPasswordPage: React.FC = () => {
           ) : null}
         </div>
 
-        {error ? (
-          <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-900/20 p-4 text-sm text-red-300">
-            <span className="shrink-0">⚠</span>
-            {error}
-          </div>
-        ) : null}
+        {error ? <AuthAlert>{error}</AuthAlert> : null}
 
         <Button
           type="submit"
-          disabled={passwordStrength.strength === 'Weak' || (confirmPassword.length > 0 && !passwordsMatch)}
+          disabled={isSubmitDisabled}
           loading={isLoading}
           className="w-full"
           size="lg"
@@ -332,13 +292,7 @@ const ResetPasswordPage: React.FC = () => {
       </form>
 
       <div className="mt-6 text-center">
-        <Link
-          to={routes.signIn}
-          className="inline-flex items-center gap-2 text-sm text-white/35 transition-colors hover:text-white/65"
-        >
-          <FaArrowLeft className="h-3 w-3" />
-          Back to Sign In
-        </Link>
+        <AuthBackLink to={routes.signIn}>Back to Sign In</AuthBackLink>
       </div>
     </AuthPageShell>
   );

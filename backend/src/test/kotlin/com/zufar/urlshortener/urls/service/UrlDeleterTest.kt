@@ -1,21 +1,29 @@
 package com.zufar.urlshortener.urls.service
 
+import com.zufar.urlshortener.auth.service.user.CurrentUserService
 import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.repository.UrlRepository
-import com.zufar.urlshortener.urls.service.command.DeleteUrlMappingService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.data.mongodb.core.MongoTemplate
+import java.time.Clock
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.util.Optional
 
 @ExtendWith(MockitoExtension::class)
 class UrlDeleterTest {
 
     @Mock private lateinit var urlRepository: UrlRepository
-    @Mock private lateinit var urlAccessService: UrlAccessService
+    @Mock private lateinit var currentUserService: CurrentUserService
+    @Mock private lateinit var mongoTemplate: MongoTemplate
+    private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
 
     @Test
     fun `deleteUrl deletes owned mapping`() {
@@ -30,10 +38,18 @@ class UrlDeleterTest {
             userAgent = "JUnit",
             userId = "user-123"
         )
-        whenever(urlAccessService.getOwnedActiveUrlMapping("abc12345", "You are not allowed to delete this URL mapping"))
-            .thenReturn(urlMapping)
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(urlMapping))
+        whenever(currentUserService.requireCurrentUserId()).thenReturn("user-123")
 
-        DeleteUrlMappingService(urlRepository, urlAccessService).delete("abc12345")
+        UrlManagementService(
+            urlRepository = urlRepository,
+            urlValidator = mock(),
+            daysCountValidator = mock(),
+            currentUserService = currentUserService,
+            mongoTemplate = mongoTemplate,
+            baseUrl = "http://localhost:8080",
+            clock = clock
+        ).delete("abc12345")
 
         verify(urlRepository).deleteById("abc12345")
     }

@@ -13,9 +13,9 @@ interface ToastItem {
 }
 
 interface ToastContextValue {
-    success: (message: string) => void;
-    error:   (message: string) => void;
-    info:    (message: string) => void;
+  success: (message: string) => void;
+  error: (message: string) => void;
+  info: (message: string) => void;
 }
 
 // ─── Context ─────────────────────────────────────────────────────────────────
@@ -33,7 +33,7 @@ const ToastContext = createContext<ToastContextValue>(defaultToastContext);
 // ─── Hook ────────────────────────────────────────────────────────────────────
 
 export const useToast = (): ToastContextValue => {
-    return useContext(ToastContext);
+  return useContext(ToastContext);
 };
 
 // ─── Single toast component ───────────────────────────────────────────────────
@@ -63,45 +63,39 @@ const STYLES: Record<ToastType, { icon: string; bar: string; border: string }> =
 };
 
 const ToastCard: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }> = ({
-    toast,
-    onDismiss,
+  toast,
+  onDismiss,
 }) => {
-    const Icon = ICONS[toast.type];
-    const s    = STYLES[toast.type];
+  const Icon = ICONS[toast.type];
+  const style = STYLES[toast.type];
 
-    return (
-        <div
-            className={`
-                relative flex items-start gap-3 w-80 px-4 py-3.5 rounded-2xl
-                bg-[#0d0f1c]/95 backdrop-blur-xl border ${s.border}
-                shadow-[0_8px_32px_rgba(0,0,0,0.5)]
-                ${toast.leaving ? 'toast-leave' : 'toast-enter'}
-            `}
-        >
-            {/* Progress bar */}
-            <div
-                className={`absolute bottom-0 left-0 h-[2px] rounded-b-2xl ${s.bar} opacity-40`}
-                style={{ animation: 'toast-progress 3.5s linear forwards' }}
-            />
-
-            {/* Icon */}
-            <div className={`w-7 h-7 rounded-xl border flex items-center justify-center flex-shrink-0 mt-0.5 ${s.icon}`}>
-                <Icon className="w-3 h-3" />
-            </div>
-
-            {/* Message */}
-            <p className="flex-1 text-sm text-white/85 leading-snug pt-0.5">{toast.message}</p>
-
-            {/* Dismiss */}
-            <button
-                onClick={() => onDismiss(toast.id)}
-                className="text-white/25 hover:text-white/60 transition-colors mt-0.5 flex-shrink-0"
-                aria-label="Dismiss"
-            >
-                <FaTimes className="w-3 h-3" />
-            </button>
-        </div>
-    );
+  return (
+    <div
+      className={`relative flex w-80 items-start gap-3 rounded-[24px] border px-4 py-3.5 backdrop-blur-xl ${
+        style.border
+      } bg-[color:var(--surface-overlay)] shadow-[0_20px_40px_rgba(4,10,24,0.42)] ${
+        toast.leaving ? 'toast-leave' : 'toast-enter'
+      }`}
+    >
+      <div
+        className={`absolute bottom-0 left-0 h-[2px] rounded-b-[24px] ${style.bar} opacity-50`}
+        style={{ animation: 'toast-progress 3.5s linear forwards' }}
+      />
+      <div className={`mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl border ${style.icon}`}>
+        <Icon className="h-3.5 w-3.5" />
+      </div>
+      <p className="flex-1 pt-0.5 text-sm leading-snug text-[color:var(--text-primary)]">
+        {toast.message}
+      </p>
+      <button
+        onClick={() => onDismiss(toast.id)}
+        className="mt-0.5 flex-shrink-0 text-[color:var(--text-muted)] transition-colors hover:text-[color:var(--text-primary)]"
+        aria-label="Dismiss"
+      >
+        <FaTimes className="h-3 w-3" />
+      </button>
+    </div>
+  );
 };
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
@@ -109,65 +103,70 @@ const ToastCard: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }>
 const DURATION = 3500;
 
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [toasts, setToasts] = useState<ToastItem[]>([]);
-    const timers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
-    const removalTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
-    const nextToastId = useRef(0);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const timers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const removalTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  const nextToastId = useRef(0);
 
-    const dismiss = useCallback((id: string) => {
-        // Mark as leaving to trigger exit animation
-        setToasts(prev => prev.map(t => t.id === id ? { ...t, leaving: true } : t));
-        // Remove after animation completes
-        const removalTimer = setTimeout(() => {
-            setToasts(prev => prev.filter(t => t.id !== id));
-            removalTimers.current.delete(id);
-        }, 250);
-        removalTimers.current.set(id, removalTimer);
-        const timer = timers.current.get(id);
-        if (timer) { clearTimeout(timer); timers.current.delete(id); }
-    }, []);
+  const dismiss = useCallback((id: string) => {
+    setToasts((current) => current.map((toast) => (toast.id === id ? { ...toast, leaving: true } : toast)));
 
-    const push = useCallback((type: ToastType, message: string) => {
-        nextToastId.current += 1;
-        const id = `toast-${nextToastId.current}`;
-        setToasts(prev => [...prev.slice(-3), { id, type, message, leaving: false }]);
-        const timer = setTimeout(() => dismiss(id), DURATION);
-        timers.current.set(id, timer);
-    }, [dismiss]);
+    const removalTimer = setTimeout(() => {
+      setToasts((current) => current.filter((toast) => toast.id !== id));
+      removalTimers.current.delete(id);
+    }, 250);
 
-    React.useEffect(() => {
-        const toastTimers = timers.current;
-        const toastRemovalTimers = removalTimers.current;
+    removalTimers.current.set(id, removalTimer);
 
-        return () => {
-            toastTimers.forEach(clearTimeout);
-            toastRemovalTimers.forEach(clearTimeout);
-            toastTimers.clear();
-            toastRemovalTimers.clear();
-        };
-    }, []);
+    const timer = timers.current.get(id);
 
-    const api: ToastContextValue = {
-        success: (msg) => push('success', msg),
-        error:   (msg) => push('error',   msg),
-        info:    (msg) => push('info',    msg),
+    if (timer) {
+      clearTimeout(timer);
+      timers.current.delete(id);
+    }
+  }, []);
+
+  const push = useCallback(
+    (type: ToastType, message: string) => {
+      nextToastId.current += 1;
+      const id = `toast-${nextToastId.current}`;
+      setToasts((current) => [...current.slice(-3), { id, type, message, leaving: false }]);
+      timers.current.set(id, setTimeout(() => dismiss(id), DURATION));
+    },
+    [dismiss],
+  );
+
+  React.useEffect(() => {
+    const toastTimers = timers.current;
+    const toastRemovalTimers = removalTimers.current;
+
+    return () => {
+      toastTimers.forEach(clearTimeout);
+      toastRemovalTimers.forEach(clearTimeout);
+      toastTimers.clear();
+      toastRemovalTimers.clear();
     };
+  }, []);
 
-    return (
-        <ToastContext.Provider value={api}>
-            {children}
+  const api: ToastContextValue = {
+    success: (message) => push('success', message),
+    error: (message) => push('error', message),
+    info: (message) => push('info', message),
+  };
 
-            {/* Portal-style fixed container */}
-            <div
-                aria-live="polite"
-                className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 items-end pointer-events-none"
-            >
-                {toasts.map(t => (
-                    <div key={t.id} className="pointer-events-auto">
-                        <ToastCard toast={t} onDismiss={dismiss} />
-                    </div>
-                ))}
-            </div>
-        </ToastContext.Provider>
-    );
+  return (
+    <ToastContext.Provider value={api}>
+      {children}
+      <div
+        aria-live="polite"
+        className="pointer-events-none fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-3"
+      >
+        {toasts.map((toast) => (
+          <div key={toast.id} className="pointer-events-auto">
+            <ToastCard toast={toast} onDismiss={dismiss} />
+          </div>
+        ))}
+      </div>
+    </ToastContext.Provider>
+  );
 };

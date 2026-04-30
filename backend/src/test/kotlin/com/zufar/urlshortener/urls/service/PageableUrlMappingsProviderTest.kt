@@ -4,7 +4,6 @@ import com.zufar.urlshortener.auth.entity.UserDetails
 import com.zufar.urlshortener.auth.service.user.CurrentUserService
 import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.repository.UrlRepository
-import com.zufar.urlshortener.urls.service.query.UserUrlMappingsQueryService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -13,9 +12,11 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.mongodb.core.MongoTemplate
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDateTime
@@ -26,8 +27,19 @@ class PageableUrlMappingsProviderTest {
 
     @Mock private lateinit var urlRepository: UrlRepository
     @Mock private lateinit var currentUserService: CurrentUserService
+    @Mock private lateinit var mongoTemplate: MongoTemplate
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
-    private val provider by lazy { UserUrlMappingsQueryService(urlRepository, currentUserService, clock) }
+    private val provider by lazy {
+        UrlManagementService(
+            urlRepository = urlRepository,
+            urlValidator = mock(),
+            daysCountValidator = mock(),
+            currentUserService = currentUserService,
+            mongoTemplate = mongoTemplate,
+            baseUrl = "http://localhost:8080",
+            clock = clock
+        )
+    }
 
     private val testUser = UserDetails(
         id = "user-123",
@@ -61,7 +73,7 @@ class PageableUrlMappingsProviderTest {
         whenever(urlRepository.findAllByUserIdAndExpirationDateAfter(eq("user-123"), any(), eq(pageable)))
             .thenReturn(PageImpl(activeMappings))
 
-        val result = provider.getPage(0, 10)
+        val result = provider.getUserUrlMappings(0, 10)
 
         assertEquals(2, result.content.size)
         assertEquals(hashes, result.content.map { it.urlHash })
@@ -75,7 +87,7 @@ class PageableUrlMappingsProviderTest {
         whenever(urlRepository.findAllByUserIdAndExpirationDateAfter(eq("user-123"), any(), eq(pageable)))
             .thenReturn(PageImpl(emptyList()))
 
-        val result = provider.getPage(0, 10)
+        val result = provider.getUserUrlMappings(0, 10)
 
         assertTrue(result.content.isEmpty(), "Expired mappings must not appear in active listing")
         assertEquals(0, result.totalElements)
@@ -89,7 +101,7 @@ class PageableUrlMappingsProviderTest {
         whenever(urlRepository.findAllByUserIdAndExpirationDateAfter(eq("user-123"), any(), eq(pageable)))
             .thenReturn(PageImpl(emptyList(), pageable, 0))
 
-        val result = provider.getPage(2, 5)
+        val result = provider.getUserUrlMappings(2, 5)
 
         assertEquals(2, result.page)
         assertEquals(5, result.size)

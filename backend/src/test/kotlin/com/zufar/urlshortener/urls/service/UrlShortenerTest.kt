@@ -1,9 +1,9 @@
 package com.zufar.urlshortener.urls.service
 
+import com.zufar.urlshortener.auth.service.user.CurrentUserService
 import com.zufar.urlshortener.urls.dto.ShortenUrlRequest
 import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.repository.UrlRepository
-import com.zufar.urlshortener.urls.service.command.ShortenUrlService
 import jakarta.servlet.http.HttpServletRequest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -16,9 +16,13 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.dao.DuplicateKeyException
+import org.springframework.data.mongodb.core.MongoTemplate
+import java.time.Clock
+import java.time.Instant
 import java.time.LocalDateTime
-import kotlin.test.assertTrue
+import java.time.ZoneOffset
 import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 
 @ExtendWith(MockitoExtension::class)
 class UrlShortenerTest {
@@ -26,39 +30,25 @@ class UrlShortenerTest {
     @Mock private lateinit var urlRepository: UrlRepository
     @Mock @Suppress("unused") private lateinit var urlValidator: UrlValidator
     @Mock @Suppress("unused") private lateinit var daysCountValidator: DaysCountValidator
-    @Mock private lateinit var urlMappingEntityCreator: UrlMappingEntityCreator
+    @Mock private lateinit var currentUserService: CurrentUserService
+    @Mock private lateinit var mongoTemplate: MongoTemplate
     @Mock private lateinit var httpRequest: HttpServletRequest
     private val baseUrl = "http://localhost:8080"
+    private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
 
-    private fun fakeMapping(urlHash: String, shortUrl: String, original: String) = UrlMapping(
-        urlHash = urlHash,
-        shortUrl = shortUrl,
-        originalUrl = original,
-        clickCount = 0,
-        createdAt = LocalDateTime.now(),
-        expirationDate = LocalDateTime.now().plusDays(365),
-        requestIp = "127.0.0.1",
-        userAgent = null,
-        userId = null
-    )
-
-    private fun createShortener(baseUrl: String = this.baseUrl) = ShortenUrlService(
+    private fun createShortener(baseUrl: String = this.baseUrl) = UrlManagementService(
         urlRepository = urlRepository,
         urlValidator = urlValidator,
         daysCountValidator = daysCountValidator,
-        urlMappingEntityCreator = urlMappingEntityCreator,
-        baseUrl = baseUrl
+        currentUserService = currentUserService,
+        mongoTemplate = mongoTemplate,
+        baseUrl = baseUrl,
+        clock = clock
     )
 
     @Test
     fun `two different original URLs produce different short codes`() {
         whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
-        whenever(urlMappingEntityCreator.create(any(), any(), any(), any())).thenAnswer { inv ->
-            val hash = inv.arguments[2] as String
-            val short = inv.arguments[3] as String
-            val req = inv.arguments[0] as ShortenUrlRequest
-            fakeMapping(hash, short, req.originalUrl)
-        }
         whenever(urlRepository.insert(any<UrlMapping>())).thenAnswer { it.arguments[0] }
 
         val urlShortener = createShortener()
@@ -71,11 +61,6 @@ class UrlShortenerTest {
     @Test
     fun `same URL called twice creates two separate mappings without global deduplication`() {
         whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
-        whenever(urlMappingEntityCreator.create(any(), any(), any(), any())).thenAnswer { inv ->
-            val hash = inv.arguments[2] as String
-            val short = inv.arguments[3] as String
-            fakeMapping(hash, short, "http://example.com")
-        }
         whenever(urlRepository.insert(any<UrlMapping>())).thenAnswer { it.arguments[0] }
 
         val urlShortener = createShortener()
@@ -90,14 +75,11 @@ class UrlShortenerTest {
     fun `insert collision retries and succeeds`() {
         whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
         var callCount = 0
-        whenever(urlMappingEntityCreator.create(any(), any(), any(), any())).thenAnswer { inv ->
-            val hash = inv.arguments[2] as String
-            val short = inv.arguments[3] as String
-            fakeMapping(hash, short, "http://example.com")
-        }
-        whenever(urlRepository.insert(any<UrlMapping>())).thenAnswer { inv ->
-            if (callCount++ < 1) throw DuplicateKeyException("collision")
-            inv.arguments[0]
+        whenever(urlRepository.insert(any<UrlMapping>())).thenAnswer { invocation ->
+            if (callCount++ < 1) {
+                throw DuplicateKeyException("collision")
+            }
+            invocation.arguments[0]
         }
 
         val urlShortener = createShortener()
@@ -111,11 +93,6 @@ class UrlShortenerTest {
     @Test
     fun `shortenUrl throws when insert collisions exhaust all retries`() {
         whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
-        whenever(urlMappingEntityCreator.create(any(), any(), any(), any())).thenAnswer { inv ->
-            val hash = inv.arguments[2] as String
-            val short = inv.arguments[3] as String
-            fakeMapping(hash, short, "http://example.com")
-        }
         whenever(urlRepository.insert(any<UrlMapping>())).thenThrow(DuplicateKeyException("collision"))
 
         val urlShortener = createShortener()
@@ -130,11 +107,6 @@ class UrlShortenerTest {
     @Test
     fun `baseUrl trailing slash does not produce double slash`() {
         whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
-        whenever(urlMappingEntityCreator.create(any(), any(), any(), any())).thenAnswer { inv ->
-            val hash = inv.arguments[2] as String
-            val short = inv.arguments[3] as String
-            fakeMapping(hash, short, "http://example.com")
-        }
         whenever(urlRepository.insert(any<UrlMapping>())).thenAnswer { it.arguments[0] }
 
         val urlShortener = createShortener("http://localhost:8080/")

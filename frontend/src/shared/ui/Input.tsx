@@ -13,20 +13,23 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>((
   const generatedId = useId();
   const inputId = id ?? generatedId;
   const errorId = `${inputId}-error`;
-  const baseStyles = 'w-full rounded-xl border border-white/7 bg-[#11182b] px-4 py-3 text-white placeholder-white/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all duration-200';
+  const baseStyles =
+    'w-full rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface-raised)] px-4 py-3 text-[color:var(--text-primary)] ' +
+    'placeholder-[color:var(--text-muted)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition duration-200 ' +
+    'focus:border-[color:var(--accent-border)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-ring)]';
   const errorStyles = error ? 'border-red-500/40 focus:ring-red-500/40' : '';
   const iconStyles = icon ? 'pl-12' : '';
 
   return (
     <div className="space-y-2">
       {label && (
-        <label htmlFor={inputId} className="block text-sm font-semibold text-white/70">
+        <label htmlFor={inputId} className="block text-sm font-semibold text-[color:var(--text-secondary)]">
           {label}
         </label>
       )}
       <div className="relative">
         {icon && (
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-[color:var(--text-muted)]">
             {icon}
           </div>
         )}
@@ -40,8 +43,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>((
         />
       </div>
       {error && (
-        <p id={errorId} className="text-red-500 text-sm flex items-center">
-          <span className="mr-1">⚠️</span>
+        <p id={errorId} className="flex items-center text-sm text-red-400">
+          <span className="mr-1">⚠</span>
           {error}
         </p>
       )}

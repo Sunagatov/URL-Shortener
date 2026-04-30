@@ -13,6 +13,7 @@ import { FaEnvelope, FaLock, FaRocket, FaShieldAlt, FaChartLine } from 'react-ic
 import { getAuthDestination } from '@/features/auth/lib/authRouting';
 import { useCompleteAuth } from '@/features/auth/model/useCompleteAuth';
 import { AuthBrandPanel } from '@/features/auth/ui/AuthBrandPanel';
+import { AuthAlert } from '@/features/auth/ui/AuthFlowElements';
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
 import { AuthTextField } from '@/features/auth/ui/AuthTextField';
 
@@ -105,10 +106,7 @@ const SignInPage: React.FC = () => {
         </div>
 
         {error ? (
-          <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-900/20 p-4 text-sm text-red-300">
-            <span className="shrink-0">⚠</span>
-            {error.errorMessage}
-          </div>
+          <AuthAlert>{error.errorMessage}</AuthAlert>
         ) : null}
 
         <Button type="submit" loading={loading} className="w-full" size="lg">
@@ -122,7 +120,7 @@ const SignInPage: React.FC = () => {
             <div className="w-full border-t border-white/[0.08]" />
           </div>
           <div className="relative flex justify-center text-xs">
-            <span className="bg-[#060612] px-3 text-white/25">Or continue with</span>
+            <span className="bg-[rgb(var(--bg-base-rgb))] px-3 text-white/25">Or continue with</span>
           </div>
         </div>
         <div className="mt-4 grid grid-cols-2 gap-3">

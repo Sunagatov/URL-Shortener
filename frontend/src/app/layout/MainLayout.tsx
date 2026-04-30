@@ -11,16 +11,28 @@ interface MainLayoutProps {
   children: React.ReactNode;
 }
 
+const AUTH_ROUTES = new Set<string>([
+  routes.signIn,
+  routes.signUp,
+  routes.forgotPassword,
+  routes.resetPassword,
+  routes.verifyEmail,
+]);
+
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { isAuthenticated, logout } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
-  const pathname = location.pathname;
+  const { pathname } = useLocation();
   const isAccountRoute = pathname.startsWith('/account');
   const isSignInRoute = pathname === routes.signIn;
   const isSignUpRoute = pathname === routes.signUp;
-  const isAuthRoute = isSignInRoute || isSignUpRoute;
+  const isAuthRoute = AUTH_ROUTES.has(pathname);
+  const mainClassName = [
+    'flex-grow pt-[72px] md:pt-24',
+    isAuthenticated ? 'pb-24 md:pb-0' : '',
+    isAccountRoute || isAuthRoute ? '' : 'flex items-center justify-center',
+  ].join(' ');
 
   const handleLogout = () => {
     logout();
@@ -47,13 +59,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         onCloseUserMenu={() => setIsUserMenuOpen(false)}
       />
 
-      <main
-        className={`flex-grow bg-[#060612] pt-[72px] md:pt-24 ${isAuthenticated ? 'pb-24 md:pb-0' : ''} ${
-          isAccountRoute || isAuthRoute ? '' : 'flex items-center justify-center'
-        }`}
-      >
-        {children}
-      </main>
+      <main className={mainClassName}>{children}</main>
 
       {isAuthenticated && <MobileTabBar />}
       {!isAccountRoute && <LayoutFooter isAuthenticated={isAuthenticated} />}

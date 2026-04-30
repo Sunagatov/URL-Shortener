@@ -16,6 +16,7 @@ import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { FaCalendarAlt, FaEnvelope, FaGlobe, FaLock, FaUser } from 'react-icons/fa';
 import { getAuthDestination } from '@/features/auth/lib/authRouting';
 import { AuthBrandPanel } from '@/features/auth/ui/AuthBrandPanel';
+import { AuthAlert } from '@/features/auth/ui/AuthFlowElements';
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
 import { AuthTextField } from '@/features/auth/ui/AuthTextField';
 
@@ -171,10 +172,7 @@ const SignUpPage: React.FC = () => {
         </div>
 
         {error ? (
-          <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-900/20 p-4 text-sm text-red-300">
-            <span className="shrink-0">⚠</span>
-            {error.errorMessage}
-          </div>
+          <AuthAlert>{error.errorMessage}</AuthAlert>
         ) : null}
 
         <Button type="submit" loading={loading} className="w-full" size="lg">

@@ -1,12 +1,11 @@
 package com.zufar.urlshortener.shared.security
 
 import com.zufar.urlshortener.urls.dto.UrlMappingDto
-import com.zufar.urlshortener.urls.service.command.TrackUrlClickService
-import com.zufar.urlshortener.urls.service.command.ShortenUrlService
-import com.zufar.urlshortener.urls.service.query.UrlQueryService
+import com.zufar.urlshortener.urls.service.UrlManagementService
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -32,13 +31,7 @@ class SecurityRestExceptionHandlingTest {
     private lateinit var mockMvc: MockMvc
 
     @Autowired
-    private lateinit var shortenUrlService: ShortenUrlService
-
-    @Autowired
-    private lateinit var urlQueryService: UrlQueryService
-
-    @Autowired
-    private lateinit var trackUrlClickService: TrackUrlClickService
+    private lateinit var urlManagementService: UrlManagementService
 
     @Test
     fun `users endpoint without auth returns 401 JSON`() {
@@ -58,7 +51,7 @@ class SecurityRestExceptionHandlingTest {
 
     @Test
     fun `shorten url endpoint remains publicly accessible`() {
-        whenever(shortenUrlService.shorten(any(), any())).thenReturn("http://localhost:8080/abc12345")
+        whenever(urlManagementService.shorten(any(), any())).thenReturn("http://localhost:8080/abc12345")
 
         mockMvc.perform(
             post("/api/v1/urls")
@@ -71,7 +64,7 @@ class SecurityRestExceptionHandlingTest {
 
     @Test
     fun `public short url redirect remains accessible without auth`() {
-        whenever(urlQueryService.getPublicByHash("abc12345")).thenReturn(
+        whenever(urlManagementService.getPublicUrlMapping("abc12345")).thenReturn(
             UrlMappingDto(
                 urlHash = "abc12345",
                 shortUrl = "http://localhost:8080/abc12345",
@@ -88,7 +81,7 @@ class SecurityRestExceptionHandlingTest {
             .andExpect(header().string("Referrer-Policy", "no-referrer"))
             .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("public")))
 
-        org.mockito.kotlin.verify(trackUrlClickService).increment("abc12345")
+        verify(urlManagementService).incrementClickCount("abc12345")
     }
 
     @Test
@@ -102,14 +95,6 @@ class SecurityRestExceptionHandlingTest {
 
         @Bean
         @Primary
-        fun shortenUrlService(): ShortenUrlService = mock()
-
-        @Bean
-        @Primary
-        fun urlQueryService(): UrlQueryService = mock()
-
-        @Bean
-        @Primary
-        fun trackUrlClickService(): TrackUrlClickService = mock()
+        fun urlManagementService(): UrlManagementService = mock()
     }
 }

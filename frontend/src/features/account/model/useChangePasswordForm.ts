@@ -5,7 +5,7 @@ import { changePassword } from '@/features/account/api/accountApi';
 import { useAuth } from '@/shared/auth/useAuth';
 import { getApiErrorMessage, isSessionInvalidError } from '@/shared/lib/apiErrors';
 import { useToast } from '@/shared/ui';
-import { getPasswordStrength } from './passwordStrength';
+import { getPasswordStrength } from '@/shared/lib/passwordStrength';
 
 export function useChangePasswordForm() {
   const [currentPassword, setCurrentPassword] = useState('');

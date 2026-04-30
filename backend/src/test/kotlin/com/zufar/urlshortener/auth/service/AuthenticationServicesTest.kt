@@ -8,10 +8,7 @@ import com.zufar.urlshortener.auth.exception.EmailAlreadyExistsException
 import com.zufar.urlshortener.auth.exception.InvalidTokenException
 import com.zufar.urlshortener.auth.repository.UserRepository
 import com.zufar.urlshortener.auth.security.JwtTokenProvider
-import com.zufar.urlshortener.auth.service.authentication.SignInService
-import com.zufar.urlshortener.auth.service.registration.SignUpService
 import com.zufar.urlshortener.auth.service.support.AuthTokenIssuer
-import com.zufar.urlshortener.auth.service.token.RefreshAccessTokenService
 import com.zufar.urlshortener.auth.validation.AuthRequestValidator
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -42,21 +39,14 @@ class AuthenticationServicesTest {
     @Mock private lateinit var passwordEncoder: PasswordEncoder
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
 
-    private fun signInService() = SignInService(authenticationManager, authRequestValidator, authTokenIssuer)
-
-    private fun signUpService() = SignUpService(
+    private fun authService() = AuthService(
+        authenticationManager = authenticationManager,
         authRequestValidator = authRequestValidator,
+        authTokenIssuer = authTokenIssuer,
         userRepository = userRepository,
         passwordEncoder = passwordEncoder,
-        authTokenIssuer = authTokenIssuer,
-        clock = clock
-    )
-
-    private fun refreshAccessTokenService() = RefreshAccessTokenService(
-        authRequestValidator = authRequestValidator,
-        userRepository = userRepository,
         jwtTokenProvider = jwtTokenProvider,
-        authTokenIssuer = authTokenIssuer
+        clock = clock
     )
 
     @Test
@@ -67,7 +57,7 @@ class AuthenticationServicesTest {
             com.zufar.urlshortener.auth.dto.AuthResponse("access-token", "refresh-token")
         )
 
-        signUpService().register(
+        authService().signUp(
             SignUpRequest(
                 firstName = "Jane",
                 lastName = "Doe",
@@ -100,7 +90,7 @@ class AuthenticationServicesTest {
         )
 
         assertThrows<EmailAlreadyExistsException> {
-            signUpService().register(
+            authService().signUp(
                 SignUpRequest(
                     firstName = "Jane",
                     lastName = "Doe",
@@ -123,7 +113,7 @@ class AuthenticationServicesTest {
             com.zufar.urlshortener.auth.dto.AuthResponse("access-token", "refresh-token")
         )
 
-        signInService().authenticate(SignInRequest("  User@Example.COM  ", "password"))
+        authService().signIn(SignInRequest("  User@Example.COM  ", "password"))
 
         val captor = ArgumentCaptor.forClass(UsernamePasswordAuthenticationToken::class.java)
         verify(authenticationManager).authenticate(captor.capture())
@@ -146,7 +136,7 @@ class AuthenticationServicesTest {
         whenever(userRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
         whenever(authTokenIssuer.issueAccessToken(user)).thenReturn("new-access-token")
 
-        val response = refreshAccessTokenService().refresh(RefreshTokenRequest("refresh-token"))
+        val response = authService().refreshAccessToken(RefreshTokenRequest("refresh-token"))
 
         verify(userRepository).findByEmailIgnoreCase("user@example.com")
         assertEquals("new-access-token", response.accessToken)
@@ -169,7 +159,7 @@ class AuthenticationServicesTest {
         whenever(userRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
 
         assertThrows<InvalidTokenException> {
-            refreshAccessTokenService().refresh(RefreshTokenRequest("refresh-token"))
+            authService().refreshAccessToken(RefreshTokenRequest("refresh-token"))
         }
     }
 }

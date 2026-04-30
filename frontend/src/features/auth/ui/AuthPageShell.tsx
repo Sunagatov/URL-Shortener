@@ -28,8 +28,8 @@ export function AuthPageShell({
       <div className="flex flex-1 items-center justify-center px-5 py-10 sm:px-8">
         <div className={`w-full ${contentWidthClass[width]}`}>
           <div className="mb-8 flex items-center gap-2 lg:hidden">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-blue-500/30 bg-blue-600/20">
-              <FaLink className="h-3.5 w-3.5 text-blue-400" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl border border-[color:var(--accent-border)] bg-[var(--accent-glow)]">
+              <FaLink className="h-3.5 w-3.5 text-cyan-200" />
             </div>
             <span
               className="text-base font-bold text-white"
@@ -41,12 +41,12 @@ export function AuthPageShell({
 
           <div className="mb-8">
             <h1
-              className="mb-1.5 text-2xl font-bold text-white"
+              className="mb-1.5 text-3xl font-bold text-white"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               {title}
             </h1>
-            <p className="text-sm text-white/40">{description}</p>
+            <p className="text-sm leading-relaxed text-[color:var(--text-secondary)]">{description}</p>
           </div>
 
           {children}

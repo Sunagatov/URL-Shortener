@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  FaArrowLeft,
-  FaCheck,
-  FaClock,
-  FaEnvelope,
-  FaInbox,
-  FaLock,
-  FaShieldAlt,
-} from 'react-icons/fa';
+import { FaCheck, FaClock, FaEnvelope, FaInbox, FaLock, FaShieldAlt } from 'react-icons/fa';
 import { routes } from '@/app/routes';
 import { requestPasswordReset } from '@/features/auth/api/passwordResetApi';
 import { AuthBrandPanel } from '@/features/auth/ui/AuthBrandPanel';
+import {
+  AuthAlert,
+  AuthBackLink,
+  AuthStatusIcon,
+  AuthStatusView,
+  AuthSupportCard,
+} from '@/features/auth/ui/AuthFlowElements';
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
 import { authInputClassName } from '@/features/auth/ui/authStyles';
 import { getApiErrorStatus } from '@/shared/lib/apiErrors';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { Button } from '@/shared/ui';
+
+const RESEND_COOLDOWN_SECONDS = 30;
 
 const brandPanel = (
   <AuthBrandPanel
@@ -42,8 +43,6 @@ const brandPanel = (
   />
 );
 
-const RESEND_COOLDOWN_SECONDS = 30;
-
 function maskEmailAddress(email: string): string {
   const [localPart, domain] = email.split('@');
 
@@ -59,6 +58,12 @@ function maskEmailAddress(email: string): string {
 
   return `${visibleLocal}${hiddenLocal}@${visibleDomain}${hiddenDomain}${domainTail.length ? `.${domainTail.join('.')}` : ''}`;
 }
+
+const recoveryHints = [
+  'Look in your inbox, spam, and promotions folders',
+  'The newest recovery link automatically replaces older ones',
+  'Keep this tab open while you check your email',
+];
 
 const ForgotPasswordPage: React.FC = () => {
   usePageTitle('Forgot Password');
@@ -77,16 +82,16 @@ const ForgotPasswordPage: React.FC = () => {
     }
 
     const timer = window.setInterval(() => {
-      setCooldownSeconds(seconds => (seconds <= 1 ? 0 : seconds - 1));
+      setCooldownSeconds((seconds) => (seconds <= 1 ? 0 : seconds - 1));
     }, 1000);
 
     return () => window.clearInterval(timer);
   }, [cooldownSeconds, submitted]);
 
-  const completeSubmission = (targetEmail: string, notice?: string) => {
+  const completeSubmission = (targetEmail: string, notice = '') => {
     setSubmittedEmail(targetEmail);
     setSubmitted(true);
-    setInlineNotice(notice ?? '');
+    setInlineNotice(notice);
     setCooldownSeconds(RESEND_COOLDOWN_SECONDS);
   };
 
@@ -103,13 +108,13 @@ const ForgotPasswordPage: React.FC = () => {
       await requestPasswordReset(targetEmail);
       completeSubmission(
         targetEmail,
-        mode === 'resend' ? 'If that account exists, we sent a fresh recovery email.' : ''
+        mode === 'resend' ? 'If that account exists, we sent a fresh recovery email.' : '',
       );
     } catch (err: unknown) {
       if (getApiErrorStatus(err) !== undefined) {
         completeSubmission(
           targetEmail,
-          mode === 'resend' ? 'If that account exists, we sent a fresh recovery email.' : ''
+          mode === 'resend' ? 'If that account exists, we sent a fresh recovery email.' : '',
         );
         return;
       }
@@ -140,83 +145,73 @@ const ForgotPasswordPage: React.FC = () => {
         description={`If an account exists for ${maskEmailAddress(submittedEmail)}, recovery instructions are on the way.`}
         brandPanel={brandPanel}
       >
-        <div className="animate-fade-up space-y-5">
-          <div className="flex flex-col items-center py-4">
-            <div className="relative mb-5">
-              <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-emerald-500/25 bg-emerald-500/12">
-                <FaInbox className="h-8 w-8 text-emerald-400" />
-              </div>
-              <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full border border-emerald-500/40 bg-emerald-500/20">
-                <FaCheck className="h-3 w-3 text-emerald-400" />
-              </div>
-            </div>
-
-            <div className="mb-2 text-center">
+        <AuthStatusView
+          title="Recovery requested"
+          description={(
+            <>
               <p className="text-sm text-white/40">Recovery requested for</p>
               <p className="mt-1 break-all text-sm font-semibold text-white">{submittedEmail}</p>
-            </div>
-          </div>
+            </>
+          )}
+          icon={(
+            <AuthStatusIcon badge="success">
+              <FaInbox className="h-8 w-8 text-emerald-400" />
+            </AuthStatusIcon>
+          )}
+          action={(
+            <>
+              <AuthSupportCard>
+                <div className="space-y-3">
+                  {recoveryHints.map((hint) => (
+                    <div key={hint} className="flex items-start gap-2.5 text-sm text-white/45">
+                      <FaCheck className="mt-0.5 h-3 w-3 flex-shrink-0 text-emerald-500/70" />
+                      <span>{hint}</span>
+                    </div>
+                  ))}
+                </div>
+              </AuthSupportCard>
 
-          <div className="rounded-xl border border-white/[0.07] bg-white/[0.04] p-4 space-y-3">
-            {[
-              'Look in your inbox, spam, and promotions folders',
-              'The newest recovery link automatically replaces older ones',
-              'Keep this tab open while you check your email',
-            ].map(hint => (
-              <div key={hint} className="flex items-start gap-2.5 text-sm text-white/45">
-                <FaCheck className="mt-0.5 h-3 w-3 flex-shrink-0 text-emerald-500/70" />
-                <span>{hint}</span>
+              {inlineNotice ? (
+                <AuthSupportCard>
+                  <p className="text-sm text-[color:var(--text-secondary)]">{inlineNotice}</p>
+                </AuthSupportCard>
+              ) : null}
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="lg"
+                  className="w-full"
+                  onClick={() => void sendRecoveryLink(submittedEmail, 'resend')}
+                  loading={isResending}
+                  disabled={cooldownSeconds > 0}
+                >
+                  <FaEnvelope className="h-4 w-4" />
+                  <span>{cooldownSeconds > 0 ? `Resend in ${cooldownSeconds}s` : 'Resend email'}</span>
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="lg"
+                  className="w-full"
+                  onClick={() => {
+                    setSubmitted(false);
+                    setEmail(submittedEmail);
+                    setInlineNotice('');
+                  }}
+                >
+                  Try a different email
+                </Button>
               </div>
-            ))}
-          </div>
 
-          {inlineNotice ? (
-            <div className="rounded-xl border border-white/[0.08] bg-white/[0.04] p-4 text-sm text-white/60">
-              {inlineNotice}
-            </div>
-          ) : null}
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Button
-              type="button"
-              variant="secondary"
-              size="lg"
-              className="w-full"
-              onClick={() => void sendRecoveryLink(submittedEmail, 'resend')}
-              loading={isResending}
-              disabled={cooldownSeconds > 0}
-            >
-              <FaEnvelope className="h-4 w-4" />
-              <span>
-                {cooldownSeconds > 0 ? `Resend in ${cooldownSeconds}s` : 'Resend email'}
-              </span>
-            </Button>
-
-            <Button
-              type="button"
-              variant="ghost"
-              size="lg"
-              className="w-full"
-              onClick={() => {
-                setSubmitted(false);
-                setEmail(submittedEmail);
-                setInlineNotice('');
-              }}
-            >
-              Try a different email
-            </Button>
-          </div>
-
-          <div className="text-center">
-            <Link
-              to={routes.signIn}
-              className="inline-flex items-center gap-2 text-sm text-white/35 transition-colors hover:text-white/65"
-            >
-              <FaArrowLeft className="h-3 w-3" />
-              Back to Sign In
-            </Link>
-          </div>
-        </div>
+              <div className="text-center">
+                <AuthBackLink to={routes.signIn}>Back to Sign In</AuthBackLink>
+              </div>
+            </>
+          )}
+        />
       </AuthPageShell>
     );
   }
@@ -243,7 +238,7 @@ const ForgotPasswordPage: React.FC = () => {
               type="email"
               required
               value={email}
-              onChange={event => setEmail(event.target.value)}
+              onChange={(event) => setEmail(event.target.value)}
               placeholder="your@email.com"
               autoComplete="username"
               autoCapitalize="none"
@@ -259,12 +254,7 @@ const ForgotPasswordPage: React.FC = () => {
           </p>
         </div>
 
-        {error ? (
-          <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-900/20 p-4 text-sm text-red-300">
-            <span className="shrink-0">⚠</span>
-            {error}
-          </div>
-        ) : null}
+        {error ? <AuthAlert>{error}</AuthAlert> : null}
 
         <Button type="submit" loading={isLoading} className="w-full" size="lg">
           <FaEnvelope className="h-4 w-4" />
@@ -273,20 +263,14 @@ const ForgotPasswordPage: React.FC = () => {
       </form>
 
       <div className="mt-6 text-center">
-        <Link
-          to={routes.signIn}
-          className="inline-flex items-center gap-2 text-sm text-white/35 transition-colors hover:text-white/65"
-        >
-          <FaArrowLeft className="h-3 w-3" />
-          Back to Sign In
-        </Link>
+        <AuthBackLink to={routes.signIn}>Back to Sign In</AuthBackLink>
       </div>
 
       <p className="mt-6 text-center text-sm text-white/30">
         Don't have an account?{' '}
         <Link
           to={routes.signUp}
-          className="font-semibold text-blue-400 transition-colors hover:text-blue-300"
+          className="font-semibold text-cyan-300 transition-colors hover:text-cyan-200"
         >
           Sign up for free
         </Link>

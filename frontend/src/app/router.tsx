@@ -15,52 +15,35 @@ import UrlShortenerPage from '@/features/urls/routes/UrlShortenerPage';
 import UserUrlMappingsPage from '@/features/urls/routes/UserUrlMappingsPage';
 import UrlMappingDetailsPage from '@/features/urls/routes/UrlMappingDetailsPage';
 
+const guestRoutes = [
+  { path: routes.signIn, element: <SignInPage /> },
+  { path: routes.signUp, element: <SignUpPage /> },
+  { path: routes.verifyEmail, element: <VerifyEmailPage /> },
+  { path: routes.forgotPassword, element: <ForgotPasswordPage /> },
+  { path: routes.resetPassword, element: <ResetPasswordPage /> },
+] as const;
+
+const protectedRoutes = [
+  { path: routes.dashboard, element: <DashboardPage /> },
+  { path: routes.profile, element: <UserAccountPage /> },
+  { path: routes.security, element: <SecurityPage /> },
+  { path: routes.urlMappings, element: <UserUrlMappingsPage /> },
+  { path: routes.urlDetails(':urlHash'), element: <UrlMappingDetailsPage /> },
+] as const;
+
 const AppRouter = () => {
   return (
     <Router>
       <MainLayout>
         <Routes>
           <Route path={routes.home} element={<UrlShortenerPage />} />
-          <Route
-            path={routes.signIn}
-            element={(
-              <GuestOnlyRoute>
-                <SignInPage />
-              </GuestOnlyRoute>
-            )}
-          />
-          <Route
-            path={routes.signUp}
-            element={(
-              <GuestOnlyRoute>
-                <SignUpPage />
-              </GuestOnlyRoute>
-            )}
-          />
-          <Route
-            path={routes.verifyEmail}
-            element={(
-              <GuestOnlyRoute>
-                <VerifyEmailPage />
-              </GuestOnlyRoute>
-            )}
-          />
-          <Route
-            path={routes.forgotPassword}
-            element={(
-              <GuestOnlyRoute>
-                <ForgotPasswordPage />
-              </GuestOnlyRoute>
-            )}
-          />
-          <Route
-            path={routes.resetPassword}
-            element={(
-              <GuestOnlyRoute>
-                <ResetPasswordPage />
-              </GuestOnlyRoute>
-            )}
-          />
+          {guestRoutes.map(({ path, element }) => (
+            <Route
+              key={path}
+              path={path}
+              element={<GuestOnlyRoute>{element}</GuestOnlyRoute>}
+            />
+          ))}
           <Route
             path={routes.account}
             element={(
@@ -69,46 +52,13 @@ const AppRouter = () => {
               </ProtectedRoute>
             )}
           />
-          <Route
-            path={routes.dashboard}
-            element={(
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            )}
-          />
-          <Route
-            path={routes.profile}
-            element={(
-              <ProtectedRoute>
-                <UserAccountPage />
-              </ProtectedRoute>
-            )}
-          />
-          <Route
-            path={routes.security}
-            element={(
-              <ProtectedRoute>
-                <SecurityPage />
-              </ProtectedRoute>
-            )}
-          />
-          <Route
-            path={routes.urlMappings}
-            element={(
-              <ProtectedRoute>
-                <UserUrlMappingsPage />
-              </ProtectedRoute>
-            )}
-          />
-          <Route
-            path={routes.urlDetails(':urlHash')}
-            element={(
-              <ProtectedRoute>
-                <UrlMappingDetailsPage />
-              </ProtectedRoute>
-            )}
-          />
+          {protectedRoutes.map(({ path, element }) => (
+            <Route
+              key={path}
+              path={path}
+              element={<ProtectedRoute>{element}</ProtectedRoute>}
+            />
+          ))}
           <Route path="*" element={<Navigate to={routes.home} replace />} />
         </Routes>
       </MainLayout>

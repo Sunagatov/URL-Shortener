@@ -1,7 +1,7 @@
 import type { FormEvent } from 'react';
 import { FaCheck, FaExclamationTriangle, FaEye, FaEyeSlash, FaLock, FaTimes } from 'react-icons/fa';
 import { Button } from '@/shared/ui';
-import { passwordChecks, type PasswordStrength } from '@/features/account/model/passwordStrength';
+import { passwordChecks, type PasswordStrength } from '@/shared/lib/passwordStrength';
 
 interface PasswordChangeFormProps {
   confirmPassword: string;

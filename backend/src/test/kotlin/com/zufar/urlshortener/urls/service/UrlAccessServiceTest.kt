@@ -3,32 +3,47 @@ package com.zufar.urlshortener.urls.service
 import com.zufar.urlshortener.auth.service.user.CurrentUserService
 import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.exception.UrlNotFoundException
+import com.zufar.urlshortener.urls.repository.UrlRepository
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.security.access.AccessDeniedException
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.util.Optional
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
 class UrlAccessServiceTest {
 
-    @Mock private lateinit var cachedUrlMappingLookupService: CachedUrlMappingLookupService
+    @Mock private lateinit var urlRepository: UrlRepository
     @Mock private lateinit var currentUserService: CurrentUserService
+    @Mock private lateinit var mongoTemplate: MongoTemplate
 
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
-    private val service by lazy { UrlAccessService(cachedUrlMappingLookupService, currentUserService, clock) }
+    private val service by lazy {
+        UrlManagementService(
+            urlRepository = urlRepository,
+            urlValidator = mock(),
+            daysCountValidator = mock(),
+            currentUserService = currentUserService,
+            mongoTemplate = mongoTemplate,
+            baseUrl = "http://localhost:8080",
+            clock = clock
+        )
+    }
 
     @Test
     fun `getActiveUrlMapping returns active mapping`() {
         val urlMapping = mapping(expirationDate = LocalDateTime.parse("2024-01-02T10:15:30"))
-        whenever(cachedUrlMappingLookupService.getByUrlHash("abc12345")).thenReturn(urlMapping)
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(urlMapping))
 
         val result = service.getActiveUrlMapping("abc12345")
 
@@ -38,7 +53,7 @@ class UrlAccessServiceTest {
     @Test
     fun `getActiveUrlMapping rejects expired mapping`() {
         val expiredMapping = mapping(expirationDate = LocalDateTime.parse("2023-12-31T10:15:30"))
-        whenever(cachedUrlMappingLookupService.getByUrlHash("abc12345")).thenReturn(expiredMapping)
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(expiredMapping))
 
         assertThrows<UrlNotFoundException> {
             service.getActiveUrlMapping("abc12345")
@@ -48,7 +63,7 @@ class UrlAccessServiceTest {
     @Test
     fun `getOwnedActiveUrlMapping rejects access to mapping owned by another user`() {
         val urlMapping = mapping(userId = "another-user", expirationDate = LocalDateTime.parse("2024-01-02T10:15:30"))
-        whenever(cachedUrlMappingLookupService.getByUrlHash("abc12345")).thenReturn(urlMapping)
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(urlMapping))
         whenever(currentUserService.requireCurrentUserId()).thenReturn("user-123")
 
         val exception = assertThrows<AccessDeniedException> {
@@ -61,7 +76,7 @@ class UrlAccessServiceTest {
     @Test
     fun `getOwnedActiveUrlMapping returns mapping for owner`() {
         val urlMapping = mapping(userId = "user-123", expirationDate = LocalDateTime.parse("2024-01-02T10:15:30"))
-        whenever(cachedUrlMappingLookupService.getByUrlHash("abc12345")).thenReturn(urlMapping)
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(urlMapping))
         whenever(currentUserService.requireCurrentUserId()).thenReturn("user-123")
 
         val result = service.getOwnedActiveUrlMapping("abc12345", "forbidden")
