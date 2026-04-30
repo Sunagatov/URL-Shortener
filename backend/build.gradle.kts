@@ -30,7 +30,7 @@ sonar {
 val springCloudVersion = "2025.0.0"
 val mockitoVersion = "5.18.0"
 val mockitoKotlinVersion = "5.4.0"
-val springdocVersion = "2.8.9"
+val springdocVersion = "2.8.17"
 val commonsValidatorVersion = "1.9.0"
 val caffeineVersion = "3.2.0"
 val bucket4jVersion = "8.7.0"
@@ -64,7 +64,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     // OpenAPI
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-scalar:$springdocVersion")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-api:$springdocVersion")
 
     // Validation

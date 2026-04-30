@@ -1,4 +1,5 @@
 import type { MouseEvent } from 'react';
+import { useState } from 'react';
 import { FaCheck, FaChevronRight, FaCopy, FaExternalLinkAlt, FaLink, FaTrash } from 'react-icons/fa';
 import { getDomainLabel, getShortUrlSlug } from '@/features/urls/lib/urlMappings';
 import type { UrlMapping } from '@/shared/types';
@@ -17,6 +18,21 @@ interface UrlMappingCardProps {
   onDetails: () => void;
   onToggleSelect?: () => void;
 }
+
+const FaviconImage = ({ domain }: { domain: string }) => {
+  const [failed, setFailed] = useState(false);
+  if (failed) return <FaLink className="h-3.5 w-3.5 text-blue-400" />;
+  return (
+    <img
+      src={`https://www.google.com/s2/favicons?domain=${domain}&sz=32`}
+      alt=""
+      width={16}
+      height={16}
+      onError={() => setFailed(true)}
+      className="h-4 w-4 object-contain"
+    />
+  );
+};
 
 export const UrlMappingCard = ({
   copiedUrl,
@@ -61,7 +77,7 @@ export const UrlMappingCard = ({
           </div>
         ) : (
           <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-600/15">
-            <FaLink className="h-3 w-3 text-blue-400" />
+            <FaviconImage domain={domain} />
           </div>
         )}
         <div className="min-w-0 flex-1">
@@ -134,7 +150,12 @@ export const UrlMappingCard = ({
               </a>
             </div>
             {copiedUrl === mapping.shortUrl && (
-              <span className="shrink-0 text-[10px] font-medium text-blue-400">Copied!</span>
+              <span
+                className="max-w-[8.5rem] shrink truncate text-[10px] font-medium text-blue-400 sm:max-w-[12rem]"
+                title={`${mapping.shortUrl} copied!`}
+              >
+                {mapping.shortUrl} copied!
+              </span>
             )}
           </div>
         </div>

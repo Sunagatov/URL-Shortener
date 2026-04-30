@@ -46,6 +46,9 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
             {/* Modal card */}
             <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="confirm-modal-title"
                 className="relative w-full max-w-sm rounded-2xl border border-white/[0.09] bg-[#0d0f1e] shadow-[0_24px_64px_rgba(0,0,0,0.6)] p-6"
                 style={{ animation: 'modal-in 0.2s cubic-bezier(0.22,1,0.36,1) both' }}
             >
@@ -58,6 +61,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
                 {/* Text */}
                 <h2
+                    id="confirm-modal-title"
                     className="text-center text-base font-bold text-white mb-1.5"
                     style={{ fontFamily: 'var(--font-display)' }}
                 >

@@ -45,11 +45,16 @@ This document describes all configurable environment variables for the URL Short
 | `CACHE_EXPIRE_MINUTES` | Cache entry expiration in minutes | `30` | `30` |
 | `CACHE_NAMES` | Comma-separated list of cache names | `urlMappings,userDetails` | `urlMappings,userDetails` |
 
-## Swagger/OpenAPI
+## API Docs
 
 | Variable | Description | Default | Example |
 |----------|-------------|---------|---------|
-| `SWAGGER_ENABLED` | Enable/disable Swagger UI | `true` | `false` (prod), `true` (dev) |
+| `API_DOCS_ENABLED` | Enable/disable the OpenAPI JSON and Scalar API reference | `true` | `false` (prod), `true` (dev) |
+| `SWAGGER_ENABLED` | Legacy alias for `API_DOCS_ENABLED` | `true` | `false` (prod), `true` (dev) |
+| `SCALAR_PATH` | Public path for the Scalar API reference | `/api/v1/docs` | `/docs` |
+| `SCALAR_THEME` | Scalar theme preset | `bluePlanet` | `deepSpace` |
+| `SCALAR_LAYOUT` | Scalar layout mode | `modern` | `classic` |
+| `SCALAR_DARK_MODE` | Force dark mode in Scalar | `false` | `true` |
 
 ## Logging
 
@@ -81,7 +86,7 @@ MONGODB_DATABASE=urlshortener
 CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
 CORS_ALLOWED_ORIGIN_PATTERNS=http://localhost:*,http://127.0.0.1:*
 RATE_LIMIT_REQUESTS=1000
-SWAGGER_ENABLED=true
+API_DOCS_ENABLED=true
 LOG_LEVEL_APP=DEBUG
 ```
 
@@ -95,7 +100,7 @@ MONGODB_DATABASE=urlshortener
 CORS_ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
 CORS_ALLOWED_ORIGIN_PATTERNS=https://*.yourdomain.com
 RATE_LIMIT_REQUESTS=100
-SWAGGER_ENABLED=false
+API_DOCS_ENABLED=false
 LOG_LEVEL_APP=INFO
 ```
 
@@ -121,7 +126,7 @@ services:
 
 1. **Never commit `.env` or `.env.prod` files** - They are in `.gitignore`
 2. **Use strong JWT secrets** - Generate with: `openssl rand -base64 64`
-3. **Disable Swagger in production** - Set `SWAGGER_ENABLED=false`
+3. **Disable public API docs in production** - Set `API_DOCS_ENABLED=false`
 4. **Use restrictive CORS** - Only allow trusted origins
 5. **Set appropriate rate limits** - Lower for production, higher for development
 6. **Use MongoDB Atlas** - For production with proper authentication

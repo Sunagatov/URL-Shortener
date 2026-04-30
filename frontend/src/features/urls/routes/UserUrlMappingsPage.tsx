@@ -19,6 +19,7 @@ const UserUrlMappingsPage: React.FC = () => {
   usePageTitle('My URLs');
   const navigate = useNavigate();
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
+  const [pendingDeleteHash, setPendingDeleteHash] = useState<string | null>(null);
   const {
     copiedUrl,
     deletingHash,
@@ -46,6 +47,15 @@ const UserUrlMappingsPage: React.FC = () => {
     toggleSortOrder,
     totalElements,
   } = useUserUrlMappings();
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDeleteHash) {
+      return;
+    }
+
+    await handleDeleteMapping(pendingDeleteHash);
+    setPendingDeleteHash(null);
+  };
 
   if (isLoading) {
     return <AccountPageLoadingState message="Loading your URLs…" />;
@@ -105,7 +115,7 @@ const UserUrlMappingsPage: React.FC = () => {
               onCopy={handleCopyUrl}
               copiedUrl={copiedUrl}
               onDetails={() => navigate(routes.urlDetails(mapping.urlHash))}
-              onDelete={() => handleDeleteMapping(mapping.urlHash)}
+              onDelete={() => setPendingDeleteHash(mapping.urlHash)}
               isDeleting={deletingHash === mapping.urlHash}
               formatDate={formatUrlDate}
               isSelectMode={isSelectMode}
@@ -188,6 +198,16 @@ const UserUrlMappingsPage: React.FC = () => {
           </Button>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={pendingDeleteHash !== null}
+        title="Delete URL?"
+        message="This short link will stop working immediately and cannot be restored."
+        confirmLabel="Delete"
+        isLoading={deletingHash !== null}
+        onConfirm={() => void handleConfirmDelete()}
+        onCancel={() => setPendingDeleteHash(null)}
+      />
 
       <ConfirmModal
         isOpen={showBulkConfirm}

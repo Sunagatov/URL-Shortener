@@ -102,7 +102,7 @@ URL Shortener Backend is a REST API that generates short URLs from long ones, ha
 | ⚡ Caching | Caffeine (1 hour TTL) |
 | 🚦 Rate Limiting | Custom filter (100 req/min per IP) |
 | 🧪 Testing | JUnit 5, Spring Boot Test, Mockito |
-| 📝 API Docs | OpenAPI 3 (Swagger UI) |
+| 📝 API Docs | OpenAPI 3 (Scalar) |
 | 🚢 Deployment | Docker (multi-stage build) |
 
 ---

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { getVisiblePages } from '@/features/urls/lib/urlMappings';
@@ -36,7 +36,7 @@ describe('getVisiblePages', () => {
 
 describe('UserUrlMappings', () => {
   beforeEach(() => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
@@ -118,6 +118,7 @@ describe('UserUrlMappings', () => {
     await waitFor(() => expect(mockGetUserUrls).toHaveBeenCalledWith(1, 6));
 
     await userEvent.click(screen.getByTitle('Delete URL'));
+    await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete' }));
 
     await waitFor(() => expect(mockDeleteUrl).toHaveBeenCalledWith('abc123'));
     await waitFor(() => expect(mockGetUserUrls).toHaveBeenCalledWith(0, 6));
@@ -147,9 +148,31 @@ describe('UserUrlMappings', () => {
     );
 
     await userEvent.click(await screen.findByTitle('Delete URL'));
+    await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete' }));
 
     expect(
       await screen.findByText('You are not allowed to delete this URL mapping')
     ).toBeInTheDocument();
+  });
+
+  it('opens a confirm modal before deleting a URL from the list', async () => {
+    mockGetUserUrls.mockResolvedValue({
+      content: [mapping],
+      page: 0,
+      size: 6,
+      totalElements: 1,
+      totalPages: 1,
+    });
+
+    render(
+      <MemoryRouter>
+        <UserUrlMappingsPage />
+      </MemoryRouter>
+    );
+
+    await userEvent.click(await screen.findByTitle('Delete URL'));
+
+    expect(screen.getByText('Delete URL?')).toBeInTheDocument();
+    expect(mockDeleteUrl).not.toHaveBeenCalled();
   });
 });

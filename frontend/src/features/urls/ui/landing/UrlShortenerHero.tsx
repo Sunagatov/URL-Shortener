@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { FaArrowRight, FaCheck, FaCopy, FaExternalLinkAlt, FaGlobe, FaLink } from 'react-icons/fa';
+import { FaArrowRight, FaCheck, FaCopy, FaExternalLinkAlt, FaGlobe, FaLink, FaShareAlt } from 'react-icons/fa';
 import { routes } from '@/app/routes';
 import { Button } from '@/shared/ui';
 import { heroBadgeIcon, heroHighlights } from './landingContent';
@@ -96,9 +96,22 @@ export function UrlShortenerHero({
                   target="_blank"
                   rel="noopener noreferrer"
                   className="rounded-lg border border-white/10 bg-white/10 p-2 text-white/60 transition-all duration-200 hover:bg-white/20"
+                  title="Open"
                 >
                   <FaExternalLinkAlt className="h-3 w-3" />
                 </a>
+                {typeof navigator !== 'undefined' &&
+                  typeof navigator.share === 'function' &&
+                  navigator.canShare?.({ url: shortUrl }) && (
+                    <button
+                      type="button"
+                      onClick={() => void navigator.share({ url: shortUrl })}
+                      className="rounded-lg border border-white/10 bg-white/10 p-2 text-white/60 transition-all duration-200 hover:bg-white/20"
+                      title="Share"
+                    >
+                      <FaShareAlt className="h-3 w-3" />
+                    </button>
+                  )}
                 <button
                   type="button"
                   onClick={onClear}

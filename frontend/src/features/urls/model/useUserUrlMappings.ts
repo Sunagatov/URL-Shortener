@@ -124,10 +124,6 @@ export const useUserUrlMappings = () => {
   };
 
   const handleDeleteMapping = async (urlHash: string) => {
-    if (!window.confirm('This short link will stop working immediately and cannot be restored.')) {
-      return;
-    }
-
     setDeletingHash(urlHash);
     try {
       await deleteUrl(urlHash);
