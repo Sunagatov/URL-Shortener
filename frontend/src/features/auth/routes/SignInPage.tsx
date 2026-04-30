@@ -32,7 +32,7 @@ const SignInPage: React.FC = () => {
   });
 
   const onSubmit = async (data: SignInFormData) => {
-    const result = await execute(() => signIn(data));
+    const result = await execute(() => signIn(data), { action: 'auth.sign_in' });
 
     if (result) {
       await completeAuth(result, destination);

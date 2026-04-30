@@ -5,7 +5,7 @@ import com.zufar.urlshortener.shared.ANONYMOUS_USER
 import com.zufar.urlshortener.shared.API_DOCS_PATH_PREFIX
 import com.zufar.urlshortener.shared.AUTHENTICATED_USER_ID_ATTRIBUTE
 import com.zufar.urlshortener.shared.DOCS_PATH_PREFIX
-import com.zufar.urlshortener.shared.config.RateLimitConfig
+import com.zufar.urlshortener.shared.http.ClientIpResolver
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -21,7 +21,7 @@ private const val OUTCOME_TEMPLATE = "http.request.completed: method={}, path={}
 @Component
 @Order(2)
 class RequestCompletionLoggingFilter(
-    private val rateLimitConfig: RateLimitConfig,
+    private val clientIpResolver: ClientIpResolver,
     @Value("\${logging.slow-request-threshold-ms:1000}") private val slowRequestThresholdMs: Long
 ) : OncePerRequestFilter() {
 
@@ -62,7 +62,7 @@ class RequestCompletionLoggingFilter(
             path,
             status,
             durationMs,
-            resolveClientIp(request),
+            clientIpResolver.resolve(request),
             authenticated,
             resolveOutcome(status)
         )
@@ -86,15 +86,6 @@ class RequestCompletionLoggingFilter(
             ?: request.requestURI
 
         return resolved.replace(Regex("[\\r\\n]"), "_")
-    }
-
-    private fun resolveClientIp(request: HttpServletRequest): String {
-        val forwardedFor = request.getHeader("X-Forwarded-For")
-            ?.takeIf { rateLimitConfig.isTrustedProxy(request.remoteAddr) }
-            ?.split(",")
-            ?.firstNotNullOfOrNull { it.trim().takeIf(String::isNotEmpty) }
-
-        return forwardedFor ?: request.remoteAddr
     }
 
     private fun resolveOutcome(status: Int): String = when {

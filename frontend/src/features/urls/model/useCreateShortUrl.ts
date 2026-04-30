@@ -20,7 +20,7 @@ export function useCreateShortUrl() {
   }, [error, toast]);
 
   const submit = async (data: CreateUrlFormData) => {
-    const result = await execute(() => createUrl(data));
+    const result = await execute(() => createUrl(data), { action: 'urls.create_short_url' });
 
     if (result) {
       setShortUrl(result.shortUrl);

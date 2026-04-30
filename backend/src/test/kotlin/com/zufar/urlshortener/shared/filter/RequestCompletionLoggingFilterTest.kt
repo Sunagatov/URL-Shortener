@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.core.read.ListAppender
 import com.zufar.urlshortener.shared.config.RateLimitConfig
+import com.zufar.urlshortener.shared.http.ClientIpResolver
 import jakarta.servlet.FilterChain
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -17,8 +18,10 @@ import kotlin.test.assertTrue
 
 class RequestCompletionLoggingFilterTest {
 
+    private val rateLimitConfig = RateLimitConfig(100, "")
+
     private val filter = RequestCompletionLoggingFilter(
-        rateLimitConfig = RateLimitConfig(100, ""),
+        clientIpResolver = ClientIpResolver(rateLimitConfig),
         slowRequestThresholdMs = 1000
     )
 

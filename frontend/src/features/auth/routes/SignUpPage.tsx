@@ -43,7 +43,8 @@ const SignUpPage: React.FC = () => {
         password: data.password,
         country: data.country.trim(),
         age: data.age,
-      })
+      }),
+      { action: 'auth.sign_up' },
     );
 
     if (result !== undefined) {

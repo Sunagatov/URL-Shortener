@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.auth.security
 
 import com.zufar.urlshortener.shared.AUTHENTICATED_USER_ID_ATTRIBUTE
+import com.zufar.urlshortener.shared.AUTHORIZATION_HEADER
 import jakarta.servlet.FilterChain
 import jakarta.servlet.ServletException
 import jakarta.servlet.http.HttpServletRequest
@@ -59,7 +60,7 @@ class JwtAuthenticationFilter(
     }
 
     private fun extractBearerToken(request: HttpServletRequest): String? =
-        request.getHeader("Authorization")
+        request.getHeader(AUTHORIZATION_HEADER)
             ?.takeIf { it.startsWith(BEARER_PREFIX) }
             ?.removePrefix(BEARER_PREFIX)
 }

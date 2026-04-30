@@ -3,6 +3,7 @@ import { authSession } from '@/shared/auth/authSession';
 import { storage } from '@/shared/auth/storage';
 import { endpoints } from '@/shared/api/endpoints';
 import { redirectToSignIn } from '@/shared/lib/authRedirect';
+import { logger, loggerSessionId } from '@/shared/lib/logger';
 import type { AuthTokens } from '@/shared/types';
 
 const backendRestApiUrl = import.meta.env.VITE_BACKEND_REST_API_URL;
@@ -27,8 +28,6 @@ const isAuthRequest = (url?: string): boolean => {
     return AUTH_PATHS.some((path) => url === path || url.endsWith(path));
 };
 
-const clientTraceId = crypto.randomUUID();
-
 const defaultConfig = {
     baseURL: backendRestApiUrl,
     timeout: 10000,
@@ -42,7 +41,7 @@ const axiosInstance = axios.create(defaultConfig);
 
 const attachRequestContext = (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
     if (config.headers) {
-        config.headers[CLIENT_TRACE_ID_HEADER] = clientTraceId;
+        config.headers[CLIENT_TRACE_ID_HEADER] = loggerSessionId;
     }
 
     return config;
@@ -88,6 +87,10 @@ axiosInstance.interceptors.response.use(
         }
 
         originalRequest._retry = true;
+        logger.warn('frontend.auth.access_token_expired', {
+            path: originalRequest.url,
+            status: error.response?.status,
+        });
 
         try {
             const response = await rawAxios.post(endpoints.auth.refresh, { refreshToken });
@@ -95,6 +98,9 @@ axiosInstance.interceptors.response.use(
                 response.data as Partial<AuthTokens>;
 
             if (!newAccessToken) {
+                logger.error('frontend.auth.refresh_missing_access_token', {
+                    path: originalRequest.url,
+                });
                 authSession.logout();
                 redirectToSignIn();
 
@@ -111,8 +117,15 @@ axiosInstance.interceptors.response.use(
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
             }
 
+            logger.info('frontend.auth.refresh_succeeded', {
+                path: originalRequest.url,
+            });
             return axiosInstance(originalRequest);
         } catch (refreshError) {
+            logger.error('frontend.auth.refresh_failed', {
+                error: refreshError instanceof Error ? refreshError : new Error('Token refresh failed'),
+                path: originalRequest.url,
+            });
             authSession.logout();
             redirectToSignIn();
 

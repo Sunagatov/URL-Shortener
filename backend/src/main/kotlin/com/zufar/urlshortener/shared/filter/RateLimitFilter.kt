@@ -5,6 +5,7 @@ import com.zufar.urlshortener.shared.ACTUATOR_PATH_PREFIX
 import com.zufar.urlshortener.shared.API_DOCS_PATH_PREFIX
 import com.zufar.urlshortener.shared.DOCS_PATH_PREFIX
 import com.zufar.urlshortener.shared.http.ErrorResponseWriter
+import com.zufar.urlshortener.shared.http.ClientIpResolver
 import com.zufar.urlshortener.shared.config.RateLimitConfig
 import io.github.bucket4j.Bucket
 import jakarta.servlet.FilterChain
@@ -23,7 +24,8 @@ private const val RATE_LIMIT_ERROR_MESSAGE = "Rate limit exceeded. Please try ag
 class RateLimitFilter(
     private val rateLimitConfig: RateLimitConfig,
     private val buckets: Cache<String, Bucket>,
-    private val errorResponseWriter: ErrorResponseWriter
+    private val errorResponseWriter: ErrorResponseWriter,
+    private val clientIpResolver: ClientIpResolver
 ) : OncePerRequestFilter() {
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
@@ -42,7 +44,7 @@ class RateLimitFilter(
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        val clientIp = resolveClientIp(request)
+        val clientIp = clientIpResolver.resolve(request)
         val bucket = buckets.get(clientIp) { rateLimitConfig.createBucket() }
 
         if (bucket.tryConsume(1)) {
@@ -50,15 +52,6 @@ class RateLimitFilter(
         } else {
             writeRateLimitExceededResponse(response)
         }
-    }
-
-    private fun resolveClientIp(request: HttpServletRequest): String {
-        val forwardedFor = request.getHeader("X-Forwarded-For")
-            ?.takeIf { rateLimitConfig.isTrustedProxy(request.remoteAddr) }
-            ?.split(",")
-            ?.firstNotNullOfOrNull { it.trim().takeIf(String::isNotEmpty) }
-
-        return forwardedFor ?: request.remoteAddr
     }
 
     private fun writeRateLimitExceededResponse(response: HttpServletResponse) {
