@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.shared.config
 
 import com.github.benmanes.caffeine.cache.Caffeine
+import com.zufar.urlshortener.shared.URL_MAPPINGS_CACHE
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.EnableCaching
@@ -14,7 +15,7 @@ import java.time.Duration
 class CacheConfig(
     @Value("\${cache.max.size:10000}") private val maxSize: Long,
     @Value("\${cache.expire.minutes:30}") private val expireMinutes: Long,
-    @Value("\${cache.names:urlMappings}") private val cacheNames: String
+    @Value("\${cache.names:$URL_MAPPINGS_CACHE}") private val cacheNames: String
 ) {
 
     @Bean

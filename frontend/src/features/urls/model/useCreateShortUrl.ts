@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
 import { createUrl } from '@/features/urls/api/urlsApi';
+import { urlCopyMessages } from '@/features/urls/lib/urlMessages';
 import { createUrlSchema, type CreateUrlFormData } from '@/features/urls/model/urlValidation';
 import { useClipboard } from '@/shared/lib/useClipboard';
 import { useApi } from '@/shared/api/useApi';
@@ -35,11 +36,11 @@ export function useCreateShortUrl() {
     const didCopy = await copyValue(shortUrl);
 
     if (!didCopy) {
-      toast.error('Unable to copy URL.');
+      toast.error(urlCopyMessages.error);
       return;
     }
 
-    toast.success('Copied to clipboard');
+    toast.success(urlCopyMessages.success);
   };
 
   return {

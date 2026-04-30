@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { routes } from '@/app/routes';
 import { deleteUrl, getUrlDetails } from '@/features/urls/api/urlsApi';
+import { urlDeleteMessages } from '@/features/urls/lib/urlMessages';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
 import type { UrlMapping } from '@/shared/types';
 import { useToast } from '@/shared/ui';
@@ -65,7 +66,7 @@ export function useUrlMappingDetails(urlHash?: string) {
         return false;
       }
 
-      toast.error(getApiErrorMessage(error, 'Failed to delete URL mapping.'));
+      toast.error(getApiErrorMessage(error, urlDeleteMessages.failedSingle));
       return false;
     } finally {
       setIsDeleting(false);

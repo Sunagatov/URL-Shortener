@@ -1,6 +1,9 @@
 package com.zufar.urlshortener.shared.filter
 
 import com.github.benmanes.caffeine.cache.Cache
+import com.zufar.urlshortener.shared.ACTUATOR_PATH_PREFIX
+import com.zufar.urlshortener.shared.API_DOCS_PATH_PREFIX
+import com.zufar.urlshortener.shared.DOCS_PATH_PREFIX
 import com.zufar.urlshortener.shared.http.ErrorResponseWriter
 import com.zufar.urlshortener.shared.config.RateLimitConfig
 import io.github.bucket4j.Bucket
@@ -29,9 +32,9 @@ class RateLimitFilter(
             path == "/api/v1/health" ||
             path.startsWith("/api/v1/auth/") ||
             path == "/api/v1/auth" ||
-            path.startsWith("/api/v1/docs") ||
-            path.startsWith("/api/v1/api-docs") ||
-            path.startsWith("/actuator")
+            path.startsWith(DOCS_PATH_PREFIX) ||
+            path.startsWith(API_DOCS_PATH_PREFIX) ||
+            path.startsWith(ACTUATOR_PATH_PREFIX)
     }
 
     override fun doFilterInternal(

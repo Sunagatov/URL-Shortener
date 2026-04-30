@@ -15,6 +15,7 @@ import {
   UrlInfoCard,
   UrlMetadataCard,
 } from '@/features/urls/ui/details/UrlDetailsContent';
+import { urlCopyMessages, urlDeleteMessages } from '@/features/urls/lib/urlMessages';
 
 const UrlMappingDetailsPage: React.FC = () => {
   usePageTitle('URL Details');
@@ -30,11 +31,11 @@ const UrlMappingDetailsPage: React.FC = () => {
     const didCopy = await copyValue(url);
 
     if (!didCopy) {
-      toast.error('Unable to copy URL.');
+      toast.error(urlCopyMessages.error);
       return;
     }
 
-    toast.success('Copied to clipboard');
+    toast.success(urlCopyMessages.success);
   };
 
   const handleDelete = async () => {
@@ -74,8 +75,8 @@ const UrlMappingDetailsPage: React.FC = () => {
 
       <ConfirmModal
         isOpen={showDeleteModal}
-        title="Delete URL?"
-        message="This short link will stop working immediately and cannot be restored."
+        title={urlDeleteMessages.confirmTitle}
+        message={urlDeleteMessages.confirmMessage}
         confirmLabel="Delete"
         isLoading={isDeleting}
         onConfirm={handleDelete}

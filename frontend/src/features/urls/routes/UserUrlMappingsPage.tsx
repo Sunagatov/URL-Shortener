@@ -7,6 +7,7 @@ import {
 } from '@/app/layout/AccountPageLayout';
 import { routes } from '@/app/routes';
 import { formatUrlDate, PAGE_SIZE } from '@/features/urls/lib/urlMappings';
+import { urlDeleteMessages } from '@/features/urls/lib/urlMessages';
 import { useUserUrlMappings } from '@/features/urls/model/useUserUrlMappings';
 import { UrlMappingCard } from '@/features/urls/ui/UrlMappingCard';
 import { UrlMappingsEmptyState } from '@/features/urls/ui/UrlMappingsEmptyState';
@@ -176,8 +177,8 @@ const UserUrlMappingsPage: React.FC = () => {
 
       <ConfirmModal
         isOpen={pendingDeleteHash !== null}
-        title="Delete URL?"
-        message="This short link will stop working immediately and cannot be restored."
+        title={urlDeleteMessages.confirmTitle}
+        message={urlDeleteMessages.confirmMessage}
         confirmLabel="Delete"
         isLoading={deletingHash !== null}
         onConfirm={() => void handleConfirmDelete()}

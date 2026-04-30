@@ -4,11 +4,11 @@ import com.zufar.urlshortener.auth.entity.UserDetails
 import com.zufar.urlshortener.auth.exception.UserNotFoundException
 import com.zufar.urlshortener.auth.repository.UserRepository
 import com.zufar.urlshortener.auth.service.EmailNormalizer
+import com.zufar.urlshortener.shared.ANONYMOUS_USER
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 
-private const val ANONYMOUS_USER = "anonymousUser"
 private const val UNAUTHENTICATED_MESSAGE = "User is not authenticated"
 private const val AUTHENTICATED_USER_NOT_FOUND_MESSAGE = "Authenticated user not found"
 private const val USER_NOT_FOUND_MESSAGE = "User not found"

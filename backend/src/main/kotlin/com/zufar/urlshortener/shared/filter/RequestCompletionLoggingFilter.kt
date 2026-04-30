@@ -1,5 +1,10 @@
 package com.zufar.urlshortener.shared.filter
 
+import com.zufar.urlshortener.shared.ACTUATOR_PATH_PREFIX
+import com.zufar.urlshortener.shared.ANONYMOUS_USER
+import com.zufar.urlshortener.shared.API_DOCS_PATH_PREFIX
+import com.zufar.urlshortener.shared.AUTHENTICATED_USER_ID_ATTRIBUTE
+import com.zufar.urlshortener.shared.DOCS_PATH_PREFIX
 import com.zufar.urlshortener.shared.config.RateLimitConfig
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -11,8 +16,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.servlet.HandlerMapping
 
-private const val ANONYMOUS_USER = "anonymousUser"
-private const val AUTHENTICATED_USER_ID_ATTRIBUTE = "authenticatedUserId"
 private const val OUTCOME_TEMPLATE = "http.request.completed: method={}, path={}, status={}, duration_ms={}, client_ip={}, authenticated={}, outcome={}"
 
 @Component
@@ -27,9 +30,9 @@ class RequestCompletionLoggingFilter(
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val path = request.requestURI
         return request.method.equals("OPTIONS", ignoreCase = true) ||
-            path.startsWith("/actuator") ||
-            path.startsWith("/api/v1/docs") ||
-            path.startsWith("/api/v1/api-docs")
+            path.startsWith(ACTUATOR_PATH_PREFIX) ||
+            path.startsWith(DOCS_PATH_PREFIX) ||
+            path.startsWith(API_DOCS_PATH_PREFIX)
     }
 
     override fun doFilterInternal(
@@ -101,5 +104,5 @@ class RequestCompletionLoggingFilter(
     }
 
     private fun isPublicInternetNoise(path: String): Boolean =
-        !path.startsWith("/api/") && !path.startsWith("/actuator/")
+        !path.startsWith("/api/") && !path.startsWith(ACTUATOR_PATH_PREFIX)
 }

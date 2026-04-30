@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.urls.service
 
 import com.zufar.urlshortener.auth.service.user.CurrentUserService
+import com.zufar.urlshortener.shared.URL_MAPPINGS_CACHE
 import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.urls.dto.ShortenUrlRequest
 import com.zufar.urlshortener.urls.dto.UrlMappingDto
@@ -99,7 +100,7 @@ class UrlManagementService(
         )
     }
 
-    @CacheEvict(cacheNames = ["urlMappings"], key = "#urlHash")
+    @CacheEvict(cacheNames = [URL_MAPPINGS_CACHE], key = "#urlHash")
     fun delete(urlHash: String) {
         val urlMapping = getOwnedActiveUrlMapping(urlHash, DELETE_URL_MAPPING_DENIED_MESSAGE)
         urlRepository.deleteById(urlMapping.urlHash)
@@ -112,7 +113,7 @@ class UrlManagementService(
         mongoTemplate.updateFirst(query, update, UrlMapping::class.java)
     }
 
-    @Cacheable(cacheNames = ["urlMappings"], key = "#urlHash")
+    @Cacheable(cacheNames = [URL_MAPPINGS_CACHE], key = "#urlHash")
     fun getCachedUrlMapping(urlHash: String): UrlMapping =
         urlRepository.findByUrlHash(urlHash)
             .orElseThrow { UrlNotFoundException(URL_MAPPING_NOT_FOUND_MESSAGE) }

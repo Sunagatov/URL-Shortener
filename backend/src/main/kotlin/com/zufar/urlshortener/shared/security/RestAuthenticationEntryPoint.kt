@@ -1,5 +1,6 @@
 package com.zufar.urlshortener.shared.security
 
+import com.zufar.urlshortener.shared.UNAUTHORIZED_ACCESS_MESSAGE
 import com.zufar.urlshortener.shared.http.ErrorResponseWriter
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -18,6 +19,6 @@ class RestAuthenticationEntryPoint(
         response: HttpServletResponse,
         authException: AuthenticationException
     ) {
-        errorResponseWriter.write(response, HttpStatus.UNAUTHORIZED, "Unauthorized access")
+        errorResponseWriter.write(response, HttpStatus.UNAUTHORIZED, UNAUTHORIZED_ACCESS_MESSAGE)
     }
 }

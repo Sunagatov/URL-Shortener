@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { routes } from '@/app/routes';
 import { deleteUrl, getUserUrls } from '@/features/urls/api/urlsApi';
+import { urlCopyMessages, urlDeleteMessages } from '@/features/urls/lib/urlMessages';
 import { PAGE_SIZE } from '@/features/urls/lib/urlMappings';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
 import { useClipboard } from '@/shared/lib/useClipboard';
@@ -143,7 +144,7 @@ export function useUrlMappingsCollection() {
 
     try {
       await deleteUrl(urlHash);
-      toast.success('URL deleted successfully.');
+      toast.success(urlDeleteMessages.success);
       await updateMappingsAfterDelete([urlHash]);
     } catch (error: unknown) {
       if (getApiErrorStatus(error) === 401) {
@@ -151,7 +152,7 @@ export function useUrlMappingsCollection() {
         return;
       }
 
-      const message = getApiErrorMessage(error, 'Failed to delete URL mapping.');
+      const message = getApiErrorMessage(error, urlDeleteMessages.failedSingle);
       setPageError(message);
       toast.error(message);
     } finally {
@@ -171,7 +172,7 @@ export function useUrlMappingsCollection() {
         return false;
       }
 
-      const message = getApiErrorMessage(error, 'Failed to delete some URLs.');
+      const message = getApiErrorMessage(error, urlDeleteMessages.failedBatch);
       toast.error(message);
       return false;
     }
@@ -181,11 +182,11 @@ export function useUrlMappingsCollection() {
     const didCopy = await copyValue(url);
 
     if (!didCopy) {
-      toast.error('Unable to copy URL.');
+      toast.error(urlCopyMessages.error);
       return;
     }
 
-    toast.success('Copied to clipboard');
+    toast.success(urlCopyMessages.success);
   };
 
   return {

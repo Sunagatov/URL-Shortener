@@ -2,6 +2,8 @@ package com.zufar.urlshortener.shared.config
 
 import com.zufar.urlshortener.auth.security.CustomUserDetailsService
 import com.zufar.urlshortener.auth.security.JwtAuthenticationFilter
+import com.zufar.urlshortener.shared.API_DOCS_PATH_PREFIX
+import com.zufar.urlshortener.shared.DOCS_PATH_PREFIX
 import com.zufar.urlshortener.shared.security.RestAccessDeniedHandler
 import com.zufar.urlshortener.shared.security.RestAuthenticationEntryPoint
 import com.zufar.urlshortener.urls.UrlHashFormat
@@ -68,8 +70,8 @@ class SecurityConfig(
                         "/api/v1/health",
                         "/api/v1/auth/**",
                         "/v1/auth/**",
-                        "/api/v1/docs/**",
-                        "/api/v1/api-docs/**"
+                        "$DOCS_PATH_PREFIX/**",
+                        "$API_DOCS_PATH_PREFIX/**"
                     ).permitAll()
                     .anyRequest().authenticated()
             }

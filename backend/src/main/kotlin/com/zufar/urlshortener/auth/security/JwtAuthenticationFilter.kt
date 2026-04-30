@@ -1,5 +1,6 @@
 package com.zufar.urlshortener.auth.security
 
+import com.zufar.urlshortener.shared.AUTHENTICATED_USER_ID_ATTRIBUTE
 import jakarta.servlet.FilterChain
 import jakarta.servlet.ServletException
 import jakarta.servlet.http.HttpServletRequest
@@ -15,7 +16,6 @@ import org.springframework.web.filter.OncePerRequestFilter
 import java.io.IOException
 
 private const val BEARER_PREFIX = "Bearer "
-private const val AUTHENTICATED_USER_ID_ATTRIBUTE = "authenticatedUserId"
 
 @Component
 class JwtAuthenticationFilter(

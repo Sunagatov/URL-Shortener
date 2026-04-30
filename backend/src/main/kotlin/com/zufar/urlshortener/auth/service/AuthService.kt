@@ -24,6 +24,9 @@ import org.springframework.stereotype.Service
 import java.time.Clock
 import java.time.LocalDateTime
 
+private const val INVALID_REFRESH_TOKEN_MESSAGE = "Invalid or expired refresh token"
+private const val EMAIL_ALREADY_IN_USE_MESSAGE = "Email is already in use"
+
 @Service
 class AuthService(
     private val authenticationManager: AuthenticationManager,
@@ -81,15 +84,15 @@ class AuthService(
 
         val refreshToken = request.refreshToken
         if (!jwtTokenProvider.validateRefreshToken(refreshToken)) {
-            throw InvalidTokenException("Invalid or expired refresh token")
+            throw InvalidTokenException(INVALID_REFRESH_TOKEN_MESSAGE)
         }
 
         val user = findUserForRefreshToken(refreshToken)
         val tokenVersion = jwtTokenProvider.getTokenVersionFromJWT(refreshToken)
-            ?: throw InvalidTokenException("Invalid or expired refresh token")
+            ?: throw InvalidTokenException(INVALID_REFRESH_TOKEN_MESSAGE)
 
         if (tokenVersion != user.tokenVersion) {
-            throw InvalidTokenException("Invalid or expired refresh token")
+            throw InvalidTokenException(INVALID_REFRESH_TOKEN_MESSAGE)
         }
 
         log.info("auth.token_refresh.succeeded: user_id={}", user.id)
@@ -98,7 +101,7 @@ class AuthService(
 
     private fun ensureEmailIsAvailable(email: String) {
         if (userRepository.findByEmailIgnoreCase(email) != null) {
-            throw EmailAlreadyExistsException("Email is already in use")
+            throw EmailAlreadyExistsException(EMAIL_ALREADY_IN_USE_MESSAGE)
         }
     }
 
@@ -106,7 +109,7 @@ class AuthService(
         try {
             userRepository.save(user)
         } catch (_: DuplicateKeyException) {
-            throw EmailAlreadyExistsException("Email is already in use")
+            throw EmailAlreadyExistsException(EMAIL_ALREADY_IN_USE_MESSAGE)
         }
 
     private fun findUserForRefreshToken(refreshToken: String): UserDetails {
