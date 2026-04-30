@@ -13,6 +13,7 @@ import com.zufar.urlshortener.auth.repository.UserRepository
 import com.zufar.urlshortener.auth.security.JwtTokenProvider
 import com.zufar.urlshortener.auth.security.withTokenVersion
 import com.zufar.urlshortener.auth.validation.AuthRequestValidator
+import org.slf4j.LoggerFactory
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -32,20 +33,24 @@ class AuthService(
     private val jwtTokenProvider: JwtTokenProvider,
     private val clock: Clock
 ) {
+    private val log = LoggerFactory.getLogger(AuthService::class.java)
 
     fun signIn(request: SignInRequest): AuthResponse {
         val normalizedRequest = request.copy(email = EmailNormalizer.normalize(request.email))
+        log.info("auth.sign_in.requested: email={}", normalizedRequest.email)
         authRequestValidator.validateAuthRequest(normalizedRequest)
 
         val authentication = authenticationManager.authenticate(
             UsernamePasswordAuthenticationToken(normalizedRequest.email, request.password)
         )
 
+        log.info("auth.sign_in.succeeded: email={}", normalizedRequest.email)
         return issueAuthentication(authentication.principal as User)
     }
 
     fun signUp(request: SignUpRequest): AuthResponse {
         val normalizedRequest = request.copy(email = EmailNormalizer.normalize(request.email))
+        log.info("auth.sign_up.requested: email={}", normalizedRequest.email)
         authRequestValidator.validateSignUpRequest(normalizedRequest)
         ensureEmailIsAvailable(normalizedRequest.email)
 
@@ -65,10 +70,13 @@ class AuthService(
             updatedAt = now
         )
 
-        return issueAuthentication(saveUser(user))
+        val savedUser = saveUser(user)
+        log.info("auth.sign_up.succeeded: user_id={}, email={}", savedUser.id, savedUser.email)
+        return issueAuthentication(savedUser)
     }
 
     fun refreshAccessToken(request: RefreshTokenRequest): RefreshTokenResponse {
+        log.info("auth.token_refresh.requested")
         authRequestValidator.validateRefreshTokenRequest(request)
 
         val refreshToken = request.refreshToken
@@ -84,6 +92,7 @@ class AuthService(
             throw InvalidTokenException("Invalid or expired refresh token")
         }
 
+        log.info("auth.token_refresh.succeeded: user_id={}", user.id)
         return RefreshTokenResponse(issueAccessToken(user))
     }
 

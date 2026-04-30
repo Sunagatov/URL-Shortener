@@ -48,7 +48,7 @@ class UrlManagementService(
         val normalizedRequest = normalize(request)
         val normalizedBaseUrl = baseUrl.trimEnd('/')
 
-        log.info("Shortening originalURL='{}' from IP='{}'", normalizedRequest.originalUrl, httpRequest.remoteAddr)
+        log.info("url.create.requested: original_url={}, client_ip={}", normalizedRequest.originalUrl, httpRequest.remoteAddr)
 
         urlValidator.validateUrl(normalizedRequest.originalUrl)
         validateDaysCount(normalizedRequest.daysCount)
@@ -66,10 +66,10 @@ class UrlManagementService(
                         shortUrl = shortUrl
                     )
                 )
-                log.info("Created shortUrl='{}' for originalURL='{}'", shortUrl, normalizedRequest.originalUrl)
+                log.info("url.created: url_hash={}, short_url={}, original_url={}", urlHash, shortUrl, normalizedRequest.originalUrl)
                 return shortUrl
             } catch (_: DuplicateKeyException) {
-                log.warn("Short code collision for urlHash='{}' on attempt {}", urlHash, attempt + 1)
+                log.warn("url.short_code_collision: url_hash={}, attempt={}", urlHash, attempt + 1)
             }
         }
 
@@ -103,7 +103,7 @@ class UrlManagementService(
     fun delete(urlHash: String) {
         val urlMapping = getOwnedActiveUrlMapping(urlHash, DELETE_URL_MAPPING_DENIED_MESSAGE)
         urlRepository.deleteById(urlMapping.urlHash)
-        log.info("Deleted URL mapping for urlHash='{}'", urlHash)
+        log.info("url.deleted: url_hash={}", urlHash)
     }
 
     fun incrementClickCount(urlHash: String) {
@@ -156,7 +156,7 @@ class UrlManagementService(
         )
 
         log.debug(
-            "Created URL mapping: urlHash='{}', shortUrl='{}', originalUrl='{}', createdAt='{}', expirationDate='{}', requestIp='{}', userAgent='{}', userId='{}'",
+            "url.mapping_built: url_hash={}, short_url={}, original_url={}, created_at={}, expiration_date={}, request_ip={}, user_agent={}, user_id={}",
             urlHash,
             shortUrl,
             mapping.originalUrl,

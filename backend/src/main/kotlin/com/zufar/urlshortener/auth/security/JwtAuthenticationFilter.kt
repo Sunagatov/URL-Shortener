@@ -39,8 +39,11 @@ class JwtAuthenticationFilter(
                     val authentication = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
                     authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
                     SecurityContextHolder.getContext().authentication = authentication
-                    MDC.put("userId", userDetails.username)
-                    request.setAttribute(AUTHENTICATED_USER_ID_ATTRIBUTE, userDetails.username)
+                    val internalUserId = (userDetails as? UserDetailsWithTokenVersion)?.userId
+                    if (!internalUserId.isNullOrBlank()) {
+                        MDC.put("userId", internalUserId)
+                        request.setAttribute(AUTHENTICATED_USER_ID_ATTRIBUTE, internalUserId)
+                    }
                 }
             } catch (_: AuthenticationException) {
                 SecurityContextHolder.clearContext()

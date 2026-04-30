@@ -36,13 +36,13 @@ class AuthRequestValidator(
     private val log = LoggerFactory.getLogger(AuthRequestValidator::class.java)
 
     fun validateAuthRequest(signInRequest: SignInRequest) {
-        log.debug("Validating AuthRequest: {}", signInRequest)
+        log.debug("auth.sign_in.validating: email={}", signInRequest.email)
         validate(signInRequest.email.isBlank(), EMAIL_MUST_NOT_BE_EMPTY)
         validate(signInRequest.password.isBlank(), PASSWORD_MUST_NOT_BE_EMPTY)
     }
 
     fun validateSignUpRequest(signUpRequest: SignUpRequest) {
-        log.debug("Validating SignUpRequest: {}", signUpRequest)
+        log.debug("auth.sign_up.validating: email={}", signUpRequest.email)
         validateName(
             signUpRequest.firstName,
             FIRST_NAME_MUST_NOT_BE_EMPTY,
@@ -62,14 +62,14 @@ class AuthRequestValidator(
     }
 
     fun validateRefreshTokenRequest(refreshTokenRequest: RefreshTokenRequest) {
-        log.debug("Validating RefreshTokenRequest: {}", refreshTokenRequest)
+        log.debug("auth.token_refresh.validating")
         val token = refreshTokenRequest.refreshToken
         validate(token.isBlank(), "Refresh token must not be empty")
         validate(token.length < MIN_JWT_TOKEN_LENGTH || token.length > MAX_JWT_TOKEN_LENGTH, "Refresh token length is invalid")
     }
 
     fun validateChangePasswordRequest(changePasswordRequest: ChangePasswordRequest) {
-        log.debug("Validating ChangePasswordRequest")
+        log.debug("user.password_change.validating")
         validate(changePasswordRequest.currentPassword.isBlank(), PASSWORD_MUST_NOT_BE_EMPTY)
         passwordOfUserValidator.validate(changePasswordRequest.newPassword)
     }

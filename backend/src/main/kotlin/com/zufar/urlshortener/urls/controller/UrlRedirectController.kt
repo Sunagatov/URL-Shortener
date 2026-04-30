@@ -36,10 +36,10 @@ class UrlRedirectController(
         @PathVariable urlHash: String,
         httpServletRequest: HttpServletRequest
     ): ResponseEntity<Unit> {
-        log.info("Redirect request for urlHash='{}' from IP='{}'", urlHash, httpServletRequest.remoteAddr)
+        log.info("url.redirect.requested: url_hash={}, client_ip={}", urlHash, httpServletRequest.remoteAddr)
         val urlMapping = urlManagementService.getPublicUrlMapping(urlHash)
         urlManagementService.incrementClickCount(urlHash)
-        log.info("Redirecting to originalUrl='{}'", urlMapping.originalUrl)
+        log.info("url.redirected: url_hash={}, target_url={}", urlHash, urlMapping.originalUrl)
         return ResponseEntity.status(HttpStatus.FOUND)
             .cacheControl(buildCacheControl(urlMapping.expirationDate))
             .header(REFERRER_POLICY_HEADER, REFERRER_POLICY_VALUE)
