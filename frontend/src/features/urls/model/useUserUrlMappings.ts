@@ -9,6 +9,7 @@ import type { UrlMapping } from '@/shared/types';
 import { useToast } from '@/shared/ui';
 
 type SortOrder = 'newest' | 'oldest';
+type SelectionSet = Set<string>;
 
 export const useUserUrlMappings = () => {
   const [urlMappings, setUrlMappings] = useState<UrlMapping[]>([]);
@@ -23,6 +24,9 @@ export const useUserUrlMappings = () => {
   const [clientPage, setClientPage] = useState(0);
   const [pageError, setPageError] = useState<string | null>(null);
   const [deletingHash, setDeletingHash] = useState<string | null>(null);
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [selectedHashes, setSelectedHashes] = useState<SelectionSet>(new Set());
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   const navigate = useNavigate();
   const toast = useToast();
@@ -158,6 +162,67 @@ export const useUserUrlMappings = () => {
     toast.success('Copied to clipboard');
   };
 
+  const toggleSelectMode = useCallback(() => {
+    setIsSelectMode(previous => !previous);
+    setSelectedHashes(new Set());
+  }, []);
+
+  const toggleSelect = useCallback((hash: string) => {
+    setSelectedHashes(previous => {
+      const next = new Set(previous);
+      if (next.has(hash)) next.delete(hash);
+      else next.add(hash);
+      return next;
+    });
+  }, []);
+
+  const isAllSelected =
+    displayMappings.length > 0 && displayMappings.every(m => selectedHashes.has(m.urlHash));
+
+  const toggleSelectAll = useCallback(() => {
+    if (isAllSelected) {
+      setSelectedHashes(new Set());
+    } else {
+      setSelectedHashes(new Set(displayMappings.map(m => m.urlHash)));
+    }
+  }, [isAllSelected, displayMappings]);
+
+  const handleBulkDelete = useCallback(async () => {
+    const hashes = [...selectedHashes];
+    setIsBulkDeleting(true);
+    try {
+      await Promise.all(hashes.map(hash => deleteUrl(hash)));
+      toast.success(`${hashes.length} URL${hashes.length !== 1 ? 's' : ''} deleted.`);
+      setSelectedHashes(new Set());
+      setIsSelectMode(false);
+      setTotalElements(previous => previous - hashes.length);
+      if (isSearchMode) {
+        setAllMappings(previous => previous.filter(m => !hashes.includes(m.urlHash)));
+      } else {
+        const nextPage =
+          urlMappings.length <= hashes.length && serverPage > 0 ? serverPage - 1 : serverPage;
+        await fetchPage(nextPage);
+      }
+    } catch (error: unknown) {
+      if (getApiErrorStatus(error) === 401) {
+        redirectToSignIn();
+        return;
+      }
+      const message = getApiErrorMessage(error, 'Failed to delete some URLs.');
+      toast.error(message);
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  }, [
+    selectedHashes,
+    toast,
+    isSearchMode,
+    urlMappings.length,
+    serverPage,
+    fetchPage,
+    redirectToSignIn,
+  ]);
+
   return {
     copiedUrl: copiedValue,
     deletingHash,
@@ -165,15 +230,23 @@ export const useUserUrlMappings = () => {
     displayPage,
     displayTotal,
     displayTotalPages,
+    handleBulkDelete,
     handleCopyUrl,
     handleDeleteMapping,
     handlePageChange,
+    isAllSelected,
+    isBulkDeleting,
     isLoading,
     isSearchMode,
+    isSelectMode,
     pageError,
     search,
+    selectedHashes,
     setSearch,
     sortOrder,
+    toggleSelect,
+    toggleSelectAll,
+    toggleSelectMode,
     toggleSortOrder: () => setSortOrder(current => (current === 'newest' ? 'oldest' : 'newest')),
     totalElements,
   };

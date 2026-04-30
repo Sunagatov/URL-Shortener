@@ -9,10 +9,13 @@ interface UrlMappingCardProps {
   formatDate: (date: string) => string;
   index: number;
   isDeleting: boolean;
+  isSelectMode?: boolean;
+  isSelected?: boolean;
   mapping: UrlMapping;
   onCopy: (url: string) => void;
   onDelete: () => void;
   onDetails: () => void;
+  onToggleSelect?: () => void;
 }
 
 export const UrlMappingCard = ({
@@ -20,10 +23,13 @@ export const UrlMappingCard = ({
   formatDate,
   index,
   isDeleting,
+  isSelectMode = false,
+  isSelected = false,
   mapping,
   onCopy,
   onDelete,
   onDetails,
+  onToggleSelect,
 }: UrlMappingCardProps) => {
   const domain = getDomainLabel(mapping.originalUrl);
   const shortSlug = getShortUrlSlug(mapping.shortUrl);
@@ -33,15 +39,31 @@ export const UrlMappingCard = ({
     event.stopPropagation();
   };
 
+  const handleCardClick = isSelectMode ? onToggleSelect : onDetails;
+
   return (
     <div
-      onClick={onDetails}
-      className="group cursor-pointer overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.04] transition-all duration-200 hover:border-blue-500/25 hover:bg-white/[0.055]"
+      onClick={handleCardClick}
+      className={`group cursor-pointer overflow-hidden rounded-2xl border transition-all duration-200 ${
+        isSelectMode && isSelected
+          ? 'border-blue-500/50 bg-blue-900/10 ring-1 ring-blue-500/30'
+          : 'border-white/[0.07] bg-white/[0.04] hover:border-blue-500/25 hover:bg-white/[0.055]'
+      }`}
     >
       <div className="flex items-center gap-3 border-b border-white/[0.06] px-5 py-3.5">
-        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-600/15">
-          <FaLink className="h-3 w-3 text-blue-400" />
-        </div>
+        {isSelectMode ? (
+          <div
+            className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md border-2 transition-all duration-150 ${
+              isSelected ? 'border-blue-500 bg-blue-500' : 'border-white/25 bg-transparent'
+            }`}
+          >
+            {isSelected && <FaCheck className="h-2.5 w-2.5 text-white" />}
+          </div>
+        ) : (
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-600/15">
+            <FaLink className="h-3 w-3 text-blue-400" />
+          </div>
+        )}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-white/50">#{index}</span>
@@ -54,18 +76,22 @@ export const UrlMappingCard = ({
           <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45">
             {clickCountLabel}
           </span>
-          <a
-            href={mapping.shortUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={stopPropagation}
-            className="rounded-lg p-2 text-white/30 transition-all hover:bg-blue-500/10 hover:text-blue-300"
-            title="Open short URL"
-            aria-label={`Open short URL ${mapping.shortUrl}`}
-          >
-            <FaExternalLinkAlt className="h-3 w-3" />
-          </a>
-          <FaChevronRight className="h-3 w-3 flex-shrink-0 text-white/15 transition-colors group-hover:text-white/40" />
+          {!isSelectMode && (
+            <>
+              <a
+                href={mapping.shortUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={stopPropagation}
+                className="rounded-lg p-2 text-white/30 transition-all hover:bg-blue-500/10 hover:text-blue-300"
+                title="Open short URL"
+                aria-label={`Open short URL ${mapping.shortUrl}`}
+              >
+                <FaExternalLinkAlt className="h-3 w-3" />
+              </a>
+              <FaChevronRight className="h-3 w-3 flex-shrink-0 text-white/15 transition-colors group-hover:text-white/40" />
+            </>
+          )}
         </div>
       </div>
 
@@ -155,22 +181,24 @@ export const UrlMappingCard = ({
         )}
       </div>
 
-      <div className="flex justify-end border-t border-white/[0.06] bg-white/[0.02] px-5 py-3">
-        <Button
-          onClick={event => {
-            stopPropagation(event);
-            void onDelete();
-          }}
-          variant="secondary"
-          size="sm"
-          title="Delete URL"
-          loading={isDeleting}
-          className="text-red-400/40 hover:border-red-500/20 hover:bg-red-900/20 hover:text-red-300"
-        >
-          {!isDeleting && <FaTrash className="h-3 w-3" />}
-          <span>{isDeleting ? 'Deleting…' : 'Delete'}</span>
-        </Button>
-      </div>
+      {!isSelectMode && (
+        <div className="flex justify-end border-t border-white/[0.06] bg-white/[0.02] px-5 py-3">
+          <Button
+            onClick={event => {
+              stopPropagation(event);
+              void onDelete();
+            }}
+            variant="secondary"
+            size="sm"
+            title="Delete URL"
+            loading={isDeleting}
+            className="text-red-400/40 hover:border-red-500/20 hover:bg-red-900/20 hover:text-red-300"
+          >
+            {!isDeleting && <FaTrash className="h-3 w-3" />}
+            <span>{isDeleting ? 'Deleting…' : 'Delete'}</span>
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

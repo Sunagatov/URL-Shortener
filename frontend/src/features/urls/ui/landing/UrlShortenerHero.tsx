@@ -142,7 +142,8 @@ interface UrlShortenerFormProps {
 
 export function UrlShortenerForm({ children, isLoading = false, onSubmit }: UrlShortenerFormProps) {
   return (
-    <div className="glass-card mb-6 animate-fade-up-d3 p-2.5">
+    <div className="glass-card group relative mb-6 animate-fade-up-d3 overflow-hidden p-2.5">
+      <div className="pointer-events-none absolute inset-0 rounded-[20px] border border-white/8 transition-all duration-300 group-focus-within:border-blue-400/35 group-focus-within:shadow-[inset_0_0_0_1px_rgba(96,165,250,0.22),inset_0_0_42px_rgba(59,130,246,0.18),0_0_0_1px_rgba(59,130,246,0.12)]" />
       <form onSubmit={onSubmit}>
         <div className="flex flex-col gap-2 sm:flex-row">
           <div className="relative flex-1">
@@ -155,6 +156,12 @@ export function UrlShortenerForm({ children, isLoading = false, onSubmit }: UrlS
             <FaLink className="h-4 w-4" />
             <span>{isLoading ? 'Shortening…' : 'Shorten'}</span>
           </Button>
+        </div>
+        <div className="mt-2.5 flex items-center justify-between gap-3 px-1.5 text-left">
+          <p className="text-xs text-white/33">Paste shortcut: Ctrl+V to paste your URL</p>
+          <span className="hidden text-[11px] uppercase tracking-[0.2em] text-white/20 sm:inline">
+            Fast input
+          </span>
         </div>
       </form>
     </div>

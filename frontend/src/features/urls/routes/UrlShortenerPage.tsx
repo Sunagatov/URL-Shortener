@@ -49,7 +49,8 @@ const UrlShortenerPage: React.FC = () => {
             {...register('originalUrl')}
             type="url"
             placeholder="Paste your long URL here…"
-            className="h-full w-full rounded-xl border border-white/7 bg-[#11182b] py-3.5 pl-11 pr-4 text-base text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+            className="h-full w-full rounded-xl border border-white/8 bg-[linear-gradient(180deg,rgba(17,24,43,0.96)_0%,rgba(11,17,32,0.98)_100%)] py-3.5 pl-11 pr-4 text-base text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_10px_30px_rgba(3,8,20,0.18)] placeholder-white/30 transition-all duration-200 focus:border-blue-400/35 focus:outline-none focus:ring-2 focus:ring-blue-500/35"
+            spellCheck={false}
           />
         </UrlShortenerForm>
         {errors.originalUrl ? (

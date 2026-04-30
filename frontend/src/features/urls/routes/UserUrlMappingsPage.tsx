@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AccountPageHeader,
@@ -12,12 +12,13 @@ import { UrlMappingCard } from '@/features/urls/ui/UrlMappingCard';
 import { UrlMappingsPagination } from '@/features/urls/ui/UrlMappingsPagination';
 import { UrlMappingsToolbar } from '@/features/urls/ui/UrlMappingsToolbar';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
-import { Button } from '@/shared/ui';
-import { FaLink, FaPlus, FaSearch, FaTimes } from 'react-icons/fa';
+import { Button, ConfirmModal } from '@/shared/ui';
+import { FaCheckSquare, FaLink, FaPlus, FaSearch, FaTimes, FaTrash } from 'react-icons/fa';
 
 const UserUrlMappingsPage: React.FC = () => {
   usePageTitle('My URLs');
   const navigate = useNavigate();
+  const [showBulkConfirm, setShowBulkConfirm] = useState(false);
   const {
     copiedUrl,
     deletingHash,
@@ -25,15 +26,23 @@ const UserUrlMappingsPage: React.FC = () => {
     displayPage,
     displayTotal,
     displayTotalPages,
+    handleBulkDelete,
     handleCopyUrl,
     handleDeleteMapping,
     handlePageChange,
+    isAllSelected,
+    isBulkDeleting,
     isLoading,
     isSearchMode,
+    isSelectMode,
     pageError,
     search,
+    selectedHashes,
     setSearch,
     sortOrder,
+    toggleSelect,
+    toggleSelectAll,
+    toggleSelectMode,
     toggleSortOrder,
     totalElements,
   } = useUserUrlMappings();
@@ -48,10 +57,24 @@ const UserUrlMappingsPage: React.FC = () => {
         title="My URLs"
         description="Manage and track your shortened links"
         actions={
-          <Button onClick={() => navigate(routes.home)} variant="primary" size="sm">
-            <FaPlus className="w-3.5 h-3.5" />
-            <span>New URL</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            {totalElements > 0 && (
+              <Button
+                onClick={toggleSelectMode}
+                variant={isSelectMode ? 'ghost' : 'secondary'}
+                size="sm"
+              >
+                <FaCheckSquare className="w-3.5 h-3.5" />
+                <span>{isSelectMode ? 'Cancel' : 'Select'}</span>
+              </Button>
+            )}
+            {!isSelectMode && (
+              <Button onClick={() => navigate(routes.home)} variant="primary" size="sm">
+                <FaPlus className="w-3.5 h-3.5" />
+                <span>New URL</span>
+              </Button>
+            )}
+          </div>
         }
       />
 
@@ -85,6 +108,9 @@ const UserUrlMappingsPage: React.FC = () => {
               onDelete={() => handleDeleteMapping(mapping.urlHash)}
               isDeleting={deletingHash === mapping.urlHash}
               formatDate={formatUrlDate}
+              isSelectMode={isSelectMode}
+              isSelected={selectedHashes.has(mapping.urlHash)}
+              onToggleSelect={() => toggleSelect(mapping.urlHash)}
             />
           ))}
         </div>
@@ -130,6 +156,48 @@ const UserUrlMappingsPage: React.FC = () => {
           onPageChange={handlePageChange}
         />
       )}
+
+      {isSelectMode && (
+        <div
+          className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-2xl border border-white/[0.10] bg-[#0d0f1e]/90 px-4 py-3 shadow-[0_8px_40px_rgba(0,0,0,0.55)] backdrop-blur-xl"
+          style={{ animation: 'modal-in 0.2s cubic-bezier(0.22,1,0.36,1) both' }}
+        >
+          <span className="min-w-[90px] text-sm font-medium text-white/55">
+            {selectedHashes.size > 0
+              ? `${selectedHashes.size} selected`
+              : 'Select URLs'}
+          </span>
+
+          <div className="mx-1 h-4 w-px bg-white/[0.1]" />
+
+          <button
+            onClick={toggleSelectAll}
+            className="rounded-lg px-3 py-1.5 text-xs font-semibold text-white/50 transition-all hover:bg-white/[0.06] hover:text-white/80"
+          >
+            {isAllSelected ? 'Deselect all' : 'Select all'}
+          </button>
+
+          <Button
+            variant="danger"
+            size="sm"
+            disabled={selectedHashes.size === 0}
+            onClick={() => setShowBulkConfirm(true)}
+          >
+            <FaTrash className="h-3 w-3" />
+            Delete {selectedHashes.size > 0 ? selectedHashes.size : ''}
+          </Button>
+        </div>
+      )}
+
+      <ConfirmModal
+        isOpen={showBulkConfirm}
+        title={`Delete ${selectedHashes.size} URL${selectedHashes.size !== 1 ? 's' : ''}?`}
+        message="These short links will stop working immediately and cannot be restored."
+        confirmLabel={`Delete ${selectedHashes.size}`}
+        isLoading={isBulkDeleting}
+        onConfirm={() => void handleBulkDelete().then(() => setShowBulkConfirm(false))}
+        onCancel={() => setShowBulkConfirm(false)}
+      />
     </AccountPageLayout>
   );
 };
