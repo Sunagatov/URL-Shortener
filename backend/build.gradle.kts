@@ -34,6 +34,7 @@ val commonsValidatorVersion = "1.10.1"
 val caffeineVersion = "3.2.3"
 val bucket4jVersion = "8.10.1"
 val jjwtApiVersion = "0.13.0"
+val logstashLogbackEncoderVersion = "9.0"
 
 
 dependencies {
@@ -57,6 +58,7 @@ dependencies {
 
     // Logging
     implementation("org.springframework.boot:spring-boot-starter-logging")
+    implementation("net.logstash.logback:logstash-logback-encoder:$logstashLogbackEncoderVersion")
 
     // Jackson
     implementation("tools.jackson.module:jackson-module-kotlin")

@@ -168,6 +168,12 @@ src/main/kotlin/com/zufar/urlshortener/
 
 See `.env.example` for local defaults and `.env.prod` for the production template.
 
+For structured JSON logs in production, enable the `json-logs` Spring profile. Example:
+
+```bash
+SPRING_PROFILES_ACTIVE=json-logs
+```
+
 ---
 
 ## 🤝 Contributing
