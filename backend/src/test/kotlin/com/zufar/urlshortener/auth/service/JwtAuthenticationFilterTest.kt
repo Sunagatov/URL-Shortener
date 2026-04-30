@@ -45,7 +45,7 @@ class JwtAuthenticationFilterTest {
 
         filter.doFilter(request, MockHttpServletResponse(), MockFilterChain())
 
-        assertEquals("user@example.com", SecurityContextHolder.getContext().authentication.name)
+        assertEquals("user@example.com", SecurityContextHolder.getContext().authentication?.name)
     }
 
     @Test

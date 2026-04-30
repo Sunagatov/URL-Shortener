@@ -23,6 +23,18 @@ describe('urlMappings helpers', () => {
     );
   });
 
+  it('preserves the backend port for localhost redirect urls in local development', async () => {
+    vi.stubEnv('VITE_BACKEND_REST_API_URL', 'http://localhost:8080');
+    vi.resetModules();
+
+    const helpers = await import('@/features/urls/lib/urlMappings');
+
+    expect(helpers.getPublicShortUrlBase()).toBe('http://localhost:8080');
+    expect(helpers.normalizeShortUrl('http://localhost:8080/HZezBeaR')).toBe(
+      'http://localhost:8080/HZezBeaR',
+    );
+  });
+
   it('keeps already-public short urls unchanged', async () => {
     vi.stubEnv('VITE_BACKEND_REST_API_URL', 'http://116.203.197.65/api');
     vi.resetModules();

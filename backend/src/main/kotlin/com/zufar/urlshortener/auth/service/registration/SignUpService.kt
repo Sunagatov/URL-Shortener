@@ -40,12 +40,15 @@ class SignUpService(
 
     private fun buildUser(signUpRequest: SignUpRequest): UserDetails {
         val now = LocalDateTime.now(clock)
+        val encodedPassword = requireNotNull(passwordEncoder.encode(signUpRequest.password)) {
+            "Password encoder returned null during sign-up"
+        }
 
         return UserDetails(
             firstName = signUpRequest.firstName,
             lastName = signUpRequest.lastName,
             email = signUpRequest.email,
-            password = passwordEncoder.encode(signUpRequest.password),
+            password = encodedPassword,
             country = signUpRequest.country,
             age = signUpRequest.age,
             createdAt = now,

@@ -27,7 +27,7 @@ class UserDetailsProviderTest {
     fun `getUserDetails returns createdAt for authenticated user`() {
         val createdAt = LocalDateTime.of(2024, 1, 15, 10, 0)
         SecurityContextHolder.getContext().authentication =
-            TestingAuthenticationToken("User@Example.COM", null)
+            TestingAuthenticationToken("User@Example.COM", "")
         whenever(userRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(
             UserDetails(
                 id = "user-1",

@@ -1,9 +1,9 @@
 plugins {
-    kotlin("jvm") version "2.1.21"
-    kotlin("plugin.spring") version "2.1.21"
-    id("org.springframework.boot") version "3.5.3"
+    kotlin("jvm") version "2.3.21"
+    kotlin("plugin.spring") version "2.3.21"
+    id("org.springframework.boot") version "4.0.6"
     id("io.spring.dependency-management") version "1.1.7"
-    id("org.sonarqube") version "6.0.1.5171"
+    id("org.sonarqube") version "7.3.0.8198"
     jacoco
 }
 
@@ -27,14 +27,14 @@ sonar {
     }
 }
 
-val springCloudVersion = "2025.0.0"
-val mockitoVersion = "5.18.0"
-val mockitoKotlinVersion = "5.4.0"
-val springdocVersion = "2.8.17"
-val commonsValidatorVersion = "1.9.0"
-val caffeineVersion = "3.2.0"
-val bucket4jVersion = "8.7.0"
-val jjwtApiVersion = "0.12.6"
+val springCloudVersion = "2025.1.1"
+val mockitoVersion = "5.23.0"
+val mockitoKotlinVersion = "6.3.0"
+val springdocVersion = "3.0.3"
+val commonsValidatorVersion = "1.10.1"
+val caffeineVersion = "3.2.3"
+val bucket4jVersion = "8.10.1"
+val jjwtApiVersion = "0.13.0"
 
 
 dependencies {
@@ -89,6 +89,7 @@ dependencies {
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
     testImplementation("org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
@@ -141,7 +142,7 @@ sourceSets {
 }
 
 jacoco {
-    toolVersion = "0.8.13"
+    toolVersion = "0.8.14"
 }
 tasks.jacocoTestReport {
     reports {

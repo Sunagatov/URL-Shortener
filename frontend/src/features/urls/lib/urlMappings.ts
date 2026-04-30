@@ -35,15 +35,18 @@ export const getPublicShortUrlBase = () => {
 
   try {
     const parsedBackendUrl = new URL(backendRestApiUrl);
-    const publicHost = parsedBackendUrl.hostname.startsWith('api.')
+    const publicHostname = parsedBackendUrl.hostname.startsWith('api.')
       ? parsedBackendUrl.hostname.slice(4)
       : parsedBackendUrl.hostname;
+    const publicAuthority = parsedBackendUrl.port
+      ? `${publicHostname}:${parsedBackendUrl.port}`
+      : publicHostname;
     const trimmedPathname = parsedBackendUrl.pathname.replace(/\/+$/, '');
     const publicPathname = trimmedPathname.replace(/\/api(?:\/v\d+)?$/, '');
     const normalizedPathname = publicPathname ? `${publicPathname}/` : '/';
     return new URL(
       normalizedPathname,
-      `${parsedBackendUrl.protocol}//${publicHost}`,
+      `${parsedBackendUrl.protocol}//${publicAuthority}`,
     ).toString().replace(/\/$/, '');
   } catch {
     return null;

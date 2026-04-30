@@ -8,9 +8,8 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 
 @Component
-class ErrorResponseWriter(
-    private val objectMapper: ObjectMapper
-) {
+class ErrorResponseWriter {
+    private val objectMapper = ObjectMapper()
 
     fun write(response: HttpServletResponse, status: HttpStatus, message: String) {
         response.status = status.value()

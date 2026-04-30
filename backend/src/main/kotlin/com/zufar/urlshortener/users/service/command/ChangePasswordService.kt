@@ -27,8 +27,12 @@ class ChangePasswordService(
             throw InvalidRequestException("Current password is incorrect")
         }
 
+        val encodedPassword = requireNotNull(passwordEncoder.encode(changePasswordRequest.newPassword)) {
+            "Password encoder returned null during password change"
+        }
+
         val updatedUser = user.copy(
-            password = passwordEncoder.encode(changePasswordRequest.newPassword),
+            password = encodedPassword,
             tokenVersion = user.tokenVersion + 1,
             updatedAt = LocalDateTime.now(clock)
         )

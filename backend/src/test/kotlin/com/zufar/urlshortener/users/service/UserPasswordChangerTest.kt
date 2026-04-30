@@ -51,7 +51,7 @@ class UserPasswordChangerTest {
             age = 30
         )
         SecurityContextHolder.getContext().authentication =
-            TestingAuthenticationToken("  User@Example.COM  ", null)
+            TestingAuthenticationToken("  User@Example.COM  ", "")
         whenever(userRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
         whenever(passwordEncoder.matches("OldPassword1!", "old-hash")).thenReturn(true)
         whenever(passwordEncoder.encode("NewPassword1!")).thenReturn("new-hash")
@@ -91,7 +91,7 @@ class UserPasswordChangerTest {
             age = 30
         )
         SecurityContextHolder.getContext().authentication =
-            TestingAuthenticationToken("user@example.com", null)
+            TestingAuthenticationToken("user@example.com", "")
         whenever(userRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
         whenever(passwordEncoder.matches("WrongPassword1!", "old-hash")).thenReturn(false)
 

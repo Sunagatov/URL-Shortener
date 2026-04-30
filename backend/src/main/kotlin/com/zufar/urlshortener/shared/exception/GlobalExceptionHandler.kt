@@ -1,7 +1,5 @@
 package com.zufar.urlshortener.shared.exception
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException
-import com.fasterxml.jackson.databind.exc.MismatchedInputException
 import com.zufar.urlshortener.auth.exception.EmailAlreadyExistsException
 import com.zufar.urlshortener.auth.exception.InvalidTokenException
 import com.zufar.urlshortener.auth.exception.UserNotFoundException
@@ -90,10 +88,13 @@ class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleHttpMessageNotReadableException(ex: HttpMessageNotReadableException): ResponseEntity<ErrorResponse> {
         val cause = ex.mostSpecificCause
+        val exceptionClassName = cause::class.java.name
         val message = when {
-            cause is InvalidFormatException -> "Request field has an invalid value or type"
-            cause is MismatchedInputException && cause.isMissingRequiredField() -> "Required request field is missing"
-            cause is MismatchedInputException -> "Request field has an invalid value or type"
+            cause.isMissingRequiredField() -> "Required request field is missing"
+            exceptionClassName.endsWith(".InvalidFormatException") -> "Request field has an invalid value or type"
+            exceptionClassName.endsWith(".MismatchedInputException") ||
+                exceptionClassName.endsWith(".MissingKotlinParameterException") ->
+                "Request field has an invalid value or type"
             else -> "Malformed JSON request"
         }
 
@@ -106,10 +107,14 @@ class GlobalExceptionHandler {
         return errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred")
     }
 
-    private fun MismatchedInputException.isMissingRequiredField(): Boolean {
+    private fun Throwable.isMissingRequiredField(): Boolean {
         val detail = message ?: return false
         return detail.contains("missing", ignoreCase = true) ||
-            detail.contains("creator parameter", ignoreCase = true)
+            detail.contains("creator parameter", ignoreCase = true) ||
+            detail.contains("non-null", ignoreCase = true) ||
+            detail.contains("must not be null", ignoreCase = true) ||
+            detail.contains("null value", ignoreCase = true) ||
+            detail.contains("required creator property", ignoreCase = true)
     }
 
     private fun errorResponse(status: HttpStatus, message: String): ResponseEntity<ErrorResponse> =
