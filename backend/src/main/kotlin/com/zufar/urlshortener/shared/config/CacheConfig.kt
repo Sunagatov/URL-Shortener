@@ -14,7 +14,7 @@ import java.time.Duration
 class CacheConfig(
     @Value("\${cache.max.size:10000}") private val maxSize: Long,
     @Value("\${cache.expire.minutes:30}") private val expireMinutes: Long,
-    @Value("\${cache.names:urlMappings,userDetails}") private val cacheNames: String
+    @Value("\${cache.names:urlMappings}") private val cacheNames: String
 ) {
 
     @Bean

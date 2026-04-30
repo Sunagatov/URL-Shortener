@@ -25,6 +25,8 @@ import java.time.Clock
 import java.time.LocalDateTime
 
 private const val DEFAULT_EXPIRATION_URL_DAYS = 365L
+private const val MIN_ALLOWED_DAYS_COUNT = 1L
+private const val MAX_ALLOWED_DAYS_COUNT = 365L
 private const val MAX_CODE_GENERATION_ATTEMPTS = 10
 private const val MAX_PAGE_SIZE = 100
 private const val URL_MAPPING_NOT_FOUND_MESSAGE = "URL mapping not found"
@@ -35,7 +37,6 @@ private const val DELETE_URL_MAPPING_DENIED_MESSAGE = "You are not allowed to de
 class UrlManagementService(
     private val urlRepository: UrlRepository,
     private val urlValidator: UrlValidator,
-    private val daysCountValidator: DaysCountValidator,
     private val currentUserService: CurrentUserService,
     private val mongoTemplate: MongoTemplate,
     @Value("\${app.base-url}") private val baseUrl: String,
@@ -50,7 +51,7 @@ class UrlManagementService(
         log.info("Shortening originalURL='{}' from IP='{}'", normalizedRequest.originalUrl, httpRequest.remoteAddr)
 
         urlValidator.validateUrl(normalizedRequest.originalUrl)
-        daysCountValidator.validateDaysCount(normalizedRequest.daysCount)
+        validateDaysCount(normalizedRequest.daysCount)
 
         repeat(MAX_CODE_GENERATION_ATTEMPTS) { attempt ->
             val urlHash = StringEncoder.generate()
@@ -175,6 +176,16 @@ class UrlManagementService(
         }
         if (size !in 1..MAX_PAGE_SIZE) {
             throw InvalidRequestException("Size must be between 1 and $MAX_PAGE_SIZE")
+        }
+    }
+
+    private fun validateDaysCount(daysCount: Long?) {
+        val value = daysCount ?: return
+        if (value < MIN_ALLOWED_DAYS_COUNT) {
+            throw InvalidRequestException("Days count must be at least $MIN_ALLOWED_DAYS_COUNT day(s).")
+        }
+        if (value > MAX_ALLOWED_DAYS_COUNT) {
+            throw InvalidRequestException("Days count must not exceed $MAX_ALLOWED_DAYS_COUNT day(s).")
         }
     }
 

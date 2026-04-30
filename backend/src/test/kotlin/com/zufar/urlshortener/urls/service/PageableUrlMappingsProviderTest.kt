@@ -33,7 +33,6 @@ class PageableUrlMappingsProviderTest {
         UrlManagementService(
             urlRepository = urlRepository,
             urlValidator = mock(),
-            daysCountValidator = mock(),
             currentUserService = currentUserService,
             mongoTemplate = mongoTemplate,
             baseUrl = "http://localhost:8080",

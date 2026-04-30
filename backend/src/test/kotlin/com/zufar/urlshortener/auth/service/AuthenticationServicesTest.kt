@@ -8,7 +8,6 @@ import com.zufar.urlshortener.auth.exception.EmailAlreadyExistsException
 import com.zufar.urlshortener.auth.exception.InvalidTokenException
 import com.zufar.urlshortener.auth.repository.UserRepository
 import com.zufar.urlshortener.auth.security.JwtTokenProvider
-import com.zufar.urlshortener.auth.service.support.AuthTokenIssuer
 import com.zufar.urlshortener.auth.validation.AuthRequestValidator
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -32,7 +31,6 @@ import kotlin.test.assertEquals
 class AuthenticationServicesTest {
 
     @Mock private lateinit var authenticationManager: AuthenticationManager
-    @Mock private lateinit var authTokenIssuer: AuthTokenIssuer
     @Mock private lateinit var jwtTokenProvider: JwtTokenProvider
     @Mock private lateinit var authRequestValidator: AuthRequestValidator
     @Mock private lateinit var userRepository: UserRepository
@@ -42,7 +40,6 @@ class AuthenticationServicesTest {
     private fun authService() = AuthService(
         authenticationManager = authenticationManager,
         authRequestValidator = authRequestValidator,
-        authTokenIssuer = authTokenIssuer,
         userRepository = userRepository,
         passwordEncoder = passwordEncoder,
         jwtTokenProvider = jwtTokenProvider,
@@ -53,9 +50,8 @@ class AuthenticationServicesTest {
     fun `register lowercases and trims email before save`() {
         whenever(passwordEncoder.encode("SecurePassword123!")).thenReturn("hashed-password")
         whenever(userRepository.save(any<UserDetails>())).thenAnswer { it.arguments[0] }
-        whenever(authTokenIssuer.issueAuthentication(any<UserDetails>())).thenReturn(
-            com.zufar.urlshortener.auth.dto.AuthResponse("access-token", "refresh-token")
-        )
+        whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access-token")
+        whenever(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh-token")
 
         authService().signUp(
             SignUpRequest(
@@ -109,9 +105,8 @@ class AuthenticationServicesTest {
         whenever(authenticationManager.authenticate(any())).thenReturn(
             UsernamePasswordAuthenticationToken(principal, null, principal.authorities)
         )
-        whenever(authTokenIssuer.issueAuthentication(principal)).thenReturn(
-            com.zufar.urlshortener.auth.dto.AuthResponse("access-token", "refresh-token")
-        )
+        whenever(jwtTokenProvider.generateAccessToken(principal)).thenReturn("access-token")
+        whenever(jwtTokenProvider.generateRefreshToken(principal)).thenReturn("refresh-token")
 
         authService().signIn(SignInRequest("  User@Example.COM  ", "password"))
 
@@ -134,7 +129,7 @@ class AuthenticationServicesTest {
         whenever(jwtTokenProvider.getUsernameFromJWT("refresh-token")).thenReturn("  User@Example.COM  ")
         whenever(jwtTokenProvider.getTokenVersionFromJWT("refresh-token")).thenReturn(0)
         whenever(userRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
-        whenever(authTokenIssuer.issueAccessToken(user)).thenReturn("new-access-token")
+        whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("new-access-token")
 
         val response = authService().refreshAccessToken(RefreshTokenRequest("refresh-token"))
 

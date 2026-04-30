@@ -11,12 +11,13 @@ import com.zufar.urlshortener.auth.exception.InvalidTokenException
 import com.zufar.urlshortener.auth.exception.UserNotFoundException
 import com.zufar.urlshortener.auth.repository.UserRepository
 import com.zufar.urlshortener.auth.security.JwtTokenProvider
-import com.zufar.urlshortener.auth.service.support.AuthTokenIssuer
+import com.zufar.urlshortener.auth.security.withTokenVersion
 import com.zufar.urlshortener.auth.validation.AuthRequestValidator
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.userdetails.User
+import org.springframework.security.core.userdetails.UserDetails as SecurityUserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.Clock
@@ -26,7 +27,6 @@ import java.time.LocalDateTime
 class AuthService(
     private val authenticationManager: AuthenticationManager,
     private val authRequestValidator: AuthRequestValidator,
-    private val authTokenIssuer: AuthTokenIssuer,
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
     private val jwtTokenProvider: JwtTokenProvider,
@@ -41,7 +41,7 @@ class AuthService(
             UsernamePasswordAuthenticationToken(normalizedRequest.email, request.password)
         )
 
-        return authTokenIssuer.issueAuthentication(authentication.principal as User)
+        return issueAuthentication(authentication.principal as User)
     }
 
     fun signUp(request: SignUpRequest): AuthResponse {
@@ -65,7 +65,7 @@ class AuthService(
             updatedAt = now
         )
 
-        return authTokenIssuer.issueAuthentication(saveUser(user))
+        return issueAuthentication(saveUser(user))
     }
 
     fun refreshAccessToken(request: RefreshTokenRequest): RefreshTokenResponse {
@@ -84,7 +84,7 @@ class AuthService(
             throw InvalidTokenException("Invalid or expired refresh token")
         }
 
-        return RefreshTokenResponse(authTokenIssuer.issueAccessToken(user))
+        return RefreshTokenResponse(issueAccessToken(user))
     }
 
     private fun ensureEmailIsAvailable(email: String) {
@@ -105,4 +105,19 @@ class AuthService(
         return userRepository.findByEmailIgnoreCase(normalizedEmail)
             ?: throw UserNotFoundException("User not found for the provided refresh token")
     }
+
+    private fun issueAuthentication(userDetails: SecurityUserDetails): AuthResponse =
+        AuthResponse(
+            accessToken = jwtTokenProvider.generateAccessToken(userDetails),
+            refreshToken = jwtTokenProvider.generateRefreshToken(userDetails)
+        )
+
+    private fun issueAuthentication(userDetails: UserDetails): AuthResponse =
+        issueAuthentication(userDetails.toSecurityUser())
+
+    private fun issueAccessToken(userDetails: UserDetails): String =
+        jwtTokenProvider.generateAccessToken(userDetails.toSecurityUser())
+
+    private fun UserDetails.toSecurityUser(): SecurityUserDetails =
+        User(email, password, emptyList()).withTokenVersion(tokenVersion)
 }

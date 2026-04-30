@@ -29,7 +29,6 @@ class UrlShortenerTest {
 
     @Mock private lateinit var urlRepository: UrlRepository
     @Mock @Suppress("unused") private lateinit var urlValidator: UrlValidator
-    @Mock @Suppress("unused") private lateinit var daysCountValidator: DaysCountValidator
     @Mock private lateinit var currentUserService: CurrentUserService
     @Mock private lateinit var mongoTemplate: MongoTemplate
     @Mock private lateinit var httpRequest: HttpServletRequest
@@ -39,7 +38,6 @@ class UrlShortenerTest {
     private fun createShortener(baseUrl: String = this.baseUrl) = UrlManagementService(
         urlRepository = urlRepository,
         urlValidator = urlValidator,
-        daysCountValidator = daysCountValidator,
         currentUserService = currentUserService,
         mongoTemplate = mongoTemplate,
         baseUrl = baseUrl,
