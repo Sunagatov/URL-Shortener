@@ -1,9 +1,16 @@
 import type { MouseEvent } from 'react';
 import { useState } from 'react';
-import { FaCheck, FaChevronRight, FaCopy, FaExternalLinkAlt, FaLink, FaTrash } from 'react-icons/fa';
+import { FaCheck, FaChevronRight, FaExternalLinkAlt, FaTrash } from 'react-icons/fa';
 import { getDomainLabel, getShortUrlSlug } from '@/features/urls/lib/urlMappings';
 import type { UrlMapping } from '@/shared/types';
 import { Button } from '@/shared/ui';
+import {
+  UrlCopyButton,
+  UrlExternalLinkButton,
+  UrlFallbackIcon,
+  UrlFieldLabel,
+  UrlFavicon,
+} from '@/features/urls/ui/UrlSurfacePrimitives';
 
 interface UrlMappingCardProps {
   copiedUrl: string | null;
@@ -21,17 +28,8 @@ interface UrlMappingCardProps {
 
 const FaviconImage = ({ domain }: { domain: string }) => {
   const [failed, setFailed] = useState(false);
-  if (failed) return <FaLink className="h-3.5 w-3.5 text-blue-400" />;
-  return (
-    <img
-      src={`https://www.google.com/s2/favicons?domain=${domain}&sz=32`}
-      alt=""
-      width={16}
-      height={16}
-      onError={() => setFailed(true)}
-      className="h-4 w-4 object-contain"
-    />
-  );
+  if (failed) return <UrlFallbackIcon />;
+  return <UrlFavicon domain={domain} onError={() => setFailed(true)} />;
 };
 
 export const UrlMappingCard = ({
@@ -113,9 +111,7 @@ export const UrlMappingCard = ({
 
       <div className="space-y-3 px-5 py-4">
         <div>
-          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/30">
-            Short URL
-          </p>
+          <UrlFieldLabel>Short URL</UrlFieldLabel>
           <div className="group/row flex items-center gap-2 rounded-xl border border-white/[0.06] bg-[#0a1220] px-3 py-2.5 transition-colors hover:border-blue-500/20">
             <span
               className="flex-1 truncate text-sm text-blue-400"
@@ -124,30 +120,25 @@ export const UrlMappingCard = ({
               …/{shortSlug}
             </span>
             <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover/row:opacity-100">
-              <button
-                onClick={event => {
+              <span
+                onClick={(event) => {
                   stopPropagation(event);
-                  void onCopy(mapping.shortUrl);
                 }}
-                className="rounded-lg p-1.5 text-white/30 transition-all hover:bg-blue-500/10 hover:text-blue-300"
-                title="Copy"
               >
-                {copiedUrl === mapping.shortUrl ? (
-                  <FaCheck className="h-3 w-3 text-blue-400" />
-                ) : (
-                  <FaCopy className="h-3 w-3" />
-                )}
-              </button>
-              <a
+                <UrlCopyButton
+                  copied={copiedUrl === mapping.shortUrl}
+                  onCopy={() => {
+                    void onCopy(mapping.shortUrl);
+                  }}
+                  primary
+                />
+              </span>
+              <UrlExternalLinkButton
                 href={mapping.shortUrl}
-                target="_blank"
-                rel="noopener noreferrer"
                 onClick={stopPropagation}
-                className="rounded-lg p-1.5 text-white/30 transition-all hover:bg-blue-500/10 hover:text-blue-300"
+                primary
                 title="Open"
-              >
-                <FaExternalLinkAlt className="h-3 w-3" />
-              </a>
+              />
             </div>
             {copiedUrl === mapping.shortUrl && (
               <span
@@ -161,9 +152,7 @@ export const UrlMappingCard = ({
         </div>
 
         <div>
-          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/30">
-            Original URL
-          </p>
+          <UrlFieldLabel>Original URL</UrlFieldLabel>
           <div className="group/row flex items-center gap-2 rounded-xl border border-white/[0.05] bg-white/[0.03] px-3 py-2.5 transition-colors hover:border-white/[0.10]">
             <span
               className="flex-1 truncate text-xs text-white/45"
@@ -173,16 +162,19 @@ export const UrlMappingCard = ({
               {mapping.originalUrl}
             </span>
             <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover/row:opacity-100">
-              <button
-                onClick={event => {
+              <span
+                onClick={(event) => {
                   stopPropagation(event);
-                  void onCopy(mapping.originalUrl);
                 }}
-                className="rounded-lg p-1.5 text-white/30 transition-all hover:bg-white/5 hover:text-white/60"
-                title="Copy"
               >
-                <FaCopy className="h-3 w-3" />
-              </button>
+                <UrlCopyButton
+                  copied={copiedUrl === mapping.originalUrl}
+                  onCopy={() => {
+                    void onCopy(mapping.originalUrl);
+                  }}
+                  title="Copy"
+                />
+              </span>
             </div>
           </div>
         </div>

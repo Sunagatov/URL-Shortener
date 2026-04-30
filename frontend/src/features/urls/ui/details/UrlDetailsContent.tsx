@@ -1,9 +1,6 @@
 import {
   FaCalendarAlt,
-  FaCheck,
   FaClock,
-  FaCopy,
-  FaExternalLinkAlt,
   FaLink,
   FaLock,
   FaQrcode,
@@ -12,6 +9,13 @@ import {
 import { Button } from '@/shared/ui';
 import type { UrlMapping } from '@/shared/types';
 import { formatUrlDate, getDomainLabel } from '@/features/urls/lib/urlMappings';
+import {
+  UrlCopyButton,
+  UrlExternalLinkButton,
+  UrlFieldLabel,
+  UrlMetadataRow,
+  UrlSurfaceCard,
+} from '@/features/urls/ui/UrlSurfacePrimitives';
 
 interface UrlDetailsHeaderProps {
   onBack: () => void;
@@ -72,13 +76,8 @@ interface UrlInfoCardProps {
 
 export function UrlInfoCard({ copiedValue, onCopy, urlMapping }: UrlInfoCardProps) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.04] lg:col-span-3">
-      <div className="border-b border-white/[0.06] px-5 py-3.5">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">
-          URL Information
-        </p>
-      </div>
-      <div className="space-y-4 p-5">
+    <UrlSurfaceCard title="URL Information" className="lg:col-span-3">
+      <div className="space-y-4">
         <UrlValueRow
           label="Short URL"
           value={urlMapping.shortUrl}
@@ -96,7 +95,7 @@ export function UrlInfoCard({ copiedValue, onCopy, urlMapping }: UrlInfoCardProp
           tone="default"
         />
       </div>
-    </div>
+    </UrlSurfaceCard>
   );
 }
 
@@ -119,17 +118,10 @@ function UrlValueRow({
     tone === 'primary' ? 'border-blue-500/15 bg-[#0a1220]' : 'border-white/[0.06] bg-white/[0.03]';
   const linkClassName =
     tone === 'primary' ? 'text-blue-400 hover:text-blue-300' : 'text-white/50 hover:text-white/80';
-  const buttonClassName =
-    tone === 'primary'
-      ? 'text-white/30 hover:bg-blue-500/10 hover:text-blue-300'
-      : 'text-white/30 hover:bg-white/5 hover:text-white/60';
-  const copiedIconClassName = tone === 'primary' ? 'text-blue-400' : 'text-white/60';
 
   return (
     <div>
-      <label className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-white/30">
-        {label}
-      </label>
+      <UrlFieldLabel>{label}</UrlFieldLabel>
       <div className={`flex items-center gap-2 rounded-xl border px-4 py-3 ${containerClassName}`}>
         <a
           href={href}
@@ -141,25 +133,18 @@ function UrlValueRow({
           {value}
         </a>
         <div className="flex shrink-0 gap-1">
-          <button
-            onClick={() => onCopy(value)}
-            className={`rounded-lg p-2 transition-all ${buttonClassName}`}
-            title="Copy"
-          >
-            {copiedValue === value ? (
-              <FaCheck className={`h-3.5 w-3.5 ${copiedIconClassName}`} />
-            ) : (
-              <FaCopy className="h-3.5 w-3.5" />
-            )}
-          </button>
-          <a
+          <UrlCopyButton
+            copied={copiedValue === value}
+            onCopy={() => {
+              void onCopy(value);
+            }}
+            primary={tone === 'primary'}
+          />
+          <UrlExternalLinkButton
             href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`rounded-lg p-2 transition-all ${buttonClassName}`}
-          >
-            <FaExternalLinkAlt className="h-3.5 w-3.5" />
-          </a>
+            primary={tone === 'primary'}
+            title="Open"
+          />
         </div>
       </div>
     </div>
@@ -168,19 +153,16 @@ function UrlValueRow({
 
 export function UrlMetadataCard({ urlMapping }: { urlMapping: UrlMapping }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.04] lg:col-span-2">
-      <div className="border-b border-white/[0.06] px-5 py-3.5">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Details</p>
-      </div>
-      <div className="space-y-3 p-4">
-        <MetadataRow
+    <UrlSurfaceCard title="Details" className="lg:col-span-2">
+      <div className="space-y-3 px-0 py-0">
+        <UrlMetadataRow
           icon={FaCalendarAlt}
           label="Created"
           value={formatUrlDate(urlMapping.createdAt, true)}
           tone="default"
         />
         {urlMapping.expirationDate ? (
-          <MetadataRow
+          <UrlMetadataRow
             icon={FaClock}
             label="Expires"
             value={formatUrlDate(urlMapping.expirationDate, true)}
@@ -197,47 +179,6 @@ export function UrlMetadataCard({ urlMapping }: { urlMapping: UrlMapping }) {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function MetadataRow({
-  icon: Icon,
-  label,
-  tone,
-  value,
-}: {
-  icon: typeof FaCalendarAlt;
-  label: string;
-  tone: 'default' | 'warning';
-  value: string;
-}) {
-  const containerClassName =
-    tone === 'warning'
-      ? 'border-amber-500/15 bg-amber-900/15'
-      : 'border-white/[0.06] bg-white/[0.03]';
-  const iconClassName =
-    tone === 'warning'
-      ? 'border-amber-500/15 bg-amber-500/15 text-amber-400'
-      : 'border-blue-500/15 bg-blue-600/15 text-blue-400';
-  const textClassName = tone === 'warning' ? 'text-amber-300/80' : 'text-white/80';
-
-  return (
-    <div className={`flex items-center gap-3 rounded-xl border p-3 ${containerClassName}`}>
-      <div
-        className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border ${iconClassName}`}
-      >
-        <Icon className="h-3.5 w-3.5" />
-      </div>
-      <div>
-        <p className="mb-0.5 text-[10px] uppercase tracking-widest text-white/30">{label}</p>
-        <p
-          className={`text-xs font-semibold ${textClassName}`}
-          style={{ fontFamily: 'var(--font-mono)' }}
-        >
-          {value}
-        </p>
-      </div>
-    </div>
+    </UrlSurfaceCard>
   );
 }
