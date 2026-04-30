@@ -154,8 +154,25 @@ src/main/kotlin/com/zufar/urlshortener/
 | `APP_URLS_PAGINATION_MAX_SIZE` | ❌ | Defaults to `100` |
 | `APP_URLS_REDIRECT_MAX_CACHE_SECONDS` | ❌ | Defaults to `3600` |
 | `CORS_ALLOWED_ORIGINS` | ❌ | Defaults to `http://localhost:3000` |
-| `RATE_LIMIT_REQUESTS` | ❌ | Defaults to `100` (per minute per IP) |
+| `RATE_LIMIT_ENABLED` | ❌ | Defaults to `true` |
 | `RATE_LIMIT_TRUSTED_PROXIES` | ❌ | Comma-separated trusted proxy CIDRs/IPs for `X-Forwarded-For` handling |
+| `RATE_LIMIT_BUCKET_CACHE_MAX_SIZE` | ❌ | Defaults to `100000` |
+| `RATE_LIMIT_BUCKET_CACHE_EXPIRE_MINUTES` | ❌ | Defaults to `10` |
+| `RATE_LIMIT_AUTH_CAPACITY` | ❌ | Defaults to `20` |
+| `RATE_LIMIT_AUTH_REFILL_TOKENS` | ❌ | Defaults to `20` |
+| `RATE_LIMIT_AUTH_REFILL_MINUTES` | ❌ | Defaults to `1` |
+| `RATE_LIMIT_PUBLIC_CREATE_CAPACITY` | ❌ | Defaults to `30` |
+| `RATE_LIMIT_PUBLIC_CREATE_REFILL_TOKENS` | ❌ | Defaults to `30` |
+| `RATE_LIMIT_PUBLIC_CREATE_REFILL_MINUTES` | ❌ | Defaults to `1` |
+| `RATE_LIMIT_PUBLIC_REDIRECT_CAPACITY` | ❌ | Defaults to `240` |
+| `RATE_LIMIT_PUBLIC_REDIRECT_REFILL_TOKENS` | ❌ | Defaults to `240` |
+| `RATE_LIMIT_PUBLIC_REDIRECT_REFILL_MINUTES` | ❌ | Defaults to `1` |
+| `RATE_LIMIT_FRONTEND_LOGS_CAPACITY` | ❌ | Defaults to `30` |
+| `RATE_LIMIT_FRONTEND_LOGS_REFILL_TOKENS` | ❌ | Defaults to `30` |
+| `RATE_LIMIT_FRONTEND_LOGS_REFILL_MINUTES` | ❌ | Defaults to `1` |
+| `RATE_LIMIT_AUTHENTICATED_API_CAPACITY` | ❌ | Defaults to `120` |
+| `RATE_LIMIT_AUTHENTICATED_API_REFILL_TOKENS` | ❌ | Defaults to `120` |
+| `RATE_LIMIT_AUTHENTICATED_API_REFILL_MINUTES` | ❌ | Defaults to `1` |
 | `CACHE_MAX_SIZE` | ❌ | Defaults to `10000` |
 | `CACHE_EXPIRE_MINUTES` | ❌ | Defaults to `30` |
 | `CACHE_NAMES` | ❌ | Defaults to `urlMappings` |
@@ -167,6 +184,16 @@ src/main/kotlin/com/zufar/urlshortener/
 | `LOG_MAX_HISTORY` | ❌ | Defaults to `30` |
 
 See `.env.example` for local defaults and `.env.prod` for the production template.
+
+Rate limiting is policy-based rather than global:
+
+- `auth`: public auth endpoints, keyed by client IP
+- `public_create`: `POST /api/v1/urls`, keyed by client IP
+- `public_redirect`: short-link redirects, keyed by client IP
+- `frontend_logs`: browser log ingestion, keyed by client IP
+- `authenticated_api`: authenticated API traffic, keyed by `userId` when available, otherwise by client IP
+
+429 responses include `Retry-After`, `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, and structured JSON metadata including `code`, `requestId`, and `retryAfterSeconds`.
 
 For structured JSON logs in production, enable the `json-logs` Spring profile. Example:
 

@@ -2,6 +2,7 @@ package com.zufar.urlshortener.shared.config
 
 import com.zufar.urlshortener.auth.security.CustomUserDetailsService
 import com.zufar.urlshortener.auth.security.JwtAuthenticationFilter
+import com.zufar.urlshortener.shared.filter.RateLimitFilter
 import com.zufar.urlshortener.shared.API_DOCS_PATH_PREFIX
 import com.zufar.urlshortener.shared.DOCS_PATH_PREFIX
 import com.zufar.urlshortener.shared.security.RestAccessDeniedHandler
@@ -28,6 +29,7 @@ import org.springframework.security.web.util.matcher.RegexRequestMatcher
 class SecurityConfig(
     private val customUserDetailsService: CustomUserDetailsService,
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
+    private val rateLimitFilter: RateLimitFilter,
     private val restAuthenticationEntryPoint: RestAuthenticationEntryPoint,
     private val restAccessDeniedHandler: RestAccessDeniedHandler
 ) {
@@ -78,6 +80,7 @@ class SecurityConfig(
             }
             .authenticationProvider(daoAuthenticationProvider(passwordEncoder))
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+            .addFilterAfter(rateLimitFilter, JwtAuthenticationFilter::class.java)
 
         return http.build()
     }

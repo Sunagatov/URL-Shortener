@@ -68,7 +68,7 @@ Browser redirects to https://www.example.com
 ## Security
 
 - No authentication required (public endpoint)
-- Rate limiting applied (100 req/min per IP)
+- Rate limiting applied through the `public_redirect` policy
 - `X-Forwarded-For` is trusted only when the direct peer matches `RATE_LIMIT_TRUSTED_PROXIES`
 - URL validation on creation prevents malicious URLs
 - Logging of IP and User-Agent for analytics

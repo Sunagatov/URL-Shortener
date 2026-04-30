@@ -19,6 +19,6 @@ class RestAuthenticationEntryPoint(
         response: HttpServletResponse,
         authException: AuthenticationException
     ) {
-        errorResponseWriter.write(response, HttpStatus.UNAUTHORIZED, UNAUTHORIZED_ACCESS_MESSAGE)
+        errorResponseWriter.write(request, response, HttpStatus.UNAUTHORIZED, UNAUTHORIZED_ACCESS_MESSAGE)
     }
 }

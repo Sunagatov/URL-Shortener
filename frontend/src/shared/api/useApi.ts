@@ -1,5 +1,10 @@
 import { useState, useCallback } from 'react';
-import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
+import {
+  getApiErrorCode,
+  getApiErrorMessage,
+  getApiErrorRetryAfterSeconds,
+  getApiErrorStatus,
+} from '@/shared/lib/apiErrors';
 import { logger } from '@/shared/lib/logger';
 import type { ApiError } from '@/shared/types';
 
@@ -30,18 +35,36 @@ export const useApi = <T>(): UseApiReturn<T> => {
         setState(prev => ({ ...prev, data: result, loading: false }));
         return result;
       } catch (error: unknown) {
+        const status = getApiErrorStatus(error) ?? 500;
+        const code = getApiErrorCode(error);
+        const retryAfterSeconds = getApiErrorRetryAfterSeconds(error);
         const apiError: ApiError = {
           errorMessage: getApiErrorMessage(error, 'An error occurred'),
-          status: getApiErrorStatus(error) ?? 500,
+          status,
+          code,
+          retryAfterSeconds,
         };
 
-        logger.warn('frontend.api.request_failed', {
-          action: options?.action ?? 'unknown',
-          error: {
-            message: apiError.errorMessage,
-            status: apiError.status,
-          },
-        });
+        if (status === 429) {
+          logger.warn('frontend.api.rate_limited', {
+            action: options?.action ?? 'unknown',
+            error: {
+              code: apiError.code,
+              message: apiError.errorMessage,
+              retryAfterSeconds: apiError.retryAfterSeconds,
+              status: apiError.status,
+            },
+          });
+        } else {
+          logger.warn('frontend.api.request_failed', {
+            action: options?.action ?? 'unknown',
+            error: {
+              code: apiError.code,
+              message: apiError.errorMessage,
+              status: apiError.status,
+            },
+          });
+        }
 
         setState(prev => ({ ...prev, error: apiError, loading: false }));
         return null;

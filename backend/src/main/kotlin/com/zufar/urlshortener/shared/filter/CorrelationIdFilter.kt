@@ -30,6 +30,7 @@ class CorrelationIdFilter : OncePerRequestFilter() {
 
         MDC.put("correlationId", correlationId)
         MDC.put("requestId", requestId)
+        request.setAttribute(REQUEST_ID_ATTRIBUTE, requestId)
         response.setHeader(CORRELATION_ID_HEADER, correlationId)
         response.setHeader(REQUEST_ID_HEADER, requestId)
         if (clientTraceId != null) {
@@ -43,6 +44,7 @@ class CorrelationIdFilter : OncePerRequestFilter() {
             MDC.remove("correlationId")
             MDC.remove("requestId")
             MDC.remove("clientTraceId")
+            request.removeAttribute(REQUEST_ID_ATTRIBUTE)
         }
     }
 
@@ -58,5 +60,6 @@ class CorrelationIdFilter : OncePerRequestFilter() {
 private const val CORRELATION_ID_HEADER = "X-Correlation-ID"
 private const val REQUEST_ID_HEADER = "X-Request-ID"
 private const val CLIENT_TRACE_ID_HEADER = "X-Trace-ID"
+private const val REQUEST_ID_ATTRIBUTE = "requestId"
 private const val MAX_HEADER_LENGTH = 64
 private val UNSAFE_HEADER_CHARS: Pattern = Pattern.compile("[^A-Za-z0-9._\\-]")

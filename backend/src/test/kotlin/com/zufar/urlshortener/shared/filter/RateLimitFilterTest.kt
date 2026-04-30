@@ -2,11 +2,14 @@ package com.zufar.urlshortener.shared.filter
 
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
+import com.zufar.urlshortener.shared.AUTHENTICATED_USER_ID_ATTRIBUTE
+import com.zufar.urlshortener.shared.config.BucketPolicyProperties
 import com.zufar.urlshortener.shared.config.RateLimitConfig
+import com.zufar.urlshortener.shared.config.RateLimitProperties
 import com.zufar.urlshortener.shared.http.ClientIpResolver
 import com.zufar.urlshortener.shared.http.ErrorResponseWriter
-import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.Bucket
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import jakarta.servlet.FilterChain
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -15,92 +18,94 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoInteractions
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.times
+import tools.jackson.databind.ObjectMapper
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
-import tools.jackson.databind.ObjectMapper
-import java.time.Duration
 
 @ExtendWith(MockitoExtension::class)
 class RateLimitFilterTest {
 
-    @Mock private lateinit var rateLimitConfig: RateLimitConfig
     @Mock private lateinit var filterChain: FilterChain
 
     private lateinit var buckets: Cache<String, Bucket>
     private lateinit var filter: RateLimitFilter
+    private lateinit var rateLimitConfig: RateLimitConfig
 
     @BeforeEach
     fun setup() {
         buckets = Caffeine.newBuilder().build()
-        filter = RateLimitFilter(
-            rateLimitConfig,
-            buckets,
-            ErrorResponseWriter(ObjectMapper()),
-            ClientIpResolver(rateLimitConfig)
-        )
-    }
-
-    private fun bucketWithCapacity(capacity: Long): Bucket {
-        val limit = Bandwidth.builder()
-            .capacity(capacity)
-            .refillIntervally(capacity, Duration.ofMinutes(1))
-            .build()
-        return Bucket.builder().addLimit(limit).build()
+        rateLimitConfig = createRateLimitConfig()
+        filter = createFilter(rateLimitConfig)
     }
 
     @Test
     fun `when rate limit exceeded returns 429 with JSON content type`() {
-        val exhaustedBucket = bucketWithCapacity(1).apply { tryConsume(1) }
-        whenever(rateLimitConfig.createBucket()).thenReturn(exhaustedBucket)
-
-        val request = MockHttpServletRequest().apply { remoteAddr = "10.0.0.1" }
+        val request = MockHttpServletRequest("GET", "/abc12345").apply {
+            requestURI = "/abc12345"
+            servletPath = "/abc12345"
+            remoteAddr = "10.0.0.1"
+            setAttribute("requestId", "request-123")
+        }
         val response = MockHttpServletResponse()
 
+        filter.doFilter(request, response, filterChain)
         filter.doFilter(request, response, filterChain)
 
         assertEquals(HttpStatus.TOO_MANY_REQUESTS.value(), response.status)
         assertEquals(MediaType.APPLICATION_JSON_VALUE, response.contentType)
-        verify(filterChain, never()).doFilter(request, response)
+        verify(filterChain, times(1)).doFilter(request, response)
     }
 
     @Test
-    fun `when rate limit exceeded response body contains errorMessage field`() {
-        val exhaustedBucket = bucketWithCapacity(1).apply { tryConsume(1) }
-        whenever(rateLimitConfig.createBucket()).thenReturn(exhaustedBucket)
-
-        val request = MockHttpServletRequest().apply { remoteAddr = "10.0.0.2" }
+    fun `when rate limit exceeded response body contains structured fields`() {
+        val request = MockHttpServletRequest("GET", "/abc12345").apply {
+            requestURI = "/abc12345"
+            servletPath = "/abc12345"
+            remoteAddr = "10.0.0.2"
+            setAttribute("requestId", "request-456")
+        }
         val response = MockHttpServletResponse()
 
+        filter.doFilter(request, response, filterChain)
         filter.doFilter(request, response, filterChain)
 
         val body = response.contentAsString
-        assertTrue(body.contains("errorMessage"), "429 body must contain errorMessage field")
+        assertTrue(body.contains("errorMessage"))
+        assertTrue(body.contains("RATE_LIMIT_EXCEEDED"))
+        assertTrue(body.contains("retryAfterSeconds"))
+        assertTrue(body.contains("request-456"))
     }
 
     @Test
-    fun `when rate limit exceeded response includes Retry-After header`() {
-        val exhaustedBucket = bucketWithCapacity(1).apply { tryConsume(1) }
-        whenever(rateLimitConfig.createBucket()).thenReturn(exhaustedBucket)
-
-        val request = MockHttpServletRequest().apply { remoteAddr = "10.0.0.3" }
+    fun `when rate limit exceeded response includes dynamic rate limit headers`() {
+        val request = MockHttpServletRequest("GET", "/abc12345").apply {
+            requestURI = "/abc12345"
+            servletPath = "/abc12345"
+            remoteAddr = "10.0.0.3"
+            setAttribute("requestId", "request-789")
+        }
         val response = MockHttpServletResponse()
 
         filter.doFilter(request, response, filterChain)
+        filter.doFilter(request, response, filterChain)
 
-        assertTrue(response.getHeader("Retry-After") != null, "429 response must include Retry-After header")
+        assertEquals("1", response.getHeader("X-RateLimit-Limit"))
+        assertEquals("0", response.getHeader("X-RateLimit-Remaining"))
+        assertTrue(response.getHeader("Retry-After") != null)
+        assertTrue(response.getHeader("X-RateLimit-Reset") != null)
     }
 
     @Test
     fun `when rate limit not exceeded request passes through to filter chain`() {
-        whenever(rateLimitConfig.createBucket()).thenReturn(bucketWithCapacity(100))
-
-        val request = MockHttpServletRequest().apply { remoteAddr = "10.0.0.4" }
+        val request = MockHttpServletRequest("GET", "/abc12345").apply {
+            requestURI = "/abc12345"
+            servletPath = "/abc12345"
+            remoteAddr = "10.0.0.4"
+        }
         val response = MockHttpServletResponse()
 
         filter.doFilter(request, response, filterChain)
@@ -110,9 +115,9 @@ class RateLimitFilterTest {
 
     @Test
     fun `X-Forwarded-For header is ignored when remote address is not trusted proxy`() {
-        whenever(rateLimitConfig.createBucket()).thenReturn(bucketWithCapacity(100))
-
-        val request = MockHttpServletRequest().apply {
+        val request = MockHttpServletRequest("GET", "/abc12345").apply {
+            requestURI = "/abc12345"
+            servletPath = "/abc12345"
             remoteAddr = "10.0.0.99"
             addHeader("X-Forwarded-For", "203.0.113.5, 10.0.0.1")
         }
@@ -120,15 +125,16 @@ class RateLimitFilterTest {
 
         filter.doFilter(request, response, filterChain)
 
-        assertTrue(buckets.getIfPresent("10.0.0.99") != null, "Bucket should be keyed on remote address")
+        assertTrue(buckets.getIfPresent("public_redirect:ip:10.0.0.99") != null)
     }
 
     @Test
     fun `X-Forwarded-For header is used when remote address is trusted proxy`() {
-        whenever(rateLimitConfig.createBucket()).thenReturn(bucketWithCapacity(100))
-        whenever(rateLimitConfig.isTrustedProxy("10.0.0.99")).thenReturn(true)
-
-        val request = MockHttpServletRequest().apply {
+        rateLimitConfig = createRateLimitConfig(trustedProxies = "10.0.0.99")
+        filter = createFilter(rateLimitConfig)
+        val request = MockHttpServletRequest("GET", "/abc12345").apply {
+            requestURI = "/abc12345"
+            servletPath = "/abc12345"
             remoteAddr = "10.0.0.99"
             addHeader("X-Forwarded-For", "203.0.113.5, 10.0.0.1")
         }
@@ -136,23 +142,22 @@ class RateLimitFilterTest {
 
         filter.doFilter(request, response, filterChain)
 
-        assertTrue(buckets.getIfPresent("203.0.113.5") != null, "Bucket should be keyed on forwarded IP")
+        assertTrue(buckets.getIfPresent("public_redirect:ip:203.0.113.5") != null)
     }
 
     @Test
-    fun `blank forwarded client entries fall back to remote address`() {
-        whenever(rateLimitConfig.createBucket()).thenReturn(bucketWithCapacity(100))
-        whenever(rateLimitConfig.isTrustedProxy("10.0.0.99")).thenReturn(true)
-
-        val request = MockHttpServletRequest().apply {
-            remoteAddr = "10.0.0.99"
-            addHeader("X-Forwarded-For", "   ,   ")
+    fun `authenticated api policy keys on authenticated user id`() {
+        val request = MockHttpServletRequest("GET", "/api/v1/users").apply {
+            requestURI = "/api/v1/users"
+            servletPath = "/api/v1/users"
+            remoteAddr = "10.0.0.50"
+            setAttribute(AUTHENTICATED_USER_ID_ATTRIBUTE, "user-123")
         }
         val response = MockHttpServletResponse()
 
         filter.doFilter(request, response, filterChain)
 
-        assertTrue(buckets.getIfPresent("10.0.0.99") != null, "Bucket should fall back to remote address")
+        assertTrue(buckets.getIfPresent("authenticated_api:user:user-123") != null)
     }
 
     @Test
@@ -168,6 +173,22 @@ class RateLimitFilterTest {
         filter.doFilter(request, response, filterChain)
 
         verify(filterChain).doFilter(request, response)
-        verifyNoInteractions(rateLimitConfig)
     }
+
+    private fun createFilter(config: RateLimitConfig): RateLimitFilter = RateLimitFilter(
+        config,
+        buckets,
+        ErrorResponseWriter(ObjectMapper()),
+        ClientIpResolver(config),
+        SimpleMeterRegistry()
+    )
+
+    private fun createRateLimitConfig(trustedProxies: String = ""): RateLimitConfig =
+        RateLimitConfig(
+            RateLimitProperties(
+                trustedProxies = trustedProxies,
+                publicRedirect = BucketPolicyProperties(capacity = 1, refillTokens = 1, refillMinutes = 1)
+            ),
+            SimpleMeterRegistry()
+        )
 }

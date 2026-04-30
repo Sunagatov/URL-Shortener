@@ -121,10 +121,10 @@ http://116.203.197.65/api/v1/urls
 
 ## Rate Limiting
 
-- Rate limit: 100 requests per minute per IP
-- Implemented using custom RateLimitFilter
+- Public create requests use the `public_create` rate-limit policy
+- The limiter is implemented with Bucket4j + Caffeine and configured through env-backed policy settings
 - `X-Forwarded-For` is only used when the direct remote address matches `RATE_LIMIT_TRUSTED_PROXIES`
-- Returns 429 Too Many Requests when exceeded
+- Returns 429 Too Many Requests with `Retry-After` and `X-RateLimit-*` headers when exceeded
 
 ## Testing
 

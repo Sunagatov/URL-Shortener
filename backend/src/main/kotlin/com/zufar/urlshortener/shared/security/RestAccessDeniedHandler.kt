@@ -19,6 +19,7 @@ class RestAccessDeniedHandler(
         accessDeniedException: AccessDeniedException
     ) {
         errorResponseWriter.write(
+            request,
             response,
             HttpStatus.FORBIDDEN,
             accessDeniedException.message ?: "Access denied"

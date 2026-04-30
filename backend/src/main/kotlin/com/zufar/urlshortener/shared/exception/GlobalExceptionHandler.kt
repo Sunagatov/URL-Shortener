@@ -20,6 +20,18 @@ import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 
 private const val LOG_ERROR_MESSAGE = "An unexpected error occurred"
+private const val INVALID_REQUEST_CODE = "INVALID_REQUEST"
+private const val INVALID_INPUT_CODE = "INVALID_INPUT"
+private const val URL_NOT_FOUND_CODE = "URL_NOT_FOUND"
+private const val INVALID_TOKEN_CODE = "INVALID_TOKEN"
+private const val INVALID_CREDENTIALS_CODE = "INVALID_CREDENTIALS"
+private const val AUTHENTICATION_FAILED_CODE = "AUTHENTICATION_FAILED"
+private const val ACCESS_DENIED_CODE = "ACCESS_DENIED"
+private const val EMAIL_ALREADY_EXISTS_CODE = "EMAIL_ALREADY_EXISTS"
+private const val USER_NOT_FOUND_CODE = "USER_NOT_FOUND"
+private const val REQUEST_VALIDATION_FAILED_CODE = "REQUEST_VALIDATION_FAILED"
+private const val MALFORMED_JSON_CODE = "MALFORMED_JSON"
+private const val INTERNAL_SERVER_ERROR_CODE = "INTERNAL_SERVER_ERROR"
 
 @Suppress("unused")
 @ControllerAdvice
@@ -30,50 +42,50 @@ class GlobalExceptionHandler {
     @ExceptionHandler(InvalidRequestException::class)
     fun handleInvalidRequestException(ex: InvalidRequestException): ResponseEntity<ErrorResponse> {
         log.warn("request.invalid: method={}, path={}, message={}", currentMethod(), currentPath(), ex.message)
-        return errorResponse(HttpStatus.BAD_REQUEST, ex.message ?: "Invalid request")
+        return errorResponse(HttpStatus.BAD_REQUEST, ex.message ?: "Invalid request", INVALID_REQUEST_CODE)
     }
 
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgumentException(ex: IllegalArgumentException): ResponseEntity<ErrorResponse> {
         log.warn("request.invalid_input: method={}, path={}, message={}", currentMethod(), currentPath(), ex.message)
-        return errorResponse(HttpStatus.BAD_REQUEST, ex.message ?: "Invalid input")
+        return errorResponse(HttpStatus.BAD_REQUEST, ex.message ?: "Invalid input", INVALID_INPUT_CODE)
     }
 
     @ExceptionHandler(UrlNotFoundException::class)
     fun handleUrlNotFound(ex: UrlNotFoundException): ResponseEntity<ErrorResponse> {
         log.warn("url.not_found: method={}, path={}, message={}", currentMethod(), currentPath(), ex.message)
-        return errorResponse(HttpStatus.NOT_FOUND, ex.message ?: "URL not found")
+        return errorResponse(HttpStatus.NOT_FOUND, ex.message ?: "URL not found", URL_NOT_FOUND_CODE)
     }
 
     @ExceptionHandler(InvalidTokenException::class)
     fun handleInvalidTokenException(ex: InvalidTokenException): ResponseEntity<ErrorResponse> {
         log.warn("auth.invalid_token: method={}, path={}, message={}", currentMethod(), currentPath(), ex.message)
-        return errorResponse(HttpStatus.UNAUTHORIZED, ex.message ?: "Invalid token")
+        return errorResponse(HttpStatus.UNAUTHORIZED, ex.message ?: "Invalid token", INVALID_TOKEN_CODE)
     }
 
     @ExceptionHandler(BadCredentialsException::class)
     fun handleBadCredentialsException(ex: BadCredentialsException): ResponseEntity<ErrorResponse> {
-        return errorResponse(HttpStatus.UNAUTHORIZED, "Invalid email or password")
+        return errorResponse(HttpStatus.UNAUTHORIZED, "Invalid email or password", INVALID_CREDENTIALS_CODE)
     }
 
     @ExceptionHandler(AuthenticationException::class)
     fun handleAuthenticationException(ex: AuthenticationException): ResponseEntity<ErrorResponse> {
-        return errorResponse(HttpStatus.UNAUTHORIZED, "Authentication failed")
+        return errorResponse(HttpStatus.UNAUTHORIZED, "Authentication failed", AUTHENTICATION_FAILED_CODE)
     }
 
     @ExceptionHandler(AccessDeniedException::class)
     fun handleAccessDeniedException(ex: AccessDeniedException): ResponseEntity<ErrorResponse> {
-        return errorResponse(HttpStatus.FORBIDDEN, ex.message ?: "Access denied")
+        return errorResponse(HttpStatus.FORBIDDEN, ex.message ?: "Access denied", ACCESS_DENIED_CODE)
     }
 
     @ExceptionHandler(EmailAlreadyExistsException::class)
     fun handleEmailAlreadyExistsException(ex: EmailAlreadyExistsException): ResponseEntity<ErrorResponse> {
-        return errorResponse(HttpStatus.CONFLICT, ex.message ?: "Email already in use")
+        return errorResponse(HttpStatus.CONFLICT, ex.message ?: "Email already in use", EMAIL_ALREADY_EXISTS_CODE)
     }
 
     @ExceptionHandler(UserNotFoundException::class)
     fun handleUserNotFoundException(ex: UserNotFoundException): ResponseEntity<ErrorResponse> {
-        return errorResponse(HttpStatus.NOT_FOUND, ex.message ?: "User not found")
+        return errorResponse(HttpStatus.NOT_FOUND, ex.message ?: "User not found", USER_NOT_FOUND_CODE)
     }
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
@@ -85,7 +97,7 @@ class GlobalExceptionHandler {
             }
         } ?: "Request validation failed"
 
-        return errorResponse(HttpStatus.BAD_REQUEST, message)
+        return errorResponse(HttpStatus.BAD_REQUEST, message, REQUEST_VALIDATION_FAILED_CODE)
     }
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
@@ -101,7 +113,7 @@ class GlobalExceptionHandler {
             else -> "Malformed JSON request"
         }
 
-        return errorResponse(HttpStatus.BAD_REQUEST, message)
+        return errorResponse(HttpStatus.BAD_REQUEST, message, MALFORMED_JSON_CODE)
     }
 
     @ExceptionHandler(Exception::class)
@@ -113,7 +125,7 @@ class GlobalExceptionHandler {
             LOG_ERROR_MESSAGE,
             ex
         )
-        return errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred")
+        return errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", INTERNAL_SERVER_ERROR_CODE)
     }
 
     private fun currentMethod(): String =
@@ -135,6 +147,6 @@ class GlobalExceptionHandler {
             detail.contains("required creator property", ignoreCase = true)
     }
 
-    private fun errorResponse(status: HttpStatus, message: String): ResponseEntity<ErrorResponse> =
-        ResponseEntity.status(status).body(ErrorResponse(errorMessage = message))
+    private fun errorResponse(status: HttpStatus, message: String, code: String): ResponseEntity<ErrorResponse> =
+        ResponseEntity.status(status).body(ErrorResponse.of(currentRequestAttributes()?.request, status, message, code))
 }

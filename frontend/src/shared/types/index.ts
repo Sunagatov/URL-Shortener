@@ -57,6 +57,8 @@ export interface CreateUrlRequest {
 export interface ApiError {
   errorMessage: string;
   status: number;
+  code?: string;
+  retryAfterSeconds?: number;
 }
 
 export interface AuthContextType {
