@@ -12,7 +12,7 @@ version = "0.0.1"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -27,7 +27,6 @@ sonar {
     }
 }
 
-val springCloudVersion = "2025.1.1"
 val mockitoVersion = "5.23.0"
 val mockitoKotlinVersion = "6.3.0"
 val springdocVersion = "3.0.3"
@@ -60,12 +59,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-logging")
 
     // Jackson
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("tools.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     // OpenAPI
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-scalar:$springdocVersion")
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-api:$springdocVersion")
 
     // Validation
     implementation("org.springframework.boot:spring-boot-starter-validation")
@@ -83,10 +81,6 @@ dependencies {
     // Monitoring
     implementation("io.micrometer:micrometer-registry-prometheus")
 
-    // Lombok
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
-
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
@@ -95,15 +89,12 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 }
 
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
-    }
-}
-
 kotlin {
     compilerOptions {
-        freeCompilerArgs.addAll("-Xjsr305=strict")
+        freeCompilerArgs.addAll(
+            "-Xjsr305=strict",
+            "-Xannotation-default-target=param-property"
+        )
     }
 }
 

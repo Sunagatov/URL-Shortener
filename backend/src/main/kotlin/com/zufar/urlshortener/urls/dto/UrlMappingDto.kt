@@ -1,28 +1,20 @@
 package com.zufar.urlshortener.urls.dto
 
 import com.zufar.urlshortener.urls.entity.UrlMapping
-import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
 
-@Schema(description = "Data transfer object for URL mapping")
 data class UrlMappingDto(
 
-    @Schema(description = "Unique hash for the shortened URL", example = "abc123")
     val urlHash: String,
 
-    @Schema(description = "Shortened URL", example = "http://short.url/abc123")
     val shortUrl: String,
 
-    @Schema(description = "Original URL", example = "http://example.com")
     val originalUrl: String,
 
-    @Schema(description = "Number of successful redirects for this shortened URL", example = "42")
     val clickCount: Long,
 
-    @Schema(description = "Creation timestamp", example = "2023-10-15T12:34:56")
     val createdAt: LocalDateTime,
 
-    @Schema(description = "Expiration timestamp", example = "2023-11-15T12:34:56")
     val expirationDate: LocalDateTime
 ) {
     companion object {

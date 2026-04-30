@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
+import tools.jackson.databind.ObjectMapper
 import java.time.Duration
 
 @ExtendWith(MockitoExtension::class)
@@ -36,7 +37,7 @@ class RateLimitFilterTest {
     @BeforeEach
     fun setup() {
         buckets = Caffeine.newBuilder().build()
-        filter = RateLimitFilter(rateLimitConfig, buckets, ErrorResponseWriter())
+        filter = RateLimitFilter(rateLimitConfig, buckets, ErrorResponseWriter(ObjectMapper()))
     }
 
     private fun bucketWithCapacity(capacity: Long): Bucket {

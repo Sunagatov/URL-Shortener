@@ -83,6 +83,7 @@ class UrlValidator(
         return when (address) {
             is Inet4Address -> isBlockedIpv4(address)
             is Inet6Address -> isBlockedIpv6(address)
+            else -> true
         }
     }
 
