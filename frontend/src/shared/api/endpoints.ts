@@ -6,6 +6,8 @@ export const endpoints = {
     logout: '/api/v1/auth/logout',
     forgotPassword: '/api/v1/auth/forgot-password',
     resetPassword: '/api/v1/auth/reset-password',
+    verifyEmail: '/api/v1/auth/verify-email',
+    resendVerification: '/api/v1/auth/resend-verification',
   },
   urls: {
     create: '/api/v1/urls',
