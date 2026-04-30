@@ -1,7 +1,7 @@
 # =============================================================================
 # BUILD STAGE
 # =============================================================================
-FROM gradle:8.14-jdk21 AS build
+FROM gradle:jdk25 AS build
 
 WORKDIR /app
 COPY build.gradle.kts settings.gradle.kts ./
@@ -13,7 +13,7 @@ RUN gradle bootJar --no-daemon -x test
 # =============================================================================
 # RUNTIME STAGE
 # =============================================================================
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 
 LABEL maintainer="Zufar Sunagatov" \
       description="URL Shortener Service"
