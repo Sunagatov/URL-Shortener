@@ -18,7 +18,6 @@ import com.zufar.urlshortener.auth.dto.SignUpRequest
 import com.zufar.urlshortener.auth.dto.VerifyEmailRequest
 import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 private const val MAX_NAME_LENGTH = 50
@@ -35,17 +34,12 @@ class AuthRequestValidator(
     private val emailOfUserValidator: EmailOfUserValidator,
     private val passwordOfUserValidator: PasswordOfUserValidator
 ) {
-
-    private val log = LoggerFactory.getLogger(AuthRequestValidator::class.java)
-
     fun validateAuthRequest(signInRequest: SignInRequest) {
-        log.debug("auth.sign_in.validating: email={}", signInRequest.email)
         validate(signInRequest.email.isBlank(), EMAIL_MUST_NOT_BE_EMPTY)
         validate(signInRequest.password.isBlank(), PASSWORD_MUST_NOT_BE_EMPTY)
     }
 
     fun validateSignUpRequest(signUpRequest: SignUpRequest) {
-        log.debug("auth.sign_up.validating: email={}", signUpRequest.email)
         validateName(
             signUpRequest.firstName,
             FIRST_NAME_MUST_NOT_BE_EMPTY,
@@ -65,20 +59,17 @@ class AuthRequestValidator(
     }
 
     fun validateRefreshTokenRequest(refreshTokenRequest: RefreshTokenRequest) {
-        log.debug("auth.token_refresh.validating")
         val token = refreshTokenRequest.refreshToken
         validate(token.isBlank(), "Refresh token must not be empty")
         validate(token.length < MIN_JWT_TOKEN_LENGTH || token.length > MAX_JWT_TOKEN_LENGTH, "Refresh token length is invalid")
     }
 
     fun validateChangePasswordRequest(changePasswordRequest: ChangePasswordRequest) {
-        log.debug("user.password_change.validating")
         validate(changePasswordRequest.currentPassword.isBlank(), PASSWORD_MUST_NOT_BE_EMPTY)
         passwordOfUserValidator.validate(changePasswordRequest.newPassword)
     }
 
     fun validateVerifyEmailRequest(verifyEmailRequest: VerifyEmailRequest) {
-        log.debug("auth.email_verification.validating: email={}", verifyEmailRequest.email)
         emailOfUserValidator.validate(verifyEmailRequest.email)
         validate(
             !verifyEmailRequest.code.matches(Regex("^\\d{$VERIFICATION_CODE_LENGTH}$")),
@@ -87,7 +78,6 @@ class AuthRequestValidator(
     }
 
     fun validateResendVerificationRequest(resendVerificationRequest: ResendVerificationRequest) {
-        log.debug("auth.email_verification.resend_validating: email={}", resendVerificationRequest.email)
         emailOfUserValidator.validate(resendVerificationRequest.email)
     }
 

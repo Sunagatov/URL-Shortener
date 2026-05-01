@@ -86,7 +86,7 @@ class RateLimitFilter(
         } else {
             incrementCounter(policy, RATE_LIMIT_OUTCOME_BLOCKED)
             log.warn(
-                "rate_limit.exceeded: policy={}, method={}, path={}, subject_type={}, subject={}, client_ip={}, retry_after_seconds={}",
+                "rate_limit_exceeded policy={} method={} path={} subjectType={} subject={} clientIp={} retryAfterSeconds={}",
                 policy.name,
                 request.method,
                 request.requestURI,

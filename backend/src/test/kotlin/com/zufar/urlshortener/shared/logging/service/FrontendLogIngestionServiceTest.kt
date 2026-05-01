@@ -28,14 +28,14 @@ class FrontendLogIngestionServiceTest {
     }
 
     @Test
-    fun `ingest redacts sensitive context and logs at requested level`() {
+    fun `ingest redacts sensitive context and downgrades client error to warn`() {
         val appender = ListAppender<ch.qos.logback.classic.spi.ILoggingEvent>().apply { start() }
         logger.addAppender(appender)
         logger.level = Level.WARN
 
         service.ingest(
             FrontendLogRequest(
-                level = "warn",
+                level = "error",
                 message = "frontend.api.request_failed",
                 runtime = "browser",
                 sessionId = "session-123",
@@ -55,7 +55,9 @@ class FrontendLogIngestionServiceTest {
 
         val event = appender.list.single()
         assertEquals(Level.WARN, event.level)
-        assertTrue(event.formattedMessage.contains("session_id=session-123"))
+        assertTrue(event.formattedMessage.contains("frontend_event_ingested"))
+        assertTrue(event.formattedMessage.contains("clientLevel=error"))
+        assertTrue(event.formattedMessage.contains("sessionId=session-123"))
         assertTrue(event.formattedMessage.contains("\"accessToken\":\"[REDACTED]\""))
         assertTrue(event.formattedMessage.contains("\"password\":\"[REDACTED]\""))
         assertTrue(event.formattedMessage.contains("\"safe\":\"kept\""))

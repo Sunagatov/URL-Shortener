@@ -22,6 +22,7 @@ import com.zufar.urlshortener.auth.security.UserDetailsWithTokenVersion
 import com.zufar.urlshortener.auth.security.withTokenVersion
 import com.zufar.urlshortener.auth.validation.AuthRequestValidator
 import com.zufar.urlshortener.shared.exception.InvalidRequestException
+import com.zufar.urlshortener.shared.logging.LogSanitizer
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.dao.DuplicateKeyException
@@ -62,7 +63,6 @@ class AuthService(
 
     fun signIn(request: SignInRequest): AuthResponse {
         val normalizedRequest = request.copy(email = EmailNormalizer.normalize(request.email))
-        log.info("auth.sign_in.requested: email={}", normalizedRequest.email)
         authRequestValidator.validateAuthRequest(normalizedRequest)
 
         val authentication = authenticationManager.authenticate(
@@ -70,17 +70,20 @@ class AuthService(
         )
         val principal = authentication.principal as UserDetailsWithTokenVersion
         if (!principal.emailVerified) {
-            log.warn("auth.sign_in.blocked_unverified: email={}", normalizedRequest.email)
+            log.info(
+                "auth_sign_in_blocked_unverified maskedEmail={} emailDomain={}",
+                LogSanitizer.maskEmail(normalizedRequest.email),
+                LogSanitizer.emailDomain(normalizedRequest.email)
+            )
             throw EmailNotVerifiedException(EMAIL_NOT_VERIFIED_MESSAGE)
         }
 
-        log.info("auth.sign_in.succeeded: email={}", normalizedRequest.email)
+        log.info("auth_sign_in_succeeded userId={}", principal.userId ?: "unknown")
         return issueAuthentication(principal)
     }
 
     fun signUp(request: SignUpRequest): SignUpResponse {
         val normalizedRequest = request.copy(email = EmailNormalizer.normalize(request.email))
-        log.info("auth.sign_up.requested: email={}", normalizedRequest.email)
         authRequestValidator.validateSignUpRequest(normalizedRequest)
         ensureEmailIsAvailable(normalizedRequest.email)
 
@@ -101,7 +104,7 @@ class AuthService(
 
         if (!emailVerificationEnabled) {
             val savedUser = saveUser(user.copy(emailVerified = true, emailVerifiedAt = now))
-            log.info("auth.sign_up.succeeded_without_verification: user_id={}, email={}", savedUser.id, savedUser.email)
+            log.info("auth_sign_up_completed userId={} verificationRequired={}", savedUser.id, false)
             val authResponse = issueAuthentication(savedUser)
             return SignUpResponse(
                 verificationRequired = false,
@@ -113,12 +116,17 @@ class AuthService(
         val (pendingUser, verificationCode) = withFreshVerificationChallenge(user, now)
         val savedUser = saveUser(pendingUser)
         val deliveryMode = sendVerificationCode(savedUser.email, verificationCode)
-        log.info("auth.sign_up.succeeded: user_id={}, email={}", savedUser.id, savedUser.email)
+        log.info(
+            "auth_sign_up_completed userId={} verificationRequired={} deliveryMode={} emailDomain={}",
+            savedUser.id,
+            true,
+            deliveryMode,
+            LogSanitizer.emailDomain(savedUser.email)
+        )
         return toSignUpResponse(savedUser, deliveryMode, now)
     }
 
     fun refreshAccessToken(request: RefreshTokenRequest): RefreshTokenResponse {
-        log.info("auth.token_refresh.requested")
         authRequestValidator.validateRefreshTokenRequest(request)
 
         val refreshToken = request.refreshToken
@@ -134,7 +142,6 @@ class AuthService(
             throw InvalidTokenException(INVALID_REFRESH_TOKEN_MESSAGE)
         }
 
-        log.info("auth.token_refresh.succeeded: user_id={}", user.id)
         return RefreshTokenResponse(issueAccessToken(user))
     }
 
@@ -144,7 +151,6 @@ class AuthService(
             email = EmailNormalizer.normalize(request.email),
             code = request.code.trim()
         )
-        log.info("auth.email_verification.requested: email={}", normalizedRequest.email)
         authRequestValidator.validateVerifyEmailRequest(normalizedRequest)
 
         val user = userRepository.findByEmailIgnoreCase(normalizedRequest.email)
@@ -173,14 +179,13 @@ class AuthService(
                 updatedAt = now
             )
         )
-        log.info("auth.email_verification.succeeded: user_id={}, email={}", verifiedUser.id, verifiedUser.email)
+        log.info("auth_email_verified userId={} emailDomain={}", verifiedUser.id, LogSanitizer.emailDomain(verifiedUser.email))
         return issueAuthentication(verifiedUser)
     }
 
     fun resendVerificationCode(request: ResendVerificationRequest): VerificationChallengeResponse {
         requireEmailVerificationEnabled()
         val normalizedRequest = request.copy(email = EmailNormalizer.normalize(request.email))
-        log.info("auth.email_verification.resend_requested: email={}", normalizedRequest.email)
         authRequestValidator.validateResendVerificationRequest(normalizedRequest)
 
         val user = userRepository.findByEmailIgnoreCase(normalizedRequest.email)
@@ -198,7 +203,12 @@ class AuthService(
         val (updatedUser, verificationCode) = withFreshVerificationChallenge(user, now)
         val savedUser = userRepository.save(updatedUser)
         val deliveryMode = sendVerificationCode(savedUser.email, verificationCode)
-        log.info("auth.email_verification.resent: user_id={}, email={}", savedUser.id, savedUser.email)
+        log.info(
+            "auth_email_verification_resent userId={} deliveryMode={} emailDomain={}",
+            savedUser.id,
+            deliveryMode,
+            LogSanitizer.emailDomain(savedUser.email)
+        )
         return toVerificationChallengeResponse(savedUser, deliveryMode, now)
     }
 

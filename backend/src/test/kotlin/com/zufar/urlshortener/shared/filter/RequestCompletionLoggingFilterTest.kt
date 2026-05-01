@@ -35,10 +35,10 @@ class RequestCompletionLoggingFilterTest {
     }
 
     @Test
-    fun `logs successful request with template path`() {
+    fun `logs successful request with template path at debug`() {
         val appender = ListAppender<ch.qos.logback.classic.spi.ILoggingEvent>().apply { start() }
         logger.addAppender(appender)
-        logger.level = Level.INFO
+        logger.level = Level.DEBUG
 
         val request = MockHttpServletRequest("GET", "/abc12345").apply {
             setAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE, "/{urlHash}")
@@ -51,8 +51,8 @@ class RequestCompletionLoggingFilterTest {
 
         assertEquals(1, appender.list.size)
         val event = appender.list.single()
-        assertEquals(Level.INFO, event.level)
-        assertTrue(event.formattedMessage.contains("http.request.completed"))
+        assertEquals(Level.DEBUG, event.level)
+        assertTrue(event.formattedMessage.contains("http_request_completed"))
         assertTrue(event.formattedMessage.contains("path=/{urlHash}"))
     }
 

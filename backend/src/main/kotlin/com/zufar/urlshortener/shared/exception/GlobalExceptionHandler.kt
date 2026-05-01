@@ -7,7 +7,6 @@ import com.zufar.urlshortener.auth.exception.InvalidVerificationCodeException
 import com.zufar.urlshortener.auth.exception.UserNotFoundException
 import com.zufar.urlshortener.auth.exception.VerificationResendTooSoonException
 import com.zufar.urlshortener.urls.exception.UrlNotFoundException
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -22,7 +21,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 
-private const val LOG_ERROR_MESSAGE = "An unexpected error occurred"
 private const val INVALID_REQUEST_CODE = "INVALID_REQUEST"
 private const val INVALID_INPUT_CODE = "INVALID_INPUT"
 private const val URL_NOT_FOUND_CODE = "URL_NOT_FOUND"
@@ -43,29 +41,23 @@ private const val INTERNAL_SERVER_ERROR_CODE = "INTERNAL_SERVER_ERROR"
 @ControllerAdvice
 class GlobalExceptionHandler {
 
-    private val log = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
-
     @ExceptionHandler(InvalidRequestException::class)
     fun handleInvalidRequestException(ex: InvalidRequestException): ResponseEntity<ErrorResponse> {
-        log.warn("request.invalid: method={}, path={}, message={}", currentMethod(), currentPath(), ex.message)
         return errorResponse(HttpStatus.BAD_REQUEST, ex.message ?: "Invalid request", INVALID_REQUEST_CODE)
     }
 
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgumentException(ex: IllegalArgumentException): ResponseEntity<ErrorResponse> {
-        log.warn("request.invalid_input: method={}, path={}, message={}", currentMethod(), currentPath(), ex.message)
         return errorResponse(HttpStatus.BAD_REQUEST, ex.message ?: "Invalid input", INVALID_INPUT_CODE)
     }
 
     @ExceptionHandler(UrlNotFoundException::class)
     fun handleUrlNotFound(ex: UrlNotFoundException): ResponseEntity<ErrorResponse> {
-        log.warn("url.not_found: method={}, path={}, message={}", currentMethod(), currentPath(), ex.message)
         return errorResponse(HttpStatus.NOT_FOUND, ex.message ?: "URL not found", URL_NOT_FOUND_CODE)
     }
 
     @ExceptionHandler(InvalidTokenException::class)
     fun handleInvalidTokenException(ex: InvalidTokenException): ResponseEntity<ErrorResponse> {
-        log.warn("auth.invalid_token: method={}, path={}, message={}", currentMethod(), currentPath(), ex.message)
         return errorResponse(HttpStatus.UNAUTHORIZED, ex.message ?: "Invalid token", INVALID_TOKEN_CODE)
     }
 
@@ -144,11 +136,12 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception::class)
     fun handleException(ex: Exception): ResponseEntity<ErrorResponse> {
-        log.error(
-            "request.failed: method={}, path={}, message={}",
+        logger.error(
+            "request_failed method={} path={} status={} errorCode={}",
             currentMethod(),
             currentPath(),
-            LOG_ERROR_MESSAGE,
+            HttpStatus.INTERNAL_SERVER_ERROR.value(),
+            INTERNAL_SERVER_ERROR_CODE,
             ex
         )
         return errorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", INTERNAL_SERVER_ERROR_CODE)
@@ -183,3 +176,5 @@ class GlobalExceptionHandler {
             ErrorResponse.of(currentRequestAttributes()?.request, status, message, code, retryAfterSeconds)
         )
 }
+
+private val logger = org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler::class.java)

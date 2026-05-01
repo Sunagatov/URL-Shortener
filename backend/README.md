@@ -205,13 +205,27 @@ Rate limiting is policy-based rather than global:
 
 429 responses include `Retry-After`, `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, and structured JSON metadata including `code`, `requestId`, and `retryAfterSeconds`.
 
-Email verification uses a 6-digit code with a default 10-minute lifetime when `APP_AUTH_EMAIL_VERIFICATION_ENABLED=true`. The default SMTP shape targets Postmark (`smtp.postmarkapp.com:587` with STARTTLS). If the feature is enabled but `MAIL_USERNAME` or `MAIL_PASSWORD` are not configured, the backend falls back to local development mode and writes the current code to the backend logs so the `/verify-email` flow still works locally.
+Email verification uses a 6-digit code with a default 10-minute lifetime when `APP_AUTH_EMAIL_VERIFICATION_ENABLED=true`. The default SMTP shape targets Postmark (`smtp.postmarkapp.com:587` with STARTTLS). If delivery is unavailable, the backend records only a sanitized fallback event and does not write verification codes to logs.
 
 For structured JSON logs in production, enable the `json-logs` Spring profile. Example:
 
 ```bash
 SPRING_PROFILES_ACTIVE=json-logs
 ```
+
+## Logging
+
+The backend uses a low-noise logging policy intended for production debugging and support investigation.
+
+- Default levels: `root=WARN`, `com.zufar.urlshortener=INFO`, `http.access=WARN`.
+- INFO is reserved for important receipts such as `auth_sign_in_succeeded`, `auth_sign_up_completed`, `short_url_created`, and `short_url_deleted`.
+- WARN is used for degraded or abnormal conditions such as `rate_limit_exceeded`, short-code collisions, slow requests, and failed email delivery fallback.
+- Successful routine requests are not emitted at INFO by the access logger. Only slow requests, 4xx, and 5xx are surfaced by default.
+- Every request gets `X-Correlation-ID` and `X-Request-ID`; use those fields to trace a single incident across logs.
+- Never log raw passwords, JWTs, verification codes, full URLs with query strings, cookies, or authorization headers.
+- If you temporarily need more detail, raise specific package logger levels rather than enabling DEBUG globally.
+
+If runtime log-level control is enabled in another environment via the Actuator loggers endpoint, keep that endpoint protected and do not expose it publicly.
 
 ---
 

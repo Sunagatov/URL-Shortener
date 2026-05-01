@@ -2,8 +2,6 @@ package com.zufar.urlshortener.urls.controller
 
 import com.zufar.urlshortener.urls.UrlHashFormat
 import com.zufar.urlshortener.urls.service.UrlManagementService
-import jakarta.servlet.http.HttpServletRequest
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.CacheControl
 import org.springframework.http.HttpStatus
@@ -28,18 +26,10 @@ class UrlRedirectController(
     @Value("\${app.urls.redirect.max-cache-seconds:3600}") private val maxRedirectCacheSeconds: Long,
     private val clock: Clock
 ) {
-
-    private val log = LoggerFactory.getLogger(UrlRedirectController::class.java)
-
     @GetMapping(UrlHashFormat.PATH_VARIABLE_REGEX)
-    fun redirect(
-        @PathVariable urlHash: String,
-        httpServletRequest: HttpServletRequest
-    ): ResponseEntity<Unit> {
-        log.info("url.redirect.requested: url_hash={}, client_ip={}", urlHash, httpServletRequest.remoteAddr)
+    fun redirect(@PathVariable urlHash: String): ResponseEntity<Unit> {
         val urlMapping = urlManagementService.getPublicUrlMapping(urlHash)
         urlManagementService.incrementClickCount(urlHash)
-        log.info("url.redirected: url_hash={}, target_url={}", urlHash, urlMapping.originalUrl)
         return ResponseEntity.status(HttpStatus.FOUND)
             .cacheControl(buildCacheControl(urlMapping.expirationDate))
             .header(REFERRER_POLICY_HEADER, REFERRER_POLICY_VALUE)

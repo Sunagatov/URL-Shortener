@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 import java.time.Instant
 
 private const val FRONTEND_LOG_TEMPLATE =
-    "frontend.event: level={}, runtime={}, session_id={}, browser_timestamp={}, client_ip={}, message={}, context={}"
+    "frontend_event_ingested clientLevel={} runtime={} sessionId={} browserTimestamp={} clientIp={} message={} context={}"
 private const val MAX_CONTEXT_DEPTH = 5
 private const val MAX_CONTEXT_JSON_LENGTH = 8000
 private const val MAX_CONTEXT_VALUE_LENGTH = 500
@@ -51,9 +51,9 @@ class FrontendLogIngestionService(
 
         when (request.level) {
             "debug" -> frontendLog.debug(FRONTEND_LOG_TEMPLATE, *args)
-            "info" -> frontendLog.info(FRONTEND_LOG_TEMPLATE, *args)
+            "info" -> frontendLog.debug(FRONTEND_LOG_TEMPLATE, *args)
             "warn" -> frontendLog.warn(FRONTEND_LOG_TEMPLATE, *args)
-            "error" -> frontendLog.error(FRONTEND_LOG_TEMPLATE, *args)
+            "error" -> frontendLog.warn(FRONTEND_LOG_TEMPLATE, *args)
         }
     }
 

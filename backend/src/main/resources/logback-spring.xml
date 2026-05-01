@@ -6,6 +6,7 @@
     <springProperty scope="context" name="log_file_name" source="logging.file.name" defaultValue="logs/application.log"/>
     <springProperty scope="context" name="frontend_log_file_name" source="logging.frontend.file.name" defaultValue="logs/frontend-events.log"/>
     <springProperty scope="context" name="frontend_log_level" source="logging.level.frontend.logs" defaultValue="WARN"/>
+    <springProperty scope="context" name="http_access_log_level" source="logging.level.http.access" defaultValue="WARN"/>
     <springProperty scope="context" name="log_max_file_size" source="logging.logback.rollingpolicy.max-file-size" defaultValue="10MB"/>
     <springProperty scope="context" name="log_max_history" source="logging.logback.rollingpolicy.max-history" defaultValue="30"/>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -72,7 +73,7 @@
             <appender-ref ref="FILE"/>
         </root>
 
-        <logger name="http.access" level="INFO" additivity="false">
+        <logger name="http.access" level="${http_access_log_level}" additivity="false">
             <appender-ref ref="JSON_CONSOLE"/>
             <appender-ref ref="FILE"/>
         </logger>
@@ -89,7 +90,7 @@
             <appender-ref ref="FILE"/>
         </root>
 
-        <logger name="http.access" level="INFO" additivity="false">
+        <logger name="http.access" level="${http_access_log_level}" additivity="false">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE"/>
         </logger>

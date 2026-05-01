@@ -1,5 +1,6 @@
 package com.zufar.urlshortener.auth.service
 
+import com.zufar.urlshortener.shared.logging.LogSanitizer
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Value
@@ -19,12 +20,15 @@ class EmailVerificationNotifier(
 
     fun sendCode(email: String, code: String, expiresInMinutes: Long): String {
         val mailSender = mailSenderProvider.getIfAvailable()
+        val maskedEmail = LogSanitizer.maskEmail(email)
+        val emailDomain = LogSanitizer.emailDomain(email)
         if (mailSender == null) {
             log.warn(
-                "auth.email_verification.code_generated: email={}, code={}, delivery_mode={}",
-                email,
-                code,
-                LOG_DELIVERY_MODE
+                "email_verification_delivery_fallback deliveryMode={} reason={} maskedEmail={} emailDomain={}",
+                LOG_DELIVERY_MODE,
+                "mail_sender_unavailable",
+                maskedEmail,
+                emailDomain
             )
             return LOG_DELIVERY_MODE
         }
@@ -43,13 +47,20 @@ class EmailVerificationNotifier(
         }
         return try {
             mailSender.send(message)
-            log.info("auth.email_verification.code_sent: email={}, delivery_mode={}", email, EMAIL_DELIVERY_MODE)
+            log.info(
+                "email_verification_code_sent deliveryMode={} maskedEmail={} emailDomain={}",
+                EMAIL_DELIVERY_MODE,
+                maskedEmail,
+                emailDomain
+            )
             EMAIL_DELIVERY_MODE
         } catch (ex: Exception) {
             log.warn(
-                "auth.email_verification.delivery_failed_falling_back_to_log: email={}, code={}",
-                email,
-                code,
+                "email_verification_delivery_fallback deliveryMode={} reason={} maskedEmail={} emailDomain={}",
+                LOG_DELIVERY_MODE,
+                ex.javaClass.simpleName,
+                maskedEmail,
+                emailDomain,
                 ex
             )
             LOG_DELIVERY_MODE

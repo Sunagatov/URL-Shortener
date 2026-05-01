@@ -3,6 +3,7 @@ package com.zufar.urlshortener.urls.service
 import com.zufar.urlshortener.auth.service.user.CurrentUserService
 import com.zufar.urlshortener.shared.URL_MAPPINGS_CACHE
 import com.zufar.urlshortener.shared.exception.InvalidRequestException
+import com.zufar.urlshortener.shared.logging.LogSanitizer
 import com.zufar.urlshortener.urls.dto.ShortenUrlRequest
 import com.zufar.urlshortener.urls.dto.UrlMappingDto
 import com.zufar.urlshortener.urls.dto.UrlMappingPageDto
@@ -49,8 +50,6 @@ class UrlManagementService(
         val normalizedRequest = normalize(request)
         val normalizedBaseUrl = baseUrl.trimEnd('/')
 
-        log.info("url.create.requested: original_url={}, client_ip={}", normalizedRequest.originalUrl, httpRequest.remoteAddr)
-
         urlValidator.validateUrl(normalizedRequest.originalUrl)
         validateDaysCount(normalizedRequest.daysCount)
 
@@ -67,10 +66,16 @@ class UrlManagementService(
                         shortUrl = shortUrl
                     )
                 )
-                log.info("url.created: url_hash={}, short_url={}, original_url={}", urlHash, shortUrl, normalizedRequest.originalUrl)
+                log.info(
+                    "short_url_created urlHash={} ownerUserId={} targetHost={} expiresInDays={}",
+                    urlHash,
+                    currentUserService.getCurrentUserIdOrNull() ?: "anonymous",
+                    LogSanitizer.safeUrlHost(normalizedRequest.originalUrl),
+                    normalizedRequest.daysCount ?: defaultExpirationDays
+                )
                 return shortUrl
             } catch (_: DuplicateKeyException) {
-                log.warn("url.short_code_collision: url_hash={}, attempt={}", urlHash, attempt + 1)
+                log.debug("short_url_collision_detected urlHash={} attempt={}", urlHash, attempt + 1)
             }
         }
 
@@ -104,7 +109,12 @@ class UrlManagementService(
     fun delete(urlHash: String) {
         val urlMapping = getOwnedActiveUrlMapping(urlHash, DELETE_URL_MAPPING_DENIED_MESSAGE)
         urlRepository.deleteById(urlMapping.urlHash)
-        log.info("url.deleted: url_hash={}", urlHash)
+        log.info(
+            "short_url_deleted urlHash={} ownerUserId={} targetHost={}",
+            urlHash,
+            urlMapping.userId ?: "unknown",
+            LogSanitizer.safeUrlHost(urlMapping.originalUrl)
+        )
     }
 
     fun incrementClickCount(urlHash: String) {
@@ -154,18 +164,6 @@ class UrlManagementService(
             requestIp = httpRequest.remoteAddr,
             userAgent = httpRequest.getHeader("User-Agent"),
             userId = currentUserService.getCurrentUserIdOrNull()
-        )
-
-        log.debug(
-            "url.mapping_built: url_hash={}, short_url={}, original_url={}, created_at={}, expiration_date={}, request_ip={}, user_agent={}, user_id={}",
-            urlHash,
-            shortUrl,
-            mapping.originalUrl,
-            mapping.createdAt,
-            mapping.expirationDate,
-            mapping.requestIp,
-            mapping.userAgent,
-            mapping.userId
         )
 
         return mapping

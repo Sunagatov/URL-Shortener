@@ -16,7 +16,8 @@ import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.servlet.HandlerMapping
 
-private const val OUTCOME_TEMPLATE = "http.request.completed: method={}, path={}, status={}, duration_ms={}, client_ip={}, authenticated={}, outcome={}"
+private const val OUTCOME_TEMPLATE =
+    "http_request_completed method={} path={} status={} durationMs={} clientIp={} authenticated={} outcome={}"
 
 @Component
 @Order(2)
@@ -71,7 +72,7 @@ class RequestCompletionLoggingFilter(
             status >= 500 -> accessLog.error(OUTCOME_TEMPLATE, *args)
             status == HttpServletResponse.SC_NOT_FOUND && isPublicInternetNoise(path) -> accessLog.debug(OUTCOME_TEMPLATE, *args)
             status >= 400 || durationMs >= slowRequestThresholdMs -> accessLog.warn(OUTCOME_TEMPLATE, *args)
-            else -> accessLog.info(OUTCOME_TEMPLATE, *args)
+            else -> accessLog.debug(OUTCOME_TEMPLATE, *args)
         }
     }
 

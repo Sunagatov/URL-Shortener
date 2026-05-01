@@ -38,7 +38,10 @@ class SecurityRestExceptionHandlingTest {
         mockMvc.perform(get("/api/v1/users"))
             .andExpect(status().isUnauthorized)
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(header().exists("X-Correlation-ID"))
+            .andExpect(header().exists("X-Request-ID"))
             .andExpect(jsonPath("$.errorMessage").value("Unauthorized access"))
+            .andExpect(jsonPath("$.requestId").isNotEmpty)
     }
 
     @Test
@@ -46,7 +49,10 @@ class SecurityRestExceptionHandlingTest {
         mockMvc.perform(get("/api/v1/urls/someHash"))
             .andExpect(status().isUnauthorized)
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+            .andExpect(header().exists("X-Correlation-ID"))
+            .andExpect(header().exists("X-Request-ID"))
             .andExpect(jsonPath("$.errorMessage").value("Unauthorized access"))
+            .andExpect(jsonPath("$.requestId").isNotEmpty)
     }
 
     @Test
