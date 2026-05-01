@@ -1,12 +1,12 @@
-package com.zufar.urlshortener.shared.logging.service
+package com.zufar.urlshortener.frontendlogs.service
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.TextNode
+import com.zufar.urlshortener.frontendlogs.dto.FrontendLogRequest
 import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.shared.http.ClientIpResolver
-import com.zufar.urlshortener.shared.logging.dto.FrontendLogRequest
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

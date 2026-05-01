@@ -4,13 +4,12 @@ import {
   AccountPageHeader,
   AccountPageLayout,
   AccountPageLoadingState,
-} from '@/app/account/AccountPageLayout';
+} from '@/app/account/contracts';
 import { routes } from '@/app/routes';
-import { formatUrlDate } from '@/features/urls/lib/urlMappings';
 import { urlDeleteMessages } from '@/features/urls/lib/urlMessages';
 import { useUserUrlMappings } from '@/features/urls/model/useUserUrlMappings';
-import { UrlMappingCard } from '@/features/urls/ui/UrlMappingCard';
 import { UrlMappingsEmptyState } from '@/features/urls/ui/UrlMappingsEmptyState';
+import { UrlMappingsGrid } from '@/features/urls/ui/UrlMappingsGrid';
 import { UrlMappingsPagination } from '@/features/urls/ui/UrlMappingsPagination';
 import { UrlMappingsSelectionBar } from '@/features/urls/ui/UrlMappingsSelectionBar';
 import { UrlMappingsToolbar } from '@/features/urls/ui/UrlMappingsToolbar';
@@ -120,7 +119,6 @@ const UserUrlMappingsPage: React.FC = () => {
         <UrlMappingsGrid
           copiedUrl={copiedUrl}
           deletingHash={deletingHash}
-          formatDate={formatUrlDate}
           isSelectMode={isSelectMode}
           mappings={displayMappings}
           selectedHashes={selectedHashes}
@@ -191,66 +189,5 @@ const UserUrlMappingsPage: React.FC = () => {
     </AccountPageLayout>
   );
 };
-
-type UrlMappingsGridProps = {
-  copiedUrl: string | null;
-  deletingHash: string | null;
-  formatDate: (value: string) => string;
-  isSelectMode: boolean;
-  mappings: ReturnType<typeof useUserUrlMappings>['displayMappings'];
-  selectedHashes: Set<string>;
-  onCopy: (url: string) => Promise<void>;
-  onDelete: React.Dispatch<React.SetStateAction<string | null>>;
-  onDetails: (urlHash: string) => void;
-  onToggleSelect: (urlHash: string) => void;
-};
-
-function UrlMappingsGrid({
-  copiedUrl,
-  deletingHash,
-  formatDate,
-  isSelectMode,
-  mappings,
-  selectedHashes,
-  onCopy,
-  onDelete,
-  onDetails,
-  onToggleSelect,
-}: UrlMappingsGridProps) {
-  return (
-    <>
-      <style>{`
-        @keyframes urlCardIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to   { opacity: 1; transform: translateY(0);    }
-        }
-      `}</style>
-      <div className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {mappings.map((mapping, index) => (
-          <div
-            key={mapping.urlHash}
-            style={{
-              animation: 'urlCardIn 0.35s ease both',
-              animationDelay: `${index * 60}ms`,
-            }}
-          >
-            <UrlMappingCard
-              copiedUrl={copiedUrl}
-              formatDate={formatDate}
-              isDeleting={deletingHash === mapping.urlHash}
-              isSelectMode={isSelectMode}
-              isSelected={selectedHashes.has(mapping.urlHash)}
-              mapping={mapping}
-              onCopy={onCopy}
-              onDelete={() => onDelete(mapping.urlHash)}
-              onDetails={() => onDetails(mapping.urlHash)}
-              onToggleSelect={() => onToggleSelect(mapping.urlHash)}
-            />
-          </div>
-        ))}
-      </div>
-    </>
-  );
-}
 
 export default UserUrlMappingsPage;

@@ -1,7 +1,7 @@
-package com.zufar.urlshortener.shared.logging.controller
+package com.zufar.urlshortener.frontendlogs.controller
 
-import com.zufar.urlshortener.shared.logging.dto.FrontendLogRequest
-import com.zufar.urlshortener.shared.logging.service.FrontendLogIngestionService
+import com.zufar.urlshortener.frontendlogs.dto.FrontendLogRequest
+import com.zufar.urlshortener.frontendlogs.service.FrontendLogIngestionService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import org.springframework.http.MediaType

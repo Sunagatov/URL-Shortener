@@ -1,9 +1,9 @@
 package com.zufar.urlshortener.urls.service
 
 import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
-import com.zufar.urlshortener.shared.URL_MAPPINGS_CACHE
 import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.shared.logging.LogSanitizer
+import com.zufar.urlshortener.urls.config.URL_MAPPINGS_CACHE
 import com.zufar.urlshortener.urls.dto.ShortenUrlRequest
 import com.zufar.urlshortener.urls.dto.UrlMappingDto
 import com.zufar.urlshortener.urls.dto.UrlMappingPageDto

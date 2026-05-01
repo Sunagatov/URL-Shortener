@@ -1,12 +1,12 @@
-package com.zufar.urlshortener.shared.logging.service
+package com.zufar.urlshortener.frontendlogs.service
 
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.core.read.ListAppender
+import com.zufar.urlshortener.frontendlogs.dto.FrontendLogRequest
 import com.zufar.urlshortener.shared.config.RateLimitConfig
 import com.zufar.urlshortener.shared.config.RateLimitProperties
 import com.zufar.urlshortener.shared.http.ClientIpResolver
-import com.zufar.urlshortener.shared.logging.dto.FrontendLogRequest
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test

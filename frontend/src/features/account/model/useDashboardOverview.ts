@@ -6,7 +6,7 @@ import {
   getDomainLabel,
   getShortUrlSlug,
   type DashboardUrlMapping,
-} from '@/app/urls/dashboardOverview';
+} from '@/app/urls/contracts';
 import { routes } from '@/app/routes';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
 import { useToast } from '@/shared/ui';

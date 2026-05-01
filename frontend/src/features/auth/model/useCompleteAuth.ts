@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getUserProfile } from '@/app/account/profileApi';
+import { getUserProfile } from '@/app/account/contracts';
 import type { AuthTokens } from '@/shared/auth/types';
 import { useAuth } from '@/shared/auth/useAuth';
 
@@ -21,6 +21,6 @@ export function useCompleteAuth() {
 
       navigate(destination, { replace: true });
     },
-    [login, navigate, updateUser]
+    [login, navigate, updateUser],
   );
 }

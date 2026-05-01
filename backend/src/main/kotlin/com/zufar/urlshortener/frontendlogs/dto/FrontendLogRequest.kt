@@ -1,4 +1,5 @@
-package com.zufar.urlshortener.shared.logging.dto
+package com.zufar.urlshortener.frontendlogs.dto
+
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size

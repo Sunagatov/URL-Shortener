@@ -4,7 +4,7 @@ import {
   AccountPageLoadingState,
   AccountPageMessageState,
   AccountPageLayout,
-} from '@/app/account/AccountPageLayout';
+} from '@/app/account/contracts';
 import { routes } from '@/app/routes';
 import { useClipboard } from '@/shared/lib/useClipboard';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
