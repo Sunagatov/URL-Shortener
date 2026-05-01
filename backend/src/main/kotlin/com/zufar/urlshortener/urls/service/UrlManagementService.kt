@@ -1,41 +1,32 @@
 package com.zufar.urlshortener.urls.service
 
-import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
+import com.zufar.urlshortener.auth.service.user.AuthenticatedUserContextService
+import com.zufar.urlshortener.shared.exception.ApplicationException
 import com.zufar.urlshortener.shared.logging.LogSanitizer
-import com.zufar.urlshortener.urls.config.URL_MAPPINGS_CACHE
 import com.zufar.urlshortener.urls.dto.ShortenUrlRequest
 import com.zufar.urlshortener.urls.dto.UrlMappingDto
 import com.zufar.urlshortener.urls.dto.UrlMappingPageDto
 import com.zufar.urlshortener.urls.entity.UrlMapping
-import com.zufar.urlshortener.urls.exception.InvalidUrlRequestException
-import com.zufar.urlshortener.urls.exception.UrlNotFoundException
 import com.zufar.urlshortener.urls.repository.UrlRepository
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.cache.annotation.CacheEvict
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.Update
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import java.time.Clock
 import java.time.LocalDateTime
 
-private const val URL_MAPPING_NOT_FOUND_MESSAGE = "URL mapping not found"
 private const val ACCESS_URL_MAPPING_DENIED_MESSAGE = "You are not allowed to access this URL mapping"
 private const val DELETE_URL_MAPPING_DENIED_MESSAGE = "You are not allowed to delete this URL mapping"
+private const val INVALID_URL_REQUEST_CODE = "INVALID_URL_REQUEST"
 
 @Service
 class UrlManagementService(
     private val urlRepository: UrlRepository,
     private val urlValidator: UrlValidator,
-    private val authenticatedUserContext: AuthenticatedUserContext,
-    private val mongoTemplate: MongoTemplate,
+    private val authenticatedUserContext: AuthenticatedUserContextService,
+    private val urlMappingAccessService: UrlMappingAccessService,
     @Value($$"${app.base-url}") private val baseUrl: String,
     @Value($$"${app.urls.expiration.default-days:365}") private val defaultExpirationDays: Long,
     @Value($$"${app.urls.short-code.max-generation-attempts:10}") private val maxCodeGenerationAttempts: Int,
@@ -80,10 +71,10 @@ class UrlManagementService(
     }
 
     fun getPublicUrlMapping(urlHash: String): UrlMappingDto =
-        UrlMappingDto.fromEntity(getActiveUrlMapping(urlHash))
+        UrlMappingDto.fromEntity(urlMappingAccessService.getActiveUrlMapping(urlHash))
 
     fun getOwnedUrlMapping(urlHash: String): UrlMappingDto =
-        UrlMappingDto.fromEntity(getOwnedActiveUrlMapping(urlHash, ACCESS_URL_MAPPING_DENIED_MESSAGE))
+        UrlMappingDto.fromEntity(urlMappingAccessService.getOwnedActiveUrlMapping(urlHash, ACCESS_URL_MAPPING_DENIED_MESSAGE))
 
     fun getUserUrlMappings(page: Int, size: Int): UrlMappingPageDto {
         validatePageRequest(page, size)
@@ -102,10 +93,8 @@ class UrlManagementService(
         )
     }
 
-    @CacheEvict(cacheNames = [URL_MAPPINGS_CACHE], key = "#urlHash")
     fun delete(urlHash: String) {
-        val urlMapping = getOwnedActiveUrlMapping(urlHash, DELETE_URL_MAPPING_DENIED_MESSAGE)
-        urlRepository.deleteById(urlMapping.urlHash)
+        val urlMapping = urlMappingAccessService.deleteOwnedActiveUrlMapping(urlHash, DELETE_URL_MAPPING_DENIED_MESSAGE)
         log.info(
             "short_url_deleted urlHash={} ownerUserId={} targetHost={}",
             urlHash,
@@ -115,34 +104,14 @@ class UrlManagementService(
     }
 
     fun incrementClickCount(urlHash: String) {
-        val query = Query.query(Criteria.where("_id").`is`(urlHash))
-        val update = Update().inc("clickCount", 1)
-        mongoTemplate.updateFirst(query, update, UrlMapping::class.java)
+        urlMappingAccessService.incrementClickCount(urlHash)
     }
 
-    @Cacheable(cacheNames = [URL_MAPPINGS_CACHE], key = "#urlHash")
-    fun getCachedUrlMapping(urlHash: String): UrlMapping =
-        urlRepository.findByUrlHash(urlHash)
-            .orElseThrow { UrlNotFoundException(URL_MAPPING_NOT_FOUND_MESSAGE) }
+    fun getActiveUrlMapping(urlHash: String): UrlMapping =
+        urlMappingAccessService.getActiveUrlMapping(urlHash)
 
-    fun getActiveUrlMapping(urlHash: String): UrlMapping {
-        val now = LocalDateTime.now(clock)
-
-        return getCachedUrlMapping(urlHash)
-            .takeIf { it.expirationDate.isAfter(now) }
-            ?: throw UrlNotFoundException(URL_MAPPING_NOT_FOUND_MESSAGE)
-    }
-
-    fun getOwnedActiveUrlMapping(urlHash: String, accessDeniedMessage: String): UrlMapping {
-        val urlMapping = getActiveUrlMapping(urlHash)
-        val currentUserId = authenticatedUserContext.requireAuthenticatedUserId()
-
-        if (urlMapping.userId == null || urlMapping.userId != currentUserId) {
-            throw AccessDeniedException(accessDeniedMessage)
-        }
-
-        return urlMapping
-    }
+    fun getOwnedActiveUrlMapping(urlHash: String, accessDeniedMessage: String): UrlMapping =
+        urlMappingAccessService.getOwnedActiveUrlMapping(urlHash, accessDeniedMessage)
 
     private fun buildUrlMapping(
         request: ShortenUrlRequest,
@@ -168,10 +137,10 @@ class UrlManagementService(
 
     private fun validatePageRequest(page: Int, size: Int) {
         if (page < 0) {
-            throw InvalidUrlRequestException("Page must be greater than or equal to 0")
+            throw ApplicationException.badRequest(INVALID_URL_REQUEST_CODE, "Page must be greater than or equal to 0")
         }
         if (size !in 1..maxPageSize) {
-            throw InvalidUrlRequestException("Size must be between 1 and $maxPageSize")
+            throw ApplicationException.badRequest(INVALID_URL_REQUEST_CODE, "Size must be between 1 and $maxPageSize")
         }
     }
 

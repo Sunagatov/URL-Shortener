@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.zufar.urlshortener.shared.AUTHENTICATED_USER_ID_ATTRIBUTE
 import com.zufar.urlshortener.shared.config.BucketPolicyProperties
+import com.zufar.urlshortener.shared.config.RateLimitBucketFactory
 import com.zufar.urlshortener.shared.config.RateLimitConfig
 import com.zufar.urlshortener.shared.config.RateLimitProperties
 import com.zufar.urlshortener.shared.http.ClientIpResolver
@@ -177,6 +178,7 @@ class RateLimitFilterTest {
 
     private fun createFilter(config: RateLimitConfig): RateLimitFilter = RateLimitFilter(
         config,
+        RateLimitBucketFactory(),
         buckets,
         ErrorResponseWriter(ObjectMapper()),
         ClientIpResolver(config),
@@ -188,7 +190,6 @@ class RateLimitFilterTest {
             RateLimitProperties(
                 trustedProxies = trustedProxies,
                 publicRedirect = BucketPolicyProperties(capacity = 1, refillTokens = 1, refillMinutes = 1)
-            ),
-            SimpleMeterRegistry()
+            )
         )
 }

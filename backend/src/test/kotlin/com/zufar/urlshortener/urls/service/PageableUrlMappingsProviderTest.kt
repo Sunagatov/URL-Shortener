@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.urls.service
 
-import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
+import com.zufar.urlshortener.auth.service.user.AuthenticatedUserContextService
 import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.repository.UrlRepository
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -25,7 +25,7 @@ import java.time.ZoneOffset
 class PageableUrlMappingsProviderTest {
 
     @Mock private lateinit var urlRepository: UrlRepository
-    @Mock private lateinit var authenticatedUserContext: AuthenticatedUserContext
+    @Mock private lateinit var authenticatedUserContext: AuthenticatedUserContextService
     @Mock private lateinit var mongoTemplate: MongoTemplate
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
     private val provider by lazy {
@@ -33,7 +33,7 @@ class PageableUrlMappingsProviderTest {
             urlRepository = urlRepository,
             urlValidator = mock(),
             authenticatedUserContext = authenticatedUserContext,
-            mongoTemplate = mongoTemplate,
+            urlMappingAccessService = UrlMappingAccessService(urlRepository, authenticatedUserContext, mongoTemplate, clock),
             baseUrl = "https://localhost:8080",
             defaultExpirationDays = 365,
             maxCodeGenerationAttempts = 10,

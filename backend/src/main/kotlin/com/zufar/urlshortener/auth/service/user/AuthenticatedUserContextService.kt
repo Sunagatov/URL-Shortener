@@ -1,10 +1,9 @@
 package com.zufar.urlshortener.auth.service.user
 
-import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
-import com.zufar.urlshortener.auth.exception.UserNotFoundException
 import com.zufar.urlshortener.auth.security.UserDetailsWithTokenVersion
 import com.zufar.urlshortener.auth.service.EmailNormalizer
 import com.zufar.urlshortener.shared.ANONYMOUS_USER
+import com.zufar.urlshortener.shared.exception.ApplicationException
 import com.zufar.urlshortener.users.entity.UserAccountDocument
 import com.zufar.urlshortener.users.repository.UserAccountRepository
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
@@ -16,24 +15,25 @@ import java.time.LocalDateTime
 private const val UNAUTHENTICATED_MESSAGE = "User is not authenticated"
 private const val AUTHENTICATED_USER_NOT_FOUND_MESSAGE = "Authenticated user not found"
 private const val USER_NOT_FOUND_MESSAGE = "User not found"
+private const val USER_NOT_FOUND_CODE = "USER_NOT_FOUND"
 
 @Service
 class AuthenticatedUserContextService(
     private val userAccountRepository: UserAccountRepository
-) : AuthenticatedUserContext {
+) {
 
-    override fun requireAuthenticatedUser(): UserAccountDocument {
+    fun requireAuthenticatedUser(): UserAccountDocument {
         val normalizedEmail = EmailNormalizer.normalize(requireAuthenticatedEmail())
 
         return userAccountRepository.findByEmailIgnoreCase(normalizedEmail)
-            ?: throw UserNotFoundException(USER_NOT_FOUND_MESSAGE)
+            ?: throw ApplicationException.notFound(USER_NOT_FOUND_CODE, USER_NOT_FOUND_MESSAGE)
     }
 
-    override fun requireAuthenticatedUserId(): String =
+    fun requireAuthenticatedUserId(): String =
         findAuthenticatedUserIdOrNull()
             ?: throw AuthenticationCredentialsNotFoundException(AUTHENTICATED_USER_NOT_FOUND_MESSAGE)
 
-    override fun findAuthenticatedUserIdOrNull(): String? {
+    fun findAuthenticatedUserIdOrNull(): String? {
         val authentication = currentAuthentication() ?: return null
         val principalUserId = (authentication.principal as? UserDetailsWithTokenVersion)?.userId
             ?.takeIf(String::isNotBlank)
@@ -48,10 +48,10 @@ class AuthenticatedUserContextService(
         return user.id ?: throw AuthenticationCredentialsNotFoundException(AUTHENTICATED_USER_NOT_FOUND_MESSAGE)
     }
 
-    override fun updatePassword(currentUser: UserAccountDocument, encodedPassword: String, updatedAt: LocalDateTime) {
-        val userId = currentUser.id ?: throw UserNotFoundException(USER_NOT_FOUND_MESSAGE)
+    fun updatePassword(currentUser: UserAccountDocument, encodedPassword: String, updatedAt: LocalDateTime) {
+        val userId = currentUser.id ?: throw ApplicationException.notFound(USER_NOT_FOUND_CODE, USER_NOT_FOUND_MESSAGE)
         val currentRecord = userAccountRepository.findById(userId)
-            .orElseThrow { UserNotFoundException(USER_NOT_FOUND_MESSAGE) }
+            .orElseThrow { ApplicationException.notFound(USER_NOT_FOUND_CODE, USER_NOT_FOUND_MESSAGE) }
         userAccountRepository.save(
             currentRecord.copy(
                 password = encodedPassword,

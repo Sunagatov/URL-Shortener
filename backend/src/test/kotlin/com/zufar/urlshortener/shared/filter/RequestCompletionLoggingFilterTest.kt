@@ -6,7 +6,6 @@ import ch.qos.logback.core.read.ListAppender
 import com.zufar.urlshortener.shared.config.RateLimitConfig
 import com.zufar.urlshortener.shared.config.RateLimitProperties
 import com.zufar.urlshortener.shared.http.ClientIpResolver
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
@@ -18,7 +17,7 @@ import kotlin.test.assertTrue
 
 class RequestCompletionLoggingFilterTest {
 
-    private val rateLimitConfig = RateLimitConfig(RateLimitProperties(), SimpleMeterRegistry())
+    private val rateLimitConfig = RateLimitConfig(RateLimitProperties())
 
     private val filter = RequestCompletionLoggingFilter(
         clientIpResolver = ClientIpResolver(rateLimitConfig),

@@ -1,19 +1,21 @@
 package com.zufar.urlshortener.urls.service
 
-import com.zufar.urlshortener.urls.exception.InvalidUrlRequestException
+import com.zufar.urlshortener.shared.exception.ApplicationException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.InetAddress
+import java.net.InetAddress.getAllByName
 import java.net.URI
 
 private const val MAX_ALLOWED_URL_LENGTH = 2048
+private const val INVALID_URL_REQUEST_CODE = "INVALID_URL_REQUEST"
 
 @Service
 class UrlValidator(
     @Value($$"${app.base-url}") private val baseUrl: String,
-    private val hostAddressResolver: HostAddressResolver
+    private val hostLookup: (String) -> Array<InetAddress> = ::getAllByName
 ) {
     private val allowedProtocols = setOf("http", "https")
     private val validator = org.apache.commons.validator.routines.UrlValidator(allowedProtocols.toTypedArray())
@@ -36,7 +38,7 @@ class UrlValidator(
 
     private fun validate(condition: Boolean, message: String) {
         if (!condition) {
-            throw InvalidUrlRequestException(message)
+            throw ApplicationException.badRequest(INVALID_URL_REQUEST_CODE, message)
         }
     }
 
@@ -50,7 +52,7 @@ class UrlValidator(
             return false
         }
 
-        val addresses = runCatching { hostAddressResolver.resolve(host).toList() }
+        val addresses = runCatching { hostLookup(host).toList() }
             .getOrElse { return false }
 
         if (addresses.isEmpty()) {

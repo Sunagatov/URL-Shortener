@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   AccountPageHeader,
@@ -6,45 +6,86 @@ import {
   AccountPageLoadingState,
 } from '@/features/account/ui/layout/AccountPageLayout';
 import { routes } from '@/app/routes';
-import { urlDeleteMessages } from '@/features/urls/lib/urlMessages';
-import { useUrlMappingsCollection } from '@/features/urls/model/useUrlMappingsCollection';
+import { deleteUrl, getAllUserUrls } from '@/features/urls/api/urlsApi';
+import { PAGE_SIZE } from '@/features/urls/lib/urlMappings';
+import { urlCopyMessages, urlDeleteMessages } from '@/features/urls/lib/urlMessages';
 import { useUrlMappingsSelection } from '@/features/urls/model/useUrlMappingsSelection';
+import type { UrlMapping } from '@/features/urls/types/url';
 import { UrlMappingsEmptyState } from '@/features/urls/ui/UrlMappingsEmptyState';
 import { UrlMappingsGrid } from '@/features/urls/ui/UrlMappingsGrid';
 import { UrlMappingsPagination } from '@/features/urls/ui/UrlMappingsPagination';
 import { UrlMappingsSelectionBar } from '@/features/urls/ui/UrlMappingsSelectionBar';
 import { UrlMappingsToolbar } from '@/features/urls/ui/UrlMappingsToolbar';
+import { getApiErrorMessage } from '@/shared/lib/apiErrors';
+import { useClipboard } from '@/shared/lib/useClipboard';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
-import { Button, ConfirmModal } from '@/shared/ui';
+import { Button, ConfirmModal, useToast } from '@/shared/ui';
 import { FaCheckSquare, FaPlus } from 'react-icons/fa';
 
 const UserUrlMappingsPage: React.FC = () => {
   usePageTitle('My URLs');
   const navigate = useNavigate();
+  const toast = useToast();
+  const { copiedValue, copyValue } = useClipboard();
+  const [allMappings, setAllMappings] = useState<UrlMapping[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [clientPage, setClientPage] = useState(0);
+  const [pageError, setPageError] = useState<string | null>(null);
+  const [deletingHash, setDeletingHash] = useState<string | null>(null);
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
   const [pendingDeleteHash, setPendingDeleteHash] = useState<string | null>(null);
-  const collection = useUrlMappingsCollection();
-  const selection = useUrlMappingsSelection(collection.displayMappings);
-  const {
-    copiedUrl,
-    deletingHash,
-    displayMappings,
-    displayPage,
-    displayTotal,
-    displayTotalPages,
-    handleBulkDelete,
-    handleCopyUrl,
-    handleDeleteMapping,
-    handlePageChange,
-    isLoading,
-    isSearchMode,
-    pageError,
-    search,
-    setSearch,
-    sortOrder,
-    toggleSortOrder,
-    totalElements,
-  } = collection;
+  const isSearchMode = search.trim().length > 0;
+
+  const fetchMappings = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const data = await getAllUserUrls();
+      setAllMappings(data);
+      setPageError(null);
+    } catch (error: unknown) {
+      const message = getApiErrorMessage(error, 'Failed to fetch URL mappings.');
+      setPageError(message);
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    void fetchMappings();
+  }, [fetchMappings]);
+
+  useEffect(() => {
+    setClientPage(0);
+  }, [search, sortOrder]);
+
+  const filteredAndSorted = useMemo(() => {
+    const query = search.toLowerCase().trim();
+    const filtered = query
+      ? allMappings.filter((mapping) => {
+          return (
+            mapping.originalUrl.toLowerCase().includes(query) ||
+            mapping.shortUrl.toLowerCase().includes(query)
+          );
+        })
+      : allMappings;
+
+    return [...filtered].sort((left, right) => {
+      const leftTime = new Date(left.createdAt).getTime();
+      const rightTime = new Date(right.createdAt).getTime();
+      return sortOrder === 'oldest' ? leftTime - rightTime : rightTime - leftTime;
+    });
+  }, [allMappings, search, sortOrder]);
+
+  const totalElements = filteredAndSorted.length;
+  const displayTotalPages = Math.ceil(totalElements / PAGE_SIZE);
+  const displayMappings = filteredAndSorted.slice(
+    clientPage * PAGE_SIZE,
+    (clientPage + 1) * PAGE_SIZE,
+  );
+
   const {
     isAllSelected,
     isBulkDeleting,
@@ -55,7 +96,72 @@ const UserUrlMappingsPage: React.FC = () => {
     toggleSelectAll,
     toggleSelectMode,
     clearSelection,
-  } = selection;
+  } = useUrlMappingsSelection(displayMappings);
+
+  const updateMappingsAfterDelete = (hashes: string[]) => {
+    setPageError(null);
+    setAllMappings((current) => {
+      const nextMappings = current.filter((mapping) => !hashes.includes(mapping.urlHash));
+      const nextFilteredCount = (() => {
+        const query = search.toLowerCase().trim();
+
+        if (!query) {
+          return nextMappings.length;
+        }
+
+        return nextMappings.filter((mapping) => {
+          return (
+            mapping.originalUrl.toLowerCase().includes(query) ||
+            mapping.shortUrl.toLowerCase().includes(query)
+          );
+        }).length;
+      })();
+      const nextTotalPages = Math.ceil(nextFilteredCount / PAGE_SIZE);
+
+      setClientPage((currentPage) => Math.min(currentPage, Math.max(nextTotalPages - 1, 0)));
+      return nextMappings;
+    });
+  };
+
+  const handleDeleteMapping = async (urlHash: string) => {
+    setDeletingHash(urlHash);
+
+    try {
+      await deleteUrl(urlHash);
+      toast.success(urlDeleteMessages.success);
+      updateMappingsAfterDelete([urlHash]);
+    } catch (error: unknown) {
+      const message = getApiErrorMessage(error, urlDeleteMessages.failedSingle);
+      setPageError(message);
+      toast.error(message);
+    } finally {
+      setDeletingHash(null);
+    }
+  };
+
+  const handleBulkDelete = async (hashes: string[]) => {
+    try {
+      await Promise.all(hashes.map((hash) => deleteUrl(hash)));
+      toast.success(`${hashes.length} URL${hashes.length !== 1 ? 's' : ''} deleted.`);
+      updateMappingsAfterDelete(hashes);
+      return true;
+    } catch (error: unknown) {
+      const message = getApiErrorMessage(error, urlDeleteMessages.failedBatch);
+      toast.error(message);
+      return false;
+    }
+  };
+
+  const handleCopyUrl = async (url: string) => {
+    const didCopy = await copyValue(url);
+
+    if (!didCopy) {
+      toast.error(urlCopyMessages.error);
+      return;
+    }
+
+    toast.success(urlCopyMessages.success);
+  };
 
   const handleConfirmDelete = async () => {
     if (!pendingDeleteHash) {
@@ -115,14 +221,16 @@ const UserUrlMappingsPage: React.FC = () => {
       />
 
       <UrlMappingsToolbar
-        displayTotal={displayTotal}
+        displayTotal={totalElements}
         isSearchMode={isSearchMode}
         search={search}
         sortOrder={sortOrder}
         totalElements={totalElements}
         onClearSearch={() => setSearch('')}
         onSearchChange={setSearch}
-        onToggleSortOrder={toggleSortOrder}
+        onToggleSortOrder={() =>
+          setSortOrder((current) => (current === 'newest' ? 'oldest' : 'newest'))
+        }
       />
 
       {pageError ? (
@@ -133,7 +241,7 @@ const UserUrlMappingsPage: React.FC = () => {
 
       {displayMappings.length > 0 ? (
         <UrlMappingsGrid
-          copiedUrl={copiedUrl}
+          copiedUrl={copiedValue}
           deletingHash={deletingHash}
           isSelectMode={isSelectMode}
           mappings={displayMappings}
@@ -167,10 +275,10 @@ const UserUrlMappingsPage: React.FC = () => {
 
       {displayTotalPages > 1 ? (
         <UrlMappingsPagination
-          page={displayPage}
-          total={displayTotal}
+          page={clientPage}
+          total={totalElements}
           totalPages={displayTotalPages}
-          onPageChange={handlePageChange}
+          onPageChange={setClientPage}
         />
       ) : null}
 

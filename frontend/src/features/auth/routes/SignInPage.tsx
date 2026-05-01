@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { getUserProfile } from '@/features/account/api/profileApi';
 import { signIn } from '@/features/auth/api/authApi';
 import type { AuthTokens } from '@/shared/auth/types';
+import { useAuth } from '@/shared/auth/useAuth';
 import { useApi } from '@/shared/api/useApi';
 import { signInSchema, type SignInFormData } from '@/features/auth/model/authValidation';
 import { routes } from '@/app/routes';
@@ -11,7 +13,6 @@ import { Button } from '@/shared/ui';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { FaChartLine, FaEnvelope, FaLock, FaRocket, FaShieldAlt } from 'react-icons/fa';
 import { getAuthDestination } from '@/features/auth/lib/authRouting';
-import { useCompleteAuth } from '@/features/auth/model/useCompleteAuth';
 import { AuthAlert } from '@/features/auth/ui/AuthFlowElements';
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
 import { AuthBrandPanel } from '@/features/auth/ui/AuthBrandPanel';
@@ -45,7 +46,7 @@ const SignInPage: React.FC = () => {
   usePageTitle('Sign In');
   const location = useLocation();
   const navigate = useNavigate();
-  const completeAuth = useCompleteAuth();
+  const { login, updateUser } = useAuth();
   const { execute, loading, error } = useApi<AuthTokens>();
   const destination = getAuthDestination(location.state);
   const {
@@ -56,6 +57,21 @@ const SignInPage: React.FC = () => {
     resolver: zodResolver(signInSchema),
   });
   const hasValidationErrors = Object.keys(errors).length > 0;
+  const completeAuth = useCallback(
+    async (tokens: AuthTokens, targetDestination: string) => {
+      login(tokens, null);
+
+      try {
+        const profile = await getUserProfile();
+        updateUser(profile);
+      } catch {
+        // Best-effort profile hydration after authentication.
+      }
+
+      navigate(targetDestination, { replace: true });
+    },
+    [login, navigate, updateUser],
+  );
 
   const onSubmit = async (data: SignInFormData) => {
     const result = await execute(() => signIn(data), {

@@ -1,15 +1,8 @@
 package com.zufar.urlshortener.shared.config
 
-import com.github.benmanes.caffeine.cache.Cache
-import com.github.benmanes.caffeine.cache.Caffeine
 import com.zufar.urlshortener.shared.web.RateLimitedRoute
-import io.github.bucket4j.Bandwidth
-import io.github.bucket4j.Bucket
-import io.micrometer.core.instrument.Gauge
-import io.micrometer.core.instrument.MeterRegistry
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
 import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.context.annotation.Configuration
 import org.springframework.security.web.util.matcher.IpAddressMatcher
 import java.time.Duration
 
@@ -24,8 +17,7 @@ enum class RateLimitSubjectKey { CLIENT_IP, AUTHENTICATED_USER_OR_IP }
 @Configuration
 @EnableConfigurationProperties(RateLimitProperties::class)
 class RateLimitConfig(
-    private val rateLimitProperties: RateLimitProperties,
-    private val meterRegistry: MeterRegistry
+    private val rateLimitProperties: RateLimitProperties
 ) {
     private val trustedProxyMatchers = rateLimitProperties.trustedProxies
         .split(",")
@@ -40,44 +32,6 @@ class RateLimitConfig(
         RateLimitedRoute.FRONTEND_LOGS to policy("frontend_logs", rateLimitProperties.frontendLogs, RateLimitSubjectKey.CLIENT_IP),
         RateLimitedRoute.AUTHENTICATED_API to policy("authenticated_api", rateLimitProperties.authenticatedApi, RateLimitSubjectKey.AUTHENTICATED_USER_OR_IP)
     )
-
-    @Bean
-    fun rateLimitBuckets(): Cache<String, Bucket> {
-        val cache = Caffeine.newBuilder()
-            .expireAfterAccess(Duration.ofMinutes(rateLimitProperties.bucketCache.expireMinutes))
-            .maximumSize(rateLimitProperties.bucketCache.maxSize)
-            .build<String, Bucket>()
-
-        Gauge.builder("rate_limit_bucket_cache_size") { cache.estimatedSize().toDouble() }
-            .description("Estimated number of active rate limit buckets")
-            .register(meterRegistry)
-
-        return cache
-    }
-
-    @Bean
-    fun rateLimitFilter(
-        buckets: Cache<String, Bucket>,
-        errorResponseWriter: com.zufar.urlshortener.shared.http.ErrorResponseWriter,
-        clientIpResolver: com.zufar.urlshortener.shared.http.ClientIpResolver,
-        meterRegistry: MeterRegistry
-    ): com.zufar.urlshortener.shared.filter.RateLimitFilter = com.zufar.urlshortener.shared.filter.RateLimitFilter(
-        rateLimitConfig = this,
-        buckets = buckets,
-        errorResponseWriter = errorResponseWriter,
-        clientIpResolver = clientIpResolver,
-        meterRegistry = meterRegistry
-    )
-
-    fun createBucket(policy: RateLimitPolicy): Bucket {
-        val limit = Bandwidth.builder()
-            .capacity(policy.capacity)
-            .refillIntervally(policy.refillTokens, policy.refillPeriod)
-            .build()
-        return Bucket.builder()
-            .addLimit(limit)
-            .build()
-    }
 
     fun isEnabled(): Boolean = rateLimitProperties.enabled
 

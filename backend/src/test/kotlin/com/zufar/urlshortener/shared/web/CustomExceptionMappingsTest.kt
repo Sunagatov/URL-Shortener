@@ -1,10 +1,6 @@
 package com.zufar.urlshortener.shared.web
 
-import com.zufar.urlshortener.auth.exception.InvalidTokenException
-import com.zufar.urlshortener.auth.exception.VerificationResendTooSoonException
-import com.zufar.urlshortener.frontendlogs.exception.InvalidFrontendLogRequestException
-import com.zufar.urlshortener.urls.exception.UrlNotFoundException
-import com.zufar.urlshortener.users.exception.InvalidUserRequestException
+import com.zufar.urlshortener.shared.exception.ApplicationException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
@@ -15,8 +11,8 @@ class CustomExceptionMappingsTest {
 
     @Test
     fun `invalid token exception returns 401 with original message`() {
-        val response = handler.handleInvalidTokenException(
-            InvalidTokenException("Invalid or expired refresh token")
+        val response = handler.handleApplicationException(
+            ApplicationException.unauthorized("INVALID_TOKEN", "Invalid or expired refresh token")
         )
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.statusCode)
@@ -26,8 +22,8 @@ class CustomExceptionMappingsTest {
 
     @Test
     fun `verification resend too soon includes retry after seconds`() {
-        val response = handler.handleVerificationResendTooSoonException(
-            VerificationResendTooSoonException("Verification code was sent recently", 42)
+        val response = handler.handleApplicationException(
+            ApplicationException.tooManyRequests("VERIFICATION_RESEND_TOO_SOON", "Verification code was sent recently", 42)
         )
 
         assertEquals(HttpStatus.TOO_MANY_REQUESTS, response.statusCode)
@@ -37,7 +33,9 @@ class CustomExceptionMappingsTest {
 
     @Test
     fun `url not found exception returns 404 with url code`() {
-        val response = handler.handleUrlNotFound(UrlNotFoundException("URL mapping not found"))
+        val response = handler.handleApplicationException(
+            ApplicationException.notFound("URL_NOT_FOUND", "URL mapping not found")
+        )
 
         assertEquals(HttpStatus.NOT_FOUND, response.statusCode)
         assertEquals("URL_NOT_FOUND", response.body!!.code)
@@ -45,7 +43,9 @@ class CustomExceptionMappingsTest {
 
     @Test
     fun `invalid user request exception returns 400 with user code`() {
-        val response = handler.handleInvalidUserRequest(InvalidUserRequestException("Current password is incorrect"))
+        val response = handler.handleApplicationException(
+            ApplicationException.badRequest("INVALID_USER_REQUEST", "Current password is incorrect")
+        )
 
         assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)
         assertEquals("INVALID_USER_REQUEST", response.body!!.code)
@@ -53,8 +53,8 @@ class CustomExceptionMappingsTest {
 
     @Test
     fun `invalid frontend log request exception returns 400 with frontend code`() {
-        val response = handler.handleInvalidFrontendLogRequest(
-            InvalidFrontendLogRequestException("Timestamp must be a valid ISO-8601 instant")
+        val response = handler.handleApplicationException(
+            ApplicationException.badRequest("INVALID_FRONTEND_LOG_REQUEST", "Timestamp must be a valid ISO-8601 instant")
         )
 
         assertEquals(HttpStatus.BAD_REQUEST, response.statusCode)

@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.users.service
 
-import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
+import com.zufar.urlshortener.auth.service.user.AuthenticatedUserContextService
 import com.zufar.urlshortener.users.entity.UserAccountDocument
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
@@ -11,7 +11,7 @@ import kotlin.test.assertEquals
 
 class UserDetailsProviderTest {
 
-    private val authenticatedUserContext: AuthenticatedUserContext = mock()
+    private val authenticatedUserContext: AuthenticatedUserContextService = mock()
     private val userProfileService = UserAccountService(
         authenticatedUserContext = authenticatedUserContext,
         passwordEncoder = mock(),

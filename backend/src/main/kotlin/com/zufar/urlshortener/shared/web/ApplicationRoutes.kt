@@ -1,15 +1,13 @@
 package com.zufar.urlshortener.shared.web
 
-import com.zufar.urlshortener.auth.api.AuthApiPaths
-import com.zufar.urlshortener.frontendlogs.api.FrontendLogsApiPaths
-import com.zufar.urlshortener.health.api.HealthApiPaths
 import com.zufar.urlshortener.shared.ACTUATOR_PATH_PREFIX
 import com.zufar.urlshortener.shared.API_DOCS_PATH_PREFIX
 import com.zufar.urlshortener.shared.DOCS_PATH_PREFIX
-import com.zufar.urlshortener.urls.api.UrlApiPaths
+import com.zufar.urlshortener.urls.api.UrlHashFormat
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpMethod
 import org.springframework.security.web.util.matcher.OrRequestMatcher
+import org.springframework.security.web.util.matcher.RegexRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher.withDefaults
 
@@ -21,19 +19,25 @@ enum class RateLimitedRoute {
     AUTHENTICATED_API
 }
 
-object ApplicationRouteClassifier {
+object ApplicationRoutes {
+    const val AUTH_BASE_PATH = "/api/v1/auth"
+    const val AUTH_LEGACY_BASE_PATH = "/v1/auth"
+    const val URLS_BASE_PATH = "/api/v1/urls"
+    const val FRONTEND_LOGS_BASE_PATH = "/api/v1/frontend/logs"
+    const val HEALTH_BASE_PATH = "/api/v1/health"
+
     private const val FAVICON_PATH = "/favicon.ico"
     private val optionsMatcher = withDefaults().matcher(HttpMethod.OPTIONS, "/**")
-    private val frontendLogsMatcher = withDefaults().matcher(HttpMethod.POST, FrontendLogsApiPaths.BASE_PATH)
-    private val publicCreateMatcher = withDefaults().matcher(HttpMethod.POST, UrlApiPaths.BASE_PATH)
+    private val frontendLogsMatcher = withDefaults().matcher(HttpMethod.POST, FRONTEND_LOGS_BASE_PATH)
+    private val publicCreateMatcher = withDefaults().matcher(HttpMethod.POST, URLS_BASE_PATH)
     private val faviconMatcher = withDefaults().matcher(HttpMethod.GET, FAVICON_PATH)
-    private val publicRedirectMatcher = UrlApiPaths.publicRedirectMatcher()
-    private val healthMatcher = withDefaults().matcher(HealthApiPaths.BASE_PATH)
+    private val publicRedirectMatcher = RegexRequestMatcher(UrlHashFormat.SECURITY_REGEX, HttpMethod.GET.name())
+    private val healthMatcher = withDefaults().matcher(HEALTH_BASE_PATH)
     private val authMatcher = OrRequestMatcher(
-        withDefaults().matcher(AuthApiPaths.BASE_PATH),
-        withDefaults().matcher("${AuthApiPaths.BASE_PATH}/**"),
-        withDefaults().matcher(AuthApiPaths.LEGACY_BASE_PATH),
-        withDefaults().matcher("${AuthApiPaths.LEGACY_BASE_PATH}/**")
+        withDefaults().matcher(AUTH_BASE_PATH),
+        withDefaults().matcher("$AUTH_BASE_PATH/**"),
+        withDefaults().matcher(AUTH_LEGACY_BASE_PATH),
+        withDefaults().matcher("$AUTH_LEGACY_BASE_PATH/**")
     )
     private val docsMatcher = withDefaults().matcher("$DOCS_PATH_PREFIX/**")
     private val apiDocsMatcher = withDefaults().matcher("$API_DOCS_PATH_PREFIX/**")

@@ -1,17 +1,15 @@
 package com.zufar.urlshortener.shared.config
 
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import org.junit.jupiter.api.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.Test
 
 class RateLimitConfigTest {
 
     @Test
     fun `isTrustedProxy matches exact addresses and CIDR ranges`() {
         val config = RateLimitConfig(
-            RateLimitProperties(trustedProxies = "10.0.0.5, 192.168.0.0/16"),
-            SimpleMeterRegistry()
+            RateLimitProperties(trustedProxies = "10.0.0.5, 192.168.0.0/16")
         )
 
         assertTrue(config.isTrustedProxy("10.0.0.5"))
@@ -21,7 +19,7 @@ class RateLimitConfigTest {
 
     @Test
     fun `isTrustedProxy returns false when trusted proxy list is blank`() {
-        val config = RateLimitConfig(RateLimitProperties(trustedProxies = ""), SimpleMeterRegistry())
+        val config = RateLimitConfig(RateLimitProperties(trustedProxies = ""))
 
         assertFalse(config.isTrustedProxy("10.0.0.5"))
     }

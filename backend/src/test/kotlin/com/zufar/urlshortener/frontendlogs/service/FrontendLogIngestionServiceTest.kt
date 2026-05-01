@@ -7,7 +7,6 @@ import com.zufar.urlshortener.frontendlogs.dto.FrontendLogRequest
 import com.zufar.urlshortener.shared.config.RateLimitConfig
 import com.zufar.urlshortener.shared.config.RateLimitProperties
 import com.zufar.urlshortener.shared.http.ClientIpResolver
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
@@ -19,7 +18,7 @@ class FrontendLogIngestionServiceTest {
 
     private val logger = LoggerFactory.getLogger("frontend.logs") as Logger
     private val service = FrontendLogIngestionService(
-        clientIpResolver = ClientIpResolver(RateLimitConfig(RateLimitProperties(), SimpleMeterRegistry()))
+        clientIpResolver = ClientIpResolver(RateLimitConfig(RateLimitProperties()))
     )
 
     @AfterEach

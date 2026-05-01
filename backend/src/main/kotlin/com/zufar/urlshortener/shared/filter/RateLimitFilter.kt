@@ -4,11 +4,12 @@ import com.github.benmanes.caffeine.cache.Cache
 import com.zufar.urlshortener.shared.ANONYMOUS_USER
 import com.zufar.urlshortener.shared.AUTHENTICATED_USER_ID_ATTRIBUTE
 import com.zufar.urlshortener.shared.config.RateLimitConfig
+import com.zufar.urlshortener.shared.config.RateLimitBucketFactory
 import com.zufar.urlshortener.shared.config.RateLimitPolicy
 import com.zufar.urlshortener.shared.config.RateLimitSubjectKey
 import com.zufar.urlshortener.shared.http.ClientIpResolver
 import com.zufar.urlshortener.shared.http.ErrorResponseWriter
-import com.zufar.urlshortener.shared.web.ApplicationRouteClassifier
+import com.zufar.urlshortener.shared.web.ApplicationRoutes
 import io.github.bucket4j.Bucket
 import io.github.bucket4j.ConsumptionProbe
 import io.micrometer.core.instrument.Counter
@@ -33,6 +34,7 @@ private const val RATE_LIMIT_OUTCOME_BLOCKED = "blocked"
 
 class RateLimitFilter(
     private val rateLimitConfig: RateLimitConfig,
+    private val rateLimitBucketFactory: RateLimitBucketFactory,
     private val buckets: Cache<String, Bucket>,
     private val errorResponseWriter: ErrorResponseWriter,
     private val clientIpResolver: ClientIpResolver,
@@ -47,7 +49,7 @@ class RateLimitFilter(
             return true
         }
 
-        return ApplicationRouteClassifier.shouldBypassRateLimit(request)
+        return ApplicationRoutes.shouldBypassRateLimit(request)
     }
 
     override fun doFilterInternal(
@@ -64,7 +66,7 @@ class RateLimitFilter(
         val clientIp = clientIpResolver.resolve(request)
         val subject = resolveSubject(policy, request, clientIp)
         val cacheKey = "${policy.name}:$subject"
-        val bucket = buckets.get(cacheKey) { rateLimitConfig.createBucket(policy) }
+        val bucket = buckets.get(cacheKey) { rateLimitBucketFactory.create(policy) }
         val probe = bucket.tryConsumeAndReturnRemaining(1)
 
         applyRateLimitHeaders(response, policy, probe)
@@ -89,7 +91,7 @@ class RateLimitFilter(
     }
 
     private fun resolvePolicy(request: HttpServletRequest): RateLimitPolicy? =
-        ApplicationRouteClassifier.resolveRateLimitedRoute(request)
+        ApplicationRoutes.resolveRateLimitedRoute(request)
             ?.let(rateLimitConfig::policyFor)
 
     private fun resolveSubject(

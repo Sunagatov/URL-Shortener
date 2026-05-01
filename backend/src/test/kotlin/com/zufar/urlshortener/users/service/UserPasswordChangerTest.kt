@@ -1,9 +1,9 @@
 package com.zufar.urlshortener.users.service
 
-import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
+import com.zufar.urlshortener.auth.service.user.AuthenticatedUserContextService
+import com.zufar.urlshortener.shared.exception.ApplicationException
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
 import com.zufar.urlshortener.users.entity.UserAccountDocument
-import com.zufar.urlshortener.users.exception.InvalidUserRequestException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -25,7 +25,7 @@ import kotlin.test.assertEquals
 @ExtendWith(MockitoExtension::class)
 class UserPasswordChangerTest {
 
-    @Mock private lateinit var authenticatedUserContext: AuthenticatedUserContext
+    @Mock private lateinit var authenticatedUserContext: AuthenticatedUserContextService
     @Mock private lateinit var passwordEncoder: PasswordEncoder
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
 
@@ -80,7 +80,7 @@ class UserPasswordChangerTest {
         whenever(authenticatedUserContext.requireAuthenticatedUser()).thenReturn(user)
         whenever(passwordEncoder.matches("WrongPassword1!", "old-hash")).thenReturn(false)
 
-        assertThrows<InvalidUserRequestException> {
+        val ex = assertThrows<ApplicationException> {
             UserAccountService(
                 authenticatedUserContext,
                 passwordEncoder,
@@ -92,6 +92,7 @@ class UserPasswordChangerTest {
                 )
             )
         }
+        assertEquals("INVALID_USER_REQUEST", ex.code)
 
         verify(authenticatedUserContext, never()).updatePassword(any(), any(), any())
     }

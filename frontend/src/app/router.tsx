@@ -1,8 +1,7 @@
 import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { MainLayout } from '@/app/layout/MainLayout';
 import { routes } from '@/app/routes';
-import { GuestOnlyRoute } from '@/features/auth/routes/GuestOnlyRoute';
-import { ProtectedRoute } from '@/features/auth/routes/ProtectedRoute';
+import { AuthRoute } from '@/features/auth/routes/AuthRoute';
 import SignInPage from '@/features/auth/routes/SignInPage';
 import SignUpPage from '@/features/auth/routes/SignUpPage';
 import ForgotPasswordPage from '@/features/auth/routes/ForgotPasswordPage';
@@ -43,22 +42,22 @@ function AppRoutes() {
             <Route
               key={path}
               path={path}
-              element={<GuestOnlyRoute>{element}</GuestOnlyRoute>}
+              element={<AuthRoute access="guest">{element}</AuthRoute>}
             />
           ))}
           <Route
             path={routes.account}
             element={(
-              <ProtectedRoute>
+              <AuthRoute access="protected">
                 <Navigate to={routes.dashboard} replace />
-              </ProtectedRoute>
+              </AuthRoute>
             )}
           />
           {protectedRoutes.map(({ path, element }) => (
             <Route
               key={path}
               path={path}
-              element={<ProtectedRoute>{element}</ProtectedRoute>}
+              element={<AuthRoute access="protected">{element}</AuthRoute>}
             />
           ))}
           <Route path="*" element={<Navigate to={routes.home} replace />} />

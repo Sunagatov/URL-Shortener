@@ -1,6 +1,5 @@
 package com.zufar.urlshortener.auth.controller
 
-import com.zufar.urlshortener.auth.api.AuthApiPaths
 import com.zufar.urlshortener.auth.dto.AuthResponse
 import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
 import com.zufar.urlshortener.auth.dto.RefreshTokenResponse
@@ -11,6 +10,7 @@ import com.zufar.urlshortener.auth.dto.SignUpResponse
 import com.zufar.urlshortener.auth.dto.VerificationChallengeResponse
 import com.zufar.urlshortener.auth.dto.VerifyEmailRequest
 import com.zufar.urlshortener.auth.service.AuthService
+import com.zufar.urlshortener.shared.web.ApplicationRoutes
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping(AuthApiPaths.BASE_PATH)
+@RequestMapping(ApplicationRoutes.AUTH_BASE_PATH)
 class AuthController(
     private val authService: AuthService
 ) {

@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.urls.service
 
-import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
+import com.zufar.urlshortener.auth.service.user.AuthenticatedUserContextService
 import com.zufar.urlshortener.urls.dto.ShortenUrlRequest
 import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.repository.UrlRepository
@@ -24,7 +24,7 @@ class UrlShortenerTest {
 
     @Mock private lateinit var urlRepository: UrlRepository
     @Mock private lateinit var urlValidator: UrlValidator
-    @Mock private lateinit var authenticatedUserContext: AuthenticatedUserContext
+    @Mock private lateinit var authenticatedUserContext: AuthenticatedUserContextService
     @Mock private lateinit var mongoTemplate: MongoTemplate
     @Mock private lateinit var httpRequest: HttpServletRequest
     private val baseUrl = "https://localhost:8080"
@@ -34,7 +34,7 @@ class UrlShortenerTest {
         urlRepository = urlRepository,
         urlValidator = urlValidator,
         authenticatedUserContext = authenticatedUserContext,
-        mongoTemplate = mongoTemplate,
+        urlMappingAccessService = UrlMappingAccessService(urlRepository, authenticatedUserContext, mongoTemplate, clock),
         baseUrl = baseUrl,
         defaultExpirationDays = 365,
         maxCodeGenerationAttempts = 10,

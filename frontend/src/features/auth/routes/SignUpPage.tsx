@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { getUserProfile } from '@/features/account/api/profileApi';
 import { signUp } from '@/features/auth/api/authApi';
 import {
   signUpSchema,
@@ -11,6 +12,7 @@ import {
 import type { SignUpResponse } from '@/features/auth/types/auth';
 import { routes } from '@/app/routes';
 import type { AuthTokens } from '@/shared/auth/types';
+import { useAuth } from '@/shared/auth/useAuth';
 import { useApi } from '@/shared/api/useApi';
 import { Button } from '@/shared/ui';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
@@ -26,7 +28,6 @@ import {
   FaUser,
 } from 'react-icons/fa';
 import { getAuthDestination } from '@/features/auth/lib/authRouting';
-import { useCompleteAuth } from '@/features/auth/model/useCompleteAuth';
 import { AuthAlert } from '@/features/auth/ui/AuthFlowElements';
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
 import { AuthBrandPanel } from '@/features/auth/ui/AuthBrandPanel';
@@ -63,7 +64,7 @@ const SignUpPage: React.FC = () => {
   usePageTitle('Sign Up');
   const location = useLocation();
   const navigate = useNavigate();
-  const completeAuth = useCompleteAuth();
+  const { login, updateUser } = useAuth();
   const { execute, loading, error } = useApi<SignUpResponse>();
   const destination = getAuthDestination(location.state);
   const {
@@ -77,6 +78,21 @@ const SignUpPage: React.FC = () => {
   const hasValidationErrors = Object.keys(errors).length > 0;
   const password = useWatch({ control, name: 'password', defaultValue: '' });
   const passwordStrength = getPasswordStrength(password);
+  const completeAuth = useCallback(
+    async (tokens: AuthTokens, targetDestination: string) => {
+      login(tokens, null);
+
+      try {
+        const profile = await getUserProfile();
+        updateUser(profile);
+      } catch {
+        // Best-effort profile hydration after authentication.
+      }
+
+      navigate(targetDestination, { replace: true });
+    },
+    [login, navigate, updateUser],
+  );
 
   const onSubmit = async (data: SignUpFormData) => {
     const result = await execute(() =>

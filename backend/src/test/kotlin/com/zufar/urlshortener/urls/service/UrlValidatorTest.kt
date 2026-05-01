@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.urls.service
 
-import com.zufar.urlshortener.urls.exception.InvalidUrlRequestException
+import com.zufar.urlshortener.shared.exception.ApplicationException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -12,7 +12,7 @@ class UrlValidatorTest {
     fun `same host as configured base url is rejected`() {
         val validator = UrlValidator("http://116.203.197.65:8080", stubResolver())
 
-        assertThrows<InvalidUrlRequestException> {
+        assertThrows<ApplicationException> {
             validator.validateUrl("http://116.203.197.65:8080/url/abc123")
         }
     }
@@ -21,7 +21,7 @@ class UrlValidatorTest {
     fun `configured domain host is rejected`() {
         val validator = UrlValidator("https://short.example.com", stubResolver())
 
-        assertThrows<InvalidUrlRequestException> {
+        assertThrows<ApplicationException> {
             validator.validateUrl("https://short.example.com/url/abc123")
         }
     }
@@ -30,7 +30,7 @@ class UrlValidatorTest {
     fun `loopback hosts are rejected`() {
         val validator = UrlValidator("https://short.example.com", stubResolver())
 
-        assertThrows<InvalidUrlRequestException> {
+        assertThrows<ApplicationException> {
             validator.validateUrl("http://localhost:8080/example")
         }
     }
@@ -39,7 +39,7 @@ class UrlValidatorTest {
     fun `private ipv4 addresses are rejected`() {
         val validator = UrlValidator("https://short.example.com", stubResolver())
 
-        assertThrows<InvalidUrlRequestException> {
+        assertThrows<ApplicationException> {
             validator.validateUrl("https://10.0.0.7/internal")
         }
     }
@@ -48,7 +48,7 @@ class UrlValidatorTest {
     fun `link local metadata addresses are rejected`() {
         val validator = UrlValidator("https://short.example.com", stubResolver())
 
-        assertThrows<InvalidUrlRequestException> {
+        assertThrows<ApplicationException> {
             validator.validateUrl("http://169.254.169.254/latest/meta-data")
         }
     }
@@ -57,7 +57,7 @@ class UrlValidatorTest {
     fun `urls with embedded credentials are rejected`() {
         val validator = UrlValidator("https://short.example.com", stubResolver())
 
-        assertThrows<InvalidUrlRequestException> {
+        assertThrows<ApplicationException> {
             validator.validateUrl("https://user:secret@example.com/path")
         }
     }
@@ -69,7 +69,7 @@ class UrlValidatorTest {
             stubResolver("internal.example" to listOf("192.168.1.10"))
         )
 
-        assertThrows<InvalidUrlRequestException> {
+        assertThrows<ApplicationException> {
             validator.validateUrl("https://internal.example/path")
         }
     }
@@ -83,7 +83,7 @@ class UrlValidatorTest {
         }
     }
 
-    private fun stubResolver(vararg entries: Pair<String, List<String>>) = HostAddressResolver { host ->
+    private fun stubResolver(vararg entries: Pair<String, List<String>>) = { host: String ->
         val mappedAddresses = entries.toMap()[host]
         val values = mappedAddresses ?: listOf(host)
         values.map(InetAddress::getByName).toTypedArray()

@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.urls.controller
 
-import com.zufar.urlshortener.urls.api.UrlApiPaths
+import com.zufar.urlshortener.shared.web.ApplicationRoutes
 import com.zufar.urlshortener.urls.dto.ShortenUrlRequest
 import com.zufar.urlshortener.urls.dto.UrlMappingDto
 import com.zufar.urlshortener.urls.dto.UrlMappingPageDto
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping(UrlApiPaths.BASE_PATH)
+@RequestMapping(ApplicationRoutes.URLS_BASE_PATH)
 class UrlController(
     private val urlManagementService: UrlManagementService,
     @Value($$"${app.urls.pagination.default-page:0}") private val defaultPage: Int,

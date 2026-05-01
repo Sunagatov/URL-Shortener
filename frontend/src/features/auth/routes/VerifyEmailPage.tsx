@@ -1,8 +1,8 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useCallback } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaClock, FaEnvelope, FaExclamationTriangle, FaRedo, FaShieldAlt } from 'react-icons/fa';
 import { routes } from '@/app/routes';
-import { useCompleteAuth } from '@/features/auth/model/useCompleteAuth';
+import { getUserProfile } from '@/features/account/api/profileApi';
 import { useVerificationCodeFlow } from '@/features/auth/model/verificationCodeFlow';
 import {
   AuthAlert,
@@ -14,6 +14,8 @@ import {
 } from '@/features/auth/ui/AuthFlowElements';
 import { AuthBrandPanel } from '@/features/auth/ui/AuthBrandPanel';
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
+import type { AuthTokens } from '@/shared/auth/types';
+import { useAuth } from '@/shared/auth/useAuth';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { Button } from '@/shared/ui';
 
@@ -54,10 +56,26 @@ type LocationState = {
 const VerifyEmailPage: React.FC = () => {
   usePageTitle('Verify Email');
   const { state } = useLocation();
-  const completeAuth = useCompleteAuth();
+  const navigate = useNavigate();
+  const { login, updateUser } = useAuth();
   const locationState = state as LocationState;
   const email = locationState?.email ?? '';
   const destination = locationState?.destination ?? routes.dashboard;
+  const completeAuth = useCallback(
+    async (tokens: AuthTokens, targetDestination: string) => {
+      login(tokens, null);
+
+      try {
+        const profile = await getUserProfile();
+        updateUser(profile);
+      } catch {
+        // Best-effort profile hydration after authentication.
+      }
+
+      navigate(targetDestination, { replace: true });
+    },
+    [login, navigate, updateUser],
+  );
   const {
     countdown,
     deliveryMode,

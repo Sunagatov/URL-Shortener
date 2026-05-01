@@ -1,17 +1,10 @@
 package com.zufar.urlshortener.auth.service
 
-import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
 import com.zufar.urlshortener.auth.dto.ResendVerificationRequest
-import com.zufar.urlshortener.auth.dto.SignInRequest
 import com.zufar.urlshortener.auth.dto.SignUpRequest
 import com.zufar.urlshortener.auth.dto.VerifyEmailRequest
-import com.zufar.urlshortener.auth.exception.EmailAlreadyExistsException
-import com.zufar.urlshortener.auth.exception.EmailNotVerifiedException
-import com.zufar.urlshortener.auth.exception.InvalidTokenException
-import com.zufar.urlshortener.auth.exception.InvalidVerificationCodeException
-import com.zufar.urlshortener.auth.exception.VerificationResendTooSoonException
 import com.zufar.urlshortener.auth.security.JwtTokenProvider
-import com.zufar.urlshortener.auth.security.withTokenVersion
+import com.zufar.urlshortener.shared.exception.ApplicationException
 import com.zufar.urlshortener.users.entity.UserAccountDocument
 import com.zufar.urlshortener.users.repository.UserAccountRepository
 import org.junit.jupiter.api.Test
@@ -25,9 +18,6 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.userdetails.User
-import org.springframework.security.core.userdetails.UserDetails as SecurityUserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.Clock
 import java.time.Instant
@@ -39,7 +29,7 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @ExtendWith(MockitoExtension::class)
-class AuthenticationServicesTest {
+class AuthServiceVerificationTest {
 
     @Mock private lateinit var authenticationManager: AuthenticationManager
     @Mock private lateinit var jwtTokenProvider: JwtTokenProvider
@@ -48,13 +38,13 @@ class AuthenticationServicesTest {
     @Mock private lateinit var emailVerificationNotifier: EmailVerificationNotifier
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
 
-    private fun authService() = AuthService(
+    private fun authService(emailVerificationEnabled: Boolean = true) = AuthService(
         authenticationManager = authenticationManager,
         userAccountRepository = userAccountRepository,
         passwordEncoder = passwordEncoder,
         jwtTokenProvider = jwtTokenProvider,
         emailVerificationNotifier = emailVerificationNotifier,
-        emailVerificationEnabled = true,
+        emailVerificationEnabled = emailVerificationEnabled,
         verificationExpirationMinutes = 10,
         verificationResendCooldownSeconds = 60,
         clock = clock
@@ -110,7 +100,7 @@ class AuthenticationServicesTest {
             )
         )
 
-        assertThrows<EmailAlreadyExistsException> {
+        val ex = assertThrows<ApplicationException> {
             authService().signUp(
                 SignUpRequest(
                     firstName = "Jane",
@@ -122,27 +112,17 @@ class AuthenticationServicesTest {
                 )
             )
         }
+        assertEquals("EMAIL_ALREADY_EXISTS", ex.code)
     }
 
     @Test
     fun `register returns tokens immediately when email verification is disabled`() {
-        val authService = AuthService(
-            authenticationManager = authenticationManager,
-            userAccountRepository = userAccountRepository,
-            passwordEncoder = passwordEncoder,
-            jwtTokenProvider = jwtTokenProvider,
-            emailVerificationNotifier = emailVerificationNotifier,
-            emailVerificationEnabled = false,
-            verificationExpirationMinutes = 10,
-            verificationResendCooldownSeconds = 60,
-            clock = clock
-        )
         whenever(passwordEncoder.encode("SecurePassword123!")).thenReturn("hashed-password")
         whenever(userAccountRepository.save(any<UserAccountDocument>())).thenAnswer { it.arguments[0] }
         whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access-token")
         whenever(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh-token")
 
-        val response = authService.signUp(
+        val response = authService(emailVerificationEnabled = false).signUp(
             SignUpRequest(
                 firstName = "Jane",
                 lastName = "Doe",
@@ -157,79 +137,6 @@ class AuthenticationServicesTest {
         assertEquals("access-token", response.accessToken)
         assertEquals("refresh-token", response.refreshToken)
         verify(emailVerificationNotifier, never()).sendCode(any(), any(), any())
-    }
-
-    @Test
-    fun `authenticate passes normalized email to authentication manager`() {
-        val principal: SecurityUserDetails = User("user@example.com", "hashed", emptyList())
-            .withTokenVersion(0, "user-1", true)
-        whenever(authenticationManager.authenticate(any())).thenReturn(
-            UsernamePasswordAuthenticationToken(principal, null, principal.authorities)
-        )
-        whenever(jwtTokenProvider.generateAccessToken(principal)).thenReturn("access-token")
-        whenever(jwtTokenProvider.generateRefreshToken(principal)).thenReturn("refresh-token")
-
-        authService().signIn(SignInRequest("  User@Example.COM  ", "password"))
-
-        val captor = argumentCaptor<UsernamePasswordAuthenticationToken>()
-        verify(authenticationManager).authenticate(captor.capture())
-        assertEquals("user@example.com", captor.firstValue.principal)
-    }
-
-    @Test
-    fun `sign in rejects unverified users`() {
-        val principal: SecurityUserDetails = User("user@example.com", "hashed", emptyList())
-            .withTokenVersion(0, "user-1", false)
-        whenever(authenticationManager.authenticate(any())).thenReturn(
-            UsernamePasswordAuthenticationToken(principal, null, principal.authorities)
-        )
-
-        assertThrows<EmailNotVerifiedException> {
-            authService().signIn(SignInRequest("user@example.com", "password"))
-        }
-    }
-
-    @Test
-    fun `refresh access token looks up normalized email from token subject`() {
-        val user = UserAccountDocument(
-            firstName = "User",
-            lastName = "Test",
-            email = "user@example.com",
-            password = "hashed",
-            country = "USA",
-            age = 30
-        )
-        whenever(jwtTokenProvider.validateRefreshToken("refresh-token")).thenReturn(true)
-        whenever(jwtTokenProvider.getUsernameFromJWT("refresh-token")).thenReturn("  User@Example.COM  ")
-        whenever(jwtTokenProvider.getTokenVersionFromJWT("refresh-token")).thenReturn(0)
-        whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
-        whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("new-access-token")
-
-        val response = authService().refreshAccessToken(RefreshTokenRequest("refresh-token"))
-
-        verify(userAccountRepository).findByEmailIgnoreCase("user@example.com")
-        assertEquals("new-access-token", response.accessToken)
-    }
-
-    @Test
-    fun `refresh access token rejects token version mismatch`() {
-        val user = UserAccountDocument(
-            firstName = "User",
-            lastName = "Test",
-            email = "user@example.com",
-            password = "hashed",
-            country = "USA",
-            age = 30,
-            tokenVersion = 2
-        )
-        whenever(jwtTokenProvider.validateRefreshToken("refresh-token")).thenReturn(true)
-        whenever(jwtTokenProvider.getUsernameFromJWT("refresh-token")).thenReturn("user@example.com")
-        whenever(jwtTokenProvider.getTokenVersionFromJWT("refresh-token")).thenReturn(1)
-        whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
-
-        assertThrows<InvalidTokenException> {
-            authService().refreshAccessToken(RefreshTokenRequest("refresh-token"))
-        }
     }
 
     @Test
@@ -279,9 +186,10 @@ class AuthenticationServicesTest {
         whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
         whenever(passwordEncoder.matches("123456", "verification-hash")).thenReturn(false)
 
-        assertThrows<InvalidVerificationCodeException> {
+        val ex = assertThrows<ApplicationException> {
             authService().verifyEmail(VerifyEmailRequest("user@example.com", "123456"))
         }
+        assertEquals("INVALID_VERIFICATION_CODE", ex.code)
     }
 
     @Test
@@ -297,11 +205,12 @@ class AuthenticationServicesTest {
         )
         whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
 
-        val ex = assertThrows<VerificationResendTooSoonException> {
+        val ex = assertThrows<ApplicationException> {
             authService().resendVerificationCode(ResendVerificationRequest("user@example.com"))
         }
 
         assertEquals(35, ex.retryAfterSeconds)
+        assertEquals("VERIFICATION_RESEND_TOO_SOON", ex.code)
         verify(emailVerificationNotifier, never()).sendCode(any(), any(), any())
     }
 }

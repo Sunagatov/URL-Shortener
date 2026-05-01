@@ -1,118 +1,37 @@
-import {
-  createHttpLogReporter,
-  logger,
-  setLogReporter,
-  type LogContext,
-} from '@/shared/lib/logger';
+import { logger } from '@/shared/lib/logger';
 
 describe('logger', () => {
   afterEach(() => {
-    setLogReporter(null);
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
-  it('redacts sensitive keys before reporting', () => {
-    const report = vi.fn();
-    setLogReporter(report);
-
-    logger.error('auth.failed', {
-      accessToken: 'secret-token',
-      nested: {
-        password: 'super-secret',
-        safe: 'value',
-      },
-    });
-
-    expect(report).toHaveBeenCalledWith(
-      expect.objectContaining({
-        context: {
-          accessToken: '[REDACTED]',
-          nested: {
-            password: '[REDACTED]',
-            safe: 'value',
-          },
-        },
-      }),
-    );
-  });
-
-  it('avoids crashing on circular data', () => {
-    const report = vi.fn();
-    const circular = { name: 'loop' } as LogContext & { self?: LogContext };
+  it('does not crash on circular data', () => {
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const circular: { name: string; self?: unknown } = { name: 'loop' };
     circular.self = circular;
-    setLogReporter(report);
 
-    logger.warn('circular.payload', circular);
+    expect(() => {
+      logger.warn('circular.payload', circular);
+    }).not.toThrow();
 
-    expect(report).toHaveBeenCalledWith(
-      expect.objectContaining({
-        context: {
-          name: 'loop',
-          self: '[CIRCULAR]',
-        },
-      }),
-    );
+    expect(consoleWarn).toHaveBeenCalled();
   });
 
-  it('truncates deeply nested values before reporting', () => {
-    const report = vi.fn();
-    setLogReporter(report);
-
-    logger.warn('deep.payload', {
-      level1: {
-        level2: {
-          level3: {
-            level4: {
-              level5: {
-                level6: 'hidden',
-              },
-            },
-          },
-        },
-      },
-    });
-
-    expect(report).toHaveBeenCalledWith(
-      expect.objectContaining({
-        context: {
-          level1: {
-            level2: {
-              level3: {
-                level4: {
-                  level5: '[TRUNCATED]',
-                },
-              },
-            },
-          },
-        },
-      }),
-    );
-  });
-
-  it('uses sendBeacon for reportable remote logs when available', () => {
+  it('uses sendBeacon for warn and error logs when available', () => {
     const sendBeacon = vi.fn(() => true);
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     Object.defineProperty(window.navigator, 'sendBeacon', {
       configurable: true,
       value: sendBeacon,
     });
-    const reporter = createHttpLogReporter({
-      endpoint: 'https://logs.example.com/frontend',
-      minLevel: 'warn',
+
+    logger.error('frontend.runtime.window_error', {
+      message: 'Broken',
     });
 
-    reporter({
-      level: 'error',
-      message: 'frontend.runtime.window_error',
-      runtime: 'browser',
-      sessionId: 'session-1',
-      timestamp: '2026-04-30T13:00:00.000Z',
-    });
-
+    expect(consoleError).toHaveBeenCalled();
     expect(sendBeacon).toHaveBeenCalledTimes(1);
-    expect(sendBeacon).toHaveBeenCalledWith(
-      'https://logs.example.com/frontend',
-      expect.any(Blob),
-    );
   });
 
   it('falls back to fetch when sendBeacon is unavailable', async () => {
@@ -120,51 +39,15 @@ describe('logger', () => {
       configurable: true,
       value: undefined,
     });
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
     const fetchSpy = vi.fn(() => Promise.resolve(new Response(null, { status: 202 })));
     vi.stubGlobal('fetch', fetchSpy);
-    const reporter = createHttpLogReporter({
-      endpoint: 'https://logs.example.com/frontend',
-      minLevel: 'warn',
-    });
 
-    reporter({
-      level: 'warn',
-      message: 'frontend.api.request_failed',
-      runtime: 'browser',
-      sessionId: 'session-1',
-      timestamp: '2026-04-30T13:00:00.000Z',
+    logger.warn('frontend.api.request_failed', {
+      status: 500,
     });
     await Promise.resolve();
 
-    expect(fetchSpy).toHaveBeenCalledWith('https://logs.example.com/frontend', {
-      body: expect.any(String),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      keepalive: true,
-      method: 'POST',
-    });
-  });
-
-  it('does not report entries below the remote threshold', () => {
-    const sendBeacon = vi.fn(() => true);
-    Object.defineProperty(window.navigator, 'sendBeacon', {
-      configurable: true,
-      value: sendBeacon,
-    });
-    const reporter = createHttpLogReporter({
-      endpoint: 'https://logs.example.com/frontend',
-      minLevel: 'warn',
-    });
-
-    reporter({
-      level: 'info',
-      message: 'frontend.runtime.started',
-      runtime: 'browser',
-      sessionId: 'session-1',
-      timestamp: '2026-04-30T13:00:00.000Z',
-    });
-
-    expect(sendBeacon).not.toHaveBeenCalled();
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 });

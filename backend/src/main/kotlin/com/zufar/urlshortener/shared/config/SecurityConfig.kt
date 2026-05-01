@@ -7,7 +7,7 @@ import com.zufar.urlshortener.shared.filter.RateLimitFilter
 import com.zufar.urlshortener.shared.filter.RequestCompletionLoggingFilter
 import com.zufar.urlshortener.shared.security.RestAccessDeniedHandler
 import com.zufar.urlshortener.shared.security.RestAuthenticationEntryPoint
-import com.zufar.urlshortener.shared.web.ApplicationRouteClassifier
+import com.zufar.urlshortener.shared.web.ApplicationRoutes
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -72,7 +72,7 @@ class SecurityConfig(
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests { auth ->
                 auth
-                    .requestMatchers(*ApplicationRouteClassifier.securityPermitAllMatchers()).permitAll()
+                    .requestMatchers(*ApplicationRoutes.securityPermitAllMatchers()).permitAll()
                     .anyRequest().authenticated()
             }
             .authenticationProvider(daoAuthenticationProvider(passwordEncoder))

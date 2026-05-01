@@ -35,8 +35,7 @@ export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorB
               The app hit an unexpected problem.
             </h1>
             <p className="mt-3 text-sm leading-6 text-[color:var(--text-secondary)]">
-              The failure was logged with safe redaction. Reload the page to retry the current
-              flow.
+              The failure was logged. Reload the page to retry the current flow.
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
               <button
