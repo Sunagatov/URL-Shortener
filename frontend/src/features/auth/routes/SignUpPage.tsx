@@ -3,14 +3,15 @@ import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { signUp } from '@/features/auth/api/authApi';
-import { useApi } from '@/shared/api/useApi';
 import {
   signUpSchema,
   type SignUpFormData,
   type SignUpFormInput,
 } from '@/features/auth/model/authValidation';
+import type { SignUpResponse } from '@/features/auth/types/auth';
 import { routes } from '@/app/routes';
-import type { AuthTokens, SignUpResponse } from '@/shared/types';
+import type { AuthTokens } from '@/shared/auth/types';
+import { useApi } from '@/shared/api/useApi';
 import { Button } from '@/shared/ui';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { FaCalendarAlt, FaCheck, FaEnvelope, FaGlobe, FaLock, FaTimes, FaUser } from 'react-icons/fa';

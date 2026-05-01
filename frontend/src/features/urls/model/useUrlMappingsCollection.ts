@@ -2,15 +2,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { routes } from '@/app/routes';
 import { deleteUrl, getAllUserUrls, getUserUrls } from '@/features/urls/api/urlsApi';
-import { urlCopyMessages, urlDeleteMessages } from '@/features/urls/lib/urlMessages';
 import { PAGE_SIZE } from '@/features/urls/lib/urlMappings';
+import { urlCopyMessages, urlDeleteMessages } from '@/features/urls/lib/urlMessages';
+import type { UrlMapping } from '@/features/urls/types/url';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
 import { useClipboard } from '@/shared/lib/useClipboard';
-import type { UrlMapping } from '@/shared/types';
 import { useToast } from '@/shared/ui';
 
 export type SortOrder = 'newest' | 'oldest';
-export type SelectionSet = Set<string>;
 
 function sortMappings(urlMappings: UrlMapping[], sortOrder: SortOrder) {
   return [...urlMappings].sort((left, right) => {
@@ -209,58 +208,5 @@ export function useUrlMappingsCollection() {
     toggleSortOrder: () =>
       setSortOrder((current) => (current === 'newest' ? 'oldest' : 'newest')),
     totalElements,
-  };
-}
-
-export function useUrlMappingsSelection(displayMappings: UrlMapping[]) {
-  const [isSelectMode, setIsSelectMode] = useState(false);
-  const [selectedHashes, setSelectedHashes] = useState<SelectionSet>(new Set());
-  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
-
-  const toggleSelectMode = useCallback(() => {
-    setIsSelectMode((current) => !current);
-    setSelectedHashes(new Set());
-  }, []);
-
-  const toggleSelect = useCallback((hash: string) => {
-    setSelectedHashes((current) => {
-      const next = new Set(current);
-
-      if (next.has(hash)) {
-        next.delete(hash);
-      } else {
-        next.add(hash);
-      }
-
-      return next;
-    });
-  }, []);
-
-  const isAllSelected =
-    displayMappings.length > 0 &&
-    displayMappings.every((mapping) => selectedHashes.has(mapping.urlHash));
-
-  const toggleSelectAll = useCallback(() => {
-    if (isAllSelected) {
-      setSelectedHashes(new Set());
-      return;
-    }
-
-    setSelectedHashes(new Set(displayMappings.map((mapping) => mapping.urlHash)));
-  }, [displayMappings, isAllSelected]);
-
-  return {
-    clearSelection: () => {
-      setSelectedHashes(new Set());
-      setIsSelectMode(false);
-    },
-    isAllSelected,
-    isBulkDeleting,
-    isSelectMode,
-    selectedHashes,
-    setIsBulkDeleting,
-    toggleSelect,
-    toggleSelectAll,
-    toggleSelectMode,
   };
 }

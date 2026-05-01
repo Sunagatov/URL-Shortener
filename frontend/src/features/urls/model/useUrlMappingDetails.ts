@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { routes } from '@/app/routes';
 import { deleteUrl, getUrlDetails } from '@/features/urls/api/urlsApi';
 import { urlDeleteMessages } from '@/features/urls/lib/urlMessages';
+import type { UrlMapping } from '@/features/urls/types/url';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
-import type { UrlMapping } from '@/shared/types';
 import { useToast } from '@/shared/ui';
 
 export function useUrlMappingDetails(urlHash?: string) {

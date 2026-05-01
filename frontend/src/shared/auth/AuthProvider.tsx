@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { authSession } from '@/shared/auth/authSession';
-import type { AuthContextType, User, AuthTokens } from '@/shared/types';
+import type { AuthContextType, AuthTokens, User } from '@/shared/auth/types';
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 

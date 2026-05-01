@@ -1,7 +1,7 @@
 import { FaDownload, FaPencilAlt, FaShieldAlt } from 'react-icons/fa';
 import { routes } from '@/app/routes';
-import type { User } from '@/shared/types';
-import { formatUserDate } from '@/features/users/model/userProfile';
+import { formatUserDate } from '@/features/account/lib/userProfile';
+import type { User } from '@/shared/auth/types';
 
 interface AccountSidebarCardsProps {
   onEditProfile: () => void;

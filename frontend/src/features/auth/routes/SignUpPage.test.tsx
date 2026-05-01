@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import * as authApi from '@/features/auth/api/authApi';
-import * as userProfileApi from '@/features/users/api/userProfileApi';
+import * as profileApi from '@/shared/auth/profileApi';
 import SignInPage from '@/features/auth/routes/SignInPage';
 import SignUpPage from '@/features/auth/routes/SignUpPage';
 
@@ -12,7 +12,7 @@ vi.mock('@/features/auth/api/authApi', () => ({
   signUp: vi.fn(),
 }));
 
-vi.mock('@/features/users/api/userProfileApi', () => ({
+vi.mock('@/shared/auth/profileApi', () => ({
   getUserProfile: vi.fn(),
 }));
 
@@ -38,7 +38,7 @@ vi.mock('@/shared/api/useApi', () => ({
 }));
 
 const mockSignUp = vi.mocked(authApi.signUp);
-const mockGetUserProfile = vi.mocked(userProfileApi.getUserProfile);
+const mockGetUserProfile = vi.mocked(profileApi.getUserProfile);
 
 const renderSignUp = () =>
   render(

@@ -1,10 +1,10 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { authSession } from '@/shared/auth/authSession';
+import type { AuthTokens } from '@/shared/auth/types';
 import { storage } from '@/shared/auth/storage';
 import { endpoints } from '@/shared/api/endpoints';
 import { redirectToSignIn } from '@/shared/lib/authRedirect';
 import { logger, loggerSessionId } from '@/shared/lib/logger';
-import type { AuthTokens } from '@/shared/types';
 
 const backendRestApiUrl = import.meta.env.VITE_BACKEND_REST_API_URL;
 const CLIENT_TRACE_ID_HEADER = 'X-Trace-ID';

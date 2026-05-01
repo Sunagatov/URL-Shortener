@@ -1,10 +1,10 @@
 import { FaCalendarAlt, FaEnvelope, FaGlobe, FaPencilAlt, FaUser } from 'react-icons/fa';
-import type { User } from '@/shared/types';
+import type { User } from '@/shared/auth/types';
 import {
   formatUserDate,
   getUserDisplayName,
   getUserInitials,
-} from '@/features/users/model/userProfile';
+} from '@/features/account/lib/userProfile';
 
 interface UserProfileCardProps {
   user: User;

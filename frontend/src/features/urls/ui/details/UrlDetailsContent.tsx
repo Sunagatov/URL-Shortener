@@ -8,7 +8,7 @@ import {
 } from 'react-icons/fa';
 import { QRCodeSVG } from 'qrcode.react';
 import { Button, Tooltip } from '@/shared/ui';
-import type { UrlMapping } from '@/shared/types';
+import type { UrlMapping } from '@/features/urls/types/url';
 import { formatUrlDate, getDomainLabel } from '@/features/urls/lib/urlMappings';
 import {
   UrlCopyButton,

@@ -1,4 +1,4 @@
-import type { User } from '@/shared/types';
+import type { User } from '@/shared/auth/types';
 
 export function getUserInitials(user: User): string {
   return `${user.firstName?.charAt(0) ?? ''}${user.lastName?.charAt(0) ?? ''}`.toUpperCase() || 'U';

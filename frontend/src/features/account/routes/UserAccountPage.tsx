@@ -10,9 +10,9 @@ import { AccountSidebarCards } from '@/features/account/ui/AccountSidebarCards';
 import { EditProfileForm } from '@/features/account/ui/EditProfileForm';
 import { UserProfileCard } from '@/features/account/ui/UserProfileCard';
 import { useUserProfile } from '@/features/account/model/useUserProfile';
+import type { User } from '@/shared/auth/types';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { routes } from '@/app/routes';
-import type { User } from '@/shared/types';
 
 const UserAccountPage: React.FC = () => {
   usePageTitle('My Profile');

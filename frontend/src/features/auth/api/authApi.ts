@@ -1,12 +1,12 @@
 import httpClient from '@/shared/api/httpClient';
 import { endpoints } from '@/shared/api/endpoints';
 import type {
-  AuthTokens,
   RefreshTokenResponse,
   SignInRequest,
   SignUpRequest,
   SignUpResponse,
-} from '@/shared/types';
+} from '@/features/auth/types/auth';
+import type { AuthTokens } from '@/shared/auth/types';
 
 export async function signIn(data: SignInRequest): Promise<AuthTokens> {
   const response = await httpClient.post(endpoints.auth.signIn, data);

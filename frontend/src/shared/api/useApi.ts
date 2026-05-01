@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import type { ApiError } from '@/shared/api/types';
 import {
   getApiErrorCode,
   getApiErrorMessage,
@@ -6,7 +7,6 @@ import {
   getApiErrorStatus,
 } from '@/shared/lib/apiErrors';
 import { logger } from '@/shared/lib/logger';
-import type { ApiError } from '@/shared/types';
 
 interface UseApiState<T> {
   data: T | null;

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { FaChevronDown, FaLink, FaSignOutAlt } from 'react-icons/fa';
 import { accountNavigationItems } from '@/app/layout/layoutNavigation';
 import { routes } from '@/app/routes';
-import type { User } from '@/shared/types';
+import type { User } from '@/shared/auth/types';
 
 interface LayoutHeaderProps {
   isAuthenticated: boolean;

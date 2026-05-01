@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { routes } from '@/app/routes';
 import { getUserUrlsUpTo } from '@/features/urls/api/urlsApi';
 import { formatUrlDate, getDomainLabel, getShortUrlSlug } from '@/features/urls/lib/urlMappings';
+import type { UrlMapping } from '@/features/urls/types/url';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
-import type { UrlMapping } from '@/shared/types';
 import { useToast } from '@/shared/ui';
 
 type DashboardStat = {

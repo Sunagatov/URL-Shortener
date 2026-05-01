@@ -2,7 +2,7 @@ import type { MouseEvent } from 'react';
 import { useState } from 'react';
 import { FaCheck, FaExternalLinkAlt, FaTrash } from 'react-icons/fa';
 import { getDomainLabel } from '@/features/urls/lib/urlMappings';
-import type { UrlMapping } from '@/shared/types';
+import type { UrlMapping } from '@/features/urls/types/url';
 import {
   UrlCopyButton,
   UrlExternalLinkButton,

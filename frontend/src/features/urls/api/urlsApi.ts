@@ -1,7 +1,7 @@
 import httpClient from '@/shared/api/httpClient';
 import { endpoints } from '@/shared/api/endpoints';
 import { normalizeShortUrl } from '@/features/urls/lib/urlMappings';
-import type { CreateUrlRequest, PaginatedResponse, UrlMapping } from '@/shared/types';
+import type { CreateUrlRequest, PaginatedResponse, UrlMapping } from '@/features/urls/types/url';
 
 export const MAX_USER_URLS_PAGE_SIZE = 100;
 

@@ -2,7 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FaCheck, FaEnvelope, FaInbox } from 'react-icons/fa';
 import { routes } from '@/app/routes';
-import { maskEmailAddress, useForgotPasswordFlow } from '@/features/auth/model/passwordRecoveryFlows';
+import { maskEmailAddress } from '@/features/auth/lib/maskEmailAddress';
+import { useForgotPasswordFlow } from '@/features/auth/model/useForgotPasswordFlow';
 import {
   AuthAlert,
   AuthBackLink,

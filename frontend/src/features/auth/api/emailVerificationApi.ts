@@ -1,6 +1,7 @@
 import httpClient from '@/shared/api/httpClient';
 import { endpoints } from '@/shared/api/endpoints';
-import type { AuthTokens, VerificationChallengeResponse } from '@/shared/types';
+import type { VerificationChallengeResponse } from '@/features/auth/types/auth';
+import type { AuthTokens } from '@/shared/auth/types';
 
 export async function verifyEmail(data: { email: string; code: string }): Promise<AuthTokens> {
   const response = await httpClient.post(endpoints.auth.verifyEmail, data);

@@ -1,7 +1,7 @@
 import {
   useUrlMappingsCollection,
-  useUrlMappingsSelection,
-} from '@/features/urls/model/urlMappingsState';
+} from '@/features/urls/model/useUrlMappingsCollection';
+import { useUrlMappingsSelection } from '@/features/urls/model/useUrlMappingsSelection';
 
 export const useUserUrlMappings = () => {
   const collection = useUrlMappingsCollection();

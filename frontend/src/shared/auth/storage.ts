@@ -1,4 +1,4 @@
-import type { User, AuthTokens } from '@/shared/types';
+import type { AuthTokens, User } from '@/shared/auth/types';
 
 export const STORAGE_KEYS = {
   ACCESS_TOKEN: 'accessToken',

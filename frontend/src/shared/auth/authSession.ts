@@ -1,5 +1,5 @@
 import { storage } from '@/shared/auth/storage';
-import type { User, AuthTokens } from '@/shared/types';
+import type { AuthTokens, User } from '@/shared/auth/types';
 
 type AuthListener = (isAuthenticated: boolean, user: User | null) => void;
 

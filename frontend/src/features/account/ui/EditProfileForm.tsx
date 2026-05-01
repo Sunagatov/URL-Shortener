@@ -1,14 +1,14 @@
 import type { ElementType, InputHTMLAttributes } from 'react';
 import type { UseFormRegisterReturn } from 'react-hook-form';
 import { FaCalendarAlt, FaEnvelope, FaGlobe, FaLock, FaTimes, FaUser } from 'react-icons/fa';
-import { Button } from '@/shared/ui';
-import type { User } from '@/shared/types';
 import {
   formatUserDate,
   getUserDisplayName,
   getUserInitials,
-} from '@/features/users/model/userProfile';
+} from '@/features/account/lib/userProfile';
 import { useEditProfileForm } from '@/features/account/model/useEditProfileForm';
+import type { User } from '@/shared/auth/types';
+import { Button } from '@/shared/ui';
 
 interface EditProfileFormProps {
   user: User;

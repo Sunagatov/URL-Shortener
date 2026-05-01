@@ -1,7 +1,7 @@
 import React from 'react';
 import { FaCheck, FaExclamationTriangle, FaLock, FaShieldAlt } from 'react-icons/fa';
 import { routes } from '@/app/routes';
-import { useResetPasswordFlow } from '@/features/auth/model/passwordRecoveryFlows';
+import { useResetPasswordFlow } from '@/features/auth/model/useResetPasswordFlow';
 import {
   AuthAlert,
   AuthBackLink,

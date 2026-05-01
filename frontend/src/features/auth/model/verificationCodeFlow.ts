@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { resendVerificationCode, verifyEmail } from '@/features/auth/api/emailVerificationApi';
+import type { VerificationChallengeResponse } from '@/features/auth/types/auth';
+import type { AuthTokens } from '@/shared/auth/types';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';
-import type { AuthTokens, VerificationChallengeResponse } from '@/shared/types';
 
 const VERIFICATION_CODE_LENGTH = 6;
 
