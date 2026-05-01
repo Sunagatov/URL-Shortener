@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { routes } from '@/app/routes';
-import { deleteUrl, getUserUrls } from '@/features/urls/api/urlsApi';
+import { deleteUrl, getAllUserUrls, getUserUrls } from '@/features/urls/api/urlsApi';
 import { urlCopyMessages, urlDeleteMessages } from '@/features/urls/lib/urlMessages';
 import { PAGE_SIZE } from '@/features/urls/lib/urlMappings';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
@@ -82,8 +82,8 @@ export function useUrlMappingsCollection() {
 
   const fetchAll = useCallback(async () => {
     try {
-      const data = await getUserUrls(0, 500);
-      setAllMappings(data.content);
+      const data = await getAllUserUrls();
+      setAllMappings(data);
       setAllLoaded(true);
     } catch (error: unknown) {
       if (getApiErrorStatus(error) === 401) {

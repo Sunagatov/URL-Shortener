@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { routes } from '@/app/routes';
-import { getUserUrls } from '@/features/urls/api/urlsApi';
+import { getUserUrlsUpTo } from '@/features/urls/api/urlsApi';
 import { formatUrlDate, getDomainLabel, getShortUrlSlug } from '@/features/urls/lib/urlMappings';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
 import type { UrlMapping } from '@/shared/types';
@@ -75,9 +75,9 @@ export function useDashboardOverview() {
   const fetchOverview = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await getUserUrls(0, DASHBOARD_SAMPLE_SIZE);
+      const mappings = await getUserUrlsUpTo(DASHBOARD_SAMPLE_SIZE);
       setUrlMappings(
-        [...response.content].sort(
+        [...mappings].sort(
           (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
         ),
       );
