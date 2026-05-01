@@ -20,7 +20,7 @@ const AUTH_ROUTES = new Set<string>([
 ]);
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -54,6 +54,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         isSignUpRoute={isSignUpRoute}
         isUserMenuOpen={isUserMenuOpen}
         pathname={pathname}
+        user={user}
         onLogout={handleLogout}
         onToggleUserMenu={() => setIsUserMenuOpen((current) => !current)}
         onCloseUserMenu={() => setIsUserMenuOpen(false)}
