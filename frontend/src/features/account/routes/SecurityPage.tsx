@@ -1,8 +1,8 @@
 import React from 'react';
-import { AccountPageHeader, AccountPageLayout } from '@/app/layout/AccountPageLayout';
 import { useChangePasswordForm } from '@/features/account/model/useChangePasswordForm';
 import { PasswordChangeForm } from '@/features/account/ui/PasswordChangeForm';
 import { SecurityStatusCard } from '@/features/account/ui/SecurityStatusCard';
+import { AccountPageHeader, AccountPageLayout } from '@/features/account/ui/layout/AccountPageLayout';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 
 const SecurityPage: React.FC = () => {

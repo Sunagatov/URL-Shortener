@@ -1,8 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { requestPasswordReset } from '@/features/auth/api/passwordResetApi';
+import {
+  getRecoveryNetworkFailureMessage,
+  getRecoverySuccessNotice,
+  RESEND_COOLDOWN_SECONDS,
+  tickCooldown,
+  type RecoveryRequestMode,
+} from '@/features/auth/lib/forgotPasswordFlow';
 import { getApiErrorStatus } from '@/shared/lib/apiErrors';
-
-const RESEND_COOLDOWN_SECONDS = 30;
 
 export function useForgotPasswordFlow() {
   const [email, setEmail] = useState('');
@@ -20,7 +25,7 @@ export function useForgotPasswordFlow() {
     }
 
     const timer = window.setInterval(() => {
-      setCooldownSeconds((seconds) => (seconds <= 1 ? 0 : seconds - 1));
+      setCooldownSeconds((seconds) => tickCooldown(seconds));
     }, 1000);
 
     return () => window.clearInterval(timer);
@@ -33,7 +38,7 @@ export function useForgotPasswordFlow() {
     setCooldownSeconds(RESEND_COOLDOWN_SECONDS);
   };
 
-  const sendRecoveryLink = useCallback(async (targetEmail: string, mode: 'initial' | 'resend') => {
+  const sendRecoveryLink = useCallback(async (targetEmail: string, mode: RecoveryRequestMode) => {
     if (mode === 'initial') {
       setError('');
       setIsLoading(true);
@@ -44,23 +49,17 @@ export function useForgotPasswordFlow() {
 
     try {
       await requestPasswordReset(targetEmail);
-      completeSubmission(
-        targetEmail,
-        mode === 'resend' ? 'If that account exists, we sent a fresh recovery email.' : '',
-      );
+      completeSubmission(targetEmail, getRecoverySuccessNotice(mode));
     } catch (err: unknown) {
       if (getApiErrorStatus(err) !== undefined) {
-        completeSubmission(
-          targetEmail,
-          mode === 'resend' ? 'If that account exists, we sent a fresh recovery email.' : '',
-        );
+        completeSubmission(targetEmail, getRecoverySuccessNotice(mode));
         return;
       }
 
       if (mode === 'initial') {
-        setError('We could not reach the server. Please check your connection and try again.');
+        setError(getRecoveryNetworkFailureMessage(mode));
       } else {
-        setInlineNotice('We could not send another email right now. Please try again shortly.');
+        setInlineNotice(getRecoveryNetworkFailureMessage(mode));
       }
     } finally {
       if (mode === 'initial') {

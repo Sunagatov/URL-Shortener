@@ -9,10 +9,6 @@ vi.mock('@/shared/auth/useAuth', () => ({
   useAuth: vi.fn(),
 }));
 
-vi.mock('@/app/layout/AccountSidebar', () => ({
-  default: () => <aside>Side Panel</aside>,
-}));
-
 vi.mock('@/shared/api/useApi', () => ({
   useApi: () => ({
     execute: vi.fn(),

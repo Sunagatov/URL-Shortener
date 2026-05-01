@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  formatUrlDate,
+  getDashboardUrlMappings,
+  getDomainLabel,
+  getShortUrlSlug,
+  type DashboardUrlMapping,
+} from '@/app/urls/dashboardOverview';
 import { routes } from '@/app/routes';
-import { getUserUrlsUpTo } from '@/features/urls/api/urlsApi';
-import { formatUrlDate, getDomainLabel, getShortUrlSlug } from '@/features/urls/lib/urlMappings';
-import type { UrlMapping } from '@/features/urls/types/url';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
 import { useToast } from '@/shared/ui';
 
@@ -36,7 +40,7 @@ function formatCompactNumber(value: number) {
   }).format(value);
 }
 
-function getMonthSpan(urlMappings: UrlMapping[]) {
+function getMonthSpan(urlMappings: DashboardUrlMapping[]) {
   if (urlMappings.length < 2) {
     return 1;
   }
@@ -48,7 +52,7 @@ function getMonthSpan(urlMappings: UrlMapping[]) {
   return Math.max(months, 1);
 }
 
-function buildActivity(urlMappings: UrlMapping[]): DashboardActivity[] {
+function buildActivity(urlMappings: DashboardUrlMapping[]): DashboardActivity[] {
   return urlMappings.slice(0, 4).map((mapping) => {
     const domain = getDomainLabel(mapping.originalUrl);
     const hasClicks = mapping.clickCount > 0;
@@ -68,14 +72,14 @@ function buildActivity(urlMappings: UrlMapping[]): DashboardActivity[] {
 export function useDashboardOverview() {
   const navigate = useNavigate();
   const toast = useToast();
-  const [urlMappings, setUrlMappings] = useState<UrlMapping[]>([]);
+  const [urlMappings, setUrlMappings] = useState<DashboardUrlMapping[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchOverview = useCallback(async () => {
     try {
       setIsLoading(true);
-      const mappings = await getUserUrlsUpTo(DASHBOARD_SAMPLE_SIZE);
+      const mappings = await getDashboardUrlMappings(DASHBOARD_SAMPLE_SIZE);
       setUrlMappings(
         [...mappings].sort(
           (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),

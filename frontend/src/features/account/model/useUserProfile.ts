@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { routes } from '@/app/routes';
+import { getUserProfile } from '@/features/account/api/profileApi';
 import type { User } from '@/shared/auth/types';
-import { getUserProfile } from '@/shared/auth/profileApi';
 import { useAuth } from '@/shared/auth/useAuth';
 import { getApiErrorMessage, isSessionInvalidError } from '@/shared/lib/apiErrors';
 import { useToast } from '@/shared/ui';

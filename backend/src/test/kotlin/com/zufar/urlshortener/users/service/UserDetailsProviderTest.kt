@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.users.service
 
-import com.zufar.urlshortener.auth.api.CurrentUserAccess
+import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
 import com.zufar.urlshortener.auth.api.UserAccount
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
@@ -11,9 +11,9 @@ import kotlin.test.assertEquals
 
 class UserDetailsProviderTest {
 
-    private val currentUserAccess: CurrentUserAccess = mock()
+    private val authenticatedUserContext: AuthenticatedUserContext = mock()
     private val userProfileService = UserAccountService(
-        currentUserAccess = currentUserAccess,
+        authenticatedUserContext = authenticatedUserContext,
         passwordEncoder = mock(),
         changePasswordValidator = mock(),
         clock = Clock.systemUTC()
@@ -22,7 +22,7 @@ class UserDetailsProviderTest {
     @Test
     fun `getUserDetails returns createdAt for authenticated user`() {
         val createdAt = LocalDateTime.of(2024, 1, 15, 10, 0)
-        whenever(currentUserAccess.requireCurrentUser()).thenReturn(
+        whenever(authenticatedUserContext.requireAuthenticatedUser()).thenReturn(
             UserAccount(
                 id = "user-1",
                 firstName = "Test",

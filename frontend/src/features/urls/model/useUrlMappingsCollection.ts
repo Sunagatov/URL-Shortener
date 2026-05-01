@@ -3,32 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { routes } from '@/app/routes';
 import { deleteUrl, getAllUserUrls, getUserUrls } from '@/features/urls/api/urlsApi';
 import { PAGE_SIZE } from '@/features/urls/lib/urlMappings';
+import {
+  getClientPageMappings,
+  getClientTotalPages,
+  getNextServerPageAfterDelete,
+  getVisibleMappings,
+  type SortOrder,
+} from '@/features/urls/lib/urlMappingsCollection';
 import { urlCopyMessages, urlDeleteMessages } from '@/features/urls/lib/urlMessages';
 import type { UrlMapping } from '@/features/urls/types/url';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
 import { useClipboard } from '@/shared/lib/useClipboard';
 import { useToast } from '@/shared/ui';
-
-export type SortOrder = 'newest' | 'oldest';
-
-function sortMappings(urlMappings: UrlMapping[], sortOrder: SortOrder) {
-  return [...urlMappings].sort((left, right) => {
-    const leftTime = new Date(left.createdAt).getTime();
-    const rightTime = new Date(right.createdAt).getTime();
-    return sortOrder === 'oldest' ? leftTime - rightTime : rightTime - leftTime;
-  });
-}
-
-function filterMappings(urlMappings: UrlMapping[], search: string) {
-  const query = search.toLowerCase().trim();
-
-  return urlMappings.filter((mapping) => {
-    return (
-      mapping.originalUrl.toLowerCase().includes(query) ||
-      mapping.shortUrl.toLowerCase().includes(query)
-    );
-  });
-}
 
 export function useUrlMappingsCollection() {
   const [urlMappings, setUrlMappings] = useState<UrlMapping[]>([]);
@@ -105,13 +91,12 @@ export function useUrlMappingsCollection() {
 
   const filteredAndSorted = useMemo(() => {
     const source = isSearchMode ? allMappings : urlMappings;
-    const visibleMappings = isSearchMode ? filterMappings(source, search) : source;
-    return sortMappings(visibleMappings, sortOrder);
+    return getVisibleMappings(source, isSearchMode ? search : '', sortOrder);
   }, [allMappings, isSearchMode, search, sortOrder, urlMappings]);
 
-  const clientTotalPages = Math.ceil(filteredAndSorted.length / PAGE_SIZE);
+  const clientTotalPages = getClientTotalPages(filteredAndSorted.length);
   const displayMappings = isSearchMode
-    ? filteredAndSorted.slice(clientPage * PAGE_SIZE, (clientPage + 1) * PAGE_SIZE)
+    ? getClientPageMappings(filteredAndSorted, clientPage)
     : filteredAndSorted;
 
   const handlePageChange = (page: number) => {
@@ -133,8 +118,11 @@ export function useUrlMappingsCollection() {
       return;
     }
 
-    const nextPage =
-      urlMappings.length <= hashes.length && serverPage > 0 ? serverPage - 1 : serverPage;
+    const nextPage = getNextServerPageAfterDelete({
+      currentPageSize: urlMappings.length,
+      deletedCount: hashes.length,
+      serverPage,
+    });
     await fetchPage(nextPage);
   };
 

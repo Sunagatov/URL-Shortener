@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.users.service
 
-import com.zufar.urlshortener.auth.api.CurrentUserAccess
+import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
 import com.zufar.urlshortener.auth.api.UserAccount
 import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
@@ -26,7 +26,7 @@ import kotlin.test.assertEquals
 @ExtendWith(MockitoExtension::class)
 class UserPasswordChangerTest {
 
-    @Mock private lateinit var currentUserAccess: CurrentUserAccess
+    @Mock private lateinit var authenticatedUserContext: AuthenticatedUserContext
     @Mock private lateinit var passwordEncoder: PasswordEncoder
     @Mock private lateinit var changePasswordValidator: ChangePasswordValidator
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
@@ -44,12 +44,12 @@ class UserPasswordChangerTest {
             createdAt = LocalDateTime.of(2024, 1, 1, 9, 0),
             tokenVersion = 0
         )
-        whenever(currentUserAccess.requireCurrentUser()).thenReturn(user)
+        whenever(authenticatedUserContext.requireAuthenticatedUser()).thenReturn(user)
         whenever(passwordEncoder.matches("OldPassword1!", "old-hash")).thenReturn(true)
         whenever(passwordEncoder.encode("NewPassword1!")).thenReturn("new-hash")
 
         UserAccountService(
-            currentUserAccess,
+            authenticatedUserContext,
             passwordEncoder,
             changePasswordValidator,
             clock
@@ -61,7 +61,7 @@ class UserPasswordChangerTest {
         )
 
         verify(changePasswordValidator).validate(any())
-        verify(currentUserAccess).updatePassword(argThat {
+        verify(authenticatedUserContext).updatePassword(argThat {
             assertEquals("user@example.com", email)
             assertEquals(0, tokenVersion)
             true
@@ -81,12 +81,12 @@ class UserPasswordChangerTest {
             createdAt = LocalDateTime.of(2024, 1, 1, 9, 0),
             tokenVersion = 0
         )
-        whenever(currentUserAccess.requireCurrentUser()).thenReturn(user)
+        whenever(authenticatedUserContext.requireAuthenticatedUser()).thenReturn(user)
         whenever(passwordEncoder.matches("WrongPassword1!", "old-hash")).thenReturn(false)
 
         assertThrows<InvalidRequestException> {
             UserAccountService(
-                currentUserAccess,
+                authenticatedUserContext,
                 passwordEncoder,
                 changePasswordValidator,
                 clock
@@ -98,6 +98,6 @@ class UserPasswordChangerTest {
             )
         }
 
-        verify(currentUserAccess, never()).updatePassword(any(), any(), any())
+        verify(authenticatedUserContext, never()).updatePassword(any(), any(), any())
     }
 }

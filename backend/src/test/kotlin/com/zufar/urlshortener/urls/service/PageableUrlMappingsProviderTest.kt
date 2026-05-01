@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.urls.service
 
-import com.zufar.urlshortener.auth.api.CurrentUserAccess
+import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
 import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.repository.UrlRepository
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -25,14 +25,14 @@ import java.time.ZoneOffset
 class PageableUrlMappingsProviderTest {
 
     @Mock private lateinit var urlRepository: UrlRepository
-    @Mock private lateinit var currentUserAccess: CurrentUserAccess
+    @Mock private lateinit var authenticatedUserContext: AuthenticatedUserContext
     @Mock private lateinit var mongoTemplate: MongoTemplate
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
     private val provider by lazy {
         UrlManagementService(
             urlRepository = urlRepository,
             urlValidator = mock(),
-            currentUserAccess = currentUserAccess,
+            authenticatedUserContext = authenticatedUserContext,
             mongoTemplate = mongoTemplate,
             baseUrl = "https://localhost:8080",
             defaultExpirationDays = 365,
@@ -61,7 +61,7 @@ class PageableUrlMappingsProviderTest {
         val pageable = PageRequest.of(0, 10)
         val activeMappings = hashes.map { mapping(it, LocalDateTime.now().plusDays(10)) }
 
-        whenever(currentUserAccess.requireCurrentUserId()).thenReturn("user-123")
+        whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("user-123")
         whenever(urlRepository.findAllByUserIdAndExpirationDateAfter(eq("user-123"), any(), eq(pageable)))
             .thenReturn(PageImpl(activeMappings))
 
@@ -75,7 +75,7 @@ class PageableUrlMappingsProviderTest {
     fun `getUrlMappingsPage does not return expired mappings`() {
         val pageable = PageRequest.of(0, 10)
 
-        whenever(currentUserAccess.requireCurrentUserId()).thenReturn("user-123")
+        whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("user-123")
         whenever(urlRepository.findAllByUserIdAndExpirationDateAfter(eq("user-123"), any(), eq(pageable)))
             .thenReturn(PageImpl(emptyList()))
 
@@ -89,7 +89,7 @@ class PageableUrlMappingsProviderTest {
     fun `getUrlMappingsPage passes correct pagination parameters`() {
         val pageable = PageRequest.of(2, 5)
 
-        whenever(currentUserAccess.requireCurrentUserId()).thenReturn("user-123")
+        whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("user-123")
         whenever(urlRepository.findAllByUserIdAndExpirationDateAfter(eq("user-123"), any(), eq(pageable)))
             .thenReturn(PageImpl(emptyList(), pageable, 0))
 

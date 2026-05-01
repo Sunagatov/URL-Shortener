@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { resetPassword } from '@/features/auth/api/passwordResetApi';
+import {
+  getResetPasswordSubmitDisabled,
+  getResetPasswordValidationError,
+  passwordsMatch,
+} from '@/features/auth/lib/resetPasswordFlow';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 import { getPasswordStrength } from '@/shared/lib/passwordStrength';
 
@@ -16,7 +21,7 @@ export function useResetPasswordFlow() {
   const [error, setError] = useState('');
 
   const passwordStrength = getPasswordStrength(newPassword);
-  const passwordsMatch = confirmPassword.length === 0 || newPassword === confirmPassword;
+  const arePasswordsMatching = passwordsMatch(newPassword, confirmPassword);
   const isWeakPassword = passwordStrength.strength === 'Weak';
 
   useEffect(() => {
@@ -31,14 +36,14 @@ export function useResetPasswordFlow() {
 
   const submit = async () => {
     setError('');
+    const validationError = getResetPasswordValidationError({
+      confirmPassword,
+      isWeakPassword,
+      newPassword,
+    });
 
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match.');
-      return false;
-    }
-
-    if (isWeakPassword) {
-      setError('Use at least 15 characters. A passphrase or password manager works well.');
+    if (validationError) {
+      setError(validationError);
       return false;
     }
 
@@ -60,10 +65,14 @@ export function useResetPasswordFlow() {
     confirmPassword,
     error,
     isLoading,
-    isSubmitDisabled: isWeakPassword || (confirmPassword.length > 0 && !passwordsMatch),
+    isSubmitDisabled: getResetPasswordSubmitDisabled({
+      confirmPassword,
+      isWeakPassword,
+      newPassword,
+    }),
     newPassword,
     passwordStrength,
-    passwordsMatch,
+    passwordsMatch: arePasswordsMatching,
     setConfirmPassword,
     setNewPassword,
     showConfirm,

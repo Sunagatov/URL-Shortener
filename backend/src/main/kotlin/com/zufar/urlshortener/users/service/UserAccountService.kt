@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.users.service
 
-import com.zufar.urlshortener.auth.api.CurrentUserAccess
+import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
 import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
 import com.zufar.urlshortener.users.dto.UserDetailsDto
@@ -12,14 +12,14 @@ import java.time.LocalDateTime
 
 @Service
 class UserAccountService(
-    private val currentUserAccess: CurrentUserAccess,
+    private val authenticatedUserContext: AuthenticatedUserContext,
     private val passwordEncoder: PasswordEncoder,
     private val changePasswordValidator: ChangePasswordValidator,
     private val clock: Clock
 ) {
 
     fun getCurrentUserDetails(): UserDetailsDto {
-        val user = currentUserAccess.requireCurrentUser()
+        val user = authenticatedUserContext.requireAuthenticatedUser()
         return UserDetailsDto(
             firstName = user.firstName,
             lastName = user.lastName,
@@ -32,7 +32,7 @@ class UserAccountService(
 
     fun changePassword(request: ChangePasswordRequest) {
         changePasswordValidator.validate(request)
-        val user = currentUserAccess.requireCurrentUser()
+        val user = authenticatedUserContext.requireAuthenticatedUser()
 
         if (!passwordEncoder.matches(request.currentPassword, user.passwordHash)) {
             throw InvalidRequestException("Current password is incorrect")
@@ -42,6 +42,6 @@ class UserAccountService(
             "Password encoder returned null during password change"
         }
 
-        currentUserAccess.updatePassword(user, encodedPassword, LocalDateTime.now(clock))
+        authenticatedUserContext.updatePassword(user, encodedPassword, LocalDateTime.now(clock))
     }
 }

@@ -1,11 +1,13 @@
 package com.zufar.urlshortener.auth.service.user
 
-import com.zufar.urlshortener.auth.api.CurrentUserAccess
+import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
 import com.zufar.urlshortener.auth.api.UserAccount
 import com.zufar.urlshortener.auth.exception.UserNotFoundException
-import com.zufar.urlshortener.auth.repository.UserRepository
 import com.zufar.urlshortener.auth.service.EmailNormalizer
 import com.zufar.urlshortener.shared.ANONYMOUS_USER
+import com.zufar.urlshortener.users.api.UserAccountRecord
+import com.zufar.urlshortener.users.api.UserAccountReader
+import com.zufar.urlshortener.users.api.UserPasswordUpdater
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
@@ -16,39 +18,37 @@ private const val AUTHENTICATED_USER_NOT_FOUND_MESSAGE = "Authenticated user not
 private const val USER_NOT_FOUND_MESSAGE = "User not found"
 
 @Service
-class CurrentUserService(
-    private val userRepository: UserRepository
-) : CurrentUserAccess {
+class AuthenticatedUserContextService(
+    private val userAccountReader: UserAccountReader,
+    private val userPasswordUpdater: UserPasswordUpdater
+) : AuthenticatedUserContext {
 
-    override fun requireCurrentUser(): UserAccount {
+    override fun requireAuthenticatedUser(): UserAccount {
         val normalizedEmail = EmailNormalizer.normalize(requireAuthenticatedEmail())
 
-        val user = userRepository.findByEmailIgnoreCase(normalizedEmail)
+        val user = userAccountReader.findByEmailIgnoreCase(normalizedEmail)
             ?: throw UserNotFoundException(USER_NOT_FOUND_MESSAGE)
 
         return user.toUserAccount()
     }
 
-    override fun requireCurrentUserId(): String = requireCurrentUser().id
+    override fun requireAuthenticatedUserId(): String = requireAuthenticatedUser().id
 
-    override fun getCurrentUserIdOrNull(): String? {
+    override fun findAuthenticatedUserIdOrNull(): String? {
         val email = currentAuthenticationName() ?: return null
         val normalizedEmail = EmailNormalizer.normalize(email)
-        val user = userRepository.findByEmailIgnoreCase(normalizedEmail)
+        val user = userAccountReader.findByEmailIgnoreCase(normalizedEmail)
             ?: throw AuthenticationCredentialsNotFoundException(AUTHENTICATED_USER_NOT_FOUND_MESSAGE)
 
         return user.id ?: throw AuthenticationCredentialsNotFoundException(AUTHENTICATED_USER_NOT_FOUND_MESSAGE)
     }
 
     override fun updatePassword(currentUser: UserAccount, encodedPassword: String, updatedAt: LocalDateTime) {
-        userRepository.save(
-            userRepository.findById(currentUser.id)
-                .orElseThrow { UserNotFoundException(USER_NOT_FOUND_MESSAGE) }
-                .copy(
-                    password = encodedPassword,
-                    tokenVersion = currentUser.tokenVersion + 1,
-                    updatedAt = updatedAt
-                )
+        userPasswordUpdater.updatePassword(
+            currentUser.id,
+            encodedPassword,
+            currentUser.tokenVersion + 1,
+            updatedAt
         )
     }
 
@@ -62,7 +62,7 @@ class CurrentUserService(
         return email.takeUnless { it.isBlank() || it == ANONYMOUS_USER }
     }
 
-    private fun com.zufar.urlshortener.auth.entity.UserDetails.toUserAccount(): UserAccount {
+    private fun UserAccountRecord.toUserAccount(): UserAccount {
         val userId = id ?: throw UserNotFoundException(USER_NOT_FOUND_MESSAGE)
         return UserAccount(
             id = userId,

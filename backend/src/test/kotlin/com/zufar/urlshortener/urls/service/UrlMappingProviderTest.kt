@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.urls.service
 
-import com.zufar.urlshortener.auth.api.CurrentUserAccess
+import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
 import com.zufar.urlshortener.urls.dto.UrlMappingDto
 import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.repository.UrlRepository
@@ -22,7 +22,7 @@ import kotlin.test.assertEquals
 class UrlMappingProviderTest {
 
     @Mock private lateinit var urlRepository: UrlRepository
-    @Mock private lateinit var currentUserAccess: CurrentUserAccess
+    @Mock private lateinit var authenticatedUserContext: AuthenticatedUserContext
     @Mock private lateinit var mongoTemplate: MongoTemplate
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
 
@@ -40,7 +40,7 @@ class UrlMappingProviderTest {
     fun `getOwnedUrlMappingByHash delegates ownership lookup`() {
         val urlMapping = mapping()
         whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(urlMapping))
-        whenever(currentUserAccess.requireCurrentUserId()).thenReturn("user-123")
+        whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("user-123")
 
         val result = service().getOwnedUrlMapping("abc12345")
 
@@ -50,7 +50,7 @@ class UrlMappingProviderTest {
     private fun service() = UrlManagementService(
         urlRepository = urlRepository,
         urlValidator = mock(),
-        currentUserAccess = currentUserAccess,
+            authenticatedUserContext = authenticatedUserContext,
         mongoTemplate = mongoTemplate,
         baseUrl = "http://localhost:8080",
         defaultExpirationDays = 365,

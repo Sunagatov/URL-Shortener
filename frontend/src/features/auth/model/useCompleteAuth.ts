@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getUserProfile } from '@/app/account/profileApi';
 import type { AuthTokens } from '@/shared/auth/types';
-import { getUserProfile } from '@/shared/auth/profileApi';
 import { useAuth } from '@/shared/auth/useAuth';
 
 export function useCompleteAuth() {

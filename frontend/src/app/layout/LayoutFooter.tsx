@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { FaHeart, FaLink } from 'react-icons/fa';
-import { footerSocialLinks } from '@/app/layout/layoutNavigation';
+import { footerSocialLinks } from '@/app/config/footerSocialLinks';
 import { routes } from '@/app/routes';
 
 export const LayoutFooter = ({ isAuthenticated }: { isAuthenticated: boolean }) => {

@@ -1,11 +1,11 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import * as profileApi from '@/shared/auth/profileApi';
+import * as profileApi from '@/features/account/api/profileApi';
 import UserAccountPage from '@/features/account/routes/UserAccountPage';
 
 const logout = vi.fn();
 
-vi.mock('@/shared/auth/profileApi', () => ({
+vi.mock('@/features/account/api/profileApi', () => ({
   getUserProfile: vi.fn(),
 }));
 
@@ -20,7 +20,7 @@ vi.mock('@/shared/auth/useAuth', () => ({
   }),
 }));
 
-vi.mock('@/app/layout/AccountSidebar', () => ({
+vi.mock('@/features/account/ui/layout/AccountSidebar', () => ({
   default: () => <aside>Side Panel</aside>,
 }));
 

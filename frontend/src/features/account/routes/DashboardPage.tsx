@@ -1,14 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AccountPageHeader, AccountPageLayout } from '@/app/layout/AccountPageLayout';
-import { useDashboardOverview } from '@/app/model/useDashboardOverview';
 import { routes } from '@/app/routes';
+import { useDashboardOverview } from '@/features/account/model/useDashboardOverview';
 import {
   DashboardActivityPanel,
   DashboardOverviewBanner,
   DashboardRecentUrlsPanel,
   DashboardStatsGrid,
 } from '@/features/account/ui/DashboardOverviewPanels';
+import { AccountPageHeader, AccountPageLayout } from '@/features/account/ui/layout/AccountPageLayout';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { Button } from '@/shared/ui';
 import { FaEye, FaPlus } from 'react-icons/fa';

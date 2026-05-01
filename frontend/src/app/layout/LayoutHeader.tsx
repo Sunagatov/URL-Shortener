@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { FaChevronDown, FaLink, FaSignOutAlt } from 'react-icons/fa';
-import { accountNavigationItems } from '@/app/layout/layoutNavigation';
 import { routes } from '@/app/routes';
+import { accountNavigationItems } from '@/features/account/config/navigation';
 import type { User } from '@/shared/auth/types';
 
 interface LayoutHeaderProps {

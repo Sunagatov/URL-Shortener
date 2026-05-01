@@ -13,9 +13,9 @@ import { FaEnvelope, FaLock } from 'react-icons/fa';
 import { getAuthDestination } from '@/features/auth/lib/authRouting';
 import { useCompleteAuth } from '@/features/auth/model/useCompleteAuth';
 import { AuthAlert } from '@/features/auth/ui/AuthFlowElements';
-import { AuthCheckboxField } from '@/features/auth/ui/AuthCheckboxField';
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
 import { signInBrandPanel } from '@/features/auth/ui/AuthRoutePanels';
+import { SignInSupportRow } from '@/features/auth/ui/sign-in/SignInSupportRow';
 import { AuthTextField } from '@/features/auth/ui/AuthTextField';
 
 const SignInPage: React.FC = () => {
@@ -84,19 +84,7 @@ const SignInPage: React.FC = () => {
           error={errors.password}
         />
 
-        <div className="flex items-center justify-between pt-1">
-          <AuthCheckboxField
-            id="remember-me"
-            label="Remember me"
-            description="Keep this browser signed in on devices you trust."
-          />
-          <Link
-            to={routes.forgotPassword}
-            className="text-sm text-white/40 transition-colors hover:text-white/70"
-          >
-            Forgot password?
-          </Link>
-        </div>
+        <SignInSupportRow />
 
         {error ? (
           <AuthAlert>{error.errorMessage}</AuthAlert>

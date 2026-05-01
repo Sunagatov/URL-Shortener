@@ -1,7 +1,7 @@
 package com.zufar.urlshortener.auth.security
 
-import com.zufar.urlshortener.auth.repository.UserRepository
 import com.zufar.urlshortener.auth.service.EmailNormalizer
+import com.zufar.urlshortener.users.api.UserCredentialsReader
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -9,12 +9,12 @@ import org.springframework.stereotype.Service
 
 @Service
 class CustomUserDetailsService(
-    private val userRepository: UserRepository
+    private val userCredentialsReader: UserCredentialsReader
 ) : UserDetailsService {
 
     override fun loadUserByUsername(email: String): UserDetails {
         val normalizedEmail = EmailNormalizer.normalize(email)
-        val user = userRepository.findByEmailIgnoreCase(normalizedEmail)
+        val user = userCredentialsReader.findByEmailIgnoreCase(normalizedEmail)
             ?: throw UsernameNotFoundException("User with email='$normalizedEmail' is not found")
 
         return org.springframework.security.core.userdetails.User.builder()

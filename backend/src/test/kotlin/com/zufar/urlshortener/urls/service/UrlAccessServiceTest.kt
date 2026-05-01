@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.urls.service
 
-import com.zufar.urlshortener.auth.api.CurrentUserAccess
+import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
 import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.exception.UrlNotFoundException
 import com.zufar.urlshortener.urls.repository.UrlRepository
@@ -24,7 +24,7 @@ import kotlin.test.assertEquals
 class UrlAccessServiceTest {
 
     @Mock private lateinit var urlRepository: UrlRepository
-    @Mock private lateinit var currentUserAccess: CurrentUserAccess
+    @Mock private lateinit var authenticatedUserContext: AuthenticatedUserContext
     @Mock private lateinit var mongoTemplate: MongoTemplate
 
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
@@ -32,7 +32,7 @@ class UrlAccessServiceTest {
         UrlManagementService(
             urlRepository = urlRepository,
             urlValidator = mock(),
-            currentUserAccess = currentUserAccess,
+            authenticatedUserContext = authenticatedUserContext,
             mongoTemplate = mongoTemplate,
             baseUrl = "http://localhost:8080",
             defaultExpirationDays = 365,
@@ -67,7 +67,7 @@ class UrlAccessServiceTest {
     fun `getOwnedActiveUrlMapping rejects access to mapping owned by another user`() {
         val urlMapping = mapping(userId = "another-user", expirationDate = LocalDateTime.parse("2024-01-02T10:15:30"))
         whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(urlMapping))
-        whenever(currentUserAccess.requireCurrentUserId()).thenReturn("user-123")
+        whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("user-123")
 
         val exception = assertThrows<AccessDeniedException> {
             service.getOwnedActiveUrlMapping("abc12345", "forbidden")
@@ -80,7 +80,7 @@ class UrlAccessServiceTest {
     fun `getOwnedActiveUrlMapping returns mapping for owner`() {
         val urlMapping = mapping(userId = "user-123", expirationDate = LocalDateTime.parse("2024-01-02T10:15:30"))
         whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(urlMapping))
-        whenever(currentUserAccess.requireCurrentUserId()).thenReturn("user-123")
+        whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("user-123")
 
         val result = service.getOwnedActiveUrlMapping("abc12345", "forbidden")
 

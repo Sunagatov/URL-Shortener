@@ -8,7 +8,7 @@ vi.mock('@/features/urls/api/urlsApi', () => ({
   deleteUrl: vi.fn(),
 }));
 
-vi.mock('@/app/layout/AccountSidebar', () => ({
+vi.mock('@/features/account/ui/layout/AccountSidebar', () => ({
   default: () => <aside>Side Panel</aside>,
 }));
 

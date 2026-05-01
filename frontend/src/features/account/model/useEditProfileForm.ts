@@ -6,8 +6,8 @@ import {
   type EditProfileFormData,
   type EditProfileFormInput,
 } from '@/features/account/model/editProfileValidation';
+import { updateUserProfile } from '@/features/account/api/profileApi';
 import type { User } from '@/shared/auth/types';
-import { updateUserProfile } from '@/shared/auth/profileApi';
 import { useAuth } from '@/shared/auth/useAuth';
 import { useToast } from '@/shared/ui';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';

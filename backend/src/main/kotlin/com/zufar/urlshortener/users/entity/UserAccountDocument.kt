@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.auth.entity
+package com.zufar.urlshortener.users.entity
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.Indexed
@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 
 @Document(collection = "user_details")
-data class UserDetails(
+data class UserAccountDocument(
 
     @Id
     val id: String? = null,

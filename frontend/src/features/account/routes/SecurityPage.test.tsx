@@ -21,7 +21,7 @@ vi.mock('@/shared/auth/useAuth', () => ({
   }),
 }));
 
-vi.mock('@/app/layout/AccountSidebar', () => ({
+vi.mock('@/features/account/ui/layout/AccountSidebar', () => ({
   default: () => <aside>Side Panel</aside>,
 }));
 
