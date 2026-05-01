@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.shared.http
 
-import com.zufar.urlshortener.shared.exception.ErrorResponse
+import com.zufar.urlshortener.shared.web.ErrorResponse
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpStatus

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.http.HttpStatus
 
-class AuthExceptionHandlerTest {
+class COuldAuthExceptionHandlerTest {
 
     private val handler = AuthExceptionHandler()
     private val request = MockHttpServletRequest("POST", "/api/v1/auth/refresh-token")

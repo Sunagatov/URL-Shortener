@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.urls
+package com.zufar.urlshortener.urls.api
 
 object UrlHashFormat {
     const val LENGTH = 8

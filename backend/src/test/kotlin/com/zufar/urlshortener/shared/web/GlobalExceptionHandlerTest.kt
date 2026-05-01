@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.shared.exception
+package com.zufar.urlshortener.shared.web
 
 import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
 import com.zufar.urlshortener.urls.dto.ShortenUrlRequest
@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.springframework.mock.http.MockHttpInputMessage
+import org.springframework.core.MethodParameter
 import org.springframework.http.HttpStatus
 import org.springframework.http.converter.HttpMessageNotReadableException
-import org.springframework.core.MethodParameter
+import org.springframework.mock.http.MockHttpInputMessage
 import org.springframework.validation.BeanPropertyBindingResult
 import org.springframework.validation.FieldError
 import org.springframework.web.bind.MethodArgumentNotValidException

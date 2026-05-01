@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.urls.controller
 
-import com.zufar.urlshortener.urls.UrlHashFormat
+import com.zufar.urlshortener.urls.api.UrlHashFormat
 import com.zufar.urlshortener.urls.service.UrlManagementService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.CacheControl

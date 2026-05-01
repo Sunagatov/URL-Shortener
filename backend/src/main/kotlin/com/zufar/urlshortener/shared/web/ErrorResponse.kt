@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.shared.exception
+package com.zufar.urlshortener.shared.web
 
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus

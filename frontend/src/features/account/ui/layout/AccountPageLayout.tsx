@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import AccountSidebar from '@/app/layout/AccountSidebar';
+import AccountSidebar from '@/features/account/ui/layout/AccountSidebar';
 import { Card } from '@/shared/ui';
 
 interface AccountPageLayoutProps {

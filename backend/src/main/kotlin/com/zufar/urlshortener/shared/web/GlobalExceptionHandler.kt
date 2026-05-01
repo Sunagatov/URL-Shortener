@@ -1,5 +1,6 @@
-package com.zufar.urlshortener.shared.exception
+package com.zufar.urlshortener.shared.web
 
+import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -72,7 +73,7 @@ class GlobalExceptionHandler {
             cause.isMissingRequiredField() -> "Required request field is missing"
             exceptionClassName.endsWith(".InvalidFormatException") -> "Request field has an invalid value or type"
             exceptionClassName.endsWith(".MismatchedInputException") ||
-                    exceptionClassName.endsWith(".MissingKotlinParameterException") ->
+                exceptionClassName.endsWith(".MissingKotlinParameterException") ->
                 "Request field has an invalid value or type"
 
             else -> "Malformed JSON request"
@@ -110,11 +111,11 @@ class GlobalExceptionHandler {
     private fun Throwable.isMissingRequiredField(): Boolean {
         val detail = message ?: return false
         return detail.contains("missing", ignoreCase = true) ||
-                detail.contains("creator parameter", ignoreCase = true) ||
-                detail.contains("non-null", ignoreCase = true) ||
-                detail.contains("must not be null", ignoreCase = true) ||
-                detail.contains("null value", ignoreCase = true) ||
-                detail.contains("required creator property", ignoreCase = true)
+            detail.contains("creator parameter", ignoreCase = true) ||
+            detail.contains("non-null", ignoreCase = true) ||
+            detail.contains("must not be null", ignoreCase = true) ||
+            detail.contains("null value", ignoreCase = true) ||
+            detail.contains("required creator property", ignoreCase = true)
     }
 
     private fun errorResponse(
