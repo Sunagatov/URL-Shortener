@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import type { ApiError } from '@/shared/api/types';
 import {
   getApiErrorCode,
@@ -28,16 +28,23 @@ export const useApi = <T>(): UseApiReturn<T> => {
     loading: false,
     error: null,
   });
+  const latestRequestIdRef = useRef(0);
 
   const execute = useCallback(
     async (
       apiCall: () => Promise<T>,
       options?: { action?: string; onError?: (error: ApiError) => void }
     ): Promise<T | null> => {
+      const requestId = latestRequestIdRef.current + 1;
+      latestRequestIdRef.current = requestId;
       setState(prev => ({ ...prev, loading: true, error: null }));
 
       try {
         const result = await apiCall();
+        if (latestRequestIdRef.current !== requestId) {
+          return null;
+        }
+
         setState(prev => ({ ...prev, data: result, loading: false }));
         return result;
       } catch (error: unknown) {
@@ -72,6 +79,10 @@ export const useApi = <T>(): UseApiReturn<T> => {
           });
         }
 
+        if (latestRequestIdRef.current !== requestId) {
+          return null;
+        }
+
         setState(prev => ({ ...prev, error: apiError, loading: false }));
         options?.onError?.(apiError);
         return null;
@@ -81,6 +92,7 @@ export const useApi = <T>(): UseApiReturn<T> => {
   );
 
   const reset = useCallback(() => {
+    latestRequestIdRef.current += 1;
     setState({ data: null, loading: false, error: null });
   }, []);
 

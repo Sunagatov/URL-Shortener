@@ -105,7 +105,6 @@ export function useUrlMappingsCollection() {
       return;
     }
 
-    setServerPage(page);
     void fetchPage(page);
   };
 

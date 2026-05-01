@@ -175,4 +175,40 @@ describe('UserUrlMappings', () => {
     expect(screen.getByText('Delete URL?')).toBeInTheDocument();
     expect(mockDeleteUrl).not.toHaveBeenCalled();
   });
+
+  it('clears hidden selections after moving to a different page', async () => {
+    mockGetUserUrls
+      .mockResolvedValueOnce({
+        content: [mapping],
+        page: 0,
+        size: 6,
+        totalElements: 7,
+        totalPages: 2,
+      })
+      .mockResolvedValueOnce({
+        content: [{ ...mapping, urlHash: 'xyz789', shortUrl: 'https://sho.rt/xyz789' }],
+        page: 1,
+        size: 6,
+        totalElements: 7,
+        totalPages: 2,
+      });
+
+    render(
+      <MemoryRouter>
+        <UserUrlMappingsPage />
+      </MemoryRouter>
+    );
+
+    const [domainLabel] = await screen.findAllByText('example.com');
+    await userEvent.click(screen.getByRole('button', { name: 'Select' }));
+    await userEvent.click(domainLabel);
+
+    expect(screen.getByText('1 selected')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: '2' }));
+
+    await waitFor(() => expect(mockGetUserUrls).toHaveBeenCalledWith(1, 6));
+    expect(screen.getByText('Select URLs')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Delete' })).toBeDisabled();
+  });
 });

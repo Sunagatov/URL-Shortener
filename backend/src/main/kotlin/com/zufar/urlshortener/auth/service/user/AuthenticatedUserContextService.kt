@@ -6,8 +6,7 @@ import com.zufar.urlshortener.auth.exception.UserNotFoundException
 import com.zufar.urlshortener.auth.service.EmailNormalizer
 import com.zufar.urlshortener.shared.ANONYMOUS_USER
 import com.zufar.urlshortener.users.api.UserAccountRecord
-import com.zufar.urlshortener.users.api.UserAccountReader
-import com.zufar.urlshortener.users.api.UserPasswordUpdater
+import com.zufar.urlshortener.users.api.UserAuthStore
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
@@ -19,14 +18,13 @@ private const val USER_NOT_FOUND_MESSAGE = "User not found"
 
 @Service
 class AuthenticatedUserContextService(
-    private val userAccountReader: UserAccountReader,
-    private val userPasswordUpdater: UserPasswordUpdater
+    private val userAuthStore: UserAuthStore
 ) : AuthenticatedUserContext {
 
     override fun requireAuthenticatedUser(): UserAccount {
         val normalizedEmail = EmailNormalizer.normalize(requireAuthenticatedEmail())
 
-        val user = userAccountReader.findByEmailIgnoreCase(normalizedEmail)
+        val user = userAuthStore.findByEmailIgnoreCase(normalizedEmail)
             ?: throw UserNotFoundException(USER_NOT_FOUND_MESSAGE)
 
         return user.toUserAccount()
@@ -37,14 +35,14 @@ class AuthenticatedUserContextService(
     override fun findAuthenticatedUserIdOrNull(): String? {
         val email = currentAuthenticationName() ?: return null
         val normalizedEmail = EmailNormalizer.normalize(email)
-        val user = userAccountReader.findByEmailIgnoreCase(normalizedEmail)
+        val user = userAuthStore.findByEmailIgnoreCase(normalizedEmail)
             ?: throw AuthenticationCredentialsNotFoundException(AUTHENTICATED_USER_NOT_FOUND_MESSAGE)
 
         return user.id ?: throw AuthenticationCredentialsNotFoundException(AUTHENTICATED_USER_NOT_FOUND_MESSAGE)
     }
 
     override fun updatePassword(currentUser: UserAccount, encodedPassword: String, updatedAt: LocalDateTime) {
-        userPasswordUpdater.updatePassword(
+        userAuthStore.updatePassword(
             currentUser.id,
             encodedPassword,
             currentUser.tokenVersion + 1,

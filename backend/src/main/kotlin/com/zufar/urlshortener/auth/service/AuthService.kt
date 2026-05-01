@@ -22,8 +22,7 @@ import com.zufar.urlshortener.auth.security.withTokenVersion
 import com.zufar.urlshortener.auth.validation.AuthRequestValidator
 import com.zufar.urlshortener.shared.logging.LogSanitizer
 import com.zufar.urlshortener.users.api.UserAccountRecord
-import com.zufar.urlshortener.users.api.UserCredentialsReader
-import com.zufar.urlshortener.users.api.UserRegistrationWriter
+import com.zufar.urlshortener.users.api.UserAuthStore
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.dao.DuplicateKeyException
@@ -50,8 +49,7 @@ private const val VERIFICATION_CODE_BOUND = 1_000_000
 class AuthService(
     private val authenticationManager: AuthenticationManager,
     private val authRequestValidator: AuthRequestValidator,
-    private val userCredentialsReader: UserCredentialsReader,
-    private val userRegistrationWriter: UserRegistrationWriter,
+    private val userAuthStore: UserAuthStore,
     private val passwordEncoder: PasswordEncoder,
     private val jwtTokenProvider: JwtTokenProvider,
     private val emailVerificationNotifier: EmailVerificationNotifier,
@@ -155,7 +153,7 @@ class AuthService(
         )
         authRequestValidator.validateVerifyEmailRequest(normalizedRequest)
 
-        val user = userCredentialsReader.findByEmailIgnoreCase(normalizedRequest.email)
+        val user = userAuthStore.findByEmailIgnoreCase(normalizedRequest.email)
             ?: throw UserNotFoundException("User not found")
 
         if (user.emailVerified) {
@@ -171,7 +169,7 @@ class AuthService(
             throw InvalidVerificationCodeException(INVALID_OR_EXPIRED_VERIFICATION_CODE_MESSAGE)
         }
 
-        val verifiedUser = userRegistrationWriter.save(
+        val verifiedUser = userAuthStore.save(
             user.copy(
                 emailVerified = true,
                 emailVerifiedAt = now,
@@ -190,7 +188,7 @@ class AuthService(
         val normalizedRequest = request.copy(email = EmailNormalizer.normalize(request.email))
         authRequestValidator.validateResendVerificationRequest(normalizedRequest)
 
-        val user = userCredentialsReader.findByEmailIgnoreCase(normalizedRequest.email)
+        val user = userAuthStore.findByEmailIgnoreCase(normalizedRequest.email)
             ?: throw UserNotFoundException("User not found")
         if (user.emailVerified) {
             throw InvalidAuthRequestException(EMAIL_ALREADY_VERIFIED_MESSAGE)
@@ -203,7 +201,7 @@ class AuthService(
         }
 
         val (updatedUser, verificationCode) = withFreshVerificationChallenge(user, now)
-        val savedUser = userRegistrationWriter.save(updatedUser)
+        val savedUser = userAuthStore.save(updatedUser)
         val deliveryMode = sendVerificationCode(savedUser.email, verificationCode)
         log.info(
             "auth_email_verification_resent userId={} deliveryMode={} emailDomain={}",
@@ -215,21 +213,21 @@ class AuthService(
     }
 
     private fun ensureEmailIsAvailable(email: String) {
-        if (userCredentialsReader.findByEmailIgnoreCase(email) != null) {
+        if (userAuthStore.findByEmailIgnoreCase(email) != null) {
             throw EmailAlreadyExistsException(EMAIL_ALREADY_IN_USE_MESSAGE)
         }
     }
 
     private fun saveUser(user: UserAccountRecord): UserAccountRecord =
         try {
-            userRegistrationWriter.save(user)
+            userAuthStore.save(user)
         } catch (_: DuplicateKeyException) {
             throw EmailAlreadyExistsException(EMAIL_ALREADY_IN_USE_MESSAGE)
         }
 
     private fun findUserForRefreshToken(refreshToken: String): UserAccountRecord {
         val normalizedEmail = EmailNormalizer.normalize(jwtTokenProvider.getUsernameFromJWT(refreshToken))
-        return userCredentialsReader.findByEmailIgnoreCase(normalizedEmail)
+        return userAuthStore.findByEmailIgnoreCase(normalizedEmail)
             ?: throw UserNotFoundException("User not found for the provided refresh token")
     }
 

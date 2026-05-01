@@ -1,4 +1,4 @@
-package com.zufar.urlshortener.shared.controller
+package com.zufar.urlshortener.shared.web
 
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping

@@ -1,14 +1,18 @@
-import { endpoints } from '@/shared/api/endpoints';
 import { useEffect } from 'react';
+import {
+  getUnhandledRejectionContext,
+  getWindowErrorContext,
+  resolveFrontendLogEndpoint,
+} from '@/app/diagnostics';
 import { createHttpLogReporter, logger, setLogReporter } from '@/shared/lib/logger';
-
-const backendRestApiUrl = import.meta.env.VITE_BACKEND_REST_API_URL;
-const frontendLogEndpoint =
-  import.meta.env.VITE_FRONTEND_LOG_ENDPOINT?.trim() ||
-  new URL(endpoints.telemetry.frontendLogs, backendRestApiUrl).toString();
 
 export function FrontendDiagnostics() {
   useEffect(() => {
+    const frontendLogEndpoint = resolveFrontendLogEndpoint({
+      backendRestApiUrl: import.meta.env.VITE_BACKEND_REST_API_URL,
+      frontendLogEndpoint: import.meta.env.VITE_FRONTEND_LOG_ENDPOINT,
+    });
+
     if (frontendLogEndpoint) {
       setLogReporter(
         createHttpLogReporter({
@@ -24,20 +28,14 @@ export function FrontendDiagnostics() {
     });
 
     const handleWindowError = (event: ErrorEvent) => {
-      logger.error('frontend.runtime.window_error', {
-        error: event.error instanceof Error ? event.error : undefined,
-        filename: event.filename,
-        line: event.lineno,
-        column: event.colno,
-        message: event.message,
-      });
+      logger.error('frontend.runtime.window_error', getWindowErrorContext(event));
     };
 
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      const reason = event.reason;
-      logger.error('frontend.runtime.unhandled_rejection', {
-        reason: reason instanceof Error ? reason : { value: String(reason) },
-      });
+      logger.error(
+        'frontend.runtime.unhandled_rejection',
+        getUnhandledRejectionContext(event.reason),
+      );
     };
 
     window.addEventListener('error', handleWindowError);

@@ -1,6 +1,9 @@
 package com.zufar.urlshortener.shared.filter
 
 import com.github.benmanes.caffeine.cache.Cache
+import com.zufar.urlshortener.auth.api.AuthApiPaths
+import com.zufar.urlshortener.frontendlogs.api.FrontendLogsApiPaths
+import com.zufar.urlshortener.health.api.HealthApiPaths
 import com.zufar.urlshortener.shared.ACTUATOR_PATH_PREFIX
 import com.zufar.urlshortener.shared.ANONYMOUS_USER
 import com.zufar.urlshortener.shared.API_DOCS_PATH_PREFIX
@@ -8,9 +11,11 @@ import com.zufar.urlshortener.shared.AUTHENTICATED_USER_ID_ATTRIBUTE
 import com.zufar.urlshortener.shared.DOCS_PATH_PREFIX
 import com.zufar.urlshortener.shared.config.RateLimitPolicyDefinition
 import com.zufar.urlshortener.shared.config.RateLimitSubjectType
-import com.zufar.urlshortener.shared.http.ErrorResponseWriter
-import com.zufar.urlshortener.shared.http.ClientIpResolver
 import com.zufar.urlshortener.shared.config.RateLimitConfig
+import com.zufar.urlshortener.shared.http.ClientIpResolver
+import com.zufar.urlshortener.shared.http.ErrorResponseWriter
+import com.zufar.urlshortener.urls.api.UrlApiPaths
+import com.zufar.urlshortener.urls.api.UrlHashFormat
 import io.github.bucket4j.Bucket
 import io.github.bucket4j.ConsumptionProbe
 import io.micrometer.core.instrument.Counter
@@ -33,8 +38,6 @@ private const val RATE_LIMIT_EXCEEDED_CODE = "RATE_LIMIT_EXCEEDED"
 private const val RATE_LIMIT_OUTCOME_ALLOWED = "allowed"
 private const val RATE_LIMIT_OUTCOME_BLOCKED = "blocked"
 private const val FAVICON_PATH = "/favicon.ico"
-private const val PUBLIC_URLS_PATH = "/api/v1/urls"
-private const val FRONTEND_LOGS_PATH = "/api/v1/frontend/logs"
 
 class RateLimitFilter(
     private val rateLimitConfig: RateLimitConfig,
@@ -46,7 +49,7 @@ class RateLimitFilter(
 
     private val log = LoggerFactory.getLogger(RateLimitFilter::class.java)
     private val counters = ConcurrentHashMap<String, Counter>()
-    private val redirectPathRegex = Regex("^/[1-9A-HJ-NP-Za-km-z]{8}$")
+    private val redirectPathRegex = Regex(UrlHashFormat.SECURITY_REGEX)
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         if (!rateLimitConfig.isEnabled()) {
@@ -55,7 +58,7 @@ class RateLimitFilter(
 
         val path = request.servletPath
         return request.method == "OPTIONS" ||
-            path == "/api/v1/health" ||
+            path == HealthApiPaths.BASE_PATH ||
             path.startsWith(DOCS_PATH_PREFIX) ||
             path.startsWith(API_DOCS_PATH_PREFIX) ||
             path.startsWith(ACTUATOR_PATH_PREFIX) ||
@@ -105,11 +108,14 @@ class RateLimitFilter(
         val isApiPath = path.startsWith("/api/")
 
         return when {
-            path.startsWith("/api/v1/auth/") || path == "/api/v1/auth" || path.startsWith("/v1/auth/") ->
+            path.startsWith("${AuthApiPaths.BASE_PATH}/") ||
+                path == AuthApiPaths.BASE_PATH ||
+                path.startsWith("${AuthApiPaths.LEGACY_BASE_PATH}/") ||
+                path == AuthApiPaths.LEGACY_BASE_PATH ->
                 rateLimitConfig.authPolicy()
-            request.method == "POST" && path == FRONTEND_LOGS_PATH ->
+            request.method == "POST" && path == FrontendLogsApiPaths.BASE_PATH ->
                 rateLimitConfig.frontendLogsPolicy()
-            request.method == "POST" && path == PUBLIC_URLS_PATH ->
+            request.method == "POST" && path == UrlApiPaths.BASE_PATH ->
                 rateLimitConfig.publicCreatePolicy()
             request.method == "GET" && redirectPathRegex.matches(path) ->
                 rateLimitConfig.publicRedirectPolicy()

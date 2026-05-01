@@ -54,6 +54,41 @@ describe('logger', () => {
     );
   });
 
+  it('truncates deeply nested values before reporting', () => {
+    const report = vi.fn();
+    setLogReporter(report);
+
+    logger.warn('deep.payload', {
+      level1: {
+        level2: {
+          level3: {
+            level4: {
+              level5: {
+                level6: 'hidden',
+              },
+            },
+          },
+        },
+      },
+    });
+
+    expect(report).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: {
+          level1: {
+            level2: {
+              level3: {
+                level4: {
+                  level5: '[TRUNCATED]',
+                },
+              },
+            },
+          },
+        },
+      }),
+    );
+  });
+
   it('uses sendBeacon for reportable remote logs when available', () => {
     const sendBeacon = vi.fn(() => true);
     Object.defineProperty(window.navigator, 'sendBeacon', {
