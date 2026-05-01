@@ -1,7 +1,10 @@
 package com.zufar.urlshortener.shared.config
 
+import com.zufar.urlshortener.auth.api.AuthApiPaths
 import com.zufar.urlshortener.auth.security.CustomUserDetailsService
 import com.zufar.urlshortener.auth.security.JwtAuthenticationFilter
+import com.zufar.urlshortener.frontendlogs.api.FrontendLogsApiPaths
+import com.zufar.urlshortener.health.api.HealthApiPaths
 import com.zufar.urlshortener.shared.filter.CorrelationIdFilter
 import com.zufar.urlshortener.shared.filter.RateLimitFilter
 import com.zufar.urlshortener.shared.filter.RequestCompletionLoggingFilter
@@ -9,11 +12,10 @@ import com.zufar.urlshortener.shared.API_DOCS_PATH_PREFIX
 import com.zufar.urlshortener.shared.DOCS_PATH_PREFIX
 import com.zufar.urlshortener.shared.security.RestAccessDeniedHandler
 import com.zufar.urlshortener.shared.security.RestAuthenticationEntryPoint
-import com.zufar.urlshortener.urls.api.UrlHashFormat
+import com.zufar.urlshortener.urls.api.UrlApiPaths
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.ProviderManager
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
@@ -25,7 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher.withDefaults
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
-import org.springframework.security.web.util.matcher.RegexRequestMatcher
+import org.springframework.http.HttpMethod
 
 @Configuration
 @EnableMethodSecurity
@@ -67,7 +69,7 @@ class SecurityConfig(
         http: HttpSecurity,
         passwordEncoder: PasswordEncoder
     ): SecurityFilterChain {
-        val publicShortUrlMatcher = RegexRequestMatcher(UrlHashFormat.SECURITY_REGEX, HttpMethod.GET.name())
+        val publicShortUrlMatcher = UrlApiPaths.publicRedirectMatcher()
 
         http
             .csrf { it.disable() }
@@ -80,14 +82,14 @@ class SecurityConfig(
             .authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/v1/frontend/logs").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/v1/urls").permitAll()
+                    .requestMatchers(HttpMethod.POST, FrontendLogsApiPaths.BASE_PATH).permitAll()
+                    .requestMatchers(HttpMethod.POST, UrlApiPaths.BASE_PATH).permitAll()
                     .requestMatchers(withDefaults().matcher(HttpMethod.GET, "/favicon.ico")).permitAll()
                     .requestMatchers(publicShortUrlMatcher).permitAll()
                     .requestMatchers(
-                        "/api/v1/health",
-                        "/api/v1/auth/**",
-                        "/v1/auth/**",
+                        HealthApiPaths.BASE_PATH,
+                        AuthApiPaths.SECURITY_PATTERN,
+                        AuthApiPaths.LEGACY_SECURITY_PATTERN,
                         "$DOCS_PATH_PREFIX/**",
                         "$API_DOCS_PATH_PREFIX/**"
                     ).permitAll()

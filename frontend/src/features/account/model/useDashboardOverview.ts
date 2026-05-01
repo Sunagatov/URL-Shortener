@@ -7,29 +7,14 @@ import {
   getShortUrlSlug,
   type DashboardUrlMapping,
 } from '@/app/urls/contracts';
+import type {
+  DashboardActivityItem,
+  DashboardRecentUrlItem,
+  DashboardStat,
+} from '@/features/account/types/dashboard';
 import { routes } from '@/app/routes';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
 import { useToast } from '@/shared/ui';
-
-type DashboardStat = {
-  changeLabel: string;
-  label: string;
-  value: string;
-};
-
-type DashboardActivity = {
-  id: string;
-  primary: string;
-  secondary: string;
-};
-
-type DashboardRecentUrl = {
-  clickCount: number;
-  createdAtLabel: string;
-  domain: string;
-  shortSlug: string;
-  urlHash: string;
-};
 
 const DASHBOARD_SAMPLE_SIZE = 120;
 
@@ -52,7 +37,7 @@ function getMonthSpan(urlMappings: DashboardUrlMapping[]) {
   return Math.max(months, 1);
 }
 
-function buildActivity(urlMappings: DashboardUrlMapping[]): DashboardActivity[] {
+function buildActivity(urlMappings: DashboardUrlMapping[]): DashboardActivityItem[] {
   return urlMappings.slice(0, 4).map((mapping) => {
     const domain = getDomainLabel(mapping.originalUrl);
     const hasClicks = mapping.clickCount > 0;
@@ -136,7 +121,7 @@ export function useDashboardOverview() {
 
     return {
       activity: buildActivity(urlMappings),
-      recentUrls: urlMappings.slice(0, 5).map<DashboardRecentUrl>((mapping) => ({
+      recentUrls: urlMappings.slice(0, 5).map<DashboardRecentUrlItem>((mapping) => ({
         clickCount: mapping.clickCount,
         createdAtLabel: formatUrlDate(mapping.createdAt),
         domain: getDomainLabel(mapping.originalUrl),

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.TextNode
 import com.zufar.urlshortener.frontendlogs.dto.FrontendLogRequest
-import com.zufar.urlshortener.shared.exception.InvalidRequestException
+import com.zufar.urlshortener.frontendlogs.exception.InvalidFrontendLogRequestException
 import com.zufar.urlshortener.shared.http.ClientIpResolver
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
@@ -59,7 +59,7 @@ class FrontendLogIngestionService(
 
     private fun parseTimestamp(timestamp: String): Instant =
         runCatching { Instant.parse(timestamp) }
-            .getOrElse { throw InvalidRequestException("Timestamp must be a valid ISO-8601 instant") }
+            .getOrElse { throw InvalidFrontendLogRequestException("Timestamp must be a valid ISO-8601 instant") }
 
     private fun sanitizeContext(context: Map<String, Any?>?): String? {
         if (context == null) {

@@ -2,7 +2,7 @@ package com.zufar.urlshortener.users.service
 
 import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
 import com.zufar.urlshortener.auth.api.UserAccount
-import com.zufar.urlshortener.shared.exception.InvalidRequestException
+import com.zufar.urlshortener.users.exception.InvalidUserRequestException
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
 import com.zufar.urlshortener.users.validation.ChangePasswordValidator
 import org.junit.jupiter.api.Test
@@ -84,7 +84,7 @@ class UserPasswordChangerTest {
         whenever(authenticatedUserContext.requireAuthenticatedUser()).thenReturn(user)
         whenever(passwordEncoder.matches("WrongPassword1!", "old-hash")).thenReturn(false)
 
-        assertThrows<InvalidRequestException> {
+        assertThrows<InvalidUserRequestException> {
             UserAccountService(
                 authenticatedUserContext,
                 passwordEncoder,

@@ -18,7 +18,7 @@ import com.zufar.urlshortener.auth.dto.ResendVerificationRequest
 import com.zufar.urlshortener.auth.dto.SignInRequest
 import com.zufar.urlshortener.auth.dto.SignUpRequest
 import com.zufar.urlshortener.auth.dto.VerifyEmailRequest
-import com.zufar.urlshortener.shared.exception.InvalidRequestException
+import com.zufar.urlshortener.auth.exception.InvalidAuthRequestException
 import org.springframework.stereotype.Service
 
 private const val MAX_NAME_LENGTH = 50
@@ -96,7 +96,7 @@ class AuthRequestValidator(
 
     private fun validate(invalid: Boolean, message: String) {
         if (invalid) {
-            throw InvalidRequestException(message)
+            throw InvalidAuthRequestException(message)
         }
     }
 }

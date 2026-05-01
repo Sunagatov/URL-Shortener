@@ -1,7 +1,7 @@
 package com.zufar.urlshortener.auth.service.validator
 
 import com.zufar.urlshortener.auth.validation.EmailOfUserValidator
-import com.zufar.urlshortener.shared.exception.InvalidRequestException
+import com.zufar.urlshortener.auth.exception.InvalidAuthRequestException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -21,14 +21,14 @@ class EmailOfUserValidatorTest {
 
     @Test
     fun `blank email is rejected`() {
-        assertThrows<InvalidRequestException> {
+        assertThrows<InvalidAuthRequestException> {
             validator.validate(" ")
         }
     }
 
     @Test
     fun `invalid email format is rejected`() {
-        assertThrows<InvalidRequestException> {
+        assertThrows<InvalidAuthRequestException> {
             validator.validate("not-an-email")
         }
     }
@@ -37,7 +37,7 @@ class EmailOfUserValidatorTest {
     fun `email longer than 254 characters is rejected`() {
         val email = "a".repeat(245) + "@example.com"
 
-        assertThrows<InvalidRequestException> {
+        assertThrows<InvalidAuthRequestException> {
             validator.validate(email)
         }
     }

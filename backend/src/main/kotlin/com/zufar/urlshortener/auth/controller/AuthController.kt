@@ -1,5 +1,6 @@
 package com.zufar.urlshortener.auth.controller
 
+import com.zufar.urlshortener.auth.api.AuthApiPaths
 import com.zufar.urlshortener.auth.dto.AuthResponse
 import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
 import com.zufar.urlshortener.auth.dto.RefreshTokenResponse
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping(AuthApiPaths.BASE_PATH)
 class AuthController(
     private val authService: AuthService
 ) {

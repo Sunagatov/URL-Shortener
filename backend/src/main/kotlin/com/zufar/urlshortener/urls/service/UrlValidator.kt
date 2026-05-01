@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.urls.service
 
-import com.zufar.urlshortener.shared.exception.InvalidRequestException
+import com.zufar.urlshortener.urls.exception.InvalidUrlRequestException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.net.Inet4Address
@@ -36,7 +36,7 @@ class UrlValidator(
 
     private fun validate(condition: Boolean, message: String) {
         if (!condition) {
-            throw InvalidRequestException(message)
+            throw InvalidUrlRequestException(message)
         }
     }
 

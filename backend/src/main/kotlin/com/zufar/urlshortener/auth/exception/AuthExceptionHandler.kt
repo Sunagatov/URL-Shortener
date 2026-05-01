@@ -13,10 +13,18 @@ private const val EMAIL_NOT_VERIFIED_CODE = "EMAIL_NOT_VERIFIED"
 private const val USER_NOT_FOUND_CODE = "USER_NOT_FOUND"
 private const val INVALID_VERIFICATION_CODE = "INVALID_VERIFICATION_CODE"
 private const val VERIFICATION_RESEND_TOO_SOON_CODE = "VERIFICATION_RESEND_TOO_SOON"
+private const val INVALID_AUTH_REQUEST_CODE = "INVALID_AUTH_REQUEST"
 
 @RestControllerAdvice(basePackages = ["com.zufar.urlshortener.auth"])
 @Suppress("unused")
 class AuthExceptionHandler {
+
+    @ExceptionHandler(InvalidAuthRequestException::class)
+    fun handleInvalidAuthRequestException(
+        ex: InvalidAuthRequestException,
+        request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> =
+        errorResponse(request, HttpStatus.BAD_REQUEST, ex.message ?: "Invalid auth request", INVALID_AUTH_REQUEST_CODE)
 
     @ExceptionHandler(InvalidTokenException::class)
     fun handleInvalidTokenException(

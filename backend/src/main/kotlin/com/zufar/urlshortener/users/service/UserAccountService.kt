@@ -1,9 +1,9 @@
 package com.zufar.urlshortener.users.service
 
 import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
-import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
 import com.zufar.urlshortener.users.dto.UserDetailsDto
+import com.zufar.urlshortener.users.exception.InvalidUserRequestException
 import com.zufar.urlshortener.users.validation.ChangePasswordValidator
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -35,7 +35,7 @@ class UserAccountService(
         val user = authenticatedUserContext.requireAuthenticatedUser()
 
         if (!passwordEncoder.matches(request.currentPassword, user.passwordHash)) {
-            throw InvalidRequestException("Current password is incorrect")
+            throw InvalidUserRequestException("Current password is incorrect")
         }
 
         val encodedPassword = requireNotNull(passwordEncoder.encode(request.newPassword)) {

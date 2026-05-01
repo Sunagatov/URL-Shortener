@@ -8,10 +8,20 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 
 private const val URL_NOT_FOUND_CODE = "URL_NOT_FOUND"
+private const val INVALID_URL_REQUEST_CODE = "INVALID_URL_REQUEST"
 
 @RestControllerAdvice(basePackages = ["com.zufar.urlshortener.urls"])
 @Suppress("unused")
 class UrlExceptionHandler {
+
+    @ExceptionHandler(InvalidUrlRequestException::class)
+    fun handleInvalidUrlRequest(
+        ex: InvalidUrlRequestException,
+        request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> =
+        ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            ErrorResponse.of(request, HttpStatus.BAD_REQUEST, ex.message ?: "Invalid URL request", INVALID_URL_REQUEST_CODE)
+        )
 
     @ExceptionHandler(UrlNotFoundException::class)
     fun handleUrlNotFound(

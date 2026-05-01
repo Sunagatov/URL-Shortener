@@ -1,4 +1,9 @@
 import React from 'react';
+import type {
+  DashboardActivityItem,
+  DashboardRecentUrlItem,
+  DashboardStat,
+} from '@/features/account/types/dashboard';
 import { Button } from '@/shared/ui';
 import {
   FaArrowUp,
@@ -10,26 +15,6 @@ import {
   FaMousePointer,
   FaRedo,
 } from 'react-icons/fa';
-
-type DashboardStat = {
-  changeLabel: string;
-  label: string;
-  value: string;
-};
-
-type DashboardActivityItem = {
-  id: string;
-  primary: string;
-  secondary: string;
-};
-
-type DashboardRecentUrlItem = {
-  clickCount: number;
-  createdAtLabel: string;
-  domain: string;
-  shortSlug: string;
-  urlHash: string;
-};
 
 const statMeta = [
   { icon: FaLink, iconColor: 'text-blue-400', iconBg: 'bg-blue-600/20 border border-blue-500/20' },

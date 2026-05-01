@@ -1,13 +1,13 @@
 package com.zufar.urlshortener.urls.service
 
 import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
-import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.shared.logging.LogSanitizer
 import com.zufar.urlshortener.urls.config.URL_MAPPINGS_CACHE
 import com.zufar.urlshortener.urls.dto.ShortenUrlRequest
 import com.zufar.urlshortener.urls.dto.UrlMappingDto
 import com.zufar.urlshortener.urls.dto.UrlMappingPageDto
 import com.zufar.urlshortener.urls.entity.UrlMapping
+import com.zufar.urlshortener.urls.exception.InvalidUrlRequestException
 import com.zufar.urlshortener.urls.exception.UrlNotFoundException
 import com.zufar.urlshortener.urls.repository.UrlRepository
 import jakarta.servlet.http.HttpServletRequest
@@ -171,20 +171,20 @@ class UrlManagementService(
 
     private fun validatePageRequest(page: Int, size: Int) {
         if (page < 0) {
-            throw InvalidRequestException("Page must be greater than or equal to 0")
+            throw InvalidUrlRequestException("Page must be greater than or equal to 0")
         }
         if (size !in 1..maxPageSize) {
-            throw InvalidRequestException("Size must be between 1 and $maxPageSize")
+            throw InvalidUrlRequestException("Size must be between 1 and $maxPageSize")
         }
     }
 
     private fun validateDaysCount(daysCount: Long?) {
         val value = daysCount ?: return
         if (value < MIN_ALLOWED_DAYS_COUNT) {
-            throw InvalidRequestException("Days count must be at least $MIN_ALLOWED_DAYS_COUNT day(s).")
+            throw InvalidUrlRequestException("Days count must be at least $MIN_ALLOWED_DAYS_COUNT day(s).")
         }
         if (value > maxAllowedDaysCount) {
-            throw InvalidRequestException("Days count must not exceed $maxAllowedDaysCount day(s).")
+            throw InvalidUrlRequestException("Days count must not exceed $maxAllowedDaysCount day(s).")
         }
     }
 

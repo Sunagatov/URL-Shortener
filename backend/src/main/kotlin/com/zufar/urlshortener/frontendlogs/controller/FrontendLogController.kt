@@ -1,5 +1,6 @@
 package com.zufar.urlshortener.frontendlogs.controller
 
+import com.zufar.urlshortener.frontendlogs.api.FrontendLogsApiPaths
 import com.zufar.urlshortener.frontendlogs.dto.FrontendLogRequest
 import com.zufar.urlshortener.frontendlogs.service.FrontendLogIngestionService
 import jakarta.servlet.http.HttpServletRequest
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/v1/frontend/logs")
+@RequestMapping(FrontendLogsApiPaths.BASE_PATH)
 class FrontendLogController(
     private val frontendLogIngestionService: FrontendLogIngestionService
 ) {

@@ -11,6 +11,7 @@ import com.zufar.urlshortener.auth.dto.VerificationChallengeResponse
 import com.zufar.urlshortener.auth.dto.VerifyEmailRequest
 import com.zufar.urlshortener.auth.exception.EmailAlreadyExistsException
 import com.zufar.urlshortener.auth.exception.EmailNotVerifiedException
+import com.zufar.urlshortener.auth.exception.InvalidAuthRequestException
 import com.zufar.urlshortener.auth.exception.InvalidTokenException
 import com.zufar.urlshortener.auth.exception.InvalidVerificationCodeException
 import com.zufar.urlshortener.auth.exception.UserNotFoundException
@@ -19,7 +20,6 @@ import com.zufar.urlshortener.auth.security.JwtTokenProvider
 import com.zufar.urlshortener.auth.security.UserDetailsWithTokenVersion
 import com.zufar.urlshortener.auth.security.withTokenVersion
 import com.zufar.urlshortener.auth.validation.AuthRequestValidator
-import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.shared.logging.LogSanitizer
 import com.zufar.urlshortener.users.api.UserAccountRecord
 import com.zufar.urlshortener.users.api.UserCredentialsReader
@@ -159,7 +159,7 @@ class AuthService(
             ?: throw UserNotFoundException("User not found")
 
         if (user.emailVerified) {
-            throw InvalidRequestException(EMAIL_ALREADY_VERIFIED_MESSAGE)
+            throw InvalidAuthRequestException(EMAIL_ALREADY_VERIFIED_MESSAGE)
         }
 
         val now = LocalDateTime.now(clock)
@@ -193,7 +193,7 @@ class AuthService(
         val user = userCredentialsReader.findByEmailIgnoreCase(normalizedRequest.email)
             ?: throw UserNotFoundException("User not found")
         if (user.emailVerified) {
-            throw InvalidRequestException(EMAIL_ALREADY_VERIFIED_MESSAGE)
+            throw InvalidAuthRequestException(EMAIL_ALREADY_VERIFIED_MESSAGE)
         }
 
         val now = LocalDateTime.now(clock)
@@ -299,7 +299,7 @@ class AuthService(
 
     private fun requireEmailVerificationEnabled() {
         if (!emailVerificationEnabled) {
-            throw InvalidRequestException("Email verification is currently disabled")
+            throw InvalidAuthRequestException("Email verification is currently disabled")
         }
     }
 

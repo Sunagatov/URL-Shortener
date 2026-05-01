@@ -1,8 +1,8 @@
 package com.zufar.urlshortener.users.validation
 
 import com.zufar.urlshortener.auth.api.PasswordPolicyValidator
-import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
+import com.zufar.urlshortener.users.exception.InvalidUserRequestException
 import org.springframework.stereotype.Service
 
 private const val CURRENT_PASSWORD_REQUIRED_MESSAGE = "Password must not be empty"
@@ -14,7 +14,7 @@ class ChangePasswordValidator(
 
     fun validate(request: ChangePasswordRequest) {
         if (request.currentPassword.isBlank()) {
-            throw InvalidRequestException(CURRENT_PASSWORD_REQUIRED_MESSAGE)
+            throw InvalidUserRequestException(CURRENT_PASSWORD_REQUIRED_MESSAGE)
         }
 
         passwordPolicyValidator.validate(request.newPassword)

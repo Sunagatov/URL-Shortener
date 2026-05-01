@@ -1,6 +1,4 @@
 package com.zufar.urlshortener.shared.web
-
-import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -15,7 +13,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.context.request.ServletRequestAttributes
 
-private const val INVALID_REQUEST_CODE = "INVALID_REQUEST"
 private const val INVALID_INPUT_CODE = "INVALID_INPUT"
 private const val INVALID_CREDENTIALS_CODE = "INVALID_CREDENTIALS"
 private const val AUTHENTICATION_FAILED_CODE = "AUTHENTICATION_FAILED"
@@ -27,11 +24,6 @@ private const val INTERNAL_SERVER_ERROR_CODE = "INTERNAL_SERVER_ERROR"
 @Suppress("unused")
 @ControllerAdvice
 class GlobalExceptionHandler {
-
-    @ExceptionHandler(InvalidRequestException::class)
-    fun handleInvalidRequestException(ex: InvalidRequestException): ResponseEntity<ErrorResponse> {
-        return errorResponse(HttpStatus.BAD_REQUEST, ex.message ?: "Invalid request", INVALID_REQUEST_CODE)
-    }
 
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgumentException(ex: IllegalArgumentException): ResponseEntity<ErrorResponse> {

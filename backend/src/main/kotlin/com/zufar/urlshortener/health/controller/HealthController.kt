@@ -1,5 +1,6 @@
 package com.zufar.urlshortener.health.controller
 
+import com.zufar.urlshortener.health.api.HealthApiPaths
 import com.zufar.urlshortener.health.dto.HealthStatusResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController
 private const val HEALTHY_STATUS = "UP"
 
 @RestController
-@RequestMapping("/api/v1/health")
+@RequestMapping(HealthApiPaths.BASE_PATH)
 class HealthController {
 
     @GetMapping

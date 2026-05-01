@@ -4,12 +4,10 @@ import { FaCheck, FaExternalLinkAlt, FaTrash } from 'react-icons/fa';
 import { getDomainLabel } from '@/features/urls/lib/urlMappings';
 import type { UrlMapping } from '@/features/urls/types/url';
 import {
-  UrlCopyButton,
-  UrlExternalLinkButton,
   UrlFallbackIcon,
-  UrlFieldLabel,
   UrlFavicon,
 } from '@/features/urls/ui/UrlSurfacePrimitives';
+import { UrlValueField } from '@/features/urls/ui/UrlValueField';
 import { Tooltip } from '@/shared/ui';
 
 interface UrlMappingCardProps {
@@ -140,60 +138,30 @@ export const UrlMappingCard = ({
 
       {/* ── Body ───────────────────────────────────────────── */}
       <div className="space-y-3 px-5 py-4">
-        <div>
-          <UrlFieldLabel>Short URL</UrlFieldLabel>
-          <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-[#0a1220] px-3 py-2.5 transition-colors hover:border-blue-500/20">
-            <span
-              className="flex-1 truncate text-sm text-blue-400"
-              style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}
-            >
-              {shortDisplay}
-            </span>
-            <div className="flex shrink-0 items-center gap-1">
-              <span onClick={stopPropagation}>
-                <UrlCopyButton
-                  copied={copiedUrl === mapping.shortUrl}
-                  onCopy={() => { void onCopy(mapping.shortUrl); }}
-                  primary
-                />
-              </span>
-              <UrlExternalLinkButton
-                href={mapping.shortUrl}
-                onClick={stopPropagation}
-                primary
-                title="Open"
-              />
-            </div>
-            {copiedUrl === mapping.shortUrl && (
-              <Tooltip content={`${mapping.shortUrl} copied!`}>
-                <span className="max-w-[8.5rem] shrink truncate text-[10px] font-medium text-blue-400 sm:max-w-[12rem]">
-                  {mapping.shortUrl} copied!
-                </span>
-              </Tooltip>
-            )}
-          </div>
+        <div onClick={stopPropagation}>
+          <UrlValueField
+            copyValue={mapping.shortUrl}
+            copiedValue={copiedUrl}
+            displayValue={shortDisplay}
+            href={mapping.shortUrl}
+            label="Short URL"
+            onCopy={onCopy}
+            tone="primary"
+            value={mapping.shortUrl}
+            valueClassName="text-sm"
+            valueLabel={mapping.shortUrl}
+          />
         </div>
 
-        <div>
-          <UrlFieldLabel>Original URL</UrlFieldLabel>
-          <div className="flex items-center gap-2 rounded-xl border border-white/[0.05] bg-white/[0.03] px-3 py-2.5 transition-colors hover:border-white/[0.10]">
-            <span
-              className="flex-1 truncate text-xs text-white/45"
-              style={{ fontFamily: 'var(--font-mono)', fontSize: '0.76rem' }}
-              aria-label={mapping.originalUrl}
-            >
-              {mapping.originalUrl}
-            </span>
-            <div className="shrink-0">
-              <span onClick={stopPropagation}>
-                <UrlCopyButton
-                  copied={copiedUrl === mapping.originalUrl}
-                  onCopy={() => { void onCopy(mapping.originalUrl); }}
-                  title="Copy"
-                />
-              </span>
-            </div>
-          </div>
+        <div onClick={stopPropagation}>
+          <UrlValueField
+            copiedValue={copiedUrl}
+            label="Original URL"
+            onCopy={onCopy}
+            value={mapping.originalUrl}
+            valueClassName="text-xs"
+            valueLabel={mapping.originalUrl}
+          />
         </div>
 
         {mapping.expirationDate && (

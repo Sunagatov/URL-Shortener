@@ -11,12 +11,10 @@ import { Button, Tooltip } from '@/shared/ui';
 import type { UrlMapping } from '@/features/urls/types/url';
 import { formatUrlDate, getDomainLabel } from '@/features/urls/lib/urlMappings';
 import {
-  UrlCopyButton,
-  UrlExternalLinkButton,
-  UrlFieldLabel,
   UrlMetadataRow,
   UrlSurfaceCard,
 } from '@/features/urls/ui/UrlSurfacePrimitives';
+import { UrlValueField } from '@/features/urls/ui/UrlValueField';
 
 interface UrlDetailsHeaderProps {
   onBack: () => void;
@@ -78,76 +76,25 @@ export function UrlInfoCard({ copiedValue, onCopy, urlMapping }: UrlInfoCardProp
   return (
     <UrlSurfaceCard title="URL Information" className="lg:col-span-3">
       <div className="space-y-4">
-        <UrlValueRow
-          label="Short URL"
-          value={urlMapping.shortUrl}
-          href={urlMapping.shortUrl}
+        <UrlValueField
           copiedValue={copiedValue}
+          href={urlMapping.shortUrl}
+          label="Short URL"
           onCopy={onCopy}
           tone="primary"
+          value={urlMapping.shortUrl}
+          valueClassName="break-all text-[0.82rem] hover:text-blue-300"
         />
-        <UrlValueRow
-          label="Original URL"
-          value={urlMapping.originalUrl}
-          href={urlMapping.originalUrl}
+        <UrlValueField
           copiedValue={copiedValue}
+          href={urlMapping.originalUrl}
+          label="Original URL"
           onCopy={onCopy}
-          tone="default"
+          value={urlMapping.originalUrl}
+          valueClassName="break-all text-[0.82rem] hover:text-white/80"
         />
       </div>
     </UrlSurfaceCard>
-  );
-}
-
-function UrlValueRow({
-  copiedValue,
-  href,
-  label,
-  onCopy,
-  tone,
-  value,
-}: {
-  copiedValue: string | null;
-  href: string;
-  label: string;
-  onCopy: (url: string) => Promise<void>;
-  tone: 'default' | 'primary';
-  value: string;
-}) {
-  const containerClassName =
-    tone === 'primary' ? 'border-blue-500/15 bg-[#0a1220]' : 'border-white/[0.06] bg-white/[0.03]';
-  const linkClassName =
-    tone === 'primary' ? 'text-blue-400 hover:text-blue-300' : 'text-white/50 hover:text-white/80';
-
-  return (
-    <div>
-      <UrlFieldLabel>{label}</UrlFieldLabel>
-      <div className={`flex items-center gap-2 rounded-xl border px-4 py-3 ${containerClassName}`}>
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`flex-1 break-all transition-colors ${linkClassName}`}
-          style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem' }}
-        >
-          {value}
-        </a>
-        <div className="flex shrink-0 gap-1">
-          <UrlCopyButton
-            copied={copiedValue === value}
-            onCopy={() => {
-              void onCopy(value);
-            }}
-            primary={tone === 'primary'}
-          />
-          <UrlExternalLinkButton
-            href={href}
-            primary={tone === 'primary'}
-            title="Open"
-          />
-        </div>
-      </div>
-    </div>
   );
 }
 
