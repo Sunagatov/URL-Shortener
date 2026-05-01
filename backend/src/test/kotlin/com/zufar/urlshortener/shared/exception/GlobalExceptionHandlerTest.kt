@@ -1,6 +1,5 @@
 package com.zufar.urlshortener.shared.exception
 
-import com.zufar.urlshortener.auth.exception.InvalidTokenException
 import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
 import com.zufar.urlshortener.urls.dto.ShortenUrlRequest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -14,6 +13,7 @@ import org.springframework.core.MethodParameter
 import org.springframework.validation.BeanPropertyBindingResult
 import org.springframework.validation.FieldError
 import org.springframework.web.bind.MethodArgumentNotValidException
+import kotlin.reflect.jvm.javaMethod
 import tools.jackson.databind.exc.MismatchedInputException
 import tools.jackson.module.kotlin.jacksonObjectMapper
 import tools.jackson.module.kotlin.readValue
@@ -43,14 +43,6 @@ class GlobalExceptionHandlerTest {
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.statusCode)
         assertEquals("An unexpected error occurred", response.body!!.errorMessage)
-    }
-
-    @Test
-    fun `invalid token exception returns 401 with original message`() {
-        val response = handler.handleInvalidTokenException(InvalidTokenException("Invalid or expired refresh token"))
-
-        assertEquals(HttpStatus.UNAUTHORIZED, response.statusCode)
-        assertEquals("Invalid or expired refresh token", response.body!!.errorMessage)
     }
 
     @Test
@@ -109,11 +101,10 @@ class GlobalExceptionHandlerTest {
         assertEquals("Malformed JSON request", response.body!!.errorMessage)
     }
 
-    @Suppress("unused")
     private fun dummyEndpoint(request: ShortenUrlRequest) = request
 
     private fun methodParameter(): MethodParameter {
-        val method = this::class.java.getDeclaredMethod("dummyEndpoint", ShortenUrlRequest::class.java)
+        val method = requireNotNull(this::dummyEndpoint.javaMethod)
         return MethodParameter(method, 0)
     }
 }

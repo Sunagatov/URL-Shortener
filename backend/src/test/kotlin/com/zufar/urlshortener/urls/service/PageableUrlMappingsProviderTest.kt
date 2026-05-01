@@ -1,7 +1,6 @@
 package com.zufar.urlshortener.urls.service
 
-import com.zufar.urlshortener.auth.entity.UserDetails
-import com.zufar.urlshortener.auth.service.user.CurrentUserService
+import com.zufar.urlshortener.auth.api.CurrentUserAccess
 import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.repository.UrlRepository
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -26,16 +25,16 @@ import java.time.ZoneOffset
 class PageableUrlMappingsProviderTest {
 
     @Mock private lateinit var urlRepository: UrlRepository
-    @Mock private lateinit var currentUserService: CurrentUserService
+    @Mock private lateinit var currentUserAccess: CurrentUserAccess
     @Mock private lateinit var mongoTemplate: MongoTemplate
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
     private val provider by lazy {
         UrlManagementService(
             urlRepository = urlRepository,
             urlValidator = mock(),
-            currentUserService = currentUserService,
+            currentUserAccess = currentUserAccess,
             mongoTemplate = mongoTemplate,
-            baseUrl = "http://localhost:8080",
+            baseUrl = "https://localhost:8080",
             defaultExpirationDays = 365,
             maxAllowedDaysCount = 365,
             maxCodeGenerationAttempts = 10,
@@ -44,26 +43,16 @@ class PageableUrlMappingsProviderTest {
         )
     }
 
-    private val testUser = UserDetails(
-        id = "user-123",
-        firstName = "Test",
-        lastName = "User",
-        email = "test@example.com",
-        password = "hashed",
-        country = "US",
-        age = 25
-    )
-
     private fun mapping(urlHash: String, expiration: LocalDateTime) = UrlMapping(
         urlHash = urlHash,
-        shortUrl = "http://localhost:8080/$urlHash",
-        originalUrl = "http://example.com/$urlHash",
+        shortUrl = "https://localhost:8080/$urlHash",
+        originalUrl = "https://example.com/$urlHash",
         clickCount = 0,
         createdAt = LocalDateTime.now().minusDays(1),
         expirationDate = expiration,
         requestIp = "127.0.0.1",
         userAgent = null,
-        userId = testUser.id
+        userId = "user-123"
     )
 
     @Test
@@ -72,7 +61,7 @@ class PageableUrlMappingsProviderTest {
         val pageable = PageRequest.of(0, 10)
         val activeMappings = hashes.map { mapping(it, LocalDateTime.now().plusDays(10)) }
 
-        whenever(currentUserService.requireCurrentUserId()).thenReturn("user-123")
+        whenever(currentUserAccess.requireCurrentUserId()).thenReturn("user-123")
         whenever(urlRepository.findAllByUserIdAndExpirationDateAfter(eq("user-123"), any(), eq(pageable)))
             .thenReturn(PageImpl(activeMappings))
 
@@ -86,7 +75,7 @@ class PageableUrlMappingsProviderTest {
     fun `getUrlMappingsPage does not return expired mappings`() {
         val pageable = PageRequest.of(0, 10)
 
-        whenever(currentUserService.requireCurrentUserId()).thenReturn("user-123")
+        whenever(currentUserAccess.requireCurrentUserId()).thenReturn("user-123")
         whenever(urlRepository.findAllByUserIdAndExpirationDateAfter(eq("user-123"), any(), eq(pageable)))
             .thenReturn(PageImpl(emptyList()))
 
@@ -100,7 +89,7 @@ class PageableUrlMappingsProviderTest {
     fun `getUrlMappingsPage passes correct pagination parameters`() {
         val pageable = PageRequest.of(2, 5)
 
-        whenever(currentUserService.requireCurrentUserId()).thenReturn("user-123")
+        whenever(currentUserAccess.requireCurrentUserId()).thenReturn("user-123")
         whenever(urlRepository.findAllByUserIdAndExpirationDateAfter(eq("user-123"), any(), eq(pageable)))
             .thenReturn(PageImpl(emptyList(), pageable, 0))
 

@@ -14,9 +14,9 @@ private const val TOKEN_VERSION_CLAIM = "tokenVersion"
 
 @Component
 class JwtTokenProvider(
-    @Value("\${jwt.secret}") private val jwtSecret: String,
-    @Value("\${jwt.accessTokenExpiration}") private val jwtExpirationInMs: Long,
-    @Value("\${jwt.refreshTokenExpiration}") private val jwtRefreshExpirationInMs: Long
+    @Value($$"${jwt.secret}") private val jwtSecret: String,
+    @Value($$"${jwt.accessTokenExpiration}") private val jwtExpirationInMs: Long,
+    @Value(/* value = */ $$"${jwt.refreshTokenExpiration}") private val jwtRefreshExpirationInMs: Long
 ) {
     companion object {
         private const val TOKEN_TYPE_CLAIM = "type"

@@ -111,7 +111,7 @@ axiosInstance.interceptors.response.use(
 
 ### Full URL
 ```
-http://116.203.197.65/api/v1/auth/refresh-token
+https://116.203.197.65/api/v1/auth/refresh-token
 ```
 
 ## Token Lifecycle
@@ -129,7 +129,7 @@ http://116.203.197.65/api/v1/auth/refresh-token
 
 ### Manual Test
 ```bash
-curl -X POST http://116.203.197.65/api/v1/auth/refresh-token \
+curl -X POST https://116.203.197.65/api/v1/auth/refresh-token \
   -H "Content-Type: application/json" \
   -d '{
     "refreshToken": "YOUR_REFRESH_TOKEN"

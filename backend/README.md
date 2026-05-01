@@ -4,7 +4,7 @@
   <p><strong>A Kotlin + Spring Boot backend for URL shortening — fast, secure, and scalable.</strong></p>
   <p>
     <a href="https://t.me/zufarexplained">💬 Community</a> ·
-    <a href="http://116.203.197.65:3000/">🚀 Live Demo</a> ·
+    <a href="https://116.203.197.65:3000/">🚀 Live Demo</a> ·
     <a href="https://github.com/Sunagatov/URL-Shortener/issues?q=is%3Aopen+label%3A%22good+first+issue%22">🟢 Good First Issues</a> ·
     <a href="https://github.com/Sunagatov/URL-Shortener/issues">🐛 Issues</a>
   </p>

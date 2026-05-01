@@ -52,7 +52,7 @@ Location: https://www.example.com/original-page
 ## Redirect Flow
 
 ```
-User clicks: http://116.203.197.65/abc123
+User clicks: https://116.203.197.65/abc123
     ↓
 Backend receives GET /abc123
     ↓
@@ -88,6 +88,7 @@ return ResponseEntity.status(HttpStatus.FOUND)
 ## Nginx Configuration
 
 ### Current Setup
+<!--suppress HttpUrlsUsage -->
 ```nginx
 location ~ ^/[1-9A-HJ-NP-Za-km-z]{8}$ {
     proxy_pass http://url-shortener-app:8080;
@@ -104,7 +105,7 @@ This is a direct browser redirect, no frontend JavaScript involved.
 
 ### Usage Example
 ```html
-<a href="http://116.203.197.65/abc123">Click here</a>
+<a href="https://116.203.197.65/abc123">Click here</a>
 ```
 
 ## Analytics (Future Enhancement)
@@ -137,7 +138,7 @@ This is a direct browser redirect, no frontend JavaScript involved.
 ### Manual Test
 ```bash
 # Test redirect
-curl -I http://116.203.197.65/abc123
+curl -I https://116.203.197.65/abc123
 
 # Expected response
 HTTP/1.1 302 Found
@@ -167,7 +168,7 @@ Location: https://www.example.com/original-page
 ## Logging
 
 ```
-INFO: Received redirect request for shortUrl='http://116.203.197.65/abc123' 
+INFO: Received redirect request for shortUrl='https://116.203.197.65/abc123' 
       from IP='192.168.1.1', User-Agent='Mozilla/5.0...'
 INFO: Redirecting to the originalUrl='https://www.example.com'
 ```

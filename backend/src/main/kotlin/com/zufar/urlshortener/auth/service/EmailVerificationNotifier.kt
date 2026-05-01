@@ -14,7 +14,7 @@ private const val LOG_DELIVERY_MODE = "log"
 @Service
 class EmailVerificationNotifier(
     private val mailSenderProvider: ObjectProvider<JavaMailSender>,
-    @Value("\${app.auth.email-verification.mail.from:noreply@shorty.local}") private val fromAddress: String
+    @Value($$"${app.auth.email-verification.mail.from:noreply@shorty.local}") private val fromAddress: String
 ) {
     private val log = LoggerFactory.getLogger(EmailVerificationNotifier::class.java)
 

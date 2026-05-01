@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.urls.service
 
-import com.zufar.urlshortener.auth.service.user.CurrentUserService
+import com.zufar.urlshortener.auth.api.CurrentUserAccess
 import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.repository.UrlRepository
 import org.junit.jupiter.api.Test
@@ -21,7 +21,7 @@ import java.util.Optional
 class UrlDeleterTest {
 
     @Mock private lateinit var urlRepository: UrlRepository
-    @Mock private lateinit var currentUserService: CurrentUserService
+    @Mock private lateinit var currentUserAccess: CurrentUserAccess
     @Mock private lateinit var mongoTemplate: MongoTemplate
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
 
@@ -39,12 +39,12 @@ class UrlDeleterTest {
             userId = "user-123"
         )
         whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(urlMapping))
-        whenever(currentUserService.requireCurrentUserId()).thenReturn("user-123")
+        whenever(currentUserAccess.requireCurrentUserId()).thenReturn("user-123")
 
         UrlManagementService(
             urlRepository = urlRepository,
             urlValidator = mock(),
-            currentUserService = currentUserService,
+            currentUserAccess = currentUserAccess,
             mongoTemplate = mongoTemplate,
             baseUrl = "http://localhost:8080",
             defaultExpirationDays = 365,

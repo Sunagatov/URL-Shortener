@@ -53,9 +53,9 @@ class AuthService(
     private val passwordEncoder: PasswordEncoder,
     private val jwtTokenProvider: JwtTokenProvider,
     private val emailVerificationNotifier: EmailVerificationNotifier,
-    @Value("\${app.auth.email-verification.enabled:false}") private val emailVerificationEnabled: Boolean,
-    @Value("\${app.auth.email-verification.expiration-minutes:10}") private val verificationExpirationMinutes: Long,
-    @Value("\${app.auth.email-verification.resend-cooldown-seconds:60}") private val verificationResendCooldownSeconds: Long,
+    @Value($$"${app.auth.email-verification.enabled:false}") private val emailVerificationEnabled: Boolean,
+    @Value($$"${app.auth.email-verification.expiration-minutes:10}") private val verificationExpirationMinutes: Long,
+    @Value($$"${app.auth.email-verification.resend-cooldown-seconds:60}") private val verificationResendCooldownSeconds: Long,
     private val clock: Clock
 ) {
     private val log = LoggerFactory.getLogger(AuthService::class.java)

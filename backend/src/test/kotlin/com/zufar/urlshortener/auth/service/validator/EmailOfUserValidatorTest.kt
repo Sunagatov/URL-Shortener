@@ -12,7 +12,7 @@ class EmailOfUserValidatorTest {
 
     @Test
     fun `valid email longer than 64 characters is accepted`() {
-        val email = "${"a".repeat(50)}@very-long-example-domain.com"
+        val email = "a".repeat(50) + "@very-long-example-domain.com"
 
         assertDoesNotThrow {
             validator.validate(email)
@@ -35,7 +35,7 @@ class EmailOfUserValidatorTest {
 
     @Test
     fun `email longer than 254 characters is rejected`() {
-        val email = "${"a".repeat(245)}@example.com"
+        val email = "a".repeat(245) + "@example.com"
 
         assertThrows<InvalidRequestException> {
             validator.validate(email)

@@ -15,7 +15,7 @@ data class UrlMapping(
     val clickCount: Long = 0,
 
     val createdAt: LocalDateTime,
-    @Indexed(name = "expiration_date_ttl_idx", expireAfterSeconds = 0)
+    @Indexed(name = "expiration_date_ttl_idx", expireAfter = "0s")
     val expirationDate: LocalDateTime,
 
     val requestIp: String?,

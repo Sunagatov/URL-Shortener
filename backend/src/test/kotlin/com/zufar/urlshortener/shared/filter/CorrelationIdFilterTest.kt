@@ -8,7 +8,6 @@ import org.springframework.mock.web.MockHttpServletResponse
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 class CorrelationIdFilterTest {
 
@@ -31,14 +30,14 @@ class CorrelationIdFilterTest {
     fun `reuses sanitized incoming correlation id and propagates sanitized trace id`() {
         val request = MockHttpServletRequest().apply {
             addHeader("X-Correlation-ID", "abc-123\nbad")
-            addHeader("X-Trace-ID", "trace-1\rbad")
+            addHeader("X-Trace-ID", "trace-1\rline")
         }
         val response = MockHttpServletResponse()
 
         filter.doFilter(request, response, MockFilterChain())
 
         assertEquals("abc-123_bad", response.getHeader("X-Correlation-ID"))
-        assertEquals("trace-1_bad", response.getHeader("X-Trace-ID"))
-        assertTrue(response.getHeader("X-Request-ID")?.isNotBlank() == true)
+        assertEquals("trace-1_line", response.getHeader("X-Trace-ID"))
+        assertEquals(true, response.getHeader("X-Request-ID")?.isNotBlank())
     }
 }

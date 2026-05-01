@@ -43,6 +43,7 @@ class RateLimitFilter(
     private val clientIpResolver: ClientIpResolver,
     private val meterRegistry: MeterRegistry
 ) : OncePerRequestFilter() {
+
     private val log = LoggerFactory.getLogger(RateLimitFilter::class.java)
     private val counters = ConcurrentHashMap<String, Counter>()
     private val redirectPathRegex = Regex("^/[1-9A-HJ-NP-Za-km-z]{8}$")

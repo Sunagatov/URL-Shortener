@@ -12,7 +12,7 @@ private const val MAX_ALLOWED_URL_LENGTH = 2048
 
 @Service
 class UrlValidator(
-    @Value("\${app.base-url}") private val baseUrl: String,
+    @Value($$"${app.base-url}") private val baseUrl: String,
     private val hostAddressResolver: HostAddressResolver
 ) {
     private val allowedProtocols = setOf("http", "https")
@@ -30,7 +30,7 @@ class UrlValidator(
         validate(uri.userInfo == null, "URL must not contain embedded user credentials.")
         validate(
             isValidHost(uri),
-            "URL host must be public and routable. Private, loopback, link-local, reserved, and current shortener hosts are not allowed."
+            "URL host must be public and routable. Private, loopback, link-local, reserved, and current service hosts are not allowed."
         )
     }
 

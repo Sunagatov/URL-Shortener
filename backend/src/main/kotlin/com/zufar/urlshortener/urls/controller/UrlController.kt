@@ -23,8 +23,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/v1/urls")
 class UrlController(
     private val urlManagementService: UrlManagementService,
-    @Value("\${app.urls.pagination.default-page:0}") private val defaultPage: Int,
-    @Value("\${app.urls.pagination.default-size:10}") private val defaultSize: Int
+    @Value($$"${app.urls.pagination.default-page:0}") private val defaultPage: Int,
+    @Value($$"${app.urls.pagination.default-size:10}") private val defaultSize: Int
 ) {
 
     @PostMapping(

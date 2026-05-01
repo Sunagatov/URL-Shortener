@@ -121,13 +121,13 @@ export async function signUp(data: SignUpRequest): Promise<{ user: User } & Auth
 
 ### Base URL Configuration
 ```
-REACT_APP_BACKEND_REST_API_URL=http://116.203.197.65/api
+REACT_APP_BACKEND_REST_API_URL=https://116.203.197.65/api
 ```
 
 ### Full URL Construction
 ```
-baseURL + endpoint = http://116.203.197.65/api + /v1/auth/signup
-Result: http://116.203.197.65/api/v1/auth/signup ✅
+baseURL + endpoint = https://116.203.197.65/api + /v1/auth/signup
+Result: https://116.203.197.65/api/v1/auth/signup ✅
 ```
 
 ## Known Issues
@@ -137,11 +137,11 @@ Result: http://116.203.197.65/api/v1/auth/signup ✅
 ```typescript
 // ❌ WRONG
 SIGNUP: '/api/v1/auth/signup'
-// Results in: http://116.203.197.65/api/api/v1/auth/signup
+// Results in: https://116.203.197.65/api/api/v1/auth/signup
 
 // ✅ CORRECT
 SIGNUP: '/v1/auth/signup'
-// Results in: http://116.203.197.65/api/v1/auth/signup
+// Results in: https://116.203.197.65/api/v1/auth/signup
 ```
 
 **Status**: FIXED in constants/index.ts
@@ -150,7 +150,7 @@ SIGNUP: '/v1/auth/signup'
 
 ### Manual Test
 ```bash
-curl -X POST http://116.203.197.65/api/v1/auth/signup \
+curl -X POST https://116.203.197.65/api/v1/auth/signup \
   -H "Content-Type: application/json" \
   -d '{
     "firstName": "Test",

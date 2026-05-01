@@ -11,5 +11,7 @@ interface UrlRepository : MongoRepository<UrlMapping, String> {
 
     fun findByUrlHash(urlHash: String): Optional<UrlMapping>
 
-    fun findAllByUserIdAndExpirationDateAfter(userId: String, now: LocalDateTime, pageable: Pageable): Page<UrlMapping>
+    fun findAllByUserIdAndExpirationDateAfter(userId: String,
+                                              now: LocalDateTime,
+                                              pageable: Pageable): Page<UrlMapping>
 }

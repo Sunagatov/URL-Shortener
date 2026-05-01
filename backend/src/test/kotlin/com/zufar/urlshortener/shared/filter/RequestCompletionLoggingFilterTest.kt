@@ -7,10 +7,8 @@ import com.zufar.urlshortener.shared.config.RateLimitConfig
 import com.zufar.urlshortener.shared.config.RateLimitProperties
 import com.zufar.urlshortener.shared.http.ClientIpResolver
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
-import jakarta.servlet.FilterChain
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
 import org.slf4j.LoggerFactory
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
@@ -47,7 +45,7 @@ class RequestCompletionLoggingFilterTest {
         }
         val response = MockHttpServletResponse().apply { status = 302 }
 
-        filter.doFilter(request, response, FilterChain { _, _ -> })
+        filter.doFilter(request, response) { _, _ -> }
 
         assertEquals(1, appender.list.size)
         val event = appender.list.single()
@@ -67,7 +65,7 @@ class RequestCompletionLoggingFilterTest {
         }
         val response = MockHttpServletResponse().apply { status = 404 }
 
-        filter.doFilter(request, response, FilterChain { _, _ -> })
+        filter.doFilter(request, response) { _, _ -> }
 
         assertEquals(Level.DEBUG, appender.list.single().level)
     }

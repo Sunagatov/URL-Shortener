@@ -23,7 +23,7 @@ private const val REFERRER_POLICY_VALUE = "no-referrer"
 @RequestMapping
 class UrlRedirectController(
     private val urlManagementService: UrlManagementService,
-    @Value("\${app.urls.redirect.max-cache-seconds:3600}") private val maxRedirectCacheSeconds: Long,
+    @Value($$"${app.urls.redirect.max-cache-seconds:3600}") private val maxRedirectCacheSeconds: Long,
     private val clock: Clock
 ) {
     @GetMapping(UrlHashFormat.PATH_VARIABLE_REGEX)

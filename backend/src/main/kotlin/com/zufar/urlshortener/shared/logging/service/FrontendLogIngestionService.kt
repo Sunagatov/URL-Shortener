@@ -66,7 +66,7 @@ class FrontendLogIngestionService(
             return null
         }
 
-        val contextNode = objectMapper.valueToTree<JsonNode>(context)
+        val contextNode: JsonNode = objectMapper.valueToTree(context)
 
         val serialized = objectMapper.writeValueAsString(sanitizeNode(contextNode, depth = 0))
         return if (serialized.length <= MAX_CONTEXT_JSON_LENGTH) {
@@ -108,7 +108,7 @@ class FrontendLogIngestionService(
             }
 
             node.isTextual -> TextNode(sanitizeText(node.asText(), MAX_CONTEXT_VALUE_LENGTH))
-            node.isNumber || node.isBoolean || node.isNull -> node.deepCopy<JsonNode>()
+            node.isNumber || node.isBoolean || node.isNull -> node.deepCopy()
             else -> TextNode(sanitizeText(node.toString(), MAX_CONTEXT_VALUE_LENGTH))
         }
     }

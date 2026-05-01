@@ -94,14 +94,14 @@ export async function signIn(data: SignInRequest): Promise<{ user: User } & Auth
 
 ### Full URL
 ```
-http://116.203.197.65/api/v1/auth/signin
+https://116.203.197.65/api/v1/auth/signin
 ```
 
 ## Testing
 
 ### Manual Test
 ```bash
-curl -X POST http://116.203.197.65/api/v1/auth/signin \
+curl -X POST https://116.203.197.65/api/v1/auth/signin \
   -H "Content-Type: application/json" \
   -d '{
     "email": "test@example.com",

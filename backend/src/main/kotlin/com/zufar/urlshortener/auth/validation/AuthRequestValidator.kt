@@ -5,19 +5,20 @@ import com.zufar.urlshortener.auth.dto.AGE_MUST_NOT_BE_EMPTY
 import com.zufar.urlshortener.auth.dto.COUNTRY_MUST_NOT_BE_EMPTY
 import com.zufar.urlshortener.auth.dto.COUNTRY_NAME_CONTAINS_INVALID_CHARACTERS
 import com.zufar.urlshortener.auth.dto.COUNTRY_NAME_IS_TOO_LONG
+import com.zufar.urlshortener.auth.dto.EMAIL_MUST_NOT_BE_EMPTY
 import com.zufar.urlshortener.auth.dto.FIRST_NAME_CONTAINS_INVALID_CHARACTERS
 import com.zufar.urlshortener.auth.dto.FIRST_NAME_IS_TOO_LONG
 import com.zufar.urlshortener.auth.dto.FIRST_NAME_MUST_NOT_BE_EMPTY
 import com.zufar.urlshortener.auth.dto.LAST_NAME_CONTAINS_INVALID_CHARACTERS
 import com.zufar.urlshortener.auth.dto.LAST_NAME_IS_TOO_LONG
 import com.zufar.urlshortener.auth.dto.LAST_NAME_MUST_NOT_BE_EMPTY
+import com.zufar.urlshortener.auth.dto.PASSWORD_MUST_NOT_BE_EMPTY
 import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
 import com.zufar.urlshortener.auth.dto.ResendVerificationRequest
 import com.zufar.urlshortener.auth.dto.SignInRequest
 import com.zufar.urlshortener.auth.dto.SignUpRequest
 import com.zufar.urlshortener.auth.dto.VerifyEmailRequest
 import com.zufar.urlshortener.shared.exception.InvalidRequestException
-import com.zufar.urlshortener.users.dto.ChangePasswordRequest
 import org.springframework.stereotype.Service
 
 private const val MAX_NAME_LENGTH = 50
@@ -61,12 +62,7 @@ class AuthRequestValidator(
     fun validateRefreshTokenRequest(refreshTokenRequest: RefreshTokenRequest) {
         val token = refreshTokenRequest.refreshToken
         validate(token.isBlank(), "Refresh token must not be empty")
-        validate(token.length < MIN_JWT_TOKEN_LENGTH || token.length > MAX_JWT_TOKEN_LENGTH, "Refresh token length is invalid")
-    }
-
-    fun validateChangePasswordRequest(changePasswordRequest: ChangePasswordRequest) {
-        validate(changePasswordRequest.currentPassword.isBlank(), PASSWORD_MUST_NOT_BE_EMPTY)
-        passwordOfUserValidator.validate(changePasswordRequest.newPassword)
+        validate(token.length !in MIN_JWT_TOKEN_LENGTH..MAX_JWT_TOKEN_LENGTH, "Refresh token length is invalid")
     }
 
     fun validateVerifyEmailRequest(verifyEmailRequest: VerifyEmailRequest) {
@@ -95,7 +91,7 @@ class AuthRequestValidator(
 
     private fun validateAge(age: Int) {
         validate(age == 0, AGE_MUST_NOT_BE_EMPTY)
-        validate(age < MIN_AGE || age > MAX_AGE, AGE_MUST_BE_BETWEEN_13_AND_120)
+        validate(age !in MIN_AGE..MAX_AGE, AGE_MUST_BE_BETWEEN_13_AND_120)
     }
 
     private fun validate(invalid: Boolean, message: String) {

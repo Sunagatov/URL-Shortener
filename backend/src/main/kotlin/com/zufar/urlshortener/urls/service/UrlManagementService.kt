@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.urls.service
 
-import com.zufar.urlshortener.auth.service.user.CurrentUserService
+import com.zufar.urlshortener.auth.api.CurrentUserAccess
 import com.zufar.urlshortener.shared.URL_MAPPINGS_CACHE
 import com.zufar.urlshortener.shared.exception.InvalidRequestException
 import com.zufar.urlshortener.shared.logging.LogSanitizer
@@ -35,13 +35,13 @@ private const val DELETE_URL_MAPPING_DENIED_MESSAGE = "You are not allowed to de
 class UrlManagementService(
     private val urlRepository: UrlRepository,
     private val urlValidator: UrlValidator,
-    private val currentUserService: CurrentUserService,
+    private val currentUserAccess: CurrentUserAccess,
     private val mongoTemplate: MongoTemplate,
-    @Value("\${app.base-url}") private val baseUrl: String,
-    @Value("\${app.urls.expiration.default-days:365}") private val defaultExpirationDays: Long,
-    @Value("\${app.urls.expiration.max-days:365}") private val maxAllowedDaysCount: Long,
-    @Value("\${app.urls.short-code.max-generation-attempts:10}") private val maxCodeGenerationAttempts: Int,
-    @Value("\${app.urls.pagination.max-size:100}") private val maxPageSize: Int,
+    @Value($$"${app.base-url}") private val baseUrl: String,
+    @Value($$"${app.urls.expiration.default-days:365}") private val defaultExpirationDays: Long,
+    @Value(/* value = */ $$"${app.urls.expiration.max-days:365}") private val maxAllowedDaysCount: Long,
+    @Value($$"${app.urls.short-code.max-generation-attempts:10}") private val maxCodeGenerationAttempts: Int,
+    @Value($$"${app.urls.pagination.max-size:100}") private val maxPageSize: Int,
     private val clock: Clock
 ) {
     private val log = LoggerFactory.getLogger(UrlManagementService::class.java)
@@ -69,7 +69,7 @@ class UrlManagementService(
                 log.info(
                     "short_url_created urlHash={} ownerUserId={} targetHost={} expiresInDays={}",
                     urlHash,
-                    currentUserService.getCurrentUserIdOrNull() ?: "anonymous",
+                    currentUserAccess.getCurrentUserIdOrNull() ?: "anonymous",
                     LogSanitizer.safeUrlHost(normalizedRequest.originalUrl),
                     normalizedRequest.daysCount ?: defaultExpirationDays
                 )
@@ -92,7 +92,7 @@ class UrlManagementService(
         validatePageRequest(page, size)
 
         val pageable = PageRequest.of(page, size)
-        val userId = currentUserService.requireCurrentUserId()
+        val userId = currentUserAccess.requireCurrentUserId()
         val now = LocalDateTime.now(clock)
         val mappingsPage = urlRepository.findAllByUserIdAndExpirationDateAfter(userId, now, pageable)
 
@@ -138,7 +138,7 @@ class UrlManagementService(
 
     fun getOwnedActiveUrlMapping(urlHash: String, accessDeniedMessage: String): UrlMapping {
         val urlMapping = getActiveUrlMapping(urlHash)
-        val currentUserId = currentUserService.requireCurrentUserId()
+        val currentUserId = currentUserAccess.requireCurrentUserId()
 
         if (urlMapping.userId == null || urlMapping.userId != currentUserId) {
             throw AccessDeniedException(accessDeniedMessage)
@@ -163,7 +163,7 @@ class UrlManagementService(
             expirationDate = now.plusDays(request.daysCount ?: defaultExpirationDays),
             requestIp = httpRequest.remoteAddr,
             userAgent = httpRequest.getHeader("User-Agent"),
-            userId = currentUserService.getCurrentUserIdOrNull()
+            userId = currentUserAccess.getCurrentUserIdOrNull()
         )
 
         return mapping

@@ -23,7 +23,7 @@ private const val OUTCOME_TEMPLATE =
 @Order(2)
 class RequestCompletionLoggingFilter(
     private val clientIpResolver: ClientIpResolver,
-    @Value("\${logging.slow-request-threshold-ms:1000}") private val slowRequestThresholdMs: Long
+    @Value($$"${logging.slow-request-threshold-ms:1000}") private val slowRequestThresholdMs: Long
 ) : OncePerRequestFilter() {
 
     private val accessLog = LoggerFactory.getLogger("http.access")

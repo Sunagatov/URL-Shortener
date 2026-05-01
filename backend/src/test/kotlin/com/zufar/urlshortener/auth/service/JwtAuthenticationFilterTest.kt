@@ -7,14 +7,11 @@ import com.zufar.urlshortener.auth.security.withTokenVersion
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.slf4j.MDC
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
-import jakarta.servlet.FilterChain
-import jakarta.servlet.ServletRequest
-import jakarta.servlet.ServletResponse
+import org.slf4j.MDC
 import org.springframework.mock.web.MockFilterChain
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
@@ -23,7 +20,6 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
-import kotlin.test.assertTrue
 
 class JwtAuthenticationFilterTest {
 
@@ -66,12 +62,10 @@ class JwtAuthenticationFilterTest {
         whenever(customUserDetailsService.loadUserByUsername("user@example.com")).thenReturn(userDetails)
         val request = requestWithBearerToken(token)
 
-        filter.doFilter(request, MockHttpServletResponse(), object : FilterChain {
-            override fun doFilter(request: ServletRequest, response: ServletResponse) {
-                assertEquals("user-123", request.getAttribute("authenticatedUserId"))
-                assertEquals("user-123", MDC.get("userId"))
-            }
-        })
+        filter.doFilter(request, MockHttpServletResponse()) { servletRequest, _ ->
+            assertEquals("user-123", servletRequest.getAttribute("authenticatedUserId"))
+            assertEquals("user-123", MDC.get("userId"))
+        }
 
         assertNull(request.getAttribute("authenticatedUserId"))
         assertNull(MDC.get("userId"))

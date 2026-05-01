@@ -10,8 +10,8 @@ import java.util.concurrent.TimeUnit
 
 @Configuration
 class CorsConfig(
-    @Value("\${cors.allowed.origins}") private val allowedOrigins: String,
-    @Value("\${cors.allowed.origin-patterns:http://localhost:*,http://127.0.0.1:*}")
+    @Value($$"${cors.allowed.origins}") private val allowedOrigins: String,
+    @Value($$"${cors.allowed.origin-patterns:http://localhost:*,http://127.0.0.1:*}")
     private val allowedOriginPatterns: String
 ) {
 

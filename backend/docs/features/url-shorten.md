@@ -38,7 +38,7 @@ Authorization: Bearer {accessToken}  # optional
 ### Success (200 OK)
 ```json
 {
-  "shortUrl": "http://116.203.197.65/abc123"
+  "shortUrl": "https://116.203.197.65/abc123"
 }
 ```
 
@@ -109,7 +109,7 @@ async function createUrl(data: CreateUrlRequest): Promise<UrlMapping> {
 
 ### Full URL
 ```
-http://116.203.197.65/api/v1/urls
+https://116.203.197.65/api/v1/urls
 ```
 
 ## Caching
@@ -130,7 +130,7 @@ http://116.203.197.65/api/v1/urls
 
 ### Manual Test
 ```bash
-curl -X POST http://116.203.197.65/api/v1/urls \
+curl -X POST https://116.203.197.65/api/v1/urls \
   -H "Content-Type: application/json" \
   -d '{
     "originalUrl": "https://www.example.com/long/url",
@@ -141,7 +141,7 @@ curl -X POST http://116.203.197.65/api/v1/urls \
 ### Expected Response
 ```json
 {
-  "shortUrl": "http://116.203.197.65/abc123"
+  "shortUrl": "https://116.203.197.65/abc123"
 }
 ```
 
