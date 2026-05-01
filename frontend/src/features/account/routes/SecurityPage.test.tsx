@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import * as accountApi from '@/features/account/api/accountApi';
@@ -93,7 +93,7 @@ describe('Security', () => {
     });
   });
 
-  it('logs out and redirects to sign-in when the session is no longer valid', async () => {
+  it('does not force logout or redirect on a non-401 password change failure', async () => {
     const user = userEvent.setup();
     vi.mocked(accountApi.changePassword).mockRejectedValue({
       response: {
@@ -111,7 +111,8 @@ describe('Security', () => {
     await user.type(screen.getByPlaceholderText('Confirm your new password'), 'correct horse battery staple');
     await user.click(screen.getByRole('button', { name: /update password/i }));
 
-    expect(await screen.findByText('Sign In Destination')).toBeInTheDocument();
-    await waitFor(() => expect(logout).toHaveBeenCalled());
+    expect(screen.getByRole('heading', { name: 'Security' })).toBeInTheDocument();
+    expect(screen.queryByText('Sign In Destination')).not.toBeInTheDocument();
+    expect(logout).not.toHaveBeenCalled();
   });
 });

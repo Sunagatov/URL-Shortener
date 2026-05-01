@@ -19,7 +19,6 @@ import com.zufar.urlshortener.auth.exception.VerificationResendTooSoonException
 import com.zufar.urlshortener.auth.security.JwtTokenProvider
 import com.zufar.urlshortener.auth.security.UserDetailsWithTokenVersion
 import com.zufar.urlshortener.auth.security.withTokenVersion
-import com.zufar.urlshortener.auth.validation.AuthRequestValidator
 import com.zufar.urlshortener.shared.logging.LogSanitizer
 import com.zufar.urlshortener.users.entity.UserAccountDocument
 import com.zufar.urlshortener.users.repository.UserAccountRepository
@@ -48,7 +47,6 @@ private const val VERIFICATION_CODE_BOUND = 1_000_000
 @Service
 class AuthService(
     private val authenticationManager: AuthenticationManager,
-    private val authRequestValidator: AuthRequestValidator,
     private val userAccountRepository: UserAccountRepository,
     private val passwordEncoder: PasswordEncoder,
     private val jwtTokenProvider: JwtTokenProvider,
@@ -63,7 +61,6 @@ class AuthService(
 
     fun signIn(request: SignInRequest): AuthResponse {
         val normalizedRequest = request.copy(email = EmailNormalizer.normalize(request.email))
-        authRequestValidator.validateAuthRequest(normalizedRequest)
 
         val authentication = authenticationManager.authenticate(
             UsernamePasswordAuthenticationToken(normalizedRequest.email, request.password)
@@ -84,7 +81,6 @@ class AuthService(
 
     fun signUp(request: SignUpRequest): SignUpResponse {
         val normalizedRequest = request.copy(email = EmailNormalizer.normalize(request.email))
-        authRequestValidator.validateSignUpRequest(normalizedRequest)
         ensureEmailIsAvailable(normalizedRequest.email)
 
         val now = LocalDateTime.now(clock)
@@ -127,8 +123,6 @@ class AuthService(
     }
 
     fun refreshAccessToken(request: RefreshTokenRequest): RefreshTokenResponse {
-        authRequestValidator.validateRefreshTokenRequest(request)
-
         val refreshToken = request.refreshToken
         if (!jwtTokenProvider.validateRefreshToken(refreshToken)) {
             throw InvalidTokenException(INVALID_REFRESH_TOKEN_MESSAGE)
@@ -151,7 +145,6 @@ class AuthService(
             email = EmailNormalizer.normalize(request.email),
             code = request.code.trim()
         )
-        authRequestValidator.validateVerifyEmailRequest(normalizedRequest)
 
         val user = userAccountRepository.findByEmailIgnoreCase(normalizedRequest.email)
             ?: throw UserNotFoundException("User not found")
@@ -186,7 +179,6 @@ class AuthService(
     fun resendVerificationCode(request: ResendVerificationRequest): VerificationChallengeResponse {
         requireEmailVerificationEnabled()
         val normalizedRequest = request.copy(email = EmailNormalizer.normalize(request.email))
-        authRequestValidator.validateResendVerificationRequest(normalizedRequest)
 
         val user = userAccountRepository.findByEmailIgnoreCase(normalizedRequest.email)
             ?: throw UserNotFoundException("User not found")

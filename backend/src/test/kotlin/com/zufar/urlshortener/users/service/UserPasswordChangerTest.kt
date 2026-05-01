@@ -4,7 +4,6 @@ import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
 import com.zufar.urlshortener.users.entity.UserAccountDocument
 import com.zufar.urlshortener.users.exception.InvalidUserRequestException
-import com.zufar.urlshortener.users.validation.ChangePasswordValidator
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -28,7 +27,6 @@ class UserPasswordChangerTest {
 
     @Mock private lateinit var authenticatedUserContext: AuthenticatedUserContext
     @Mock private lateinit var passwordEncoder: PasswordEncoder
-    @Mock private lateinit var changePasswordValidator: ChangePasswordValidator
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
 
     @Test
@@ -51,7 +49,6 @@ class UserPasswordChangerTest {
         UserAccountService(
             authenticatedUserContext,
             passwordEncoder,
-            changePasswordValidator,
             clock
         ).changePassword(
             ChangePasswordRequest(
@@ -60,7 +57,6 @@ class UserPasswordChangerTest {
             )
         )
 
-        verify(changePasswordValidator).validate(any())
         verify(authenticatedUserContext).updatePassword(argThat {
             assertEquals("user@example.com", email)
             assertEquals(0, tokenVersion)
@@ -88,7 +84,6 @@ class UserPasswordChangerTest {
             UserAccountService(
                 authenticatedUserContext,
                 passwordEncoder,
-                changePasswordValidator,
                 clock
             ).changePassword(
                 ChangePasswordRequest(

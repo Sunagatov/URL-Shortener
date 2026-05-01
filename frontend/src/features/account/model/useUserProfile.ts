@@ -1,18 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { routes } from '@/app/routes';
 import { getUserProfile } from '@/features/account/api/profileApi';
 import type { User } from '@/shared/auth/types';
-import { useAuth } from '@/shared/auth/useAuth';
-import { getApiErrorMessage, isSessionInvalidError } from '@/shared/lib/apiErrors';
+import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 import { useToast } from '@/shared/ui';
 
 export function useUserProfile() {
   const [userDetails, setUserDetails] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const navigate = useNavigate();
-  const { logout } = useAuth();
   const toast = useToast();
 
   useEffect(() => {
@@ -34,12 +29,6 @@ export function useUserProfile() {
           return;
         }
 
-        if (isSessionInvalidError(error)) {
-          logout();
-          navigate(routes.signIn, { replace: true });
-          return;
-        }
-
         const message = getApiErrorMessage(error, 'Failed to fetch user details.');
         setErrorMessage(message);
         toast.error(message);
@@ -55,7 +44,7 @@ export function useUserProfile() {
     return () => {
       isMounted = false;
     };
-  }, [logout, navigate, toast]);
+  }, [toast]);
 
   return { errorMessage, isLoading, setUserDetails, userDetails };
 }

@@ -3,6 +3,7 @@ package com.zufar.urlshortener.users.controller
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
 import com.zufar.urlshortener.users.dto.UserDetailsDto
 import com.zufar.urlshortener.users.service.UserAccountService
+import jakarta.validation.Valid
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -27,7 +28,7 @@ class UserAccountController(
         value = ["/change-password"],
         consumes = [MediaType.APPLICATION_JSON_VALUE]
     )
-    fun changePassword(@RequestBody changePasswordRequest: ChangePasswordRequest): ResponseEntity<Void> {
+    fun changePassword(@Valid @RequestBody changePasswordRequest: ChangePasswordRequest): ResponseEntity<Void> {
         userAccountService.changePassword(changePasswordRequest)
         return ResponseEntity.noContent().build()
     }

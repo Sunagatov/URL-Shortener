@@ -4,7 +4,6 @@ import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
 import com.zufar.urlshortener.users.dto.UserDetailsDto
 import com.zufar.urlshortener.users.exception.InvalidUserRequestException
-import com.zufar.urlshortener.users.validation.ChangePasswordValidator
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.Clock
@@ -14,7 +13,6 @@ import java.time.LocalDateTime
 class UserAccountService(
     private val authenticatedUserContext: AuthenticatedUserContext,
     private val passwordEncoder: PasswordEncoder,
-    private val changePasswordValidator: ChangePasswordValidator,
     private val clock: Clock
 ) {
 
@@ -31,13 +29,11 @@ class UserAccountService(
     }
 
     fun changePassword(request: ChangePasswordRequest) {
-        changePasswordValidator.validate(request)
         val user = authenticatedUserContext.requireAuthenticatedUser()
 
         if (!passwordEncoder.matches(request.currentPassword, user.password)) {
             throw InvalidUserRequestException("Current password is incorrect")
         }
-
         val encodedPassword = requireNotNull(passwordEncoder.encode(request.newPassword)) {
             "Password encoder returned null during password change"
         }

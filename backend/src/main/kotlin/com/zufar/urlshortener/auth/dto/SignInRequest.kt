@@ -1,9 +1,12 @@
 package com.zufar.urlshortener.auth.dto
 
+import jakarta.validation.constraints.NotBlank
 
 data class SignInRequest(
 
-    val email: String = "",
+    @field:NotBlank(message = EMAIL_MUST_NOT_BE_EMPTY)
+    val email: String,
 
-    val password: String = ""
+    @field:NotBlank(message = PASSWORD_MUST_NOT_BE_EMPTY)
+    val password: String
 )

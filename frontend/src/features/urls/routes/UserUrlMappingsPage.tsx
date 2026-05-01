@@ -4,7 +4,7 @@ import {
   AccountPageHeader,
   AccountPageLayout,
   AccountPageLoadingState,
-} from '@/app/account/contracts';
+} from '@/features/account/ui/layout/AccountPageLayout';
 import { routes } from '@/app/routes';
 import { urlDeleteMessages } from '@/features/urls/lib/urlMessages';
 import { useUrlMappingsCollection } from '@/features/urls/model/useUrlMappingsCollection';

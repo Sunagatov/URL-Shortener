@@ -1,6 +1,7 @@
 import React from 'react';
+import { FaKey, FaLock, FaShieldAlt } from 'react-icons/fa';
 import { useResetPasswordFlow } from '@/features/auth/model/useResetPasswordFlow';
-import { resetPasswordBrandPanel } from '@/features/auth/ui/AuthRoutePanels';
+import { AuthBrandPanel } from '@/features/auth/ui/AuthBrandPanel';
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
 import { ResetPasswordForm } from '@/features/auth/ui/reset-password/ResetPasswordForm';
 import {
@@ -8,6 +9,30 @@ import {
   ResetPasswordSuccessState,
 } from '@/features/auth/ui/reset-password/ResetPasswordStates';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
+
+const resetPasswordBrandPanel = (
+  <AuthBrandPanel
+    className="auth-brand-panel relative hidden flex-shrink-0 flex-col overflow-hidden px-12 py-16 lg:flex lg:w-[480px] xl:w-[520px]"
+    heading={
+      <>
+        Choose a strong
+        <br />
+        <span className="gradient-text-animated">new password.</span>
+      </>
+    }
+    description="Pick something you'll remember but others won't guess. We'll keep it safe."
+    features={[
+      { icon: FaLock, text: '15+ characters supported' },
+      { icon: FaShieldAlt, text: 'Passphrases and password managers welcome' },
+      { icon: FaKey, text: 'Only the latest recovery link stays active' },
+    ]}
+    stats={[
+      { value: '64 char', label: 'Password support' },
+      { value: '1 link', label: 'Active recovery link' },
+      { value: 'Private', label: 'Recovery flow' },
+    ]}
+  />
+);
 
 const ResetPasswordPage: React.FC = () => {
   usePageTitle('Reset Password');

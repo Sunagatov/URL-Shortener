@@ -37,7 +37,6 @@ class UrlShortenerTest {
         mongoTemplate = mongoTemplate,
         baseUrl = baseUrl,
         defaultExpirationDays = 365,
-        maxAllowedDaysCount = 365,
         maxCodeGenerationAttempts = 10,
         maxPageSize = 100,
         clock = clock

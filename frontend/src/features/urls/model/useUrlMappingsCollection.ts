@@ -1,128 +1,101 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { routes } from '@/app/routes';
-import { deleteUrl, getAllUserUrls, getUserUrls } from '@/features/urls/api/urlsApi';
+import { deleteUrl, getAllUserUrls } from '@/features/urls/api/urlsApi';
 import { PAGE_SIZE } from '@/features/urls/lib/urlMappings';
-import {
-  getClientPageMappings,
-  getClientTotalPages,
-  getNextServerPageAfterDelete,
-  getVisibleMappings,
-  type SortOrder,
-} from '@/features/urls/lib/urlMappingsCollection';
 import { urlCopyMessages, urlDeleteMessages } from '@/features/urls/lib/urlMessages';
 import type { UrlMapping } from '@/features/urls/types/url';
-import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
+import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 import { useClipboard } from '@/shared/lib/useClipboard';
 import { useToast } from '@/shared/ui';
 
+export type SortOrder = 'newest' | 'oldest';
+
 export function useUrlMappingsCollection() {
-  const [urlMappings, setUrlMappings] = useState<UrlMapping[]>([]);
   const [allMappings, setAllMappings] = useState<UrlMapping[]>([]);
-  const [serverPage, setServerPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalElements, setTotalElements] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<SortOrder>('newest');
-  const [allLoaded, setAllLoaded] = useState(false);
   const [clientPage, setClientPage] = useState(0);
   const [pageError, setPageError] = useState<string | null>(null);
   const [deletingHash, setDeletingHash] = useState<string | null>(null);
 
-  const navigate = useNavigate();
   const toast = useToast();
   const { copiedValue, copyValue } = useClipboard();
-  const isSearchMode = search.trim().length > 0;
 
-  const redirectToSignIn = useCallback(() => {
-    navigate(routes.signIn, { replace: true });
-  }, [navigate]);
-
-  const fetchPage = useCallback(
-    async (pageNumber: number) => {
-      try {
-        setIsLoading(true);
-        const data = await getUserUrls(pageNumber, PAGE_SIZE);
-        setUrlMappings(data.content);
-        setServerPage(data.page);
-        setTotalPages(data.totalPages);
-        setTotalElements(data.totalElements);
-        setPageError(null);
-      } catch (error: unknown) {
-        if (getApiErrorStatus(error) === 401) {
-          redirectToSignIn();
-          return;
-        }
-
-        const message = getApiErrorMessage(error, 'Failed to fetch URL mappings.');
-        setPageError(message);
-        toast.error(message);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [redirectToSignIn, toast],
-  );
-
-  const fetchAll = useCallback(async () => {
+  const fetchMappings = useCallback(async () => {
     try {
+      setIsLoading(true);
       const data = await getAllUserUrls();
       setAllMappings(data);
-      setAllLoaded(true);
+      setPageError(null);
     } catch (error: unknown) {
-      if (getApiErrorStatus(error) === 401) {
-        redirectToSignIn();
-      }
+      const message = getApiErrorMessage(error, 'Failed to fetch URL mappings.');
+      setPageError(message);
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
     }
-  }, [redirectToSignIn]);
+  }, [toast]);
 
   useEffect(() => {
-    void fetchPage(0);
-  }, [fetchPage]);
+    void fetchMappings();
+  }, [fetchMappings]);
 
   useEffect(() => {
-    if (search.trim() && !allLoaded) {
-      void fetchAll();
-    }
-
     setClientPage(0);
-  }, [allLoaded, fetchAll, search]);
+  }, [search, sortOrder]);
 
   const filteredAndSorted = useMemo(() => {
-    const source = isSearchMode ? allMappings : urlMappings;
-    return getVisibleMappings(source, isSearchMode ? search : '', sortOrder);
-  }, [allMappings, isSearchMode, search, sortOrder, urlMappings]);
+    const query = search.toLowerCase().trim();
+    const filtered = query
+      ? allMappings.filter((mapping) => {
+          return (
+            mapping.originalUrl.toLowerCase().includes(query) ||
+            mapping.shortUrl.toLowerCase().includes(query)
+          );
+        })
+      : allMappings;
 
-  const clientTotalPages = getClientTotalPages(filteredAndSorted.length);
-  const displayMappings = isSearchMode
-    ? getClientPageMappings(filteredAndSorted, clientPage)
-    : filteredAndSorted;
+    return [...filtered].sort((left, right) => {
+      const leftTime = new Date(left.createdAt).getTime();
+      const rightTime = new Date(right.createdAt).getTime();
+      return sortOrder === 'oldest' ? leftTime - rightTime : rightTime - leftTime;
+    });
+  }, [allMappings, search, sortOrder]);
+
+  const totalElements = filteredAndSorted.length;
+  const displayTotalPages = Math.ceil(totalElements / PAGE_SIZE);
+  const displayMappings = filteredAndSorted.slice(
+    clientPage * PAGE_SIZE,
+    (clientPage + 1) * PAGE_SIZE,
+  );
 
   const handlePageChange = (page: number) => {
-    if (isSearchMode) {
-      setClientPage(page);
-      return;
-    }
-
-    void fetchPage(page);
+    setClientPage(page);
   };
 
-  const updateMappingsAfterDelete = async (hashes: string[]) => {
+  const updateMappingsAfterDelete = (hashes: string[]) => {
     setPageError(null);
-    setTotalElements((current) => current - hashes.length);
-    setAllMappings((current) => current.filter((mapping) => !hashes.includes(mapping.urlHash)));
+    setAllMappings((current) => {
+      const nextMappings = current.filter((mapping) => !hashes.includes(mapping.urlHash));
+      const nextFilteredCount = (() => {
+        const query = search.toLowerCase().trim();
 
-    if (isSearchMode) {
-      return;
-    }
+        if (!query) {
+          return nextMappings.length;
+        }
 
-    const nextPage = getNextServerPageAfterDelete({
-      currentPageSize: urlMappings.length,
-      deletedCount: hashes.length,
-      serverPage,
+        return nextMappings.filter((mapping) => {
+          return (
+            mapping.originalUrl.toLowerCase().includes(query) ||
+            mapping.shortUrl.toLowerCase().includes(query)
+          );
+        }).length;
+      })();
+      const nextTotalPages = Math.ceil(nextFilteredCount / PAGE_SIZE);
+
+      setClientPage((currentPage) => Math.min(currentPage, Math.max(nextTotalPages - 1, 0)));
+      return nextMappings;
     });
-    await fetchPage(nextPage);
   };
 
   const handleDeleteMapping = async (urlHash: string) => {
@@ -131,13 +104,8 @@ export function useUrlMappingsCollection() {
     try {
       await deleteUrl(urlHash);
       toast.success(urlDeleteMessages.success);
-      await updateMappingsAfterDelete([urlHash]);
+      updateMappingsAfterDelete([urlHash]);
     } catch (error: unknown) {
-      if (getApiErrorStatus(error) === 401) {
-        redirectToSignIn();
-        return;
-      }
-
       const message = getApiErrorMessage(error, urlDeleteMessages.failedSingle);
       setPageError(message);
       toast.error(message);
@@ -150,14 +118,9 @@ export function useUrlMappingsCollection() {
     try {
       await Promise.all(hashes.map((hash) => deleteUrl(hash)));
       toast.success(`${hashes.length} URL${hashes.length !== 1 ? 's' : ''} deleted.`);
-      await updateMappingsAfterDelete(hashes);
+      updateMappingsAfterDelete(hashes);
       return true;
     } catch (error: unknown) {
-      if (getApiErrorStatus(error) === 401) {
-        redirectToSignIn();
-        return false;
-      }
-
       const message = getApiErrorMessage(error, urlDeleteMessages.failedBatch);
       toast.error(message);
       return false;
@@ -179,15 +142,15 @@ export function useUrlMappingsCollection() {
     copiedUrl: copiedValue,
     deletingHash,
     displayMappings,
-    displayPage: isSearchMode ? clientPage : serverPage,
-    displayTotal: isSearchMode ? filteredAndSorted.length : totalElements,
-    displayTotalPages: isSearchMode ? clientTotalPages : totalPages,
+    displayPage: clientPage,
+    displayTotal: totalElements,
+    displayTotalPages,
     handleBulkDelete,
     handleCopyUrl,
     handleDeleteMapping,
     handlePageChange,
     isLoading,
-    isSearchMode,
+    isSearchMode: search.trim().length > 0,
     pageError,
     search,
     setSearch,

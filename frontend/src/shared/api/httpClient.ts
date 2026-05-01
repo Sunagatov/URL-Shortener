@@ -56,9 +56,13 @@ axiosInstance.interceptors.response.use(
       !originalRequest ||
       error.response?.status !== 401 ||
       originalRequest._retry ||
-      !refreshToken ||
       isAuthRequest(originalRequest.url)
     ) {
+      return Promise.reject(error);
+    }
+
+    if (!refreshToken) {
+      await refreshFailedSession(originalRequest.url, error);
       return Promise.reject(error);
     }
 

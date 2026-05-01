@@ -121,6 +121,33 @@ describe('httpClient auth interceptors', () => {
     expect(raw.instance.post).not.toHaveBeenCalled();
   });
 
+  it('clears session and redirects when a protected endpoint returns 401 without a refresh token', async () => {
+    const { raw, api } = await loadHttpClient();
+    const replace = vi.fn();
+    localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, 'access-token');
+    window.history.pushState({}, '', '/account/profile');
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: {
+        ...window.location,
+        pathname: '/account/profile',
+        replace,
+      },
+    });
+
+    await expect(
+      api.responseInterceptor.rejected?.({
+        config: { url: endpoints.user.profile, headers: {} },
+        response: { status: 401 },
+      })
+    ).rejects.toMatchObject({ response: { status: 401 } });
+
+    expect(raw.instance.post).not.toHaveBeenCalled();
+    expect(localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)).toBeNull();
+    expect(localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)).toBeNull();
+    expect(replace).toHaveBeenCalledWith('/signin');
+  });
+
   it('refreshes, stores rotated tokens, and retries protected requests once', async () => {
     const { axiosInstance, raw, api } = await loadHttpClient();
     localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, 'old-refresh-token');

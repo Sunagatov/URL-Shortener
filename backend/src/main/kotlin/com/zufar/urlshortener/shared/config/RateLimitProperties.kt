@@ -4,7 +4,6 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.Min
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.validation.annotation.Validated
-import java.time.Duration
 
 @ConfigurationProperties(prefix = "rate.limit")
 @Validated
@@ -28,26 +27,4 @@ data class BucketPolicyProperties(
     @field:Min(1) val capacity: Long,
     @field:Min(1) val refillTokens: Long,
     @field:Min(1) val refillMinutes: Long
-) {
-    fun toDefinition(name: String, subjectType: RateLimitSubjectType): RateLimitPolicyDefinition =
-        RateLimitPolicyDefinition(
-            name = name,
-            subjectType = subjectType,
-            capacity = capacity,
-            refillTokens = refillTokens,
-            refillPeriod = Duration.ofMinutes(refillMinutes)
-        )
-}
-
-data class RateLimitPolicyDefinition(
-    val name: String,
-    val subjectType: RateLimitSubjectType,
-    val capacity: Long,
-    val refillTokens: Long,
-    val refillPeriod: Duration
 )
-
-enum class RateLimitSubjectType {
-    CLIENT_IP,
-    AUTHENTICATED_USER_OR_IP
-}

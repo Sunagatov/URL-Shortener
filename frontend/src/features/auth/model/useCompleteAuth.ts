@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getUserProfile } from '@/app/account/contracts';
+import { getUserProfile } from '@/features/account/api/profileApi';
 import type { AuthTokens } from '@/shared/auth/types';
 import { useAuth } from '@/shared/auth/useAuth';
 

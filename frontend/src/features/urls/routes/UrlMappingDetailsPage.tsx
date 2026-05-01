@@ -4,11 +4,11 @@ import {
   AccountPageLoadingState,
   AccountPageMessageState,
   AccountPageLayout,
-} from '@/app/account/contracts';
+} from '@/features/account/ui/layout/AccountPageLayout';
 import { routes } from '@/app/routes';
 import { deleteUrl, getUrlDetails } from '@/features/urls/api/urlsApi';
 import type { UrlMapping } from '@/features/urls/types/url';
-import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
+import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 import { useClipboard } from '@/shared/lib/useClipboard';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { ConfirmModal, useToast } from '@/shared/ui';
@@ -48,11 +48,6 @@ const UrlMappingDetailsPage: React.FC = () => {
         setUrlMapping(response);
         setErrorMessage(null);
       } catch (error: unknown) {
-        if (getApiErrorStatus(error) === 401) {
-          navigate(routes.signIn, { replace: true });
-          return;
-        }
-
         const message = getApiErrorMessage(error, 'Failed to fetch URL mapping details.');
         setUrlMapping(null);
         setErrorMessage(message);
@@ -90,11 +85,6 @@ const UrlMappingDetailsPage: React.FC = () => {
       navigate(routes.urlMappings);
       deleted = true;
     } catch (error: unknown) {
-      if (getApiErrorStatus(error) === 401) {
-        navigate(routes.signIn, { replace: true });
-        return;
-      }
-
       toast.error(getApiErrorMessage(error, urlDeleteMessages.failedSingle));
     } finally {
       setIsDeleting(false);

@@ -1,21 +1,14 @@
 package com.zufar.urlshortener.shared.filter
 
 import com.github.benmanes.caffeine.cache.Cache
-import com.zufar.urlshortener.auth.api.AuthApiPaths
-import com.zufar.urlshortener.frontendlogs.api.FrontendLogsApiPaths
-import com.zufar.urlshortener.health.api.HealthApiPaths
-import com.zufar.urlshortener.shared.ACTUATOR_PATH_PREFIX
 import com.zufar.urlshortener.shared.ANONYMOUS_USER
-import com.zufar.urlshortener.shared.API_DOCS_PATH_PREFIX
 import com.zufar.urlshortener.shared.AUTHENTICATED_USER_ID_ATTRIBUTE
-import com.zufar.urlshortener.shared.DOCS_PATH_PREFIX
-import com.zufar.urlshortener.shared.config.RateLimitPolicyDefinition
-import com.zufar.urlshortener.shared.config.RateLimitSubjectType
 import com.zufar.urlshortener.shared.config.RateLimitConfig
+import com.zufar.urlshortener.shared.config.RateLimitPolicy
+import com.zufar.urlshortener.shared.config.RateLimitSubjectKey
 import com.zufar.urlshortener.shared.http.ClientIpResolver
 import com.zufar.urlshortener.shared.http.ErrorResponseWriter
-import com.zufar.urlshortener.urls.api.UrlApiPaths
-import com.zufar.urlshortener.urls.api.UrlHashFormat
+import com.zufar.urlshortener.shared.web.ApplicationRouteClassifier
 import io.github.bucket4j.Bucket
 import io.github.bucket4j.ConsumptionProbe
 import io.micrometer.core.instrument.Counter
@@ -37,7 +30,6 @@ private const val RATE_LIMIT_ERROR_MESSAGE = "Too many requests. Please try agai
 private const val RATE_LIMIT_EXCEEDED_CODE = "RATE_LIMIT_EXCEEDED"
 private const val RATE_LIMIT_OUTCOME_ALLOWED = "allowed"
 private const val RATE_LIMIT_OUTCOME_BLOCKED = "blocked"
-private const val FAVICON_PATH = "/favicon.ico"
 
 class RateLimitFilter(
     private val rateLimitConfig: RateLimitConfig,
@@ -49,20 +41,13 @@ class RateLimitFilter(
 
     private val log = LoggerFactory.getLogger(RateLimitFilter::class.java)
     private val counters = ConcurrentHashMap<String, Counter>()
-    private val redirectPathRegex = Regex(UrlHashFormat.SECURITY_REGEX)
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         if (!rateLimitConfig.isEnabled()) {
             return true
         }
 
-        val path = request.servletPath
-        return request.method == "OPTIONS" ||
-            path == HealthApiPaths.BASE_PATH ||
-            path.startsWith(DOCS_PATH_PREFIX) ||
-            path.startsWith(API_DOCS_PATH_PREFIX) ||
-            path.startsWith(ACTUATOR_PATH_PREFIX) ||
-            path == FAVICON_PATH
+        return ApplicationRouteClassifier.shouldBypassRateLimit(request)
     }
 
     override fun doFilterInternal(
@@ -94,7 +79,7 @@ class RateLimitFilter(
                 policy.name,
                 request.method,
                 request.requestURI,
-                policy.subjectType.name.lowercase(),
+                policy.subjectKey.name.lowercase(),
                 subject,
                 clientIp,
                 toRetryAfterSeconds(probe)
@@ -103,35 +88,17 @@ class RateLimitFilter(
         }
     }
 
-    private fun resolvePolicy(request: HttpServletRequest): RateLimitPolicyDefinition? {
-        val path = request.servletPath
-        val isApiPath = path.startsWith("/api/")
-
-        return when {
-            path.startsWith("${AuthApiPaths.BASE_PATH}/") ||
-                path == AuthApiPaths.BASE_PATH ||
-                path.startsWith("${AuthApiPaths.LEGACY_BASE_PATH}/") ||
-                path == AuthApiPaths.LEGACY_BASE_PATH ->
-                rateLimitConfig.authPolicy()
-            request.method == "POST" && path == FrontendLogsApiPaths.BASE_PATH ->
-                rateLimitConfig.frontendLogsPolicy()
-            request.method == "POST" && path == UrlApiPaths.BASE_PATH ->
-                rateLimitConfig.publicCreatePolicy()
-            request.method == "GET" && redirectPathRegex.matches(path) ->
-                rateLimitConfig.publicRedirectPolicy()
-            isApiPath ->
-                rateLimitConfig.authenticatedApiPolicy()
-            else -> null
-        }
-    }
+    private fun resolvePolicy(request: HttpServletRequest): RateLimitPolicy? =
+        ApplicationRouteClassifier.resolveRateLimitedRoute(request)
+            ?.let(rateLimitConfig::policyFor)
 
     private fun resolveSubject(
-        policy: RateLimitPolicyDefinition,
+        policy: RateLimitPolicy,
         request: HttpServletRequest,
         clientIp: String
-    ): String = when (policy.subjectType) {
-        RateLimitSubjectType.CLIENT_IP -> "ip:$clientIp"
-        RateLimitSubjectType.AUTHENTICATED_USER_OR_IP -> {
+    ): String = when (policy.subjectKey) {
+        RateLimitSubjectKey.CLIENT_IP -> "ip:$clientIp"
+        RateLimitSubjectKey.AUTHENTICATED_USER_OR_IP -> {
             val userId = request.getAttribute(AUTHENTICATED_USER_ID_ATTRIBUTE)
                 ?.toString()
                 ?.takeIf(String::isNotBlank)
@@ -142,7 +109,7 @@ class RateLimitFilter(
 
     private fun applyRateLimitHeaders(
         response: HttpServletResponse,
-        policy: RateLimitPolicyDefinition,
+        policy: RateLimitPolicy,
         probe: ConsumptionProbe
     ) {
         response.setHeader(RATE_LIMIT_LIMIT_HEADER, policy.capacity.toString())
@@ -157,6 +124,7 @@ class RateLimitFilter(
     ) {
         val retryAfterSeconds = toRetryAfterSeconds(probe)
         response.setHeader(RETRY_AFTER_HEADER, retryAfterSeconds.toString())
+
         errorResponseWriter.write(
             request,
             response,
@@ -167,7 +135,7 @@ class RateLimitFilter(
         )
     }
 
-    private fun incrementCounter(policy: RateLimitPolicyDefinition, outcome: String) {
+    private fun incrementCounter(policy: RateLimitPolicy, outcome: String) {
         val key = "${policy.name}:$outcome"
         counters.computeIfAbsent(key) {
             Counter.builder("rate_limit_requests_total")
@@ -183,7 +151,6 @@ class RateLimitFilter(
         if (nanosToWait <= 0) {
             return 0
         }
-
         return ceil(nanosToWait / 1_000_000_000.0).toLong()
     }
 }

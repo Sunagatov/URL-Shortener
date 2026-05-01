@@ -1,9 +1,7 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import * as profileApi from '@/features/account/api/profileApi';
 import UserAccountPage from '@/features/account/routes/UserAccountPage';
-
-const logout = vi.fn();
 
 vi.mock('@/features/account/api/profileApi', () => ({
   getUserProfile: vi.fn(),
@@ -11,7 +9,7 @@ vi.mock('@/features/account/api/profileApi', () => ({
 
 vi.mock('@/shared/auth/useAuth', () => ({
   useAuth: () => ({
-    logout,
+    logout: vi.fn(),
     login: vi.fn(),
     updateUser: vi.fn(),
     isAuthenticated: true,
@@ -68,7 +66,7 @@ describe('UserAccount', () => {
     expect(await screen.findByText('Request failed')).toBeInTheDocument();
   });
 
-  it('logs out and redirects to sign-in when the session is no longer valid', async () => {
+  it('shows the backend message when profile loading is rejected', async () => {
     mockGetUserProfile.mockRejectedValue({
       response: {
         status: 404,
@@ -80,8 +78,8 @@ describe('UserAccount', () => {
 
     renderUserAccount();
 
-    expect(await screen.findByText('Sign In Destination')).toBeInTheDocument();
-    await waitFor(() => expect(logout).toHaveBeenCalled());
+    expect(await screen.findByText('Profile unavailable')).toBeInTheDocument();
+    expect(screen.getByText('User not found')).toBeInTheDocument();
   });
 
   it('renders only the available first name in the profile header', async () => {

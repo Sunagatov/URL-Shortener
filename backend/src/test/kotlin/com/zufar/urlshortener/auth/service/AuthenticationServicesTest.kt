@@ -12,7 +12,6 @@ import com.zufar.urlshortener.auth.exception.InvalidVerificationCodeException
 import com.zufar.urlshortener.auth.exception.VerificationResendTooSoonException
 import com.zufar.urlshortener.auth.security.JwtTokenProvider
 import com.zufar.urlshortener.auth.security.withTokenVersion
-import com.zufar.urlshortener.auth.validation.AuthRequestValidator
 import com.zufar.urlshortener.users.entity.UserAccountDocument
 import com.zufar.urlshortener.users.repository.UserAccountRepository
 import org.junit.jupiter.api.Test
@@ -44,7 +43,6 @@ class AuthenticationServicesTest {
 
     @Mock private lateinit var authenticationManager: AuthenticationManager
     @Mock private lateinit var jwtTokenProvider: JwtTokenProvider
-    @Mock private lateinit var authRequestValidator: AuthRequestValidator
     @Mock private lateinit var userAccountRepository: UserAccountRepository
     @Mock private lateinit var passwordEncoder: PasswordEncoder
     @Mock private lateinit var emailVerificationNotifier: EmailVerificationNotifier
@@ -52,7 +50,6 @@ class AuthenticationServicesTest {
 
     private fun authService() = AuthService(
         authenticationManager = authenticationManager,
-        authRequestValidator = authRequestValidator,
         userAccountRepository = userAccountRepository,
         passwordEncoder = passwordEncoder,
         jwtTokenProvider = jwtTokenProvider,
@@ -131,7 +128,6 @@ class AuthenticationServicesTest {
     fun `register returns tokens immediately when email verification is disabled`() {
         val authService = AuthService(
             authenticationManager = authenticationManager,
-            authRequestValidator = authRequestValidator,
             userAccountRepository = userAccountRepository,
             passwordEncoder = passwordEncoder,
             jwtTokenProvider = jwtTokenProvider,

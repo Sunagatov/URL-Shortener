@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FaExclamationTriangle, FaRedo, FaShieldAlt } from 'react-icons/fa';
+import { FaClock, FaEnvelope, FaExclamationTriangle, FaRedo, FaShieldAlt } from 'react-icons/fa';
 import { routes } from '@/app/routes';
 import { useCompleteAuth } from '@/features/auth/model/useCompleteAuth';
 import { useVerificationCodeFlow } from '@/features/auth/model/verificationCodeFlow';
@@ -12,10 +12,34 @@ import {
   AuthStatusView,
   AuthSupportCard,
 } from '@/features/auth/ui/AuthFlowElements';
-import { verifyEmailBrandPanel } from '@/features/auth/ui/AuthRoutePanels';
+import { AuthBrandPanel } from '@/features/auth/ui/AuthBrandPanel';
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { Button } from '@/shared/ui';
+
+const verifyEmailBrandPanel = (
+  <AuthBrandPanel
+    className="auth-brand-panel relative hidden flex-shrink-0 flex-col overflow-hidden px-12 py-16 lg:flex lg:w-[480px] xl:w-[520px]"
+    heading={
+      <>
+        Check your
+        <br />
+        <span className="gradient-text-animated">inbox.</span>
+      </>
+    }
+    description="We sent a 6-digit code to your email. Enter it below to activate your account."
+    features={[
+      { icon: FaEnvelope, text: 'Code sent to your inbox' },
+      { icon: FaClock, text: 'Code expires in 10 minutes' },
+      { icon: FaShieldAlt, text: 'Your account stays secure' },
+    ]}
+    stats={[
+      { value: '6-digit', label: 'Code' },
+      { value: '<10 min', label: 'Expiry' },
+      { value: '99.9%', label: 'Uptime' },
+    ]}
+  />
+);
 
 const CODE_LENGTH = 6;
 

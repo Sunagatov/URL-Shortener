@@ -6,7 +6,7 @@ import * as urlsApi from '@/features/urls/api/urlsApi';
 import UserUrlMappingsPage from '@/features/urls/routes/UserUrlMappingsPage';
 
 vi.mock('@/features/urls/api/urlsApi', () => ({
-  getUserUrls: vi.fn(),
+  getAllUserUrls: vi.fn(),
   deleteUrl: vi.fn(),
 }));
 
@@ -14,7 +14,7 @@ vi.mock('@/features/account/ui/layout/AccountSidebar', () => ({
   default: () => <aside>Side Panel</aside>,
 }));
 
-const mockGetUserUrls = vi.mocked(urlsApi.getUserUrls);
+const mockGetAllUserUrls = vi.mocked(urlsApi.getAllUserUrls);
 const mockDeleteUrl = vi.mocked(urlsApi.deleteUrl);
 
 const mapping = {
@@ -44,13 +44,7 @@ describe('UserUrlMappings', () => {
   });
 
   it('renders expiration dates from expirationDate', async () => {
-    mockGetUserUrls.mockResolvedValue({
-      content: [mapping],
-      page: 0,
-      size: 6,
-      totalElements: 1,
-      totalPages: 1,
-    });
+    mockGetAllUserUrls.mockResolvedValue([mapping]);
 
     render(
       <MemoryRouter>
@@ -62,13 +56,7 @@ describe('UserUrlMappings', () => {
   });
 
   it('shows click counts and an inline open-short-url action in the card header', async () => {
-    mockGetUserUrls.mockResolvedValue({
-      content: [{ ...mapping, clickCount: 12 }],
-      page: 0,
-      size: 6,
-      totalElements: 1,
-      totalPages: 1,
-    });
+    mockGetAllUserUrls.mockResolvedValue([{ ...mapping, clickCount: 12 }]);
 
     render(
       <MemoryRouter>
@@ -83,29 +71,14 @@ describe('UserUrlMappings', () => {
     );
   });
 
-  it('refetches the previous page after deleting the only item on a non-first page', async () => {
-    mockGetUserUrls
-      .mockResolvedValueOnce({
-        content: [mapping],
-        page: 0,
-        size: 6,
-        totalElements: 7,
-        totalPages: 2,
-      })
-      .mockResolvedValueOnce({
-        content: [mapping],
-        page: 1,
-        size: 6,
-        totalElements: 7,
-        totalPages: 2,
-      })
-      .mockResolvedValueOnce({
-        content: [mapping],
-        page: 0,
-        size: 6,
-        totalElements: 6,
-        totalPages: 1,
-      });
+  it('backs up one client page after deleting the only item on the last page', async () => {
+    mockGetAllUserUrls.mockResolvedValue(
+      Array.from({ length: 7 }, (_, index) => ({
+        ...mapping,
+        urlHash: `hash-${index}`,
+        shortUrl: `https://sho.rt/hash-${index}`,
+      })),
+    );
     mockDeleteUrl.mockResolvedValue(undefined);
 
     render(
@@ -115,23 +88,17 @@ describe('UserUrlMappings', () => {
     );
 
     await userEvent.click(await screen.findByRole('button', { name: '2' }));
-    await waitFor(() => expect(mockGetUserUrls).toHaveBeenCalledWith(1, 6));
+    expect(screen.getByText('7–7')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTitle('Delete URL'));
     await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete' }));
 
-    await waitFor(() => expect(mockDeleteUrl).toHaveBeenCalledWith('abc123'));
-    await waitFor(() => expect(mockGetUserUrls).toHaveBeenCalledWith(0, 6));
+    await waitFor(() => expect(mockDeleteUrl).toHaveBeenCalledWith('hash-6'));
+    expect(screen.queryByRole('button', { name: '2' })).not.toBeInTheDocument();
   });
 
   it('shows the backend access-denied message when deletion is forbidden', async () => {
-    mockGetUserUrls.mockResolvedValue({
-      content: [mapping],
-      page: 0,
-      size: 6,
-      totalElements: 1,
-      totalPages: 1,
-    });
+    mockGetAllUserUrls.mockResolvedValue([mapping]);
     mockDeleteUrl.mockRejectedValue({
       response: {
         status: 403,
@@ -156,13 +123,7 @@ describe('UserUrlMappings', () => {
   });
 
   it('opens a confirm modal before deleting a URL from the list', async () => {
-    mockGetUserUrls.mockResolvedValue({
-      content: [mapping],
-      page: 0,
-      size: 6,
-      totalElements: 1,
-      totalPages: 1,
-    });
+    mockGetAllUserUrls.mockResolvedValue([mapping]);
 
     render(
       <MemoryRouter>
@@ -177,21 +138,14 @@ describe('UserUrlMappings', () => {
   });
 
   it('clears hidden selections after moving to a different page', async () => {
-    mockGetUserUrls
-      .mockResolvedValueOnce({
-        content: [mapping],
-        page: 0,
-        size: 6,
-        totalElements: 7,
-        totalPages: 2,
-      })
-      .mockResolvedValueOnce({
-        content: [{ ...mapping, urlHash: 'xyz789', shortUrl: 'https://sho.rt/xyz789' }],
-        page: 1,
-        size: 6,
-        totalElements: 7,
-        totalPages: 2,
-      });
+    mockGetAllUserUrls.mockResolvedValue([
+      ...Array.from({ length: 6 }, (_, index) => ({
+        ...mapping,
+        urlHash: `hash-${index}`,
+        shortUrl: `https://sho.rt/hash-${index}`,
+      })),
+      { ...mapping, urlHash: 'xyz789', shortUrl: 'https://sho.rt/xyz789' },
+    ]);
 
     render(
       <MemoryRouter>
@@ -207,7 +161,7 @@ describe('UserUrlMappings', () => {
 
     await userEvent.click(screen.getByRole('button', { name: '2' }));
 
-    await waitFor(() => expect(mockGetUserUrls).toHaveBeenCalledWith(1, 6));
+    expect(screen.getByText('7–7')).toBeInTheDocument();
     expect(screen.getByText('Select URLs')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Delete' })).toBeDisabled();
   });

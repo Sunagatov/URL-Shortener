@@ -11,6 +11,7 @@ import com.zufar.urlshortener.auth.dto.SignUpResponse
 import com.zufar.urlshortener.auth.dto.VerificationChallengeResponse
 import com.zufar.urlshortener.auth.dto.VerifyEmailRequest
 import com.zufar.urlshortener.auth.service.AuthService
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -25,31 +26,31 @@ class AuthController(
 
     @PostMapping("/signin")
     fun authenticateUser(
-        @RequestBody signInRequest: SignInRequest
+        @Valid @RequestBody signInRequest: SignInRequest
     ): ResponseEntity<AuthResponse> =
         ResponseEntity.ok(authService.signIn(signInRequest))
 
     @PostMapping("/signup")
     fun registerUser(
-        @RequestBody signUpRequest: SignUpRequest
+        @Valid @RequestBody signUpRequest: SignUpRequest
     ): ResponseEntity<SignUpResponse> =
         ResponseEntity.ok(authService.signUp(signUpRequest))
 
     @PostMapping("/refresh-token")
     fun refreshAccessToken(
-        @RequestBody refreshTokenRequest: RefreshTokenRequest
+        @Valid @RequestBody refreshTokenRequest: RefreshTokenRequest
     ): ResponseEntity<RefreshTokenResponse> =
         ResponseEntity.ok(authService.refreshAccessToken(refreshTokenRequest))
 
     @PostMapping("/verify-email")
     fun verifyEmail(
-        @RequestBody verifyEmailRequest: VerifyEmailRequest
+        @Valid @RequestBody verifyEmailRequest: VerifyEmailRequest
     ): ResponseEntity<AuthResponse> =
         ResponseEntity.ok(authService.verifyEmail(verifyEmailRequest))
 
     @PostMapping("/resend-verification")
     fun resendVerificationCode(
-        @RequestBody resendVerificationRequest: ResendVerificationRequest
+        @Valid @RequestBody resendVerificationRequest: ResendVerificationRequest
     ): ResponseEntity<VerificationChallengeResponse> =
         ResponseEntity.ok(authService.resendVerificationCode(resendVerificationRequest))
 }

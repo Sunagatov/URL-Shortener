@@ -1,19 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   formatUrlDate,
-  getDashboardUrlMappings,
   getDomainLabel,
   getShortUrlSlug,
-  type DashboardUrlMapping,
-} from '@/app/urls/contracts';
+} from '@/features/urls/lib/urlMappings';
+import { getUserUrlsUpTo } from '@/features/urls/api/urlsApi';
+import type { UrlMapping as DashboardUrlMapping } from '@/features/urls/types/url';
 import type {
   DashboardActivityItem,
   DashboardRecentUrlItem,
   DashboardStat,
 } from '@/features/account/types/dashboard';
-import { routes } from '@/app/routes';
-import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
+import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 import { useToast } from '@/shared/ui';
 
 const DASHBOARD_SAMPLE_SIZE = 120;
@@ -55,7 +53,6 @@ function buildActivity(urlMappings: DashboardUrlMapping[]): DashboardActivityIte
 }
 
 export function useDashboardOverview() {
-  const navigate = useNavigate();
   const toast = useToast();
   const [urlMappings, setUrlMappings] = useState<DashboardUrlMapping[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,7 +61,7 @@ export function useDashboardOverview() {
   const fetchOverview = useCallback(async () => {
     try {
       setIsLoading(true);
-      const mappings = await getDashboardUrlMappings(DASHBOARD_SAMPLE_SIZE);
+      const mappings = await getUserUrlsUpTo(DASHBOARD_SAMPLE_SIZE);
       setUrlMappings(
         [...mappings].sort(
           (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
@@ -72,18 +69,13 @@ export function useDashboardOverview() {
       );
       setError(null);
     } catch (requestError: unknown) {
-      if (getApiErrorStatus(requestError) === 401) {
-        navigate(routes.signIn, { replace: true });
-        return;
-      }
-
       const message = getApiErrorMessage(requestError, 'Failed to load dashboard activity.');
       setError(message);
       toast.error(message);
     } finally {
       setIsLoading(false);
     }
-  }, [navigate, toast]);
+  }, [toast]);
 
   useEffect(() => {
     void fetchOverview();

@@ -15,7 +15,6 @@ class UserDetailsProviderTest {
     private val userProfileService = UserAccountService(
         authenticatedUserContext = authenticatedUserContext,
         passwordEncoder = mock(),
-        changePasswordValidator = mock(),
         clock = Clock.systemUTC()
     )
 
