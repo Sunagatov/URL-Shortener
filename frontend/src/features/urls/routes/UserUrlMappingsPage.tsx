@@ -6,7 +6,7 @@ import {
   AccountPageLoadingState,
 } from '@/app/layout/AccountPageLayout';
 import { routes } from '@/app/routes';
-import { formatUrlDate, PAGE_SIZE } from '@/features/urls/lib/urlMappings';
+import { formatUrlDate } from '@/features/urls/lib/urlMappings';
 import { urlDeleteMessages } from '@/features/urls/lib/urlMessages';
 import { useUserUrlMappings } from '@/features/urls/model/useUserUrlMappings';
 import { UrlMappingCard } from '@/features/urls/ui/UrlMappingCard';
@@ -117,24 +117,38 @@ const UserUrlMappingsPage: React.FC = () => {
       ) : null}
 
       {displayMappings.length > 0 ? (
-        <div className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
-          {displayMappings.map((mapping, index) => (
-            <UrlMappingCard
-              key={mapping.urlHash}
-              copiedUrl={copiedUrl}
-              formatDate={formatUrlDate}
-              index={displayPage * PAGE_SIZE + index + 1}
-              isDeleting={deletingHash === mapping.urlHash}
-              isSelectMode={isSelectMode}
-              isSelected={selectedHashes.has(mapping.urlHash)}
-              mapping={mapping}
-              onCopy={handleCopyUrl}
-              onDelete={() => setPendingDeleteHash(mapping.urlHash)}
-              onDetails={() => navigate(routes.urlDetails(mapping.urlHash))}
-              onToggleSelect={() => toggleSelect(mapping.urlHash)}
-            />
-          ))}
-        </div>
+        <>
+          <style>{`
+            @keyframes urlCardIn {
+              from { opacity: 0; transform: translateY(10px); }
+              to   { opacity: 1; transform: translateY(0);    }
+            }
+          `}</style>
+          <div className="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {displayMappings.map((mapping, index) => (
+              <div
+                key={mapping.urlHash}
+                style={{
+                  animation: 'urlCardIn 0.35s ease both',
+                  animationDelay: `${index * 60}ms`,
+                }}
+              >
+                <UrlMappingCard
+                  copiedUrl={copiedUrl}
+                  formatDate={formatUrlDate}
+                  isDeleting={deletingHash === mapping.urlHash}
+                  isSelectMode={isSelectMode}
+                  isSelected={selectedHashes.has(mapping.urlHash)}
+                  mapping={mapping}
+                  onCopy={handleCopyUrl}
+                  onDelete={() => setPendingDeleteHash(mapping.urlHash)}
+                  onDetails={() => navigate(routes.urlDetails(mapping.urlHash))}
+                  onToggleSelect={() => toggleSelect(mapping.urlHash)}
+                />
+              </div>
+            ))}
+          </div>
+        </>
       ) : isSearchMode ? (
         <UrlMappingsEmptyState
           actionLabel="Clear search"

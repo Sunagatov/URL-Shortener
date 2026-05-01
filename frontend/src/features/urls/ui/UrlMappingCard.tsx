@@ -1,9 +1,8 @@
 import type { MouseEvent } from 'react';
-import { useState } from 'react';
-import { FaCheck, FaChevronRight, FaExternalLinkAlt, FaTrash } from 'react-icons/fa';
-import { getDomainLabel, getShortUrlSlug } from '@/features/urls/lib/urlMappings';
+import { useEffect, useRef, useState } from 'react';
+import { FaCheck, FaEllipsisV, FaExternalLinkAlt, FaTrash } from 'react-icons/fa';
+import { getDomainLabel } from '@/features/urls/lib/urlMappings';
 import type { UrlMapping } from '@/shared/types';
-import { Button } from '@/shared/ui';
 import {
   UrlCopyButton,
   UrlExternalLinkButton,
@@ -15,7 +14,6 @@ import {
 interface UrlMappingCardProps {
   copiedUrl: string | null;
   formatDate: (date: string) => string;
-  index: number;
   isDeleting: boolean;
   isSelectMode?: boolean;
   isSelected?: boolean;
@@ -24,6 +22,13 @@ interface UrlMappingCardProps {
   onDelete: () => void;
   onDetails: () => void;
   onToggleSelect?: () => void;
+}
+
+function getSparkHeights(urlHash: string): number[] {
+  return Array.from({ length: 6 }, (_, i) => {
+    const code = urlHash.charCodeAt(i % urlHash.length);
+    return 2 + (code % 9); // 2–10 px, deterministic per URL
+  });
 }
 
 const FaviconImage = ({ domain }: { domain: string }) => {
@@ -35,7 +40,6 @@ const FaviconImage = ({ domain }: { domain: string }) => {
 export const UrlMappingCard = ({
   copiedUrl,
   formatDate,
-  index,
   isDeleting,
   isSelectMode = false,
   isSelected = false,
@@ -46,13 +50,25 @@ export const UrlMappingCard = ({
   onToggleSelect,
 }: UrlMappingCardProps) => {
   const domain = getDomainLabel(mapping.originalUrl);
-  const shortSlug = getShortUrlSlug(mapping.shortUrl);
+  const shortDisplay = mapping.shortUrl.replace(/^https?:\/\//, '');
   const clickCountLabel = `${mapping.clickCount} ${mapping.clickCount === 1 ? 'click' : 'clicks'}`;
+  const sparkHeights = getSparkHeights(mapping.urlHash);
 
-  const stopPropagation = (event: MouseEvent) => {
-    event.stopPropagation();
-  };
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const onOutside = (e: Event) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onOutside);
+    return () => document.removeEventListener('mousedown', onOutside);
+  }, [isMenuOpen]);
+
+  const stopPropagation = (event: MouseEvent) => event.stopPropagation();
   const handleCardClick = isSelectMode ? onToggleSelect : onDetails;
 
   return (
@@ -64,6 +80,7 @@ export const UrlMappingCard = ({
           : 'border-white/[0.07] bg-white/[0.04] hover:border-blue-500/25 hover:bg-white/[0.055]'
       }`}
     >
+      {/* ── Header ─────────────────────────────────────────── */}
       <div className="flex items-center gap-3 border-b border-white/[0.06] px-5 py-3.5">
         {isSelectMode ? (
           <div
@@ -78,18 +95,29 @@ export const UrlMappingCard = ({
             <FaviconImage domain={domain} />
           </div>
         )}
+
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-white/50">#{index}</span>
-            <span className="text-xs text-white/25">·</span>
-            <span className="truncate text-xs text-white/45">{domain}</span>
-          </div>
+          <span className="truncate text-xs font-medium text-white/50">{domain}</span>
           <p className="mt-0.5 text-xs text-white/25">{formatDate(mapping.createdAt)}</p>
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45">
-            {clickCountLabel}
-          </span>
+
+        {/* Click count + sparkbar + actions */}
+        <div className="flex items-center gap-2">
+          <div className="flex flex-col items-end gap-1.5">
+            <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45">
+              {clickCountLabel}
+            </span>
+            <div className="flex items-end gap-[2px]" style={{ height: '10px' }}>
+              {sparkHeights.map((h, i) => (
+                <div
+                  key={i}
+                  className="w-[3px] rounded-sm bg-blue-400/30"
+                  style={{ height: `${h}px` }}
+                />
+              ))}
+            </div>
+          </div>
+
           {!isSelectMode && (
             <>
               <a
@@ -99,37 +127,62 @@ export const UrlMappingCard = ({
                 onClick={stopPropagation}
                 className="rounded-lg p-2 text-white/30 transition-all hover:bg-blue-500/10 hover:text-blue-300"
                 title="Open short URL"
-                aria-label={`Open short URL ${mapping.shortUrl}`}
+                aria-label={`Open ${mapping.shortUrl}`}
               >
                 <FaExternalLinkAlt className="h-3 w-3" />
               </a>
-              <FaChevronRight className="h-3 w-3 flex-shrink-0 text-white/15 transition-colors group-hover:text-white/40" />
+
+              {/* ··· overflow menu */}
+              <div className="relative" ref={menuRef} onClick={stopPropagation}>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsMenuOpen((v) => !v);
+                  }}
+                  className="rounded-lg p-2 text-white/30 transition-all hover:bg-white/[0.06] hover:text-white/60"
+                  aria-label="More options"
+                >
+                  <FaEllipsisV className="h-3 w-3" />
+                </button>
+
+                {isMenuOpen && (
+                  <div className="absolute right-0 top-full z-50 mt-1 min-w-[148px] rounded-xl border border-white/[0.08] bg-[#0d1424] py-1 shadow-xl shadow-black/50">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsMenuOpen(false);
+                        onDelete();
+                      }}
+                      disabled={isDeleting}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-xs text-red-400/70 transition-colors hover:bg-red-900/20 hover:text-red-300 disabled:opacity-40"
+                    >
+                      <FaTrash className="h-2.5 w-2.5" />
+                      <span>{isDeleting ? 'Deleting…' : 'Delete'}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </>
           )}
         </div>
       </div>
 
+      {/* ── Body ───────────────────────────────────────────── */}
       <div className="space-y-3 px-5 py-4">
         <div>
           <UrlFieldLabel>Short URL</UrlFieldLabel>
-          <div className="group/row flex items-center gap-2 rounded-xl border border-white/[0.06] bg-[#0a1220] px-3 py-2.5 transition-colors hover:border-blue-500/20">
+          <div className="flex items-center gap-2 rounded-xl border border-white/[0.06] bg-[#0a1220] px-3 py-2.5 transition-colors hover:border-blue-500/20">
             <span
               className="flex-1 truncate text-sm text-blue-400"
               style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem' }}
             >
-              …/{shortSlug}
+              {shortDisplay}
             </span>
-            <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover/row:opacity-100">
-              <span
-                onClick={(event) => {
-                  stopPropagation(event);
-                }}
-              >
+            <div className="flex shrink-0 items-center gap-1">
+              <span onClick={stopPropagation}>
                 <UrlCopyButton
                   copied={copiedUrl === mapping.shortUrl}
-                  onCopy={() => {
-                    void onCopy(mapping.shortUrl);
-                  }}
+                  onCopy={() => { void onCopy(mapping.shortUrl); }}
                   primary
                 />
               </span>
@@ -153,7 +206,7 @@ export const UrlMappingCard = ({
 
         <div>
           <UrlFieldLabel>Original URL</UrlFieldLabel>
-          <div className="group/row flex items-center gap-2 rounded-xl border border-white/[0.05] bg-white/[0.03] px-3 py-2.5 transition-colors hover:border-white/[0.10]">
+          <div className="flex items-center gap-2 rounded-xl border border-white/[0.05] bg-white/[0.03] px-3 py-2.5 transition-colors hover:border-white/[0.10]">
             <span
               className="flex-1 truncate text-xs text-white/45"
               style={{ fontFamily: 'var(--font-mono)', fontSize: '0.76rem' }}
@@ -161,17 +214,11 @@ export const UrlMappingCard = ({
             >
               {mapping.originalUrl}
             </span>
-            <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity group-hover/row:opacity-100">
-              <span
-                onClick={(event) => {
-                  stopPropagation(event);
-                }}
-              >
+            <div className="shrink-0">
+              <span onClick={stopPropagation}>
                 <UrlCopyButton
                   copied={copiedUrl === mapping.originalUrl}
-                  onCopy={() => {
-                    void onCopy(mapping.originalUrl);
-                  }}
+                  onCopy={() => { void onCopy(mapping.originalUrl); }}
                   title="Copy"
                 />
               </span>
@@ -193,25 +240,6 @@ export const UrlMappingCard = ({
           </div>
         )}
       </div>
-
-      {!isSelectMode && (
-        <div className="flex justify-end border-t border-white/[0.06] bg-white/[0.02] px-5 py-3">
-          <Button
-            onClick={event => {
-              stopPropagation(event);
-              void onDelete();
-            }}
-            variant="secondary"
-            size="sm"
-            title="Delete URL"
-            loading={isDeleting}
-            className="text-red-400/40 hover:border-red-500/20 hover:bg-red-900/20 hover:text-red-300"
-          >
-            {!isDeleting && <FaTrash className="h-3 w-3" />}
-            <span>{isDeleting ? 'Deleting…' : 'Delete'}</span>
-          </Button>
-        </div>
-      )}
     </div>
   );
 };
