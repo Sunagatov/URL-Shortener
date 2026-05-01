@@ -166,7 +166,7 @@ export function PasswordChangeForm({
               value={confirmPassword}
               onChange={event => setConfirmPassword(event.target.value)}
               required
-              className={`${inputClassName} ${!passwordsMatch ? 'border-red-500/30 focus:ring-red-500/30' : ''}`}
+              className={`${inputClassName} ${!passwordsMatch ? 'animate-error-shake border-red-500/30 focus:ring-red-500/30' : ''}`}
               placeholder="Confirm your new password"
               autoComplete="new-password"
             />
@@ -183,6 +183,7 @@ export function PasswordChangeForm({
           type="submit"
           disabled={passwordStrength.strength === 'Weak' || !passwordsMatch}
           loading={isLoading}
+          shake={Boolean(confirmPassword) && (!passwordsMatch || passwordStrength.strength === 'Weak')}
           className="w-full"
         >
           <FaLock className="h-4 w-4" />

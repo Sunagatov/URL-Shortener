@@ -1,5 +1,5 @@
 import React from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { signUp } from '@/features/auth/api/authApi';
@@ -13,13 +13,15 @@ import { routes } from '@/app/routes';
 import type { AuthTokens, SignUpResponse } from '@/shared/types';
 import { Button } from '@/shared/ui';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
-import { FaCalendarAlt, FaEnvelope, FaGlobe, FaLock, FaUser } from 'react-icons/fa';
+import { FaCalendarAlt, FaCheck, FaEnvelope, FaGlobe, FaLock, FaTimes, FaUser } from 'react-icons/fa';
 import { getAuthDestination } from '@/features/auth/lib/authRouting';
 import { useCompleteAuth } from '@/features/auth/model/useCompleteAuth';
 import { AuthAlert } from '@/features/auth/ui/AuthFlowElements';
+import { AuthCheckboxField } from '@/features/auth/ui/AuthCheckboxField';
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
 import { signUpBrandPanel } from '@/features/auth/ui/AuthRoutePanels';
 import { AuthTextField } from '@/features/auth/ui/AuthTextField';
+import { getPasswordStrength, passwordChecks } from '@/shared/lib/passwordStrength';
 
 const SignUpPage: React.FC = () => {
   usePageTitle('Sign Up');
@@ -29,12 +31,16 @@ const SignUpPage: React.FC = () => {
   const { execute, loading, error } = useApi<SignUpResponse>();
   const destination = getAuthDestination(location.state);
   const {
+    control,
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<SignUpFormInput, unknown, SignUpFormData>({
     resolver: zodResolver(signUpSchema),
   });
+  const hasValidationErrors = Object.keys(errors).length > 0;
+  const password = useWatch({ control, name: 'password', defaultValue: '' });
+  const passwordStrength = getPasswordStrength(password);
 
   const onSubmit = async (data: SignUpFormData) => {
     const result = await execute(() =>
@@ -127,6 +133,35 @@ const SignUpPage: React.FC = () => {
           autoComplete="new-password"
           error={errors.password}
         />
+        <div className="rounded-2xl border border-white/[0.07] bg-white/[0.03] px-4 py-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] uppercase tracking-[0.18em] text-white/30">Password strength</span>
+            <span className={`text-xs font-semibold ${passwordStrength.textClass}`}>
+              {password ? passwordStrength.strength : 'Start typing'}
+            </span>
+          </div>
+          <div className="mt-2 h-1 w-full rounded-full bg-white/[0.07]">
+            <div
+              className={`h-1 rounded-full transition-all duration-300 ${password ? passwordStrength.barClass : 'bg-white/10'}`}
+              style={{ width: password ? passwordStrength.width : '18%' }}
+            />
+          </div>
+          <div className="mt-3 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+            {passwordChecks.map((check) => {
+              const passes = check.isValid(password);
+
+              return (
+                <div
+                  key={check.getLabel()}
+                  className={`flex items-center gap-1.5 text-xs ${passes ? 'text-emerald-400' : 'text-white/25'}`}
+                >
+                  {passes ? <FaCheck className="h-2.5 w-2.5" /> : <FaTimes className="h-2.5 w-2.5" />}
+                  <span>{check.getLabel()}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
           <AuthTextField
@@ -151,29 +186,24 @@ const SignUpPage: React.FC = () => {
           />
         </div>
 
-        <div>
-          <label className="flex cursor-pointer items-start gap-2.5">
-            <input
-              {...register('acceptTerms')}
-              id="accept-terms"
-              type="checkbox"
-              className="mt-0.5 h-4 w-4 rounded border-white/20 bg-white/5 accent-blue-500"
-            />
-            <span className="text-sm leading-snug text-white/40">
+        <AuthCheckboxField
+          {...register('acceptTerms')}
+          id="accept-terms"
+          label={(
+            <>
               I agree to the <span className="text-white/20">Terms of Service (coming soon)</span>{' '}
               and <span className="text-white/20">Privacy Policy (coming soon)</span>
-            </span>
-          </label>
-          {errors.acceptTerms ? (
-            <p className="mt-1 text-xs text-red-400">{errors.acceptTerms.message}</p>
-          ) : null}
-        </div>
+            </>
+          )}
+          description="Account creation requires accepting the current platform terms."
+          error={errors.acceptTerms?.message}
+        />
 
         {error ? (
           <AuthAlert>{error.errorMessage}</AuthAlert>
         ) : null}
 
-        <Button type="submit" loading={loading} className="w-full" size="lg">
+        <Button type="submit" loading={loading} shake={hasValidationErrors} className="w-full" size="lg">
           <span>{loading ? 'Creating Account…' : 'Create Account'}</span>
         </Button>
       </form>

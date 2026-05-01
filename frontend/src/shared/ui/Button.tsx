@@ -5,6 +5,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: 'sm' | 'md' | 'lg';
   children: React.ReactNode;
   loading?: boolean;
+  shake?: boolean;
 }
 
 const baseClassName =
@@ -38,6 +39,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
     size = 'md',
     children,
     loading = false,
+    shake = false,
     className = '',
     disabled,
     type = 'button',
@@ -49,7 +51,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
     <button
       ref={ref}
       type={type}
-      className={`${baseClassName} ${variantClassName[variant]} ${sizeClassName[size]} ${className}`}
+      className={`${baseClassName} ${variantClassName[variant]} ${sizeClassName[size]} ${shake ? 'animate-error-shake' : ''} ${className}`}
       disabled={disabled || loading}
       {...props}
     >

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { MainLayout } from '@/app/layout/MainLayout';
 import { routes } from '@/app/routes';
 import { GuestOnlyRoute } from '@/features/auth/routes/GuestOnlyRoute';
@@ -31,11 +31,13 @@ const protectedRoutes = [
   { path: routes.urlDetails(':urlHash'), element: <UrlMappingDetailsPage /> },
 ] as const;
 
-const AppRouter = () => {
+function AppRoutes() {
+  const location = useLocation();
+
   return (
-    <Router>
-      <MainLayout>
-        <Routes>
+    <MainLayout>
+      <div key={location.pathname} className="route-transition">
+        <Routes location={location}>
           <Route path={routes.home} element={<UrlShortenerPage />} />
           {guestRoutes.map(({ path, element }) => (
             <Route
@@ -61,7 +63,15 @@ const AppRouter = () => {
           ))}
           <Route path="*" element={<Navigate to={routes.home} replace />} />
         </Routes>
-      </MainLayout>
+      </div>
+    </MainLayout>
+  );
+}
+
+const AppRouter = () => {
+  return (
+    <Router>
+      <AppRoutes />
     </Router>
   );
 };

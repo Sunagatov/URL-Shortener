@@ -38,7 +38,7 @@ function ProfileField({ error, icon: Icon, label, registration, ...inputProps }:
         <input
           {...registration}
           {...inputProps}
-          className={`${fieldInputClass} ${error ? 'border-red-500/30 focus:ring-red-500/30' : ''}`}
+          className={`${fieldInputClass} ${error ? 'animate-error-shake border-red-500/30 focus:ring-red-500/30' : ''}`}
         />
       </div>
       {error?.message ? <p className="mt-1 text-xs text-red-400">{error.message}</p> : null}
@@ -49,6 +49,7 @@ function ProfileField({ error, icon: Icon, label, registration, ...inputProps }:
 export function EditProfileForm({ user, onCancel, onSuccess }: EditProfileFormProps) {
   const { errors, handleCancel, handleSubmit, isLoading, onSubmit, register, serverError } =
     useEditProfileForm(user, onSuccess, onCancel);
+  const hasValidationErrors = Object.keys(errors).length > 0;
 
   return (
     <div className="overflow-hidden rounded-2xl border border-blue-500/20 bg-white/[0.04] lg:col-span-2">
@@ -182,7 +183,7 @@ export function EditProfileForm({ user, onCancel, onSuccess }: EditProfileFormPr
           >
             Cancel
           </Button>
-          <Button type="submit" loading={isLoading} className="w-full sm:w-auto">
+          <Button type="submit" loading={isLoading} shake={hasValidationErrors} className="w-full sm:w-auto">
             <span>{isLoading ? 'Saving…' : 'Save Changes'}</span>
           </Button>
         </div>

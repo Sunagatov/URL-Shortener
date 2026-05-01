@@ -6,7 +6,8 @@ import {
   FaQrcode,
   FaTrash,
 } from 'react-icons/fa';
-import { Button } from '@/shared/ui';
+import { QRCodeSVG } from 'qrcode.react';
+import { Button, Tooltip } from '@/shared/ui';
 import type { UrlMapping } from '@/shared/types';
 import { formatUrlDate, getDomainLabel } from '@/features/urls/lib/urlMappings';
 import {
@@ -49,15 +50,14 @@ export function UrlDetailsHeader({ onBack, onDelete, urlMapping }: UrlDetailsHea
           </div>
         </div>
         <div className="flex gap-2">
-          <div className="group relative inline-flex">
-            <Button variant="secondary" size="sm" disabled className="border-dashed opacity-40">
-              <FaLock className="h-3 w-3" />
-              <span className="hidden sm:inline">Edit</span>
-            </Button>
-            <div className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/10 bg-[#0d0f1e] px-2.5 py-1.5 text-xs text-white/55 opacity-0 shadow-xl transition-opacity duration-150 group-hover:opacity-100">
-              Coming soon
-            </div>
-          </div>
+          <Tooltip content="Editing is still locked while inline URL editing ships">
+            <span className="inline-flex">
+              <Button variant="secondary" size="sm" disabled className="border-dashed opacity-40">
+                <FaLock className="h-3 w-3" />
+                <span className="hidden sm:inline">Edit</span>
+              </Button>
+            </span>
+          </Tooltip>
           <Button onClick={onDelete} variant="danger" size="sm">
             <FaTrash className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Delete</span>
@@ -169,13 +169,25 @@ export function UrlMetadataCard({ urlMapping }: { urlMapping: UrlMapping }) {
             tone="warning"
           />
         ) : null}
-        <div className="flex cursor-not-allowed items-center gap-3 rounded-xl border border-white/[0.05] bg-white/[0.02] p-3 opacity-40">
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-white/5">
-            <FaQrcode className="h-3.5 w-3.5 text-white/40" />
+        <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+          <div className="mb-3 flex items-center gap-3">
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-emerald-500/15 bg-emerald-500/12">
+              <FaQrcode className="h-3.5 w-3.5 text-emerald-300" />
+            </div>
+            <div>
+              <p className="mb-0.5 text-[10px] uppercase tracking-widest text-white/30">QR Code</p>
+              <p className="text-xs text-white/45">Scan to open the short link on another device</p>
+            </div>
           </div>
-          <div>
-            <p className="mb-0.5 text-[10px] uppercase tracking-widest text-white/30">QR Code</p>
-            <p className="text-xs text-white/40">Coming soon</p>
+          <div className="flex justify-center rounded-2xl border border-white/[0.06] bg-white px-4 py-5">
+            <QRCodeSVG
+              value={urlMapping.shortUrl}
+              size={132}
+              bgColor="#ffffff"
+              fgColor="#0f172a"
+              level="M"
+              marginSize={4}
+            />
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import type { MouseEvent } from 'react';
-import { useEffect, useRef, useState } from 'react';
-import { FaCheck, FaEllipsisV, FaExternalLinkAlt, FaTrash } from 'react-icons/fa';
+import { useState } from 'react';
+import { FaCheck, FaExternalLinkAlt, FaTrash } from 'react-icons/fa';
 import { getDomainLabel } from '@/features/urls/lib/urlMappings';
 import type { UrlMapping } from '@/shared/types';
 import {
@@ -10,6 +10,7 @@ import {
   UrlFieldLabel,
   UrlFavicon,
 } from '@/features/urls/ui/UrlSurfacePrimitives';
+import { Tooltip } from '@/shared/ui';
 
 interface UrlMappingCardProps {
   copiedUrl: string | null;
@@ -53,20 +54,6 @@ export const UrlMappingCard = ({
   const shortDisplay = mapping.shortUrl.replace(/^https?:\/\//, '');
   const clickCountLabel = `${mapping.clickCount} ${mapping.clickCount === 1 ? 'click' : 'clicks'}`;
   const sparkHeights = getSparkHeights(mapping.urlHash);
-
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!isMenuOpen) return;
-    const onOutside = (e: Event) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setIsMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', onOutside);
-    return () => document.removeEventListener('mousedown', onOutside);
-  }, [isMenuOpen]);
 
   const stopPropagation = (event: MouseEvent) => event.stopPropagation();
   const handleCardClick = isSelectMode ? onToggleSelect : onDetails;
@@ -120,48 +107,32 @@ export const UrlMappingCard = ({
 
           {!isSelectMode && (
             <>
-              <a
-                href={mapping.shortUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={stopPropagation}
-                className="rounded-lg p-2 text-white/30 transition-all hover:bg-blue-500/10 hover:text-blue-300"
-                title="Open short URL"
-                aria-label={`Open ${mapping.shortUrl}`}
-              >
-                <FaExternalLinkAlt className="h-3 w-3" />
-              </a>
-
-              {/* ··· overflow menu */}
-              <div className="relative" ref={menuRef} onClick={stopPropagation}>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsMenuOpen((v) => !v);
-                  }}
-                  className="rounded-lg p-2 text-white/30 transition-all hover:bg-white/[0.06] hover:text-white/60"
-                  aria-label="More options"
+              <Tooltip content="Open short URL">
+                <a
+                  href={mapping.shortUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={stopPropagation}
+                  className="rounded-lg p-2 text-white/30 transition-all hover:bg-blue-500/10 hover:text-blue-300"
+                  aria-label={`Open short URL ${mapping.shortUrl}`}
                 >
-                  <FaEllipsisV className="h-3 w-3" />
+                  <FaExternalLinkAlt className="h-3 w-3" />
+                </a>
+              </Tooltip>
+              <Tooltip content="Delete URL">
+                <button
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onDelete();
+                  }}
+                  disabled={isDeleting}
+                  className="rounded-lg p-2 text-red-400/70 transition-all hover:bg-red-900/20 hover:text-red-300 disabled:opacity-40"
+                  aria-label="Delete URL"
+                  title="Delete URL"
+                >
+                  <FaTrash className="h-3 w-3" />
                 </button>
-
-                {isMenuOpen && (
-                  <div className="absolute right-0 top-full z-50 mt-1 min-w-[148px] rounded-xl border border-white/[0.08] bg-[#0d1424] py-1 shadow-xl shadow-black/50">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsMenuOpen(false);
-                        onDelete();
-                      }}
-                      disabled={isDeleting}
-                      className="flex w-full items-center gap-2 px-3 py-2 text-xs text-red-400/70 transition-colors hover:bg-red-900/20 hover:text-red-300 disabled:opacity-40"
-                    >
-                      <FaTrash className="h-2.5 w-2.5" />
-                      <span>{isDeleting ? 'Deleting…' : 'Delete'}</span>
-                    </button>
-                  </div>
-                )}
-              </div>
+              </Tooltip>
             </>
           )}
         </div>
@@ -194,12 +165,11 @@ export const UrlMappingCard = ({
               />
             </div>
             {copiedUrl === mapping.shortUrl && (
-              <span
-                className="max-w-[8.5rem] shrink truncate text-[10px] font-medium text-blue-400 sm:max-w-[12rem]"
-                title={`${mapping.shortUrl} copied!`}
-              >
-                {mapping.shortUrl} copied!
-              </span>
+              <Tooltip content={`${mapping.shortUrl} copied!`}>
+                <span className="max-w-[8.5rem] shrink truncate text-[10px] font-medium text-blue-400 sm:max-w-[12rem]">
+                  {mapping.shortUrl} copied!
+                </span>
+              </Tooltip>
             )}
           </div>
         </div>
@@ -210,7 +180,7 @@ export const UrlMappingCard = ({
             <span
               className="flex-1 truncate text-xs text-white/45"
               style={{ fontFamily: 'var(--font-mono)', fontSize: '0.76rem' }}
-              title={mapping.originalUrl}
+              aria-label={mapping.originalUrl}
             >
               {mapping.originalUrl}
             </span>

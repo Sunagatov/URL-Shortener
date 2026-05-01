@@ -6,6 +6,7 @@ import {
   FaExternalLinkAlt,
   FaLink,
 } from 'react-icons/fa';
+import { Tooltip } from '@/shared/ui';
 
 export function UrlSurfaceCard({
   children,
@@ -42,14 +43,16 @@ export function UrlActionIconButton({
   title: string;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-lg p-1.5 transition-all ${className}`}
-      title={title}
-    >
-      {children}
-    </button>
+    <Tooltip content={title}>
+      <button
+        type="button"
+        onClick={onClick}
+        className={`rounded-lg p-1.5 transition-all ${className}`}
+        aria-label={title}
+      >
+        {children}
+      </button>
+    </Tooltip>
   );
 }
 
@@ -97,21 +100,22 @@ export function UrlExternalLinkButton({
   title?: string;
 }) {
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      onClick={onClick}
-      title={title}
-      aria-label={label}
-      className={`rounded-lg p-1.5 transition-all ${
-        primary
-          ? 'text-white/30 hover:bg-blue-500/10 hover:text-blue-300'
-          : 'text-white/30 hover:bg-white/5 hover:text-white/60'
-      }`}
-    >
-      <FaExternalLinkAlt className="h-3 w-3" />
-    </a>
+    <Tooltip content={title}>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={onClick}
+        aria-label={label ?? title}
+        className={`rounded-lg p-1.5 transition-all ${
+          primary
+            ? 'text-white/30 hover:bg-blue-500/10 hover:text-blue-300'
+            : 'text-white/30 hover:bg-white/5 hover:text-white/60'
+        }`}
+      >
+        <FaExternalLinkAlt className="h-3 w-3" />
+      </a>
+    </Tooltip>
   );
 }
 

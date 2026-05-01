@@ -115,6 +115,7 @@ export const LayoutHeader = ({
                         key={item.path}
                         to={item.path}
                         onClick={onCloseUserMenu}
+                        aria-label={`Open ${item.label} page`}
                         className={`relative flex items-center space-x-3 px-4 py-2.5 transition-colors duration-200 ${
                           active
                             ? 'bg-cyan-500/10 text-white'

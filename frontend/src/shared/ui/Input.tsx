@@ -38,7 +38,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>((
           ref={ref}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? errorId : undefined}
-          className={`${baseStyles} ${errorStyles} ${iconStyles} ${className}`}
+          className={`${baseStyles} ${errorStyles} ${iconStyles} ${error ? 'animate-error-shake' : ''} ${className}`}
           {...props}
         />
       </div>

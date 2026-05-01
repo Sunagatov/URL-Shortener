@@ -28,10 +28,11 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const isSignInRoute = pathname === routes.signIn;
   const isSignUpRoute = pathname === routes.signUp;
   const isAuthRoute = AUTH_ROUTES.has(pathname);
+  const isHomeRoute = pathname === routes.home;
   const mainClassName = [
     'flex-grow pt-[72px] md:pt-24',
     isAuthenticated ? 'pb-24 md:pb-0' : '',
-    isAccountRoute || isAuthRoute ? '' : 'flex items-center justify-center',
+    isAccountRoute || isAuthRoute || isHomeRoute ? '' : 'flex items-center justify-center',
   ].join(' ');
 
   const handleLogout = () => {

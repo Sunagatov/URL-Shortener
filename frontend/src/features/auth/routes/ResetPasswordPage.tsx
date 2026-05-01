@@ -198,7 +198,7 @@ const ResetPasswordPage: React.FC = () => {
               spellCheck={false}
               className={`${authInputClassName} pr-12 ${
                 confirmPassword && !passwordsMatch ? 'border-red-500/30 focus:ring-red-500/30' : ''
-              }`}
+              } ${confirmPassword && !passwordsMatch ? 'animate-error-shake' : ''}`}
             />
             <PasswordVisibilityToggle show={showConfirm} onToggle={toggleConfirmVisibility} />
           </div>
@@ -221,6 +221,7 @@ const ResetPasswordPage: React.FC = () => {
           type="submit"
           disabled={isSubmitDisabled}
           loading={isLoading}
+          shake={Boolean(confirmPassword) && (!passwordsMatch || passwordStrength.strength === 'Weak')}
           className="w-full"
           size="lg"
         >

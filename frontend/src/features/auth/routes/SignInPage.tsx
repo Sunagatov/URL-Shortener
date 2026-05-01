@@ -13,6 +13,7 @@ import { FaEnvelope, FaLock } from 'react-icons/fa';
 import { getAuthDestination } from '@/features/auth/lib/authRouting';
 import { useCompleteAuth } from '@/features/auth/model/useCompleteAuth';
 import { AuthAlert } from '@/features/auth/ui/AuthFlowElements';
+import { AuthCheckboxField } from '@/features/auth/ui/AuthCheckboxField';
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
 import { signInBrandPanel } from '@/features/auth/ui/AuthRoutePanels';
 import { AuthTextField } from '@/features/auth/ui/AuthTextField';
@@ -31,6 +32,7 @@ const SignInPage: React.FC = () => {
   } = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
   });
+  const hasValidationErrors = Object.keys(errors).length > 0;
 
   const onSubmit = async (data: SignInFormData) => {
     const result = await execute(() => signIn(data), {
@@ -83,13 +85,11 @@ const SignInPage: React.FC = () => {
         />
 
         <div className="flex items-center justify-between pt-1">
-          <label className="flex cursor-pointer items-center gap-2">
-            <input
-              type="checkbox"
-              className="h-3.5 w-3.5 rounded border-white/20 bg-white/5 accent-blue-500"
-            />
-            <span className="text-sm text-white/40">Remember me</span>
-          </label>
+          <AuthCheckboxField
+            id="remember-me"
+            label="Remember me"
+            description="Keep this browser signed in on devices you trust."
+          />
           <Link
             to={routes.forgotPassword}
             className="text-sm text-white/40 transition-colors hover:text-white/70"
@@ -102,39 +102,10 @@ const SignInPage: React.FC = () => {
           <AuthAlert>{error.errorMessage}</AuthAlert>
         ) : null}
 
-        <Button type="submit" loading={loading} className="w-full" size="lg">
+        <Button type="submit" loading={loading} shake={hasValidationErrors} className="w-full" size="lg">
           <span>{loading ? 'Signing In…' : 'Sign In'}</span>
         </Button>
       </form>
-
-      <div className="mt-6">
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-white/[0.08]" />
-          </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="bg-[rgb(var(--bg-base-rgb))] px-3 text-white/25">Or continue with</span>
-          </div>
-        </div>
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <Button
-            variant="secondary"
-            className="w-full"
-            disabled
-            title="Google sign-in coming soon"
-          >
-            <span className="text-white/40">Google</span>
-          </Button>
-          <Button
-            variant="secondary"
-            className="w-full"
-            disabled
-            title="GitHub sign-in coming soon"
-          >
-            <span className="text-white/40">GitHub</span>
-          </Button>
-        </div>
-      </div>
 
       <p className="mt-8 text-center text-sm text-white/40">
         Don't have an account?{' '}
