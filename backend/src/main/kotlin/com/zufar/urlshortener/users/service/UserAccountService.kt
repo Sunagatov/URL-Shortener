@@ -34,7 +34,7 @@ class UserAccountService(
         changePasswordValidator.validate(request)
         val user = authenticatedUserContext.requireAuthenticatedUser()
 
-        if (!passwordEncoder.matches(request.currentPassword, user.passwordHash)) {
+        if (!passwordEncoder.matches(request.currentPassword, user.password)) {
             throw InvalidUserRequestException("Current password is incorrect")
         }
 

@@ -1,7 +1,7 @@
 package com.zufar.urlshortener.users.service
 
 import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
-import com.zufar.urlshortener.auth.api.UserAccount
+import com.zufar.urlshortener.users.api.UserAccountRecord
 import com.zufar.urlshortener.users.exception.InvalidUserRequestException
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
 import com.zufar.urlshortener.users.validation.ChangePasswordValidator
@@ -33,12 +33,12 @@ class UserPasswordChangerTest {
 
     @Test
     fun `changePassword updates the authenticated users password`() {
-        val user = UserAccount(
+        val user = UserAccountRecord(
             id = "user-1",
             firstName = "Test",
             lastName = "User",
             email = "user@example.com",
-            passwordHash = "old-hash",
+            password = "old-hash",
             country = "USA",
             age = 30,
             createdAt = LocalDateTime.of(2024, 1, 1, 9, 0),
@@ -70,12 +70,12 @@ class UserPasswordChangerTest {
 
     @Test
     fun `changePassword rejects an invalid current password`() {
-        val user = UserAccount(
+        val user = UserAccountRecord(
             id = "user-1",
             firstName = "Test",
             lastName = "User",
             email = "user@example.com",
-            passwordHash = "old-hash",
+            password = "old-hash",
             country = "USA",
             age = 30,
             createdAt = LocalDateTime.of(2024, 1, 1, 9, 0),

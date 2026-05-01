@@ -1,7 +1,7 @@
 package com.zufar.urlshortener.users.service
 
 import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
-import com.zufar.urlshortener.auth.api.UserAccount
+import com.zufar.urlshortener.users.api.UserAccountRecord
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -23,12 +23,12 @@ class UserDetailsProviderTest {
     fun `getUserDetails returns createdAt for authenticated user`() {
         val createdAt = LocalDateTime.of(2024, 1, 15, 10, 0)
         whenever(authenticatedUserContext.requireAuthenticatedUser()).thenReturn(
-            UserAccount(
+            UserAccountRecord(
                 id = "user-1",
                 firstName = "Test",
                 lastName = "User",
                 email = "user@example.com",
-                passwordHash = "hashed",
+                password = "hashed",
                 country = "USA",
                 age = 30,
                 createdAt = createdAt,

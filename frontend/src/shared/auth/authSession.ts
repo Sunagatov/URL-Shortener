@@ -1,68 +1,66 @@
 import { storage } from '@/shared/auth/storage';
 import type { AuthTokens, User } from '@/shared/auth/types';
 
-type AuthListener = (isAuthenticated: boolean, user: User | null) => void;
+type AuthSnapshot = {
+  isAuthenticated: boolean;
+  user: User | null;
+};
 
-class AuthSession {
-    private static instance: AuthSession;
-    private listeners: Set<AuthListener> = new Set();
-    private _isAuthenticated: boolean;
-    private _user: User | null;
+type AuthListener = () => void;
 
-    private constructor() {
-        this._isAuthenticated = storage.hasValidTokens();
-        this._user = storage.getUser();
-    }
+let snapshot: AuthSnapshot = {
+  isAuthenticated: storage.hasValidTokens(),
+  user: storage.getUser(),
+};
 
-    public static getInstance(): AuthSession {
-        if (!AuthSession.instance) {
-            AuthSession.instance = new AuthSession();
-        }
-        return AuthSession.instance;
-    }
+const listeners = new Set<AuthListener>();
 
-    public get isAuthenticated(): boolean {
-        return this._isAuthenticated;
-    }
-
-    public get user(): User | null {
-        return this._user;
-    }
-
-    public login(tokens: AuthTokens, user: User | null): void {
-        storage.setTokens(tokens);
-        storage.setUser(user);
-        this._isAuthenticated = true;
-        this._user = user;
-        this.notifyListeners();
-    }
-
-    public logout(): void {
-        storage.clearAll();
-        this._isAuthenticated = false;
-        this._user = null;
-        this.notifyListeners();
-    }
-
-    public updateUser(user: User): void {
-        storage.setUser(user);
-        this._user = user;
-        this.notifyListeners();
-    }
-
-    public addListener(listener: AuthListener): void {
-        this.listeners.add(listener);
-    }
-
-    public removeListener(listener: AuthListener): void {
-        this.listeners.delete(listener);
-    }
-
-    private notifyListeners(): void {
-        this.listeners.forEach(listener => {
-            listener(this._isAuthenticated, this._user);
-        });
-    }
+function notifyListeners() {
+  listeners.forEach((listener) => {
+    listener();
+  });
 }
 
-export const authSession = AuthSession.getInstance();
+function updateSnapshot(nextSnapshot: AuthSnapshot) {
+  snapshot = nextSnapshot;
+  notifyListeners();
+}
+
+export const authSession = {
+  getSnapshot(): AuthSnapshot {
+    return snapshot;
+  },
+
+  subscribe(listener: AuthListener) {
+    listeners.add(listener);
+
+    return () => {
+      listeners.delete(listener);
+    };
+  },
+
+  login(tokens: AuthTokens, user: User | null) {
+    storage.setTokens(tokens);
+    storage.setUser(user);
+    updateSnapshot({
+      isAuthenticated: true,
+      user,
+    });
+  },
+
+  logout() {
+    storage.clearAll();
+    updateSnapshot({
+      isAuthenticated: false,
+      user: null,
+    });
+  },
+
+  updateUser(user: User) {
+    storage.setUser(user);
+    updateSnapshot({
+      ...snapshot,
+      user,
+    });
+  },
+};

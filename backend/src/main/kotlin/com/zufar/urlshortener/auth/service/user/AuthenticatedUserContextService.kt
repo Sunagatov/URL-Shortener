@@ -1,13 +1,14 @@
 package com.zufar.urlshortener.auth.service.user
 
 import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
-import com.zufar.urlshortener.auth.api.UserAccount
 import com.zufar.urlshortener.auth.exception.UserNotFoundException
+import com.zufar.urlshortener.auth.security.UserDetailsWithTokenVersion
 import com.zufar.urlshortener.auth.service.EmailNormalizer
 import com.zufar.urlshortener.shared.ANONYMOUS_USER
 import com.zufar.urlshortener.users.api.UserAccountRecord
 import com.zufar.urlshortener.users.api.UserAuthStore
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -21,29 +22,36 @@ class AuthenticatedUserContextService(
     private val userAuthStore: UserAuthStore
 ) : AuthenticatedUserContext {
 
-    override fun requireAuthenticatedUser(): UserAccount {
+    override fun requireAuthenticatedUser(): UserAccountRecord {
         val normalizedEmail = EmailNormalizer.normalize(requireAuthenticatedEmail())
 
-        val user = userAuthStore.findByEmailIgnoreCase(normalizedEmail)
+        return userAuthStore.findByEmailIgnoreCase(normalizedEmail)
             ?: throw UserNotFoundException(USER_NOT_FOUND_MESSAGE)
-
-        return user.toUserAccount()
     }
 
-    override fun requireAuthenticatedUserId(): String = requireAuthenticatedUser().id
+    override fun requireAuthenticatedUserId(): String =
+        findAuthenticatedUserIdOrNull()
+            ?: throw AuthenticationCredentialsNotFoundException(AUTHENTICATED_USER_NOT_FOUND_MESSAGE)
 
     override fun findAuthenticatedUserIdOrNull(): String? {
-        val email = currentAuthenticationName() ?: return null
-        val normalizedEmail = EmailNormalizer.normalize(email)
+        val authentication = currentAuthentication() ?: return null
+        val principalUserId = (authentication.principal as? UserDetailsWithTokenVersion)?.userId
+            ?.takeIf(String::isNotBlank)
+        if (principalUserId != null) {
+            return principalUserId
+        }
+
+        val normalizedEmail = EmailNormalizer.normalize(authentication.name)
         val user = userAuthStore.findByEmailIgnoreCase(normalizedEmail)
             ?: throw AuthenticationCredentialsNotFoundException(AUTHENTICATED_USER_NOT_FOUND_MESSAGE)
 
         return user.id ?: throw AuthenticationCredentialsNotFoundException(AUTHENTICATED_USER_NOT_FOUND_MESSAGE)
     }
 
-    override fun updatePassword(currentUser: UserAccount, encodedPassword: String, updatedAt: LocalDateTime) {
+    override fun updatePassword(currentUser: UserAccountRecord, encodedPassword: String, updatedAt: LocalDateTime) {
+        val userId = currentUser.id ?: throw UserNotFoundException(USER_NOT_FOUND_MESSAGE)
         userAuthStore.updatePassword(
-            currentUser.id,
+            userId,
             encodedPassword,
             currentUser.tokenVersion + 1,
             updatedAt
@@ -53,25 +61,12 @@ class AuthenticatedUserContextService(
     private fun requireAuthenticatedEmail(): String =
         currentAuthenticationName() ?: throw AuthenticationCredentialsNotFoundException(UNAUTHENTICATED_MESSAGE)
 
+    private fun currentAuthentication(): Authentication? =
+        SecurityContextHolder.getContext().authentication
+            ?.takeUnless { it.name.isBlank() || it.name == ANONYMOUS_USER }
+
     private fun currentAuthenticationName(): String? {
-        val authentication = SecurityContextHolder.getContext().authentication ?: return null
-        val email = authentication.name
-
-        return email.takeUnless { it.isBlank() || it == ANONYMOUS_USER }
-    }
-
-    private fun UserAccountRecord.toUserAccount(): UserAccount {
-        val userId = id ?: throw UserNotFoundException(USER_NOT_FOUND_MESSAGE)
-        return UserAccount(
-            id = userId,
-            firstName = firstName,
-            lastName = lastName,
-            email = email,
-            passwordHash = password,
-            country = country,
-            age = age,
-            createdAt = createdAt,
-            tokenVersion = tokenVersion
-        )
+        val authentication = currentAuthentication() ?: return null
+        return authentication.name
     }
 }

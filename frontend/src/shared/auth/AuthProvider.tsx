@@ -1,54 +1,40 @@
-import { createContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useCallback, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { authSession } from '@/shared/auth/authSession';
 import type { AuthContextType, AuthTokens, User } from '@/shared/auth/types';
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(authSession.isAuthenticated);
-    const [user, setUser] = useState<User | null>(authSession.user);
-    const [loading, setLoading] = useState<boolean>(false);
+  const authState = useSyncExternalStore(authSession.subscribe, authSession.getSnapshot, authSession.getSnapshot);
+  const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        const handleAuthChange = (authenticated: boolean, userData: User | null) => {
-            setIsAuthenticated(authenticated);
-            setUser(userData);
-            setLoading(false);
-        };
+  const login = useCallback((tokens: AuthTokens, userData: User | null) => {
+    setLoading(true);
+    authSession.login(tokens, userData);
+    setLoading(false);
+  }, []);
 
-        authSession.addListener(handleAuthChange);
+  const updateUser = useCallback((userData: User) => {
+    authSession.updateUser(userData);
+  }, []);
 
-        return () => {
-            authSession.removeListener(handleAuthChange);
-        };
-    }, []);
+  const logout = useCallback(() => {
+    setLoading(true);
+    authSession.logout();
+    setLoading(false);
+  }, []);
 
-    const login = useCallback((tokens: AuthTokens, userData: User | null) => {
-        setLoading(true);
-        authSession.login(tokens, userData);
-    }, []);
+  const value = useMemo<AuthContextType>(
+    () => ({
+      isAuthenticated: authState.isAuthenticated,
+      user: authState.user,
+      login,
+      updateUser,
+      logout,
+      loading,
+    }),
+    [authState.isAuthenticated, authState.user, loading, login, logout, updateUser],
+  );
 
-    const updateUser = useCallback((userData: User) => {
-        authSession.updateUser(userData);
-    }, []);
-
-    const logout = useCallback(() => {
-        setLoading(true);
-        authSession.logout();
-    }, []);
-
-    const value: AuthContextType = {
-        isAuthenticated,
-        user,
-        login,
-        updateUser,
-        logout,
-        loading,
-    };
-
-    return (
-        <AuthContext.Provider value={value}>
-            {children}
-        </AuthContext.Provider>
-    );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

@@ -20,13 +20,6 @@ repositories {
     mavenCentral()
 }
 
-sonar {
-    properties {
-        property("sonar.projectKey", "shorty-url")
-        property("sonar.projectName", "ShortyURL")
-    }
-}
-
 val mockitoVersion = "5.23.0"
 val mockitoKotlinVersion = "6.3.0"
 val springdocVersion = "3.0.3"
@@ -118,21 +111,12 @@ sonarqube {
         property("sonar.sources", "src/main/kotlin")
         property("sonar.tests", "src/test/kotlin")
         property("sonar.language", "kotlin")
-        property("sonar.kotlin.detekt.reportPaths", "build/reports/detekt")
         property("sonar.jacoco.reportPaths", "${layout.buildDirectory}/jacoco/test.exec")
     }
 }
 
 tasks.named("sonarqube") {
-    dependsOn("jacocoTestReport") // Ensure JaCoCo report is generated before SonarCloud analysis
-}
-
-sourceSets {
-    main {
-        kotlin {
-            srcDir(layout.buildDirectory.dir("generated/api/src/main/kotlin"))
-        }
-    }
+    dependsOn("jacocoTestReport")
 }
 
 jacoco {

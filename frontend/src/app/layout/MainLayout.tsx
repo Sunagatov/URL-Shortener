@@ -5,7 +5,6 @@ import { LayoutHeader } from '@/app/layout/LayoutHeader';
 import { MobileTabBar } from '@/app/layout/MobileTabBar';
 import { routes } from '@/app/routes';
 import { useAuth } from '@/shared/auth/useAuth';
-import { layoutEvents } from '@/shared/lib/layoutEvents';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -40,12 +39,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     navigate(routes.home);
     setIsUserMenuOpen(false);
   };
-
-  React.useEffect(() => {
-    const handleCloseUserMenu = () => setIsUserMenuOpen(false);
-    window.addEventListener(layoutEvents.closeUserMenu, handleCloseUserMenu);
-    return () => window.removeEventListener(layoutEvents.closeUserMenu, handleCloseUserMenu);
-  }, []);
 
   return (
     <div className="flex min-h-screen flex-col">
