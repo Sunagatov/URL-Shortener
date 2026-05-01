@@ -5,8 +5,8 @@ import com.zufar.urlshortener.auth.exception.UserNotFoundException
 import com.zufar.urlshortener.auth.security.UserDetailsWithTokenVersion
 import com.zufar.urlshortener.auth.service.EmailNormalizer
 import com.zufar.urlshortener.shared.ANONYMOUS_USER
-import com.zufar.urlshortener.users.api.UserAccountRecord
-import com.zufar.urlshortener.users.api.UserAuthStore
+import com.zufar.urlshortener.users.entity.UserAccountDocument
+import com.zufar.urlshortener.users.repository.UserAccountRepository
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -19,13 +19,13 @@ private const val USER_NOT_FOUND_MESSAGE = "User not found"
 
 @Service
 class AuthenticatedUserContextService(
-    private val userAuthStore: UserAuthStore
+    private val userAccountRepository: UserAccountRepository
 ) : AuthenticatedUserContext {
 
-    override fun requireAuthenticatedUser(): UserAccountRecord {
+    override fun requireAuthenticatedUser(): UserAccountDocument {
         val normalizedEmail = EmailNormalizer.normalize(requireAuthenticatedEmail())
 
-        return userAuthStore.findByEmailIgnoreCase(normalizedEmail)
+        return userAccountRepository.findByEmailIgnoreCase(normalizedEmail)
             ?: throw UserNotFoundException(USER_NOT_FOUND_MESSAGE)
     }
 
@@ -42,19 +42,22 @@ class AuthenticatedUserContextService(
         }
 
         val normalizedEmail = EmailNormalizer.normalize(authentication.name)
-        val user = userAuthStore.findByEmailIgnoreCase(normalizedEmail)
+        val user = userAccountRepository.findByEmailIgnoreCase(normalizedEmail)
             ?: throw AuthenticationCredentialsNotFoundException(AUTHENTICATED_USER_NOT_FOUND_MESSAGE)
 
         return user.id ?: throw AuthenticationCredentialsNotFoundException(AUTHENTICATED_USER_NOT_FOUND_MESSAGE)
     }
 
-    override fun updatePassword(currentUser: UserAccountRecord, encodedPassword: String, updatedAt: LocalDateTime) {
+    override fun updatePassword(currentUser: UserAccountDocument, encodedPassword: String, updatedAt: LocalDateTime) {
         val userId = currentUser.id ?: throw UserNotFoundException(USER_NOT_FOUND_MESSAGE)
-        userAuthStore.updatePassword(
-            userId,
-            encodedPassword,
-            currentUser.tokenVersion + 1,
-            updatedAt
+        val currentRecord = userAccountRepository.findById(userId)
+            .orElseThrow { UserNotFoundException(USER_NOT_FOUND_MESSAGE) }
+        userAccountRepository.save(
+            currentRecord.copy(
+                password = encodedPassword,
+                tokenVersion = currentUser.tokenVersion + 1,
+                updatedAt = updatedAt
+            )
         )
     }
 

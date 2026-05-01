@@ -1,8 +1,8 @@
 package com.zufar.urlshortener.auth.service
 
 import com.zufar.urlshortener.auth.security.CustomUserDetailsService
-import com.zufar.urlshortener.users.api.UserAccountRecord
-import com.zufar.urlshortener.users.api.UserAuthStore
+import com.zufar.urlshortener.users.entity.UserAccountDocument
+import com.zufar.urlshortener.users.repository.UserAccountRepository
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -14,31 +14,31 @@ import kotlin.test.assertEquals
 @ExtendWith(MockitoExtension::class)
 class CustomUserDetailsServiceTest {
 
-    @Mock private lateinit var userAuthStore: UserAuthStore
+    @Mock private lateinit var userAccountRepository: UserAccountRepository
 
-    private fun service() = CustomUserDetailsService(userAuthStore)
+    private fun service() = CustomUserDetailsService(userAccountRepository)
 
     @Test
     fun `loadUserByUsername resolves mixed-case email input`() {
-        whenever(userAuthStore.findByEmailIgnoreCase("user@example.com")).thenReturn(user())
+        whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user())
 
         val result = service().loadUserByUsername("User@Example.COM")
 
-        verify(userAuthStore).findByEmailIgnoreCase("user@example.com")
+        verify(userAccountRepository).findByEmailIgnoreCase("user@example.com")
         assertEquals("user@example.com", result.username)
     }
 
     @Test
     fun `loadUserByUsername resolves trimmed email input`() {
-        whenever(userAuthStore.findByEmailIgnoreCase("user@example.com")).thenReturn(user())
+        whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user())
 
         val result = service().loadUserByUsername("  user@example.com  ")
 
-        verify(userAuthStore).findByEmailIgnoreCase("user@example.com")
+        verify(userAccountRepository).findByEmailIgnoreCase("user@example.com")
         assertEquals("user@example.com", result.username)
     }
 
-    private fun user() = UserAccountRecord(
+    private fun user() = UserAccountDocument(
         firstName = "User",
         lastName = "Test",
         email = "user@example.com",

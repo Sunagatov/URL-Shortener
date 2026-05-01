@@ -23,7 +23,6 @@ vi.mock('@/shared/auth/useAuth', () => ({
     isAuthenticated: false,
     user: null,
     logout: vi.fn(),
-    loading: false,
   }),
 }));
 

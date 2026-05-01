@@ -32,7 +32,6 @@ describe('placeholder flows', () => {
       logout: vi.fn(),
       updateUser: vi.fn(),
       user: null,
-      loading: false,
     });
   });
 
@@ -114,7 +113,6 @@ describe('placeholder flows', () => {
       logout: vi.fn(),
       updateUser: vi.fn(),
       user: { email: 'test@example.com' },
-      loading: false,
     });
 
     render(

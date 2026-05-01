@@ -1,39 +1,40 @@
-import { createContext, useCallback, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
-import { authSession } from '@/shared/auth/authSession';
+import { createContext, useCallback, useMemo, useState, type ReactNode } from 'react';
 import type { AuthContextType, AuthTokens, User } from '@/shared/auth/types';
+import { storage } from '@/shared/auth/storage';
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const authState = useSyncExternalStore(authSession.subscribe, authSession.getSnapshot, authSession.getSnapshot);
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<User | null>(() => storage.getUser());
+  const [isAuthenticated, setIsAuthenticated] = useState(() => storage.hasValidTokens());
 
   const login = useCallback((tokens: AuthTokens, userData: User | null) => {
-    setLoading(true);
-    authSession.login(tokens, userData);
-    setLoading(false);
+    storage.setTokens(tokens);
+    storage.setUser(userData);
+    setUser(userData);
+    setIsAuthenticated(true);
   }, []);
 
   const updateUser = useCallback((userData: User) => {
-    authSession.updateUser(userData);
+    storage.setUser(userData);
+    setUser(userData);
   }, []);
 
   const logout = useCallback(() => {
-    setLoading(true);
-    authSession.logout();
-    setLoading(false);
+    storage.clearAll();
+    setUser(null);
+    setIsAuthenticated(false);
   }, []);
 
   const value = useMemo<AuthContextType>(
     () => ({
-      isAuthenticated: authState.isAuthenticated,
-      user: authState.user,
+      isAuthenticated,
+      user,
       login,
       updateUser,
       logout,
-      loading,
     }),
-    [authState.isAuthenticated, authState.user, loading, login, logout, updateUser],
+    [isAuthenticated, user, login, logout, updateUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

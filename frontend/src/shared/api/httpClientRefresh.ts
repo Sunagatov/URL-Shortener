@@ -1,5 +1,4 @@
 import type { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
-import { authSession } from '@/shared/auth/authSession';
 import type { AuthTokens } from '@/shared/auth/types';
 import { storage } from '@/shared/auth/storage';
 import { endpoints } from '@/shared/api/endpoints';
@@ -19,7 +18,7 @@ export async function refreshFailedSession(path?: string, error?: unknown) {
     });
   }
 
-  authSession.logout();
+  storage.clearAll();
   redirectToSignIn();
 }
 

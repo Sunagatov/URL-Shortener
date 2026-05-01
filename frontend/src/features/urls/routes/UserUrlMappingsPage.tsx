@@ -7,7 +7,8 @@ import {
 } from '@/app/account/contracts';
 import { routes } from '@/app/routes';
 import { urlDeleteMessages } from '@/features/urls/lib/urlMessages';
-import { useUserUrlMappings } from '@/features/urls/model/useUserUrlMappings';
+import { useUrlMappingsCollection } from '@/features/urls/model/useUrlMappingsCollection';
+import { useUrlMappingsSelection } from '@/features/urls/model/useUrlMappingsSelection';
 import { UrlMappingsEmptyState } from '@/features/urls/ui/UrlMappingsEmptyState';
 import { UrlMappingsGrid } from '@/features/urls/ui/UrlMappingsGrid';
 import { UrlMappingsPagination } from '@/features/urls/ui/UrlMappingsPagination';
@@ -22,6 +23,8 @@ const UserUrlMappingsPage: React.FC = () => {
   const navigate = useNavigate();
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
   const [pendingDeleteHash, setPendingDeleteHash] = useState<string | null>(null);
+  const collection = useUrlMappingsCollection();
+  const selection = useUrlMappingsSelection(collection.displayMappings);
   const {
     copiedUrl,
     deletingHash,
@@ -33,22 +36,26 @@ const UserUrlMappingsPage: React.FC = () => {
     handleCopyUrl,
     handleDeleteMapping,
     handlePageChange,
-    isAllSelected,
-    isBulkDeleting,
     isLoading,
     isSearchMode,
-    isSelectMode,
     pageError,
     search,
-    selectedHashes,
     setSearch,
     sortOrder,
+    toggleSortOrder,
+    totalElements,
+  } = collection;
+  const {
+    isAllSelected,
+    isBulkDeleting,
+    isSelectMode,
+    selectedHashes,
+    setIsBulkDeleting,
     toggleSelect,
     toggleSelectAll,
     toggleSelectMode,
-    toggleSortOrder,
-    totalElements,
-  } = useUserUrlMappings();
+    clearSelection,
+  } = selection;
 
   const handleConfirmDelete = async () => {
     if (!pendingDeleteHash) {
@@ -60,9 +67,18 @@ const UserUrlMappingsPage: React.FC = () => {
   };
 
   const handleConfirmBulkDelete = async () => {
-    const deleted = await handleBulkDelete();
+    setIsBulkDeleting(true);
+
+    let deleted = false;
+
+    try {
+      deleted = await handleBulkDelete([...selectedHashes]);
+    } finally {
+      setIsBulkDeleting(false);
+    }
 
     if (deleted) {
+      clearSelection();
       setShowBulkConfirm(false);
     }
   };

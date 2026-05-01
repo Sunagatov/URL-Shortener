@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   AccountPageLoadingState,
@@ -6,10 +6,12 @@ import {
   AccountPageLayout,
 } from '@/app/account/contracts';
 import { routes } from '@/app/routes';
+import { deleteUrl, getUrlDetails } from '@/features/urls/api/urlsApi';
+import type { UrlMapping } from '@/features/urls/types/url';
+import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/apiErrors';
 import { useClipboard } from '@/shared/lib/useClipboard';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { ConfirmModal, useToast } from '@/shared/ui';
-import { useUrlMappingDetails } from '@/features/urls/model/useUrlMappingDetails';
 import {
   UrlDetailsHeader,
   UrlInfoCard,
@@ -23,9 +25,45 @@ const UrlMappingDetailsPage: React.FC = () => {
   const navigate = useNavigate();
   const toast = useToast();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [urlMapping, setUrlMapping] = useState<UrlMapping | null>(null);
   const { copiedValue, copyValue } = useClipboard();
-  const { deleteMapping, errorMessage, isDeleting, isLoading, urlMapping } =
-    useUrlMappingDetails(urlHash);
+
+  useEffect(() => {
+    const fetchUrlMapping = async () => {
+      if (!urlHash) {
+        const message = 'URL mapping id is missing.';
+        setUrlMapping(null);
+        setErrorMessage(message);
+        toast.error(message);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const response = await getUrlDetails(urlHash);
+        setUrlMapping(response);
+        setErrorMessage(null);
+      } catch (error: unknown) {
+        if (getApiErrorStatus(error) === 401) {
+          navigate(routes.signIn, { replace: true });
+          return;
+        }
+
+        const message = getApiErrorMessage(error, 'Failed to fetch URL mapping details.');
+        setUrlMapping(null);
+        setErrorMessage(message);
+        toast.error(message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void fetchUrlMapping();
+  }, [navigate, toast, urlHash]);
 
   const handleCopyUrl = async (url: string) => {
     const didCopy = await copyValue(url);
@@ -39,7 +77,28 @@ const UrlMappingDetailsPage: React.FC = () => {
   };
 
   const handleDelete = async () => {
-    const deleted = await deleteMapping();
+    if (!urlMapping) {
+      return;
+    }
+
+    setIsDeleting(true);
+
+    let deleted = false;
+
+    try {
+      await deleteUrl(urlMapping.urlHash);
+      navigate(routes.urlMappings);
+      deleted = true;
+    } catch (error: unknown) {
+      if (getApiErrorStatus(error) === 401) {
+        navigate(routes.signIn, { replace: true });
+        return;
+      }
+
+      toast.error(getApiErrorMessage(error, urlDeleteMessages.failedSingle));
+    } finally {
+      setIsDeleting(false);
+    }
 
     if (deleted) {
       setShowDeleteModal(false);

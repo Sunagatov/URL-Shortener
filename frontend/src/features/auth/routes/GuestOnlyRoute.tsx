@@ -16,16 +16,8 @@ interface GuestOnlyRouteProps {
 }
 
 export const GuestOnlyRoute: React.FC<GuestOnlyRouteProps> = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const location = useLocation();
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
 
   if (isAuthenticated) {
     const from = (location.state as AuthLocationState | null)?.from;

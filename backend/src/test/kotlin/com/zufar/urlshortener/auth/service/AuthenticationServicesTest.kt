@@ -13,8 +13,8 @@ import com.zufar.urlshortener.auth.exception.VerificationResendTooSoonException
 import com.zufar.urlshortener.auth.security.JwtTokenProvider
 import com.zufar.urlshortener.auth.security.withTokenVersion
 import com.zufar.urlshortener.auth.validation.AuthRequestValidator
-import com.zufar.urlshortener.users.api.UserAccountRecord
-import com.zufar.urlshortener.users.api.UserAuthStore
+import com.zufar.urlshortener.users.entity.UserAccountDocument
+import com.zufar.urlshortener.users.repository.UserAccountRepository
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -45,7 +45,7 @@ class AuthenticationServicesTest {
     @Mock private lateinit var authenticationManager: AuthenticationManager
     @Mock private lateinit var jwtTokenProvider: JwtTokenProvider
     @Mock private lateinit var authRequestValidator: AuthRequestValidator
-    @Mock private lateinit var userAuthStore: UserAuthStore
+    @Mock private lateinit var userAccountRepository: UserAccountRepository
     @Mock private lateinit var passwordEncoder: PasswordEncoder
     @Mock private lateinit var emailVerificationNotifier: EmailVerificationNotifier
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
@@ -53,7 +53,7 @@ class AuthenticationServicesTest {
     private fun authService() = AuthService(
         authenticationManager = authenticationManager,
         authRequestValidator = authRequestValidator,
-        userAuthStore = userAuthStore,
+        userAccountRepository = userAccountRepository,
         passwordEncoder = passwordEncoder,
         jwtTokenProvider = jwtTokenProvider,
         emailVerificationNotifier = emailVerificationNotifier,
@@ -71,7 +71,7 @@ class AuthenticationServicesTest {
                 else -> "verification-code-hash"
             }
         }
-        whenever(userAuthStore.save(any<UserAccountRecord>())).thenAnswer { it.arguments[0] }
+        whenever(userAccountRepository.save(any<UserAccountDocument>())).thenAnswer { it.arguments[0] }
         whenever(emailVerificationNotifier.sendCode(any(), any(), any())).thenReturn("log")
 
         val response = authService().signUp(
@@ -85,9 +85,9 @@ class AuthenticationServicesTest {
             )
         )
 
-        verify(userAuthStore).findByEmailIgnoreCase("jane.doe@example.com")
-        val captor = argumentCaptor<UserAccountRecord>()
-        verify(userAuthStore).save(captor.capture())
+        verify(userAccountRepository).findByEmailIgnoreCase("jane.doe@example.com")
+        val captor = argumentCaptor<UserAccountDocument>()
+        verify(userAccountRepository).save(captor.capture())
         assertEquals("jane.doe@example.com", captor.firstValue.email)
         assertFalse(captor.firstValue.emailVerified)
         assertEquals("verification-code-hash", captor.firstValue.emailVerificationCodeHash)
@@ -102,8 +102,8 @@ class AuthenticationServicesTest {
 
     @Test
     fun `register duplicate check is case-insensitive`() {
-        whenever(userAuthStore.findByEmailIgnoreCase("jane.doe@example.com")).thenReturn(
-            UserAccountRecord(
+        whenever(userAccountRepository.findByEmailIgnoreCase("jane.doe@example.com")).thenReturn(
+            UserAccountDocument(
                 firstName = "Jane",
                 lastName = "Doe",
                 email = "jane.doe@example.com",
@@ -132,7 +132,7 @@ class AuthenticationServicesTest {
         val authService = AuthService(
             authenticationManager = authenticationManager,
             authRequestValidator = authRequestValidator,
-            userAuthStore = userAuthStore,
+            userAccountRepository = userAccountRepository,
             passwordEncoder = passwordEncoder,
             jwtTokenProvider = jwtTokenProvider,
             emailVerificationNotifier = emailVerificationNotifier,
@@ -142,7 +142,7 @@ class AuthenticationServicesTest {
             clock = clock
         )
         whenever(passwordEncoder.encode("SecurePassword123!")).thenReturn("hashed-password")
-        whenever(userAuthStore.save(any<UserAccountRecord>())).thenAnswer { it.arguments[0] }
+        whenever(userAccountRepository.save(any<UserAccountDocument>())).thenAnswer { it.arguments[0] }
         whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access-token")
         whenever(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh-token")
 
@@ -195,7 +195,7 @@ class AuthenticationServicesTest {
 
     @Test
     fun `refresh access token looks up normalized email from token subject`() {
-        val user = UserAccountRecord(
+        val user = UserAccountDocument(
             firstName = "User",
             lastName = "Test",
             email = "user@example.com",
@@ -206,18 +206,18 @@ class AuthenticationServicesTest {
         whenever(jwtTokenProvider.validateRefreshToken("refresh-token")).thenReturn(true)
         whenever(jwtTokenProvider.getUsernameFromJWT("refresh-token")).thenReturn("  User@Example.COM  ")
         whenever(jwtTokenProvider.getTokenVersionFromJWT("refresh-token")).thenReturn(0)
-        whenever(userAuthStore.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
+        whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
         whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("new-access-token")
 
         val response = authService().refreshAccessToken(RefreshTokenRequest("refresh-token"))
 
-        verify(userAuthStore).findByEmailIgnoreCase("user@example.com")
+        verify(userAccountRepository).findByEmailIgnoreCase("user@example.com")
         assertEquals("new-access-token", response.accessToken)
     }
 
     @Test
     fun `refresh access token rejects token version mismatch`() {
-        val user = UserAccountRecord(
+        val user = UserAccountDocument(
             firstName = "User",
             lastName = "Test",
             email = "user@example.com",
@@ -229,7 +229,7 @@ class AuthenticationServicesTest {
         whenever(jwtTokenProvider.validateRefreshToken("refresh-token")).thenReturn(true)
         whenever(jwtTokenProvider.getUsernameFromJWT("refresh-token")).thenReturn("user@example.com")
         whenever(jwtTokenProvider.getTokenVersionFromJWT("refresh-token")).thenReturn(1)
-        whenever(userAuthStore.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
+        whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
 
         assertThrows<InvalidTokenException> {
             authService().refreshAccessToken(RefreshTokenRequest("refresh-token"))
@@ -238,7 +238,7 @@ class AuthenticationServicesTest {
 
     @Test
     fun `verify email marks account verified and issues tokens`() {
-        val user = UserAccountRecord(
+        val user = UserAccountDocument(
             id = "user-1",
             firstName = "User",
             lastName = "Test",
@@ -250,9 +250,9 @@ class AuthenticationServicesTest {
             emailVerificationCodeExpiresAt = LocalDateTime.of(2024, 1, 1, 10, 25, 30),
             emailVerificationCodeSentAt = LocalDateTime.of(2024, 1, 1, 10, 15, 30)
         )
-        whenever(userAuthStore.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
+        whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
         whenever(passwordEncoder.matches("123456", "verification-hash")).thenReturn(true)
-        whenever(userAuthStore.save(any<UserAccountRecord>())).thenAnswer { it.arguments[0] }
+        whenever(userAccountRepository.save(any<UserAccountDocument>())).thenAnswer { it.arguments[0] }
         whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access-token")
         whenever(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh-token")
 
@@ -260,8 +260,8 @@ class AuthenticationServicesTest {
 
         assertEquals("access-token", response.accessToken)
         assertEquals("refresh-token", response.refreshToken)
-        val captor = argumentCaptor<UserAccountRecord>()
-        verify(userAuthStore).save(captor.capture())
+        val captor = argumentCaptor<UserAccountDocument>()
+        verify(userAccountRepository).save(captor.capture())
         assertTrue(captor.firstValue.emailVerified)
         assertNull(captor.firstValue.emailVerificationCodeHash)
         assertNull(captor.firstValue.emailVerificationCodeExpiresAt)
@@ -270,7 +270,7 @@ class AuthenticationServicesTest {
 
     @Test
     fun `verify email rejects invalid code`() {
-        val user = UserAccountRecord(
+        val user = UserAccountDocument(
             firstName = "User",
             lastName = "Test",
             email = "user@example.com",
@@ -280,7 +280,7 @@ class AuthenticationServicesTest {
             emailVerificationCodeHash = "verification-hash",
             emailVerificationCodeExpiresAt = LocalDateTime.of(2024, 1, 1, 10, 25, 30)
         )
-        whenever(userAuthStore.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
+        whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
         whenever(passwordEncoder.matches("123456", "verification-hash")).thenReturn(false)
 
         assertThrows<InvalidVerificationCodeException> {
@@ -290,7 +290,7 @@ class AuthenticationServicesTest {
 
     @Test
     fun `resend verification rejects cooldown violations`() {
-        val user = UserAccountRecord(
+        val user = UserAccountDocument(
             firstName = "User",
             lastName = "Test",
             email = "user@example.com",
@@ -299,7 +299,7 @@ class AuthenticationServicesTest {
             age = 30,
             emailVerificationCodeSentAt = LocalDateTime.of(2024, 1, 1, 10, 15, 5)
         )
-        whenever(userAuthStore.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
+        whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
 
         val ex = assertThrows<VerificationResendTooSoonException> {
             authService().resendVerificationCode(ResendVerificationRequest("user@example.com"))

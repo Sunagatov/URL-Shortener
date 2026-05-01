@@ -1,9 +1,9 @@
 package com.zufar.urlshortener.users.service
 
 import com.zufar.urlshortener.auth.api.AuthenticatedUserContext
-import com.zufar.urlshortener.users.api.UserAccountRecord
-import com.zufar.urlshortener.users.exception.InvalidUserRequestException
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
+import com.zufar.urlshortener.users.entity.UserAccountDocument
+import com.zufar.urlshortener.users.exception.InvalidUserRequestException
 import com.zufar.urlshortener.users.validation.ChangePasswordValidator
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -33,7 +33,7 @@ class UserPasswordChangerTest {
 
     @Test
     fun `changePassword updates the authenticated users password`() {
-        val user = UserAccountRecord(
+        val user = UserAccountDocument(
             id = "user-1",
             firstName = "Test",
             lastName = "User",
@@ -70,7 +70,7 @@ class UserPasswordChangerTest {
 
     @Test
     fun `changePassword rejects an invalid current password`() {
-        val user = UserAccountRecord(
+        val user = UserAccountDocument(
             id = "user-1",
             firstName = "Test",
             lastName = "User",

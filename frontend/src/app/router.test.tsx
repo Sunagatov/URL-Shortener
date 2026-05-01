@@ -28,7 +28,6 @@ const authValue = (overrides: Partial<AuthContextType>): AuthContextType => ({
   login: vi.fn(),
   updateUser: vi.fn(),
   logout: vi.fn(),
-  loading: false,
   ...overrides,
 });
 
