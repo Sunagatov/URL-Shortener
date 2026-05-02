@@ -33,29 +33,29 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
         hidden
         ${desktopVisible ? 'md:flex' : 'md:hidden'}
         fixed left-0 top-24 z-[55] h-[calc(100vh-96px)] w-64
-        flex-col border-r border-white/[0.07] bg-[#0a0c1b]
+        flex-col border-r border-[color:var(--card-border)] bg-[var(--bg-alt)]
       `}
     >
       <div className="px-4 pb-3 pt-4">
-        <div className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.04] p-3">
-          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-blue-500/30 bg-blue-600/25">
+        <div className="flex items-center gap-3 rounded-xl border border-[color:var(--card-border)] bg-[var(--card-bg)] p-3">
+          <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-[color:var(--avatar-border)] bg-[var(--avatar-bg)]">
             <span
-              className="text-sm font-bold text-blue-300"
+              className="text-sm font-bold text-[color:var(--avatar-text)]"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               {initials}
             </span>
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold leading-tight text-white">{displayName}</p>
+            <p className="truncate text-sm font-semibold leading-tight text-[color:var(--text-primary)]">{displayName}</p>
             {user?.email && displayName !== user.email ? (
-              <p className="mt-0.5 truncate text-xs text-white/35">{user.email}</p>
+              <p className="mt-0.5 truncate text-xs text-[color:var(--text-muted)]">{user.email}</p>
             ) : null}
           </div>
         </div>
       </div>
 
-      <div className="mx-4 mb-2 border-t border-white/[0.06]" />
+      <div className="mx-4 mb-2 border-t border-[color:var(--border)]" />
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3">
         {accountNavigationItems.map((item) => {
@@ -71,13 +71,13 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
                 ${
                   active
                     ? 'sidebar-item-active'
-                    : 'text-white/45 hover:bg-white/[0.06] hover:text-white'
+                    : 'text-[color:var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[color:var(--text-primary)]'
                 }
               `}
             >
               <Icon
                 className={`h-4 w-4 flex-shrink-0 transition-colors ${
-                  active ? 'text-blue-400' : 'text-white/30 group-hover:text-white/60'
+                  active ? 'text-[color:var(--avatar-text)]' : 'text-[color:var(--text-muted)] group-hover:text-[color:var(--text-secondary)]'
                 }`}
               />
               <span className="text-sm font-medium">{item.label}</span>
@@ -87,10 +87,10 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
       </nav>
 
       <div className="px-3 pb-5">
-        <div className="space-y-0.5 border-t border-white/[0.06] pt-3">
+        <div className="space-y-0.5 border-t border-[color:var(--border)] pt-3">
           <Link
             to={routes.home}
-            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-white/30 transition-all duration-200 hover:bg-white/[0.06] hover:text-white/70"
+            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-[color:var(--text-muted)] transition-all duration-200 hover:bg-[var(--surface-hover)] hover:text-[color:var(--text-secondary)]"
           >
             <FaHome className="h-4 w-4" />
             <span className="text-sm font-medium">Home</span>
@@ -99,7 +99,7 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
             type="button"
             aria-label="Sign out"
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-red-400/60 transition-all duration-200 hover:bg-red-900/15 hover:text-red-300"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[color:var(--danger-text)] transition-all duration-200 hover:bg-[var(--danger-bg)] hover:text-[color:var(--danger-text)]"
           >
             <FaSignOutAlt className="h-4 w-4" />
             <span className="text-sm font-medium">Sign Out</span>

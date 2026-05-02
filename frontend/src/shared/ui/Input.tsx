@@ -43,7 +43,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>((
         />
       </div>
       {error && (
-        <p id={errorId} className="flex items-center text-sm text-red-400">
+        <p id={errorId} className="flex items-center text-sm text-[color:var(--danger)]">
           <span className="mr-1">⚠</span>
           {error}
         </p>

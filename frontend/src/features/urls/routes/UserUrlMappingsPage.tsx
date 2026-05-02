@@ -234,7 +234,7 @@ const UserUrlMappingsPage: React.FC = () => {
       />
 
       {pageError ? (
-        <div className="mb-6 rounded-xl border border-red-500/20 bg-red-900/15 px-4 py-3 text-sm text-red-300">
+        <div className="mb-6 rounded-xl border border-[color:var(--danger)] bg-[var(--danger-bg)] px-4 py-3 text-sm text-[color:var(--danger-text)]">
           {pageError}
         </div>
       ) : null}
@@ -256,7 +256,7 @@ const UserUrlMappingsPage: React.FC = () => {
           actionLabel="Clear search"
           description={
             <>
-              No URLs match "<span className="text-white/55">{search}</span>"
+              No URLs match "<span className="text-[color:var(--text-secondary)]">{search}</span>"
             </>
           }
           icon="search"

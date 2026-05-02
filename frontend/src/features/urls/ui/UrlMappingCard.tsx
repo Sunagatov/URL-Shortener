@@ -62,34 +62,34 @@ export const UrlMappingCard = ({
       className={`group cursor-pointer overflow-hidden rounded-2xl border transition-all duration-200 ${
         isSelectMode && isSelected
           ? 'border-blue-500/50 bg-blue-900/10 ring-1 ring-blue-500/30'
-          : 'border-white/[0.07] bg-white/[0.04] hover:border-blue-500/25 hover:bg-white/[0.055]'
+          : 'border-[color:var(--card-border)] bg-[var(--card-bg)] hover:border-blue-500/25 hover:bg-[var(--surface-hover)]'
       }`}
     >
       {/* ── Header ─────────────────────────────────────────── */}
-      <div className="flex items-center gap-3 border-b border-white/[0.06] px-5 py-3.5">
+      <div className="flex items-center gap-3 border-b border-[color:var(--border)] px-5 py-3.5">
         {isSelectMode ? (
           <div
             className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md border-2 transition-all duration-150 ${
-              isSelected ? 'border-blue-500 bg-blue-500' : 'border-white/25 bg-transparent'
+              isSelected ? 'border-blue-500 bg-blue-500' : 'border-[color:var(--text-muted)] bg-transparent'
             }`}
           >
-            {isSelected && <FaCheck className="h-2.5 w-2.5 text-white" />}
+            {isSelected && <FaCheck className="h-2.5 w-2.5 text-[color:var(--text-on-accent)]" />}
           </div>
         ) : (
-          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-600/15">
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl border border-[color:var(--avatar-border)] bg-[var(--avatar-bg)]">
             <FaviconImage domain={domain} />
           </div>
         )}
 
         <div className="min-w-0 flex-1">
-          <span className="truncate text-xs font-medium text-white/50">{domain}</span>
-          <p className="mt-0.5 text-xs text-white/25">{formatDate(mapping.createdAt)}</p>
+          <span className="truncate text-xs font-medium text-[color:var(--text-secondary)]">{domain}</span>
+          <p className="mt-0.5 text-xs text-[color:var(--text-muted)]">{formatDate(mapping.createdAt)}</p>
         </div>
 
         {/* Click count + sparkbar + actions */}
         <div className="flex items-center gap-2">
           <div className="flex flex-col items-end gap-1.5">
-            <span className="rounded-full border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/45">
+            <span className="rounded-full border border-[color:var(--border)] bg-[var(--card-bg)] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)]">
               {clickCountLabel}
             </span>
             <div className="flex items-end gap-[2px]" style={{ height: '10px' }}>
@@ -111,7 +111,7 @@ export const UrlMappingCard = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={stopPropagation}
-                  className="rounded-lg p-2 text-white/30 transition-all hover:bg-blue-500/10 hover:text-blue-300"
+                  className="rounded-lg p-2 text-[color:var(--text-muted)] transition-all hover:bg-[var(--badge-bg)] hover:text-[color:var(--avatar-text)]"
                   aria-label={`Open short URL ${mapping.shortUrl}`}
                 >
                   <FaExternalLinkAlt className="h-3 w-3" />
@@ -124,7 +124,7 @@ export const UrlMappingCard = ({
                     onDelete();
                   }}
                   disabled={isDeleting}
-                  className="rounded-lg p-2 text-red-400/70 transition-all hover:bg-red-900/20 hover:text-red-300 disabled:opacity-40"
+                  className="rounded-lg p-2 text-[color:var(--danger-text)] transition-all hover:bg-[var(--danger-bg)] hover:text-[color:var(--danger-text)] disabled:opacity-40"
                   aria-label="Delete URL"
                   title="Delete URL"
                 >

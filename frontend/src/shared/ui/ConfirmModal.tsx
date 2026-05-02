@@ -38,7 +38,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
   const isDanger = tone === 'danger';
   const Icon = isDanger ? FaExclamationTriangle : FaCheckCircle;
   const iconClassName = isDanger
-    ? 'border-red-500/25 bg-red-500/10 text-red-400'
+    ? 'border-red-500/25 bg-[var(--danger-bg)] text-[color:var(--danger)]'
     : 'border-emerald-500/25 bg-emerald-500/10 text-emerald-400';
   const accentClassName = isDanger
     ? 'from-red-500/16 via-transparent to-transparent'
@@ -50,7 +50,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
       style={{ animation: 'modal-backdrop-in 0.15s ease both' }}
     >
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-[var(--backdrop)] backdrop-blur-sm"
         onClick={onCancel}
       />
 

@@ -18,6 +18,13 @@ import {
   UrlMetadataCard,
 } from '@/features/urls/ui/details/UrlDetailsContent';
 import { urlCopyMessages, urlDeleteMessages } from '@/features/urls/lib/urlMessages';
+import { useUrlAnalytics } from '@/features/analytics/model/useUrlAnalytics';
+import { DateRangeSelector } from '@/features/analytics/ui/DateRangeSelector';
+import { SummaryCards } from '@/features/analytics/ui/SummaryCards';
+import { TimeseriesChart } from '@/features/analytics/ui/TimeseriesChart';
+import { BreakdownGrid } from '@/features/analytics/ui/BreakdownPanel';
+import { AnalyticsLoadingSkeleton } from '@/features/analytics/ui/AnalyticsLoadingSkeleton';
+import { EventTypeFilter } from '@/features/analytics/ui/EventTypeFilter';
 
 const UrlMappingDetailsPage: React.FC = () => {
   usePageTitle('URL Details');
@@ -30,6 +37,7 @@ const UrlMappingDetailsPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [urlMapping, setUrlMapping] = useState<UrlMapping | null>(null);
   const { copiedValue, copyValue } = useClipboard();
+  const analytics = useUrlAnalytics(urlHash);
 
   useEffect(() => {
     const fetchUrlMapping = async () => {
@@ -120,6 +128,36 @@ const UrlMappingDetailsPage: React.FC = () => {
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
         <UrlInfoCard urlMapping={urlMapping} copiedValue={copiedValue} onCopy={handleCopyUrl} />
         <UrlMetadataCard urlMapping={urlMapping} />
+      </div>
+
+      <div className="mt-8">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <h2
+            className="text-lg font-bold tracking-tight text-[color:var(--text-primary)]"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
+            Analytics
+          </h2>
+          <div className="flex items-center gap-2">
+            <EventTypeFilter value={analytics.eventType} onChange={analytics.setEventType} />
+            <DateRangeSelector dateRange={analytics.dateRange} onDateRangeChange={analytics.setDateRange} />
+          </div>
+        </div>
+        <p className="mb-4 text-[10px] text-[color:var(--text-muted)]">Bot traffic excluded from analytics</p>
+
+        {analytics.loading ? (
+          <AnalyticsLoadingSkeleton />
+        ) : analytics.error ? (
+          <div className="rounded-2xl border border-[color:var(--danger)] bg-[var(--danger-bg)] p-6 text-center">
+            <p className="text-sm text-[color:var(--danger-text)]">{analytics.error}</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {analytics.summary && <SummaryCards summary={analytics.summary} />}
+            {analytics.timeseries && <TimeseriesChart timeseries={analytics.timeseries} />}
+            <BreakdownGrid breakdowns={analytics.breakdowns} />
+          </div>
+        )}
       </div>
 
       <ConfirmModal

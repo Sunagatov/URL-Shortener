@@ -48,6 +48,7 @@ class UrlControllerTest {
             shortUrl = "http://localhost:8080/abc12345",
             originalUrl = "https://example.com",
             clickCount = 0,
+            qrScanCount = 0,
             createdAt = LocalDateTime.parse("2024-01-01T10:15:30"),
             expirationDate = LocalDateTime.parse("2024-01-02T10:15:30")
         )

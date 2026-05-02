@@ -7,6 +7,7 @@ export const routes = {
   verifyEmail: '/verify-email',
   account: '/account',
   dashboard: '/account/dashboard',
+  analytics: '/account/analytics',
   profile: '/account/profile',
   security: '/account/security',
   urlMappings: '/account/url-mappings',

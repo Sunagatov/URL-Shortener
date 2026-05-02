@@ -110,7 +110,7 @@ const ResetPasswordPage: React.FC = () => {
           description="The recovery link you followed is missing information or has already been cleaned up. Request a fresh one to continue."
           icon={(
             <AuthStatusIcon badge="error">
-              <FaLock className="h-8 w-8 text-red-400" />
+              <FaLock className="h-8 w-8 text-[color:var(--danger-text)]" />
             </AuthStatusIcon>
           )}
           action={(
@@ -179,7 +179,7 @@ const ResetPasswordPage: React.FC = () => {
           <div>
             <label
               htmlFor="new-password"
-              className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-white/30"
+              className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-[color:var(--text-muted)]"
             >
               New Password
             </label>
@@ -202,7 +202,7 @@ const ResetPasswordPage: React.FC = () => {
             </div>
             <div
               id="reset-password-guidance"
-              className="mt-2 flex items-center justify-between text-xs text-white/35"
+              className="mt-2 flex items-center justify-between text-xs text-[color:var(--text-muted)]"
             >
               <span>Long passphrases and password-manager generated passwords are supported.</span>
               <span>{newPassword.length}/64</span>
@@ -211,12 +211,12 @@ const ResetPasswordPage: React.FC = () => {
             {newPassword ? (
               <div className="mt-3 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase tracking-widest text-white/30">Strength</span>
+                  <span className="text-[10px] uppercase tracking-widest text-[color:var(--text-muted)]">Strength</span>
                   <span className={`text-xs font-semibold ${passwordStrength.textClass}`}>
                     {passwordStrength.strength}
                   </span>
                 </div>
-                <div className="h-1 w-full rounded-full bg-white/[0.07]">
+                <div className="h-1 w-full rounded-full bg-[var(--card-border)]">
                   <div
                     className={`h-1 rounded-full transition-all duration-300 ${passwordStrength.barClass}`}
                     style={{ width: passwordStrength.width }}
@@ -235,7 +235,7 @@ const ResetPasswordPage: React.FC = () => {
           <div>
             <label
               htmlFor="confirm-new-password"
-              className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-white/30"
+              className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-[color:var(--text-muted)]"
             >
               Confirm New Password
             </label>
@@ -252,7 +252,7 @@ const ResetPasswordPage: React.FC = () => {
                 spellCheck={false}
                 className={`${authInputClassName} pr-12 ${
                   confirmPassword && !passwordsMatch
-                    ? 'animate-error-shake border-red-500/30 focus:ring-red-500/30'
+                    ? 'animate-error-shake border-[color:var(--danger)] focus:ring-[color:var(--danger)]'
                     : ''
                 }`}
               />
@@ -262,7 +262,7 @@ const ResetPasswordPage: React.FC = () => {
               />
             </div>
             {confirmPassword && !passwordsMatch ? (
-              <p className="mt-2 text-xs text-red-400">Passwords do not match</p>
+              <p className="mt-2 text-xs text-[color:var(--danger-text)]">Passwords do not match</p>
             ) : confirmPassword ? (
               <p className="mt-2 text-xs text-emerald-400">Passwords match</p>
             ) : null}

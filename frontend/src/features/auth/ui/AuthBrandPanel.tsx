@@ -32,16 +32,16 @@ export function AuthBrandPanel({
 }: AuthBrandPanelProps) {
   return (
     <div className={className}>
-      <div className="absolute top-1/4 -left-20 h-72 w-72 rounded-full bg-blue-600/15 blur-[90px] pointer-events-none" />
-      <div className="absolute bottom-1/3 right-0 h-56 w-56 rounded-full bg-indigo-600/12 blur-[80px] pointer-events-none" />
+      <div className="absolute top-1/4 -left-20 h-72 w-72 rounded-full bg-[var(--avatar-bg)] blur-[90px] pointer-events-none" />
+      <div className="absolute bottom-1/3 right-0 h-56 w-56 rounded-full bg-[var(--avatar-bg)] blur-[80px] pointer-events-none" />
       <div className="absolute inset-0 bg-grid-dark pointer-events-none" />
 
       <div className="relative z-10 mb-16 flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-blue-500/30 bg-blue-600/20">
-          <FaLink className="h-4 w-4 text-blue-400" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[color:var(--avatar-border)] bg-[var(--avatar-bg)]">
+          <FaLink className="h-4 w-4 text-[color:var(--avatar-text)]" />
         </div>
         <span
-          className="text-lg font-bold text-white"
+          className="text-lg font-bold text-[color:var(--text-primary)]"
           style={{ fontFamily: 'var(--font-display)' }}
         >
           Shorty URL
@@ -51,12 +51,12 @@ export function AuthBrandPanel({
       <div className="relative z-10 flex flex-1 flex-col justify-center">
         {badge}
         <h2
-          className="mb-5 text-4xl font-bold leading-[1.1] text-white xl:text-5xl"
+          className="mb-5 text-4xl font-bold leading-[1.1] text-[color:var(--text-primary)] xl:text-5xl"
           style={{ fontFamily: 'var(--font-display)' }}
         >
           {heading}
         </h2>
-        <p className="mb-10 max-w-sm text-base leading-relaxed text-white/45">{description}</p>
+        <p className="mb-10 max-w-sm text-base leading-relaxed text-[color:var(--text-muted)]">{description}</p>
 
         <div className="space-y-4">
           {features.map(feature => {
@@ -65,15 +65,15 @@ export function AuthBrandPanel({
             return (
               <div key={feature.text} className="flex items-center gap-3">
                 {Icon ? (
-                  <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg border border-blue-500/20 bg-blue-600/15">
-                    <Icon className="h-3 w-3 text-blue-400" />
+                  <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg border border-[color:var(--avatar-border)] bg-[var(--avatar-bg)]">
+                    <Icon className="h-3 w-3 text-[color:var(--avatar-text)]" />
                   </div>
                 ) : (
-                  <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-blue-500/25 bg-blue-600/20">
-                    <span className="h-2 w-2 rounded-full bg-blue-400" />
+                  <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border border-[color:var(--avatar-border)] bg-[var(--avatar-bg)]">
+                    <span className="h-2 w-2 rounded-full bg-[var(--avatar-text)]" />
                   </div>
                 )}
-                <span className="text-sm text-white/55">{feature.text}</span>
+                <span className="text-sm text-[color:var(--text-secondary)]">{feature.text}</span>
               </div>
             );
           })}
@@ -85,15 +85,15 @@ export function AuthBrandPanel({
           {stats.map(stat => (
             <div
               key={stat.label}
-              className="rounded-xl border border-white/[0.07] bg-white/[0.04] p-3 text-center"
+              className="rounded-xl border border-[color:var(--card-border)] bg-[var(--card-bg)] p-3 text-center"
             >
               <p
-                className="text-lg font-bold text-white"
+                className="text-lg font-bold text-[color:var(--text-primary)]"
                 style={{ fontFamily: 'var(--font-display)' }}
               >
                 {stat.value}
               </p>
-              <p className="mt-0.5 text-[10px] uppercase tracking-widest text-white/30">
+              <p className="mt-0.5 text-[10px] uppercase tracking-widest text-[color:var(--text-muted)]">
                 {stat.label}
               </p>
             </div>

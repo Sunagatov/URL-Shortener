@@ -134,7 +134,7 @@ const VerifyEmailPage: React.FC = () => {
       brandPanel={verifyEmailBrandPanel}
     >
       <div className="space-y-6">
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-[color:var(--text-secondary)]">
+        <div className="rounded-2xl border border-[color:var(--border)] bg-[var(--card-bg)] px-4 py-3 text-sm text-[color:var(--text-secondary)]">
           <p>Code expires in {Math.max(1, Math.ceil(expiresInSeconds / 60))} minute(s).</p>
           {deliveryMode === 'log' ? (
             <p className="mt-1 text-amber-200/80">
@@ -144,7 +144,7 @@ const VerifyEmailPage: React.FC = () => {
         </div>
 
         <div>
-          <p className="mb-4 text-center text-[10px] font-semibold uppercase tracking-widest text-white/30">
+          <p className="mb-4 text-center text-[10px] font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">
             Verification Code
           </p>
           <div className="flex items-center justify-center gap-2.5" onPaste={handlePaste}>
@@ -166,10 +166,10 @@ const VerifyEmailPage: React.FC = () => {
                 aria-label={`Digit ${index + 1} of ${CODE_LENGTH}`}
                 className={`h-14 w-12 rounded-2xl border text-center text-xl font-bold outline-none transition duration-150 ${
                   error
-                    ? 'border-red-500/30 bg-red-500/[0.04]'
+                    ? 'border-[color:var(--danger)] bg-[var(--danger-bg)]'
                     : digit
-                      ? 'border-cyan-400/40 bg-cyan-500/[0.08] text-cyan-200'
-                      : 'border-white/[0.08] bg-white/[0.04] text-white hover:border-white/15'
+                      ? 'border-cyan-400/40 bg-cyan-500/[0.08] text-[color:var(--accent)]'
+                      : 'border-[color:var(--border)] bg-[var(--card-bg)] text-[color:var(--text-primary)] hover:border-[color:var(--border)]'
                 } focus:border-cyan-400/40 focus:ring-1 focus:ring-cyan-400/40 disabled:cursor-not-allowed disabled:opacity-40`}
               />
             ))}
@@ -197,7 +197,7 @@ const VerifyEmailPage: React.FC = () => {
               type="button"
               onClick={() => void resendCode()}
               disabled={countdown > 0 || isResending || !email}
-              className="inline-flex items-center gap-2 text-sm font-medium text-cyan-300 transition-colors hover:text-cyan-200 disabled:cursor-not-allowed disabled:text-white/20"
+              className="inline-flex items-center gap-2 text-sm font-medium text-[color:var(--accent)] transition-colors hover:text-[color:var(--accent)] disabled:cursor-not-allowed disabled:text-[color:var(--text-muted)]"
             >
               <FaRedo className={`h-3 w-3 ${isResending ? 'animate-spin' : ''}`} />
               {isResending ? 'Sending…' : countdown > 0 ? `Resend in ${countdown}s` : 'Resend code'}
@@ -209,7 +209,7 @@ const VerifyEmailPage: React.FC = () => {
           <AuthBackLink to={routes.signIn}>Back to Sign In</AuthBackLink>
           <Link
             to={routes.signUp}
-            className="text-[color:var(--text-muted)] transition-colors hover:text-white"
+            className="text-[color:var(--text-muted)] transition-colors hover:text-[color:var(--text-primary)]"
           >
             Wrong email?
           </Link>

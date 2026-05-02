@@ -14,9 +14,9 @@ export function UrlSurfaceCard({
   title,
 }: PropsWithChildren<{ className?: string; title: string }>) {
   return (
-    <div className={`overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.04] ${className}`}>
-      <div className="border-b border-white/[0.06] px-5 py-3.5">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">{title}</p>
+    <div className={`overflow-hidden rounded-2xl border border-[color:var(--card-border)] bg-[var(--card-bg)] ${className}`}>
+      <div className="border-b border-[color:var(--border)] px-5 py-3.5">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">{title}</p>
       </div>
       <div className="p-5">{children}</div>
     </div>
@@ -25,7 +25,7 @@ export function UrlSurfaceCard({
 
 export function UrlFieldLabel({ children }: PropsWithChildren) {
   return (
-    <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/30">
+    <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">
       {children}
     </p>
   );
@@ -73,12 +73,12 @@ export function UrlCopyButton({
       title={title}
       className={
         primary
-          ? 'text-white/30 hover:bg-blue-500/10 hover:text-blue-300'
-          : 'text-white/30 hover:bg-white/5 hover:text-white/60'
+          ? 'text-[color:var(--text-muted)] hover:bg-[var(--badge-bg)] hover:text-[color:var(--avatar-text)]'
+          : 'text-[color:var(--text-muted)] hover:bg-[var(--card-bg)] hover:text-[color:var(--text-secondary)]'
       }
     >
       {copied ? (
-        <FaCheck className={`h-3 w-3 ${primary ? 'text-blue-400' : 'text-white/60'}`} />
+        <FaCheck className={`h-3 w-3 ${primary ? 'text-[color:var(--avatar-text)]' : 'text-[color:var(--text-secondary)]'}`} />
       ) : (
         <FaCopy className="h-3 w-3" />
       )}
@@ -109,8 +109,8 @@ export function UrlExternalLinkButton({
         aria-label={label ?? title}
         className={`rounded-lg p-1.5 transition-all ${
           primary
-            ? 'text-white/30 hover:bg-blue-500/10 hover:text-blue-300'
-            : 'text-white/30 hover:bg-white/5 hover:text-white/60'
+            ? 'text-[color:var(--text-muted)] hover:bg-[var(--badge-bg)] hover:text-[color:var(--avatar-text)]'
+            : 'text-[color:var(--text-muted)] hover:bg-[var(--card-bg)] hover:text-[color:var(--text-secondary)]'
         }`}
       >
         <FaExternalLinkAlt className="h-3 w-3" />
@@ -133,12 +133,12 @@ export function UrlMetadataRow({
   const containerClassName =
     tone === 'warning'
       ? 'border-amber-500/15 bg-amber-900/15'
-      : 'border-white/[0.06] bg-white/[0.03]';
+      : 'border-[color:var(--border)] bg-[var(--card-bg)]';
   const iconClassName =
     tone === 'warning'
       ? 'border-amber-500/15 bg-amber-500/15 text-amber-400'
-      : 'border-blue-500/15 bg-blue-600/15 text-blue-400';
-  const textClassName = tone === 'warning' ? 'text-amber-300/80' : 'text-white/80';
+      : 'border-blue-500/15 bg-blue-600/15 text-[color:var(--avatar-text)]';
+  const textClassName = tone === 'warning' ? 'text-amber-300/80' : 'text-[color:var(--text-secondary)]';
 
   return (
     <div className={`flex items-center gap-3 rounded-xl border p-3 ${containerClassName}`}>
@@ -148,7 +148,7 @@ export function UrlMetadataRow({
         <Icon className="h-3.5 w-3.5" />
       </div>
       <div>
-        <p className="mb-0.5 text-[10px] uppercase tracking-widest text-white/30">{label}</p>
+        <p className="mb-0.5 text-[10px] uppercase tracking-widest text-[color:var(--text-muted)]">{label}</p>
         <p className={`text-xs font-semibold ${textClassName}`} style={{ fontFamily: 'var(--font-mono)' }}>
           {value}
         </p>
@@ -177,5 +177,5 @@ export function UrlFavicon({
 }
 
 export function UrlFallbackIcon() {
-  return <FaLink className="h-3.5 w-3.5 text-blue-400" />;
+  return <FaLink className="h-3.5 w-3.5 text-[color:var(--avatar-text)]" />;
 }

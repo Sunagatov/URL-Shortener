@@ -45,8 +45,8 @@ function StatItem({ stat, active }: { stat: Stat; active: boolean }) {
           {display}{suffix}
         </span>
       </div>
-      <div className="text-sm tracking-wide text-white/50">{stat.label}</div>
-      <div className="mt-0.5 text-[11px] uppercase tracking-widest text-white/20">{stat.sublabel}</div>
+      <div className="text-sm tracking-wide text-[color:var(--text-secondary)]">{stat.label}</div>
+      <div className="mt-0.5 text-[11px] uppercase tracking-widest text-[color:var(--text-muted)]">{stat.sublabel}</div>
     </div>
   );
 }
@@ -85,8 +85,8 @@ export function LandingStatsSection() {
               <StatItem stat={stat} active={active} />
               {index < landingStats.length - 1 && (
                 <>
-                  <div className="mx-auto h-px w-20 bg-white/[0.08] sm:hidden" />
-                  <div className="hidden h-12 w-px flex-shrink-0 bg-white/[0.08] sm:block" />
+                  <div className="mx-auto h-px w-20 bg-[var(--border)] sm:hidden" />
+                  <div className="hidden h-12 w-px flex-shrink-0 bg-[var(--border)] sm:block" />
                 </>
               )}
             </React.Fragment>

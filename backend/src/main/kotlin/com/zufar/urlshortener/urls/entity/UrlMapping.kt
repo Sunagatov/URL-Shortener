@@ -13,6 +13,8 @@ data class UrlMapping(
     val shortUrl: String,
     val originalUrl: String,
     val clickCount: Long = 0,
+    val qrScanCount: Long = 0,
+    val lastQrScannedAt: LocalDateTime? = null,
 
     val createdAt: LocalDateTime,
     @Indexed(name = "expiration_date_ttl_idx", expireAfter = "0s")

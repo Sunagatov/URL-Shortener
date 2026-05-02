@@ -28,6 +28,9 @@ val caffeineVersion = "3.2.3"
 val bucket4jVersion = "8.10.1"
 val jjwtApiVersion = "0.13.0"
 val logstashLogbackEncoderVersion = "9.0"
+val uaParserVersion = "1.6.1"
+val maxmindGeoipVersion = "4.2.1"
+val maxmindDbReaderVersion = "3.1.0"
 
 
 dependencies {
@@ -76,6 +79,13 @@ dependencies {
 
     // Monitoring
     implementation("io.micrometer:micrometer-registry-prometheus")
+
+    // User-Agent Parsing
+    implementation("com.github.ua-parser:uap-java:$uaParserVersion")
+
+    // GeoIP
+    implementation("com.maxmind.geoip2:geoip2:$maxmindGeoipVersion")
+    implementation("com.maxmind.db:maxmind-db:$maxmindDbReaderVersion")
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")

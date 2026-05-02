@@ -46,19 +46,19 @@ const ICONS: Record<ToastType, React.ElementType> = {
 
 const STYLES: Record<ToastType, { icon: string; bar: string; border: string }> = {
     success: {
-        icon:   'bg-blue-600/20 border-blue-500/30 text-blue-400',
+        icon:   'bg-[var(--avatar-bg)] border-[color:var(--avatar-border)] text-[color:var(--avatar-text)]',
         bar:    'bg-blue-500',
         border: 'border-blue-500/15',
     },
     error: {
-        icon:   'bg-red-600/20 border-red-500/30 text-red-400',
+        icon:   'bg-[var(--danger-bg)] border-red-500/30 text-[color:var(--danger)]',
         bar:    'bg-red-500',
         border: 'border-red-500/15',
     },
     info: {
-        icon:   'bg-white/10 border-white/20 text-white/60',
-        bar:    'bg-white/40',
-        border: 'border-white/10',
+        icon:   'bg-[var(--surface-hover)] border-[color:var(--border-strong)] text-[color:var(--text-secondary)]',
+        bar:    'bg-[var(--text-muted)]',
+        border: 'border-[color:var(--border)]',
     },
 };
 

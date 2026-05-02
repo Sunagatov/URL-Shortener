@@ -24,24 +24,24 @@ interface ProfileFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
 }
 
 const fieldInputClass =
-  'w-full rounded-xl border border-white/[0.08] bg-[#0d0f1c] py-3 pl-10 pr-4 text-sm text-white ' +
-  'placeholder-white/25 transition-all duration-200 focus:border-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40';
+  'w-full rounded-xl border border-[color:var(--border)] bg-[var(--bg-alt)] py-3 pl-10 pr-4 text-sm text-[color:var(--text-primary)] ' +
+  'placeholder-[color:var(--text-muted)] transition-all duration-200 focus:border-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40';
 
 function ProfileField({ error, icon: Icon, label, registration, ...inputProps }: ProfileFieldProps) {
   return (
     <div>
-      <label className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-white/30">
+      <label className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">
         {label}
       </label>
       <div className="relative">
-        <Icon className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/25" />
+        <Icon className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[color:var(--text-muted)]" />
         <input
           {...registration}
           {...inputProps}
           className={`${fieldInputClass} ${error ? 'animate-error-shake border-red-500/30 focus:ring-red-500/30' : ''}`}
         />
       </div>
-      {error?.message ? <p className="mt-1 text-xs text-red-400">{error.message}</p> : null}
+      {error?.message ? <p className="mt-1 text-xs text-[color:var(--danger-text)]">{error.message}</p> : null}
     </div>
   );
 }
@@ -52,12 +52,12 @@ export function EditProfileForm({ user, onCancel, onSuccess }: EditProfileFormPr
   const hasValidationErrors = Object.keys(errors).length > 0;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-blue-500/20 bg-white/[0.04] lg:col-span-2">
-      <div className="relative border-b border-white/[0.07] bg-gradient-to-r from-[#0d1628] to-[#0a0e20] px-6 py-6">
+    <div className="overflow-hidden rounded-2xl border border-blue-500/20 bg-[var(--card-bg)] lg:col-span-2">
+      <div className="relative border-b border-[color:var(--card-border)] bg-gradient-to-r from-[var(--bg-alt)] to-[var(--bg-alt)] px-6 py-6">
         <div className="flex items-center gap-5">
-          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border-2 border-blue-500/30 bg-blue-600/20 ring-2 ring-blue-500/10 ring-offset-2 ring-offset-[#060612]">
+          <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl border-2 border-[color:var(--avatar-border)] bg-[var(--avatar-bg)] ring-2 ring-blue-500/10 ring-offset-2 ring-offset-[#060612]">
             <span
-              className="text-xl font-bold text-blue-300"
+              className="text-xl font-bold text-[color:var(--avatar-text)]"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               {getUserInitials(user)}
@@ -66,18 +66,18 @@ export function EditProfileForm({ user, onCancel, onSuccess }: EditProfileFormPr
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h2
-                className="text-lg font-bold text-white"
+                className="text-lg font-bold text-[color:var(--text-primary)]"
                 style={{ fontFamily: 'var(--font-display)' }}
               >
                 {getUserDisplayName(user)}
               </h2>
-              <span className="rounded-full border border-blue-500/25 bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-blue-400">
+              <span className="rounded-full border border-[color:var(--avatar-border)] bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-[color:var(--avatar-text)]">
                 Editing
               </span>
             </div>
-            <p className="text-sm text-white/45">{user.email}</p>
+            <p className="text-sm text-[color:var(--text-muted)]">{user.email}</p>
             {user.createdAt ? (
-              <p className="mt-1 text-xs text-white/25">
+              <p className="mt-1 text-xs text-[color:var(--text-muted)]">
                 Member since {formatUserDate(user.createdAt)}
               </p>
             ) : null}
@@ -87,7 +87,7 @@ export function EditProfileForm({ user, onCancel, onSuccess }: EditProfileFormPr
           type="button"
           onClick={handleCancel}
           disabled={isLoading}
-          className="absolute right-5 top-5 flex items-center gap-1.5 rounded-xl border border-white/[0.12] bg-white/[0.05] px-3 py-1.5 text-xs text-white/40 transition-all hover:border-white/20 hover:bg-white/[0.08] hover:text-white/70 disabled:cursor-not-allowed disabled:opacity-40"
+          className="absolute right-5 top-5 flex items-center gap-1.5 rounded-xl border border-[color:var(--border)] bg-[var(--card-bg)] px-3 py-1.5 text-xs text-[color:var(--text-muted)] transition-all hover:border-[color:var(--border-strong)] hover:bg-[var(--surface-hover)] hover:text-[color:var(--text-secondary)] disabled:cursor-not-allowed disabled:opacity-40"
         >
           <FaTimes className="h-3 w-3" />
           <span className="hidden sm:inline">Cancel</span>
@@ -95,7 +95,7 @@ export function EditProfileForm({ user, onCancel, onSuccess }: EditProfileFormPr
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="p-5">
-        <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-white/25">
+        <p className="mb-4 text-[10px] font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">
           Edit Personal Information
         </p>
 
@@ -148,26 +148,26 @@ export function EditProfileForm({ user, onCancel, onSuccess }: EditProfileFormPr
           </div>
 
           <div>
-            <label className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-white/20">
+            <label className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">
               Email Address
             </label>
             <div className="relative">
-              <FaEnvelope className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/15" />
+              <FaEnvelope className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[color:var(--text-muted)]" />
               <input
                 type="email"
                 value={user.email}
                 readOnly
                 disabled
-                className="w-full cursor-not-allowed rounded-xl border border-white/[0.05] bg-white/[0.02] py-3 pl-10 pr-10 text-sm text-white/30"
+                className="w-full cursor-not-allowed rounded-xl border border-[color:var(--border)] bg-[var(--card-bg)] py-3 pl-10 pr-10 text-sm text-[color:var(--text-muted)]"
               />
-              <FaLock className="absolute right-3.5 top-1/2 h-3 w-3 -translate-y-1/2 text-white/15" />
+              <FaLock className="absolute right-3.5 top-1/2 h-3 w-3 -translate-y-1/2 text-[color:var(--text-muted)]" />
             </div>
-            <p className="mt-1 text-[10px] text-white/20">Email address cannot be changed</p>
+            <p className="mt-1 text-[10px] text-[color:var(--text-muted)]">Email address cannot be changed</p>
           </div>
         </div>
 
         {serverError ? (
-          <div className="mt-4 flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-900/20 p-4 text-sm text-red-300">
+          <div className="mt-4 flex items-center gap-2 rounded-xl border border-[color:var(--danger)] bg-[var(--danger-bg)] p-4 text-sm text-[color:var(--danger-text)]">
             <span className="shrink-0">⚠</span>
             {serverError}
           </div>

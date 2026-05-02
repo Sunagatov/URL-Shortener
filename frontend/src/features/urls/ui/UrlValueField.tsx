@@ -35,9 +35,9 @@ export function UrlValueField({
   const containerClassName =
     tone === 'primary'
       ? 'border-blue-500/15 bg-[#0a1220] hover:border-blue-500/20'
-      : 'border-white/[0.05] bg-white/[0.03] hover:border-white/[0.10]';
+      : 'border-[color:var(--border)] bg-[var(--card-bg)] hover:border-[color:var(--border)]';
   const textClassName =
-    tone === 'primary' ? 'text-blue-400' : 'text-white/45';
+    tone === 'primary' ? 'text-[color:var(--avatar-text)]' : 'text-[color:var(--text-muted)]';
 
   return (
     <div>
@@ -84,7 +84,7 @@ export function UrlValueField({
         </div>
         {copiedValue === effectiveCopyValue ? (
           <Tooltip content={`${effectiveCopyValue} copied!`}>
-            <span className="max-w-[8.5rem] shrink truncate text-[10px] font-medium text-blue-400 sm:max-w-[12rem]">
+            <span className="max-w-[8.5rem] shrink truncate text-[10px] font-medium text-[color:var(--avatar-text)] sm:max-w-[12rem]">
               {effectiveCopyValue} copied!
             </span>
           </Tooltip>

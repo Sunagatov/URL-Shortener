@@ -16,15 +16,15 @@ const baseClassName =
 const variantClassName = {
   primary:
     'border border-[color:var(--accent-border)] bg-[linear-gradient(135deg,var(--accent)_0%,var(--accent-strong)_100%)] ' +
-    'text-white shadow-[0_14px_30px_rgba(6,182,212,0.18)] hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(6,182,212,0.24)]',
+    'text-[color:var(--text-on-accent)] shadow-[0_14px_30px_rgba(6,182,212,0.18)] hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(6,182,212,0.24)]',
   secondary:
     'border border-[color:var(--border-strong)] bg-[color:var(--surface-raised)] text-[color:var(--text-primary)] ' +
-    'hover:border-[color:var(--accent-border)] hover:bg-white/10',
+    'hover:border-[color:var(--accent-border)] hover:bg-[var(--surface-hover)]',
   danger:
     'border border-red-500/30 bg-[linear-gradient(135deg,rgba(239,68,68,0.95)_0%,rgba(220,38,38,0.95)_100%)] ' +
-    'text-white shadow-[0_14px_28px_rgba(239,68,68,0.18)] hover:-translate-y-0.5',
+    'text-[color:var(--text-on-accent)] shadow-[0_14px_28px_rgba(239,68,68,0.18)] hover:-translate-y-0.5',
   ghost:
-    'border border-transparent bg-transparent text-[color:var(--text-secondary)] hover:border-[color:var(--border-strong)] hover:bg-white/6 hover:text-white',
+    'border border-transparent bg-transparent text-[color:var(--text-secondary)] hover:border-[color:var(--border-strong)] hover:bg-[var(--surface-hover)] hover:text-[color:var(--text-primary)]',
 } as const;
 
 const sizeClassName = {

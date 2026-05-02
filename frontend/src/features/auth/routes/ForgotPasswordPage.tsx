@@ -134,8 +134,8 @@ const ForgotPasswordPage: React.FC = () => {
           title="Recovery requested"
           description={(
             <>
-              <p className="text-sm text-white/40">Recovery requested for</p>
-              <p className="mt-1 break-all text-sm font-semibold text-white">{submittedEmail}</p>
+              <p className="text-sm text-[color:var(--text-muted)]">Recovery requested for</p>
+              <p className="mt-1 break-all text-sm font-semibold text-[color:var(--text-primary)]">{submittedEmail}</p>
             </>
           )}
           icon={(
@@ -148,7 +148,7 @@ const ForgotPasswordPage: React.FC = () => {
               <AuthSupportCard>
                 <div className="space-y-3">
                   {recoveryHints.map((hint) => (
-                    <div key={hint} className="flex items-start gap-2.5 text-sm text-white/45">
+                    <div key={hint} className="flex items-start gap-2.5 text-sm text-[color:var(--text-muted)]">
                       <FaCheck className="mt-0.5 h-3 w-3 flex-shrink-0 text-emerald-500/70" />
                       <span>{hint}</span>
                     </div>
@@ -212,12 +212,12 @@ const ForgotPasswordPage: React.FC = () => {
           <div>
             <label
               htmlFor="forgot-email"
-              className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-white/30"
+              className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-[color:var(--text-muted)]"
             >
               Email Address
             </label>
             <div className="relative">
-              <FaEnvelope className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/25" />
+              <FaEnvelope className="absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[color:var(--text-muted)]" />
               <input
                 id="forgot-email"
                 name="email"
@@ -234,7 +234,7 @@ const ForgotPasswordPage: React.FC = () => {
                 className={`${authInputClassName} pl-10`}
               />
             </div>
-            <p className="mt-2 text-xs text-white/35">
+            <p className="mt-2 text-xs text-[color:var(--text-muted)]">
               We keep this response neutral so no one can use it to confirm whether an account exists.
             </p>
           </div>
@@ -251,11 +251,11 @@ const ForgotPasswordPage: React.FC = () => {
           <AuthBackLink to={routes.signIn}>Back to Sign In</AuthBackLink>
         </div>
 
-        <p className="mt-6 text-center text-sm text-white/30">
+        <p className="mt-6 text-center text-sm text-[color:var(--text-muted)]">
           Don't have an account?{' '}
           <Link
             to={routes.signUp}
-            className="font-semibold text-cyan-300 transition-colors hover:text-cyan-200"
+            className="font-semibold text-[color:var(--accent)] transition-colors hover:text-[color:var(--accent)]"
           >
             Sign up for free
           </Link>

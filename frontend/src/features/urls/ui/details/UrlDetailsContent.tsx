@@ -27,24 +27,24 @@ export function UrlDetailsHeader({ onBack, onDelete, urlMapping }: UrlDetailsHea
     <div className="mb-8 mt-3 md:mt-0">
       <button
         onClick={onBack}
-        className="group mb-5 inline-flex items-center gap-1.5 text-sm text-white/35 transition-colors hover:text-white/70"
+        className="group mb-5 inline-flex items-center gap-1.5 text-sm text-[color:var(--text-muted)] transition-colors hover:text-[color:var(--text-secondary)]"
       >
         <span className="transition-transform group-hover:-translate-x-0.5">←</span>
         Back to My URLs
       </button>
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl border border-blue-500/20 bg-blue-600/15">
-            <FaLink className="h-5 w-5 text-blue-400" />
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl border border-[color:var(--avatar-border)] bg-[var(--avatar-bg)]">
+            <FaLink className="h-5 w-5 text-[color:var(--avatar-text)]" />
           </div>
           <div>
             <h1
-              className="text-2xl font-bold tracking-tight text-white"
+              className="text-2xl font-bold tracking-tight text-[color:var(--text-primary)]"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               URL Details
             </h1>
-            <p className="mt-0.5 text-sm text-white/40">{getDomainLabel(urlMapping.originalUrl)}</p>
+            <p className="mt-0.5 text-sm text-[color:var(--text-muted)]">{getDomainLabel(urlMapping.originalUrl)}</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -83,7 +83,7 @@ export function UrlInfoCard({ copiedValue, onCopy, urlMapping }: UrlInfoCardProp
           onCopy={onCopy}
           tone="primary"
           value={urlMapping.shortUrl}
-          valueClassName="break-all text-[0.82rem] hover:text-blue-300"
+          valueClassName="break-all text-[0.82rem] hover:text-[color:var(--avatar-text)]"
         />
         <UrlValueField
           copiedValue={copiedValue}
@@ -91,7 +91,7 @@ export function UrlInfoCard({ copiedValue, onCopy, urlMapping }: UrlInfoCardProp
           label="Original URL"
           onCopy={onCopy}
           value={urlMapping.originalUrl}
-          valueClassName="break-all text-[0.82rem] hover:text-white/80"
+          valueClassName="break-all text-[0.82rem] hover:text-[color:var(--text-secondary)]"
         />
       </div>
     </UrlSurfaceCard>
@@ -116,19 +116,19 @@ export function UrlMetadataCard({ urlMapping }: { urlMapping: UrlMapping }) {
             tone="warning"
           />
         ) : null}
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-4">
+        <div className="rounded-xl border border-[color:var(--border)] bg-[var(--card-bg)] p-4">
           <div className="mb-3 flex items-center gap-3">
             <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-emerald-500/15 bg-emerald-500/12">
               <FaQrcode className="h-3.5 w-3.5 text-emerald-300" />
             </div>
             <div>
-              <p className="mb-0.5 text-[10px] uppercase tracking-widest text-white/30">QR Code</p>
-              <p className="text-xs text-white/45">Scan to open the short link on another device</p>
+              <p className="mb-0.5 text-[10px] uppercase tracking-widest text-[color:var(--text-muted)]">QR Code</p>
+              <p className="text-xs text-[color:var(--text-muted)]">Scan to open the short link on another device</p>
             </div>
           </div>
-          <div className="flex justify-center rounded-2xl border border-white/[0.06] bg-white px-4 py-5">
+          <div className="flex justify-center rounded-2xl border border-[color:var(--border)] bg-white px-4 py-5">
             <QRCodeSVG
-              value={urlMapping.shortUrl}
+              value={`${urlMapping.shortUrl}?qr=1`}
               size={132}
               bgColor="#ffffff"
               fgColor="#0f172a"

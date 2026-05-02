@@ -9,8 +9,8 @@ export function AuthAlert({
 }: PropsWithChildren<{ tone?: 'error' | 'neutral' }>) {
   const className =
     tone === 'error'
-      ? 'border-red-500/20 bg-red-900/20 text-red-300'
-      : 'border-[color:var(--border)] bg-white/5 text-[color:var(--text-secondary)]';
+      ? 'border-[color:var(--danger)] bg-[var(--danger-bg)] text-[color:var(--danger-text)]'
+      : 'border-[color:var(--border)] bg-[var(--card-bg)] text-[color:var(--text-secondary)]';
 
   return (
     <div className={`flex items-center gap-2 rounded-2xl border p-4 text-sm ${className}`}>
@@ -24,7 +24,7 @@ export function AuthBackLink({ to, children = 'Back' }: { to: string; children?:
   return (
     <Link
       to={to}
-      className="inline-flex items-center gap-2 text-sm text-[color:var(--text-muted)] transition-colors hover:text-white"
+      className="inline-flex items-center gap-2 text-sm text-[color:var(--text-muted)] transition-colors hover:text-[color:var(--text-primary)]"
     >
       <FaArrowLeft className="h-3 w-3" />
       {children}
@@ -33,7 +33,7 @@ export function AuthBackLink({ to, children = 'Back' }: { to: string; children?:
 }
 
 export function AuthSupportCard({ children }: PropsWithChildren) {
-  return <Card className="rounded-2xl bg-white/4 p-4">{children}</Card>;
+  return <Card className="rounded-2xl bg-[var(--card-bg)] p-4">{children}</Card>;
 }
 
 export function AuthStatusView({
@@ -52,7 +52,7 @@ export function AuthStatusView({
       <div className="flex flex-col items-center py-4">
         {icon}
         <div className="mt-4 text-center">
-          <h2 className="text-lg font-semibold text-white">{title}</h2>
+          <h2 className="text-lg font-semibold text-[color:var(--text-primary)]">{title}</h2>
           <div className="mt-2 text-sm text-[color:var(--text-secondary)]">{description}</div>
         </div>
       </div>
@@ -68,13 +68,13 @@ export function AuthStatusIcon({
   const badgeClassName = {
     success: 'border-emerald-500/40 bg-emerald-500/20 text-emerald-400',
     warning: 'border-amber-500/40 bg-amber-500/20 text-amber-300',
-    error: 'border-red-500/40 bg-red-500/20 text-red-400',
+    error: 'border-[color:var(--danger)] bg-[var(--danger-bg)] text-[color:var(--danger-text)]',
   } as const;
 
   const outerClassName = {
     success: 'border-emerald-500/25 bg-emerald-500/12',
     warning: 'border-amber-500/25 bg-amber-500/10',
-    error: 'border-red-500/25 bg-red-500/10',
+    error: 'border-[color:var(--danger)] bg-[var(--danger-bg)]',
   } as const;
 
   return (
@@ -102,7 +102,7 @@ export function PasswordVisibilityToggle({
     <button
       type="button"
       onClick={onToggle}
-      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[color:var(--text-muted)] transition-colors hover:text-white"
+      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[color:var(--text-muted)] transition-colors hover:text-[color:var(--text-primary)]"
       aria-label={show ? 'Hide password' : 'Show password'}
     >
       {show ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
@@ -120,7 +120,7 @@ export function AuthChecklist({
       {items.map((item) => (
         <div
           key={item.label}
-          className={`flex items-center gap-1.5 text-xs ${item.passes ? 'text-cyan-300' : 'text-white/25'}`}
+          className={`flex items-center gap-1.5 text-xs ${item.passes ? 'text-[color:var(--accent)]' : 'text-[color:var(--text-muted)]'}`}
         >
           {item.passes ? <FaCheck size={9} /> : <FaTimes size={9} />}
           <span>{item.label}</span>

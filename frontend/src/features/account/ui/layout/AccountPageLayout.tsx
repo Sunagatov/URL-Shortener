@@ -39,7 +39,7 @@ export const AccountPageHeader = ({ title, description, actions }: AccountPageHe
     <div className="mb-8 mt-3 flex flex-col justify-between gap-4 sm:flex-row sm:items-center md:mt-0">
       <div>
         <h1
-          className="text-2xl font-bold tracking-tight text-white"
+          className="text-2xl font-bold tracking-tight text-[color:var(--text-primary)]"
           style={{ fontFamily: 'var(--font-display)' }}
         >
           {title}
@@ -76,9 +76,9 @@ export const AccountPageMessageState = ({
       <AccountSidebar />
       <div className="flex flex-grow items-center justify-center px-6 md:ml-64">
         <Card className="max-w-md px-8 py-9 text-center">
-          <h2 className="mb-2 text-xl font-bold text-white">{title}</h2>
+          <h2 className="mb-2 text-xl font-bold text-[color:var(--text-primary)]">{title}</h2>
           <p className="text-sm text-[color:var(--text-secondary)]">{message}</p>
-          {detail && <p className="mt-2 text-sm text-red-400">{detail}</p>}
+          {detail && <p className="mt-2 text-sm text-[color:var(--danger-text)]">{detail}</p>}
           {action && <div className="mt-6">{action}</div>}
         </Card>
       </div>

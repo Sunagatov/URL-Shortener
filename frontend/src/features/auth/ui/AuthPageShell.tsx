@@ -29,10 +29,10 @@ export function AuthPageShell({
         <div className={`w-full ${contentWidthClass[width]}`}>
           <div className="mb-8 flex items-center gap-2 lg:hidden">
             <div className="flex h-9 w-9 items-center justify-center rounded-2xl border border-[color:var(--accent-border)] bg-[var(--accent-glow)]">
-              <FaLink className="h-3.5 w-3.5 text-cyan-200" />
+              <FaLink className="h-3.5 w-3.5 text-[color:var(--accent)]" />
             </div>
             <span
-              className="text-base font-bold text-white"
+              className="text-base font-bold text-[color:var(--text-primary)]"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               Shorty URL
@@ -41,7 +41,7 @@ export function AuthPageShell({
 
           <div className="mb-8">
             <h1
-              className="mb-1.5 text-3xl font-bold text-white"
+              className="mb-1.5 text-3xl font-bold text-[color:var(--text-primary)]"
               style={{ fontFamily: 'var(--font-display)' }}
             >
               {title}

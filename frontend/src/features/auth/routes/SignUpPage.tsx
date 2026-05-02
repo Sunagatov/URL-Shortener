@@ -52,9 +52,9 @@ const signUpBrandPanel = (
       { icon: FaShieldAlt, text: 'Export your data anytime' },
     ]}
     footer={
-      <div className="rounded-2xl border border-white/[0.07] bg-white/[0.04] p-4">
-        <p className="mb-1 text-xs text-white/25">Trusted by teams at</p>
-        <p className="text-sm font-semibold text-white/45">Startups · Agencies · Developers</p>
+      <div className="rounded-2xl border border-[color:var(--card-border)] bg-[var(--card-bg)] p-4">
+        <p className="mb-1 text-xs text-[color:var(--text-muted)]">Trusted by teams at</p>
+        <p className="text-sm font-semibold text-[color:var(--text-muted)]">Startups · Agencies · Developers</p>
       </div>
     }
   />
@@ -147,77 +147,77 @@ const SignUpPage: React.FC = () => {
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <div className="relative">
-              <FaUser className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/25 transition-colors duration-200 peer-focus:text-cyan-300" />
+              <FaUser className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[color:var(--text-muted)] transition-colors duration-200 peer-focus:text-[color:var(--accent)]" />
               <input
                 {...register('firstName')}
                 id="sign-up-first-name"
                 type="text"
                 placeholder=" "
-                className={`${authInputClassName} peer pl-10 pt-6 pb-2.5 ${errors.firstName ? 'animate-error-shake border-red-500/30 focus:ring-red-500/30' : ''}`}
+                className={`${authInputClassName} peer pl-10 pt-6 pb-2.5 ${errors.firstName ? 'animate-error-shake border-[color:var(--danger)] focus:ring-[color:var(--danger)]' : ''}`}
               />
-              <label htmlFor="sign-up-first-name" className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-white/28 peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-cyan-300">First Name</label>
+              <label htmlFor="sign-up-first-name" className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[color:var(--text-muted)] peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[color:var(--accent)]">First Name</label>
             </div>
-            {errors.firstName ? <p className="mt-1 text-xs text-red-400">{errors.firstName.message}</p> : null}
+            {errors.firstName ? <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.firstName.message}</p> : null}
           </div>
           <div className="space-y-1.5">
             <div className="relative">
-              <FaUser className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/25 transition-colors duration-200 peer-focus:text-cyan-300" />
+              <FaUser className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[color:var(--text-muted)] transition-colors duration-200 peer-focus:text-[color:var(--accent)]" />
               <input
                 {...register('lastName')}
                 id="sign-up-last-name"
                 type="text"
                 placeholder=" "
-                className={`${authInputClassName} peer pl-10 pt-6 pb-2.5 ${errors.lastName ? 'animate-error-shake border-red-500/30 focus:ring-red-500/30' : ''}`}
+                className={`${authInputClassName} peer pl-10 pt-6 pb-2.5 ${errors.lastName ? 'animate-error-shake border-[color:var(--danger)] focus:ring-[color:var(--danger)]' : ''}`}
               />
-              <label htmlFor="sign-up-last-name" className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-white/28 peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-cyan-300">Last Name</label>
+              <label htmlFor="sign-up-last-name" className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[color:var(--text-muted)] peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[color:var(--accent)]">Last Name</label>
             </div>
-            {errors.lastName ? <p className="mt-1 text-xs text-red-400">{errors.lastName.message}</p> : null}
+            {errors.lastName ? <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.lastName.message}</p> : null}
           </div>
         </div>
 
         <div className="space-y-1.5">
           <div className="relative">
-            <FaEnvelope className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/25 transition-colors duration-200 peer-focus:text-cyan-300" />
+            <FaEnvelope className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[color:var(--text-muted)] transition-colors duration-200 peer-focus:text-[color:var(--accent)]" />
             <input
               {...register('email')}
               id="sign-up-email"
               type="email"
               placeholder=" "
               autoComplete="email"
-              className={`${authInputClassName} peer pl-10 pt-6 pb-2.5 ${errors.email ? 'animate-error-shake border-red-500/30 focus:ring-red-500/30' : ''}`}
+              className={`${authInputClassName} peer pl-10 pt-6 pb-2.5 ${errors.email ? 'animate-error-shake border-[color:var(--danger)] focus:ring-[color:var(--danger)]' : ''}`}
             />
-            <label htmlFor="sign-up-email" className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-white/28 peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-cyan-300">Email Address</label>
+            <label htmlFor="sign-up-email" className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[color:var(--text-muted)] peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[color:var(--accent)]">Email Address</label>
           </div>
-          {errors.email ? <p className="mt-1 text-xs text-red-400">{errors.email.message}</p> : null}
+          {errors.email ? <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.email.message}</p> : null}
         </div>
         <div className="space-y-1.5">
           <div className="relative">
-            <FaLock className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/25 transition-colors duration-200 peer-focus:text-cyan-300" />
+            <FaLock className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[color:var(--text-muted)] transition-colors duration-200 peer-focus:text-[color:var(--accent)]" />
             <input
               {...register('password')}
               id="sign-up-password"
               type="password"
               placeholder=" "
               autoComplete="new-password"
-              className={`${authInputClassName} peer pl-10 pt-6 pb-2.5 ${errors.password ? 'animate-error-shake border-red-500/30 focus:ring-red-500/30' : ''}`}
+              className={`${authInputClassName} peer pl-10 pt-6 pb-2.5 ${errors.password ? 'animate-error-shake border-[color:var(--danger)] focus:ring-[color:var(--danger)]' : ''}`}
             />
-            <label htmlFor="sign-up-password" className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-white/28 peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-cyan-300">Password</label>
+            <label htmlFor="sign-up-password" className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[color:var(--text-muted)] peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[color:var(--accent)]">Password</label>
           </div>
-          {errors.password ? <p className="mt-1 text-xs text-red-400">{errors.password.message}</p> : null}
+          {errors.password ? <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.password.message}</p> : null}
         </div>
-        <div className="rounded-2xl border border-white/[0.07] bg-white/[0.03] px-4 py-3">
+        <div className="rounded-2xl border border-[color:var(--card-border)] bg-[var(--card-bg)] px-4 py-3">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-[0.18em] text-white/30">
+            <span className="text-[10px] uppercase tracking-[0.18em] text-[color:var(--text-muted)]">
               Password strength
             </span>
             <span className={`text-xs font-semibold ${passwordStrength.textClass}`}>
               {password ? passwordStrength.strength : 'Start typing'}
             </span>
           </div>
-          <div className="mt-2 h-1 w-full rounded-full bg-white/[0.07]">
+          <div className="mt-2 h-1 w-full rounded-full bg-[var(--card-border)]">
             <div
               className={`h-1 rounded-full transition-all duration-300 ${
-                password ? passwordStrength.barClass : 'bg-white/10'
+                password ? passwordStrength.barClass : 'bg-[var(--border)]'
               }`}
               style={{ width: password ? passwordStrength.width : '18%' }}
             />
@@ -230,7 +230,7 @@ const SignUpPage: React.FC = () => {
                 <div
                   key={check.getLabel()}
                   className={`flex items-center gap-1.5 text-xs ${
-                    passes ? 'text-emerald-400' : 'text-white/25'
+                    passes ? 'text-emerald-400' : 'text-[color:var(--text-muted)]'
                   }`}
                 >
                   {passes ? (
@@ -248,21 +248,21 @@ const SignUpPage: React.FC = () => {
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <div className="relative">
-              <FaGlobe className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/25 transition-colors duration-200 peer-focus:text-cyan-300" />
+              <FaGlobe className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[color:var(--text-muted)] transition-colors duration-200 peer-focus:text-[color:var(--accent)]" />
               <input
                 {...register('country')}
                 id="sign-up-country"
                 type="text"
                 placeholder=" "
-                className={`${authInputClassName} peer pl-10 pt-6 pb-2.5 ${errors.country ? 'animate-error-shake border-red-500/30 focus:ring-red-500/30' : ''}`}
+                className={`${authInputClassName} peer pl-10 pt-6 pb-2.5 ${errors.country ? 'animate-error-shake border-[color:var(--danger)] focus:ring-[color:var(--danger)]' : ''}`}
               />
-              <label htmlFor="sign-up-country" className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-white/28 peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-cyan-300">Country</label>
+              <label htmlFor="sign-up-country" className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[color:var(--text-muted)] peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[color:var(--accent)]">Country</label>
             </div>
-            {errors.country ? <p className="mt-1 text-xs text-red-400">{errors.country.message}</p> : null}
+            {errors.country ? <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.country.message}</p> : null}
           </div>
           <div className="space-y-1.5">
             <div className="relative">
-              <FaCalendarAlt className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/25 transition-colors duration-200 peer-focus:text-cyan-300" />
+              <FaCalendarAlt className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[color:var(--text-muted)] transition-colors duration-200 peer-focus:text-[color:var(--accent)]" />
               <input
                 {...register('age')}
                 id="sign-up-age"
@@ -270,11 +270,11 @@ const SignUpPage: React.FC = () => {
                 placeholder=" "
                 min="1"
                 max="150"
-                className={`${authInputClassName} peer pl-10 pr-4 pt-6 pb-2.5 ${errors.age ? 'animate-error-shake border-red-500/30 focus:ring-red-500/30' : ''}`}
+                className={`${authInputClassName} peer pl-10 pr-4 pt-6 pb-2.5 ${errors.age ? 'animate-error-shake border-[color:var(--danger)] focus:ring-[color:var(--danger)]' : ''}`}
               />
-              <label htmlFor="sign-up-age" className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/35 transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-white/28 peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-cyan-300">Age</label>
+              <label htmlFor="sign-up-age" className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[color:var(--text-muted)] peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[color:var(--accent)]">Age</label>
             </div>
-            {errors.age ? <p className="mt-1 text-xs text-red-400">{errors.age.message}</p> : null}
+            {errors.age ? <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.age.message}</p> : null}
           </div>
         </div>
 
@@ -288,20 +288,20 @@ const SignUpPage: React.FC = () => {
                 className="peer absolute inset-0 h-full w-full cursor-pointer opacity-0"
               />
               <span className="flex h-5 w-5 items-center justify-center rounded-md border border-[color:var(--border-strong)] bg-[color:var(--surface-raised)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-200 peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--accent-ring)] peer-checked:border-[color:var(--accent-border)] peer-checked:bg-[linear-gradient(135deg,var(--accent)_0%,var(--accent-strong)_100%)] peer-checked:shadow-[0_10px_22px_rgba(6,182,212,0.2)]">
-                <FaCheck className="h-2.5 w-2.5 scale-0 text-white transition-transform duration-150 peer-checked:scale-100" />
+                <FaCheck className="h-2.5 w-2.5 scale-0 text-[color:var(--text-on-accent)] transition-transform duration-150 peer-checked:scale-100" />
               </span>
             </span>
             <span className="min-w-0">
               <span className="block text-sm font-medium leading-snug text-[color:var(--text-secondary)]">
-                I agree to the <span className="text-white/20">Terms of Service (coming soon)</span>{' '}
-                and <span className="text-white/20">Privacy Policy (coming soon)</span>
+                I agree to the <span className="text-[color:var(--text-muted)]">Terms of Service (coming soon)</span>{' '}
+                and <span className="text-[color:var(--text-muted)]">Privacy Policy (coming soon)</span>
               </span>
               <span className="mt-1 block text-xs leading-relaxed text-[color:var(--text-muted)]">
                 Account creation requires accepting the current platform terms.
               </span>
             </span>
           </label>
-          {errors.acceptTerms?.message ? <p className="mt-1 text-xs text-red-400">{errors.acceptTerms.message}</p> : null}
+          {errors.acceptTerms?.message ? <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.acceptTerms.message}</p> : null}
         </div>
 
         {error ? (
@@ -313,12 +313,12 @@ const SignUpPage: React.FC = () => {
         </Button>
       </form>
 
-      <p className="mt-6 text-center text-sm text-white/40">
+      <p className="mt-6 text-center text-sm text-[color:var(--text-muted)]">
         Already have an account?{' '}
         <Link
           to={routes.signIn}
           state={location.state}
-          className="font-semibold text-blue-400 transition-colors hover:text-blue-300"
+          className="font-semibold text-[color:var(--avatar-text)] transition-colors hover:text-[color:var(--avatar-text)]"
         >
           Sign in here
         </Link>

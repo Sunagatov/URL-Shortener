@@ -13,6 +13,7 @@ import SecurityPage from '@/features/account/routes/SecurityPage';
 import UrlShortenerPage from '@/features/urls/routes/UrlShortenerPage';
 import UserUrlMappingsPage from '@/features/urls/routes/UserUrlMappingsPage';
 import UrlMappingDetailsPage from '@/features/urls/routes/UrlMappingDetailsPage';
+import AccountAnalyticsPage from '@/features/analytics/routes/AccountAnalyticsPage';
 
 const guestRoutes = [
   { path: routes.signIn, element: <SignInPage /> },
@@ -24,6 +25,7 @@ const guestRoutes = [
 
 const protectedRoutes = [
   { path: routes.dashboard, element: <DashboardPage /> },
+  { path: routes.analytics, element: <AccountAnalyticsPage /> },
   { path: routes.profile, element: <UserAccountPage /> },
   { path: routes.security, element: <SecurityPage /> },
   { path: routes.urlMappings, element: <UserUrlMappingsPage /> },

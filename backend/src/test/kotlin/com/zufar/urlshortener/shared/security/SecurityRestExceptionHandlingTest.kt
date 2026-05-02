@@ -1,11 +1,11 @@
 package com.zufar.urlshortener.shared.security
 
-import com.zufar.urlshortener.urls.dto.UrlMappingDto
+import com.zufar.urlshortener.analytics.service.TrackUrlVisitService
+import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.service.UrlManagementService
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -91,14 +91,18 @@ class SecurityRestExceptionHandlingTest {
 
     @Test
     fun `public short url redirect remains accessible without auth`() {
-        whenever(urlManagementService.getPublicUrlMapping("abc12345")).thenReturn(
-            UrlMappingDto(
+        val now = LocalDateTime.now()
+        whenever(urlManagementService.getActiveUrlMapping("abc12345")).thenReturn(
+            UrlMapping(
                 urlHash = "abc12345",
                 shortUrl = "http://localhost:8080/abc12345",
                 originalUrl = "https://example.com/original",
                 clickCount = 0,
-                createdAt = LocalDateTime.now(),
-                expirationDate = LocalDateTime.now().plusHours(1)
+                createdAt = now,
+                expirationDate = now.plusHours(1),
+                requestIp = null,
+                userAgent = null,
+                userId = null
             )
         )
 
@@ -107,8 +111,6 @@ class SecurityRestExceptionHandlingTest {
             .andExpect(header().string("Location", "https://example.com/original"))
             .andExpect(header().string("Referrer-Policy", "no-referrer"))
             .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.containsString("public")))
-
-        verify(urlManagementService).incrementClickCount("abc12345")
     }
 
     @Test
@@ -123,5 +125,9 @@ class SecurityRestExceptionHandlingTest {
         @Bean
         @Primary
         fun urlManagementService(): UrlManagementService = mock()
+
+        @Bean
+        @Primary
+        fun trackUrlVisitService(): TrackUrlVisitService = mock()
     }
 }

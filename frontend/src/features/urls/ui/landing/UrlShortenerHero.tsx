@@ -32,20 +32,20 @@ export function UrlShortenerHero({
       <div className="absolute inset-0 bg-grid-dark pointer-events-none" />
 
       <div className="relative z-10 mx-auto w-full max-w-3xl px-5 py-10 text-center sm:px-6">
-        <div className="mb-6 inline-flex animate-fade-up items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm text-white/70 backdrop-blur-sm md:mb-8">
+        <div className="mb-6 inline-flex animate-fade-up items-center gap-2 rounded-full border border-[color:var(--border-strong)] bg-[var(--surface-hover)] px-4 py-1.5 text-sm text-[color:var(--text-secondary)] backdrop-blur-sm md:mb-8">
           <HeroBadgeIcon className="h-3 w-3 text-amber-400" />
           Trusted by 500K+ users worldwide
         </div>
 
         <h1
-          className="mb-5 text-4xl font-bold leading-[1.05] tracking-tight text-white animate-fade-up-d1 sm:text-5xl md:mb-6 md:text-[68px]"
+          className="mb-5 text-4xl font-bold leading-[1.05] tracking-tight text-[color:var(--text-primary)] animate-fade-up-d1 sm:text-5xl md:mb-6 md:text-[68px]"
           style={{ fontFamily: 'var(--font-display)' }}
         >
           URL shortener for
           <span className="gradient-text-animated mt-1 block">powerful short links</span>
         </h1>
 
-        <p className="mx-auto mb-8 max-w-xl text-base leading-relaxed text-white/55 animate-fade-up-d2 md:mb-10 md:text-xl">
+        <p className="mx-auto mb-8 max-w-xl text-base leading-relaxed text-[color:var(--text-secondary)] animate-fade-up-d2 md:mb-10 md:text-xl">
           Create memorable links, track performance, and share with confidence. Free forever — no
           sign-up required.
         </p>
@@ -53,20 +53,20 @@ export function UrlShortenerHero({
         {children}
 
         {shortUrl ? (
-          <div className="mb-6 rounded-[1.25rem] border border-white/10 bg-white/5 p-5 text-left backdrop-blur-sm">
+          <div className="mb-6 rounded-[1.25rem] border border-[color:var(--border)] bg-[var(--card-bg)] p-5 text-left backdrop-blur-sm">
             <div className="mb-4 flex items-center gap-3">
               <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/20">
                 <FaCheck className="h-4 w-4 text-emerald-400" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-white">Your link is ready!</p>
-                <p className="text-xs text-white/40">Copy the short URL below</p>
+                <p className="text-sm font-semibold text-[color:var(--text-primary)]">Your link is ready!</p>
+                <p className="text-xs text-[color:var(--text-muted)]">Copy the short URL below</p>
               </div>
             </div>
-            <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 p-3.5">
+            <div className="flex items-center justify-between gap-3 rounded-xl border border-[color:var(--border)] bg-[var(--card-bg)] p-3.5">
               <a
                 href={shortUrl}
-                className="flex-1 break-all text-sm font-medium text-blue-400 transition-colors hover:text-blue-300"
+                className="flex-1 break-all text-sm font-medium text-[color:var(--avatar-text)] transition-colors hover:text-[color:var(--avatar-text)]"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -79,7 +79,7 @@ export function UrlShortenerHero({
                   className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-all duration-200 ${
                     copiedShortUrl === shortUrl
                       ? 'border-emerald-500/30 bg-emerald-500/20 text-emerald-400'
-                      : 'border-white/10 bg-white/10 text-white/60 hover:bg-white/20'
+                      : 'border-[color:var(--border)] bg-[var(--surface-hover)] text-[color:var(--text-secondary)] hover:bg-[var(--surface-hover)]'
                   }`}
                 >
                   {copiedShortUrl === shortUrl ? (
@@ -96,7 +96,7 @@ export function UrlShortenerHero({
                     href={shortUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rounded-lg border border-white/10 bg-white/10 p-2 text-white/60 transition-all duration-200 hover:bg-white/20"
+                    className="rounded-lg border border-[color:var(--border)] bg-[var(--surface-hover)] p-2 text-[color:var(--text-secondary)] transition-all duration-200 hover:bg-[var(--surface-hover)]"
                     aria-label="Open short URL"
                   >
                     <FaExternalLinkAlt className="h-3 w-3" />
@@ -109,7 +109,7 @@ export function UrlShortenerHero({
                       <button
                         type="button"
                         onClick={() => void navigator.share({ url: shortUrl })}
-                        className="rounded-lg border border-white/10 bg-white/10 p-2 text-white/60 transition-all duration-200 hover:bg-white/20"
+                        className="rounded-lg border border-[color:var(--border)] bg-[var(--surface-hover)] p-2 text-[color:var(--text-secondary)] transition-all duration-200 hover:bg-[var(--surface-hover)]"
                         aria-label="Share short URL"
                       >
                         <FaShareAlt className="h-3 w-3" />
@@ -119,7 +119,7 @@ export function UrlShortenerHero({
                 <button
                   type="button"
                   onClick={onClear}
-                  className="rounded-lg border border-white/10 bg-white/10 px-3 py-2 text-xs font-medium text-white/50 transition-all duration-200 hover:bg-white/20"
+                  className="rounded-lg border border-[color:var(--border)] bg-[var(--surface-hover)] px-3 py-2 text-xs font-medium text-[color:var(--text-secondary)] transition-all duration-200 hover:bg-[var(--surface-hover)]"
                 >
                   Clear
                 </button>
@@ -129,7 +129,7 @@ export function UrlShortenerHero({
               <div className="mt-3 text-center">
                 <Link
                   to={routes.urlMappings}
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-400 transition-colors hover:text-blue-300"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-[color:var(--avatar-text)] transition-colors hover:text-[color:var(--avatar-text)]"
                 >
                   View in Dashboard <FaArrowRight className="h-3 w-3" />
                 </Link>
@@ -138,7 +138,7 @@ export function UrlShortenerHero({
           </div>
         ) : null}
 
-        <div className="flex flex-wrap justify-center gap-5 text-sm text-white/35">
+        <div className="flex flex-wrap justify-center gap-5 text-sm text-[color:var(--text-muted)]">
           {heroHighlights.map(highlight => (
             <span key={highlight.label} className="flex items-center gap-2">
               <span className={`inline-block h-1.5 w-1.5 rounded-full ${highlight.color}`} />
@@ -160,12 +160,12 @@ interface UrlShortenerFormProps {
 export function UrlShortenerForm({ children, isLoading = false, onSubmit }: UrlShortenerFormProps) {
   return (
     <div className="glass-card group relative mb-6 animate-fade-up-d3 overflow-hidden p-2.5">
-      <div className="pointer-events-none absolute inset-0 rounded-[20px] border border-white/8 transition-all duration-300 group-focus-within:border-blue-400/35 group-focus-within:shadow-[inset_0_0_0_1px_rgba(96,165,250,0.22),inset_0_0_42px_rgba(59,130,246,0.18),0_0_0_1px_rgba(59,130,246,0.12)]" />
+      <div className="pointer-events-none absolute inset-0 rounded-[20px] border border-[color:var(--border)] transition-all duration-300 group-focus-within:border-blue-400/35 group-focus-within:shadow-[inset_0_0_0_1px_rgba(96,165,250,0.22),inset_0_0_42px_rgba(59,130,246,0.18),0_0_0_1px_rgba(59,130,246,0.12)]" />
       <form onSubmit={onSubmit}>
         <div className="flex flex-col gap-2 sm:flex-row">
           <div className="relative flex-1">
             <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center">
-              <FaGlobe className="h-4 w-4 text-white/35" />
+              <FaGlobe className="h-4 w-4 text-[color:var(--text-muted)]" />
             </div>
             {children}
           </div>
@@ -175,8 +175,8 @@ export function UrlShortenerForm({ children, isLoading = false, onSubmit }: UrlS
           </Button>
         </div>
         <div className="mt-2.5 flex items-center justify-between gap-3 px-1.5 text-left">
-          <p className="text-xs text-white/33">Paste shortcut: Ctrl+V to paste your URL</p>
-          <span className="hidden text-[11px] uppercase tracking-[0.2em] text-white/20 sm:inline">
+          <p className="text-xs text-[color:var(--text-muted)]">Paste shortcut: Ctrl+V to paste your URL</p>
+          <span className="hidden text-[11px] uppercase tracking-[0.2em] text-[color:var(--text-muted)] sm:inline">
             Fast input
           </span>
         </div>

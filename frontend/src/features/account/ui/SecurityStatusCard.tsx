@@ -8,14 +8,14 @@ const securityFeatures = [
 
 export function SecurityStatusCard() {
   return (
-    <div className="rounded-2xl border border-white/[0.07] bg-white/[0.04] p-5">
+    <div className="rounded-2xl border border-[color:var(--card-border)] bg-[var(--card-bg)] p-5">
       <div className="mb-5 flex items-center gap-3">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-blue-500/20 bg-blue-600/15">
-          <FaShieldAlt className="h-4 w-4 text-blue-400" />
+          <FaShieldAlt className="h-4 w-4 text-[color:var(--avatar-text)]" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-white">Security Status</p>
-          <p className="text-xs text-white/30">Summary not available yet</p>
+          <p className="text-sm font-semibold text-[color:var(--text-primary)]">Security Status</p>
+          <p className="text-xs text-[color:var(--text-muted)]">Summary not available yet</p>
         </div>
       </div>
 
@@ -26,14 +26,14 @@ export function SecurityStatusCard() {
           return (
             <div
               key={feature.label}
-              className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-3"
+              className="flex items-center gap-3 rounded-xl border border-[color:var(--border)] bg-[var(--card-bg)] p-3"
             >
               <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg border border-blue-500/15 bg-blue-600/10">
-                <Icon className="h-3 w-3 text-blue-400/70" />
+                <Icon className="h-3 w-3 text-[color:var(--avatar-text)]" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-semibold text-white/75">{feature.label}</p>
-                <p className="truncate text-[10px] text-white/30">{feature.description}</p>
+                <p className="truncate text-xs font-semibold text-[color:var(--text-secondary)]">{feature.label}</p>
+                <p className="truncate text-[10px] text-[color:var(--text-muted)]">{feature.description}</p>
               </div>
               <span className="flex-shrink-0 rounded-full border border-emerald-500/20 bg-emerald-900/30 px-2 py-0.5 text-[10px] font-medium text-emerald-400">
                 Active
@@ -43,13 +43,13 @@ export function SecurityStatusCard() {
         })}
       </div>
 
-      <div className="mt-4 flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-3.5">
-        <FaClock className="h-3.5 w-3.5 flex-shrink-0 text-white/25" />
+      <div className="mt-4 flex items-center gap-3 rounded-xl border border-[color:var(--border)] bg-[var(--card-bg)] p-3.5">
+        <FaClock className="h-3.5 w-3.5 flex-shrink-0 text-[color:var(--text-muted)]" />
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-widest text-white/30">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">
             Last Password Change
           </p>
-          <p className="mt-0.5 text-xs text-white/25">
+          <p className="mt-0.5 text-xs text-[color:var(--text-muted)]">
             Password change history is not available yet.
           </p>
         </div>

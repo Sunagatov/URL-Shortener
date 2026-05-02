@@ -14,6 +14,11 @@ export const endpoints = {
     list: '/api/v1/urls',
     details: (hash: string) => `/api/v1/urls/${hash}`,
     delete: (hash: string) => `/api/v1/urls/${hash}`,
+    analytics: {
+      summary: (hash: string) => `/api/v1/urls/${hash}/analytics/summary`,
+      timeseries: (hash: string) => `/api/v1/urls/${hash}/analytics/timeseries`,
+      breakdown: (hash: string, dimension: string) => `/api/v1/urls/${hash}/analytics/${dimension}`,
+    },
   },
   user: {
     profile: '/api/v1/users',
@@ -21,5 +26,11 @@ export const endpoints = {
   },
   telemetry: {
     frontendLogs: '/api/v1/frontend/logs',
+  },
+  analytics: {
+    summary: '/api/v1/analytics/summary',
+    timeseries: '/api/v1/analytics/timeseries',
+    topLinks: '/api/v1/analytics/top-links',
+    breakdown: (dimension: string) => `/api/v1/analytics/${dimension}`,
   },
 } as const;

@@ -27,11 +27,11 @@ export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorB
     if (this.state.hasError) {
       return (
         <div className="flex min-h-screen items-center justify-center bg-[color:var(--page-bg)] px-6">
-          <div className="w-full max-w-lg rounded-[28px] border border-white/10 bg-white/[0.04] p-8 text-center shadow-[0_20px_70px_rgba(0,0,0,0.35)] backdrop-blur-xl">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-white/35">
+          <div className="w-full max-w-lg rounded-[28px] border border-[color:var(--border)] bg-[var(--card-bg)] p-8 text-center shadow-[0_20px_70px_rgba(0,0,0,0.35)] backdrop-blur-xl">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-[color:var(--text-muted)]">
               Application Error
             </p>
-            <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">
+            <h1 className="mt-4 text-3xl font-semibold tracking-tight text-[color:var(--text-primary)]">
               The app hit an unexpected problem.
             </h1>
             <p className="mt-3 text-sm leading-6 text-[color:var(--text-secondary)]">
@@ -47,7 +47,7 @@ export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorB
               </button>
               <a
                 href="/"
-                className="inline-flex items-center justify-center rounded-2xl border border-white/12 bg-white/[0.03] px-5 py-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/[0.06]"
+                className="inline-flex items-center justify-center rounded-2xl border border-[color:var(--border)] bg-[var(--surface-soft)] px-5 py-3 text-sm font-semibold text-[color:var(--text-primary)] transition hover:border-[color:var(--border-strong)] hover:bg-[var(--surface-hover)]"
               >
                 Go home
               </a>

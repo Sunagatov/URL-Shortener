@@ -9,17 +9,17 @@ export function LandingFeaturesSection() {
 
       <div className="mx-auto max-w-6xl px-6">
         <div className="relative z-10 mb-16 text-center">
-          <span className="mb-4 inline-block rounded-full border border-blue-400/15 bg-blue-500/10 px-4 py-1.5 text-sm font-semibold text-blue-300/80">
+          <span className="mb-4 inline-block rounded-full border border-blue-400/15 bg-blue-500/10 px-4 py-1.5 text-sm font-semibold text-[color:var(--avatar-text)]">
             Why Shorty URL
           </span>
           <h2
-            className="mb-4 text-4xl font-bold leading-tight text-white md:text-5xl"
+            className="mb-4 text-4xl font-bold leading-tight text-[color:var(--text-primary)] md:text-5xl"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             Everything you need,
             <br className="hidden md:block" /> nothing you don't
           </h2>
-          <p className="mx-auto max-w-xl text-lg text-white/40">
+          <p className="mx-auto max-w-xl text-lg text-[color:var(--text-muted)]">
             Powerful tools designed to make link management simple, fast, and insightful.
           </p>
         </div>
@@ -33,10 +33,10 @@ export function LandingFeaturesSection() {
                 <div
                   className={`mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${feature.color} shadow-lg ${feature.glow}`}
                 >
-                  <Icon className="h-5 w-5 text-white" />
+                  <Icon className="h-5 w-5 text-[color:var(--text-on-accent)]" />
                 </div>
-                <h3 className="mb-2 text-base font-bold text-white">{feature.title}</h3>
-                <p className="text-sm leading-relaxed text-white/45">{feature.description}</p>
+                <h3 className="mb-2 text-base font-bold text-[color:var(--text-primary)]">{feature.title}</h3>
+                <p className="text-sm leading-relaxed text-[color:var(--text-muted)]">{feature.description}</p>
               </div>
             );
           })}

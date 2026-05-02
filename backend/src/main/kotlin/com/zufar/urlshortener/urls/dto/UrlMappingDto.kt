@@ -13,6 +13,8 @@ data class UrlMappingDto(
 
     val clickCount: Long,
 
+    val qrScanCount: Long,
+
     val createdAt: LocalDateTime,
 
     val expirationDate: LocalDateTime
@@ -23,6 +25,7 @@ data class UrlMappingDto(
             shortUrl = entity.shortUrl,
             originalUrl = entity.originalUrl,
             clickCount = entity.clickCount,
+            qrScanCount = entity.qrScanCount,
             createdAt = entity.createdAt,
             expirationDate = entity.expirationDate
         )

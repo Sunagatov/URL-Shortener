@@ -3,6 +3,7 @@ export interface UrlMapping {
   shortUrl: string;
   originalUrl: string;
   clickCount: number;
+  qrScanCount: number;
   createdAt: string;
   expirationDate: string;
 }
