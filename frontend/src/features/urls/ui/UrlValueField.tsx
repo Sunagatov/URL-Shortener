@@ -34,7 +34,7 @@ export function UrlValueField({
   const renderedValue = displayValue ?? value;
   const containerClassName =
     tone === 'primary'
-      ? 'border-blue-500/15 bg-[#0a1220] hover:border-blue-500/20'
+      ? 'border-[color:var(--avatar-border)] bg-[var(--avatar-bg)] hover:border-[color:var(--avatar-border)]'
       : 'border-[color:var(--border)] bg-[var(--card-bg)] hover:border-[color:var(--border)]';
   const textClassName =
     tone === 'primary' ? 'text-[color:var(--avatar-text)]' : 'text-[color:var(--text-muted)]';

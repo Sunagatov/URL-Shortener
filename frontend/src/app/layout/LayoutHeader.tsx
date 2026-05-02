@@ -49,7 +49,7 @@ export const LayoutHeader = ({
             <FaLink className="h-4 w-4 text-[color:var(--accent)]" />
           </div>
           <span
-            className="bg-gradient-to-r from-[var(--text-primary)] via-[var(--accent-light)] to-[var(--accent)] bg-clip-text font-bold tracking-tight text-transparent"
+            className="bg-gradient-to-r from-[var(--accent)] to-[var(--text-primary)] bg-clip-text font-bold tracking-tight text-transparent"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             Shorty URL

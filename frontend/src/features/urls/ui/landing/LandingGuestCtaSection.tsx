@@ -4,8 +4,8 @@ import { routes } from '@/app/routes';
 
 export function LandingGuestCtaSection() {
   return (
-    <section className="relative overflow-hidden bg-[#060612] py-28 bg-grid-dark">
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent pointer-events-none" />
+    <section className="relative overflow-hidden bg-[var(--bg-alt)] py-28 bg-grid-dark">
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[var(--border)] to-transparent pointer-events-none" />
       <div className="absolute left-1/2 top-1/2 h-[400px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600/12 blur-[130px] pointer-events-none" />
 
       <div className="relative z-10 mx-auto max-w-2xl px-6 text-center">

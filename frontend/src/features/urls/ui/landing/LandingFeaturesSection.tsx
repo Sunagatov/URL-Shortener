@@ -2,8 +2,8 @@ import { landingFeatures } from './landingContent';
 
 export function LandingFeaturesSection() {
   return (
-    <section className="relative overflow-hidden bg-[#060612] py-28 bg-grid-dark">
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+    <section className="relative overflow-hidden bg-[var(--bg-alt)] py-28 bg-grid-dark">
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-[var(--border)] to-transparent pointer-events-none" />
       <div className="absolute top-0 left-1/3 h-[300px] w-[600px] rounded-full bg-blue-600/8 blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 h-[200px] w-[400px] rounded-full bg-indigo-600/6 blur-[100px] pointer-events-none" />
 

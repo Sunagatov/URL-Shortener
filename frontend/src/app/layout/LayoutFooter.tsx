@@ -13,7 +13,7 @@ export const LayoutFooter = ({ isAuthenticated }: { isAuthenticated: boolean }) 
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--accent-border)] bg-[var(--accent-glow)]">
                 <FaLink className="h-4 w-4 text-[color:var(--accent)]" />
               </div>
-              <span className="bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] bg-clip-text text-xl font-bold text-transparent">
+              <span className="bg-gradient-to-r from-[var(--accent)] to-[var(--text-primary)] bg-clip-text text-xl font-bold text-transparent">
                 Shorty URL
               </span>
             </div>

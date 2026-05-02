@@ -72,9 +72,9 @@ export function LandingStatsSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden bg-[#060612] py-20">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/8 to-transparent" />
+    <section ref={sectionRef} className="relative overflow-hidden bg-[var(--bg-alt)] py-20">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--border)] to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--border)] to-transparent" />
 
       <div className="relative z-10 mx-auto max-w-4xl px-6">
         <div

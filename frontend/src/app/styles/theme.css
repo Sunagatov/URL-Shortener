@@ -317,6 +317,10 @@ input:-webkit-autofill:active {
   background-size: 64px 64px;
 }
 
+:root:not(.dark) .bg-grid-dark {
+  background-image: none;
+}
+
 .bg-grid-soft {
   background-image:
     linear-gradient(rgba(148, 163, 184, 0.04) 1px, transparent 1px),
