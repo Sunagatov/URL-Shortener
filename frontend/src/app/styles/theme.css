@@ -229,11 +229,13 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-text-fill-color: var(--autofill-text);
-  caret-color: var(--autofill-text);
+  -webkit-text-fill-color: var(--autofill-text) !important;
+  caret-color: var(--autofill-text) !important;
   transition: background-color 9999s ease-in-out 0s;
-  -webkit-box-shadow: 0 0 0 1000px var(--autofill-bg) inset;
-  box-shadow: 0 0 0 1000px var(--autofill-bg) inset;
+  -webkit-box-shadow: 0 0 0 1000px var(--autofill-bg) inset !important;
+  box-shadow: 0 0 0 1000px var(--autofill-bg) inset !important;
+  background-color: var(--autofill-bg) !important;
+  background-clip: content-box !important;
 }
 
 @media (hover: none) and (pointer: coarse) {

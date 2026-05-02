@@ -25,10 +25,10 @@ export function UrlShortenerHero({
   const HeroBadgeIcon = heroBadgeIcon;
 
   return (
-    <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[var(--bg-alt)]">
-      <div className="absolute top-1/4 -left-32 h-[560px] w-[560px] rounded-full bg-blue-600/20 blur-[130px] orb-1 pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-32 h-[560px] w-[560px] rounded-full bg-purple-600/20 blur-[130px] orb-2 pointer-events-none" />
-      <div className="absolute left-1/2 top-1/2 h-[400px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-900/20 blur-[120px] orb-3 pointer-events-none" />
+    <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[var(--bg-alt)] pb-24 md:pb-10">
+      <div className="absolute top-1/4 -left-32 h-[560px] w-[560px] rounded-full bg-blue-600/20 blur-[130px] orb-1 pointer-events-none dark:block hidden" />
+      <div className="absolute bottom-1/4 -right-32 h-[560px] w-[560px] rounded-full bg-purple-600/20 blur-[130px] orb-2 pointer-events-none dark:block hidden" />
+      <div className="absolute left-1/2 top-1/2 h-[400px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-900/20 blur-[120px] orb-3 pointer-events-none dark:block hidden" />
       <div className="absolute inset-0 bg-grid-dark pointer-events-none" />
 
       <div className="relative z-10 mx-auto w-full max-w-3xl px-5 py-10 text-center sm:px-6">
