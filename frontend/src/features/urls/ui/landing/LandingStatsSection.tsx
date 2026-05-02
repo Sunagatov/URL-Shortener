@@ -35,7 +35,7 @@ function StatItem({ stat, active }: { stat: Stat; active: boolean }) {
   const display = decimals > 0 ? count.toFixed(decimals) : Math.round(count);
 
   return (
-    <div className="flex min-w-[44vw] flex-shrink-0 snap-center flex-col items-center px-4 text-center sm:min-w-0 sm:flex-1 sm:px-0">
+    <div className="flex w-full flex-col items-center px-4 text-center sm:min-w-0 sm:flex-1 sm:px-0">
       <div className="mb-1.5 flex items-center gap-2">
         <span className={`h-2 w-2 rounded-full ${stat.dotColor} animate-pulse`} />
         <span
@@ -78,21 +78,20 @@ export function LandingStatsSection() {
 
       <div className="relative z-10 mx-auto max-w-4xl px-6">
         <div
-          className="flex flex-row gap-0 overflow-x-auto snap-x snap-mandatory sm:overflow-visible sm:snap-none sm:items-center sm:justify-between
-            [&::-webkit-scrollbar]:hidden [scrollbar-width:none]"
+          className="flex flex-col gap-8 sm:flex-row sm:gap-0 sm:items-center sm:justify-between"
         >
           {landingStats.map((stat, index) => (
             <React.Fragment key={stat.label}>
               <StatItem stat={stat} active={active} />
               {index < landingStats.length - 1 && (
-                <div className="hidden h-12 w-px flex-shrink-0 bg-white/[0.08] sm:block" />
+                <>
+                  <div className="mx-auto h-px w-20 bg-white/[0.08] sm:hidden" />
+                  <div className="hidden h-12 w-px flex-shrink-0 bg-white/[0.08] sm:block" />
+                </>
               )}
             </React.Fragment>
           ))}
         </div>
-        <p className="mt-5 text-center text-[11px] tracking-widest text-white/15 sm:hidden">
-          swipe to explore
-        </p>
       </div>
     </section>
   );
