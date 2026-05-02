@@ -5,6 +5,7 @@ export const routes = {
   forgotPassword: '/forgot-password',
   resetPassword: '/reset-password',
   verifyEmail: '/verify-email',
+  googleCallback: '/auth/google/callback',
   account: '/account',
   dashboard: '/account/dashboard',
   analytics: '/account/analytics',

@@ -18,7 +18,7 @@ fun UserDetails.withTokenVersion(
         override val userId: String? = userId
         override val emailVerified: Boolean = emailVerified
         override fun getUsername(): String = this@withTokenVersion.username
-        override fun getPassword(): String = requireNotNull(this@withTokenVersion.password)
+        override fun getPassword(): String = this@withTokenVersion.password ?: ""
         override fun getAuthorities() = this@withTokenVersion.authorities
         override fun isAccountNonExpired(): Boolean = this@withTokenVersion.isAccountNonExpired
         override fun isAccountNonLocked(): Boolean = this@withTokenVersion.isAccountNonLocked

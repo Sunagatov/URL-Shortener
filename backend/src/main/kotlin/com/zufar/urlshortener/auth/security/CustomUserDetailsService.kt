@@ -19,7 +19,7 @@ class CustomUserDetailsService(
 
         return org.springframework.security.core.userdetails.User.builder()
             .username(user.email)
-            .password(user.password)
+            .password(user.password ?: "")
             .authorities(emptyList())
             .build()
             .withTokenVersion(user.tokenVersion, user.id, user.emailVerified)

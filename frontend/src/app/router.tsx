@@ -7,6 +7,7 @@ import SignUpPage from '@/features/auth/routes/SignUpPage';
 import ForgotPasswordPage from '@/features/auth/routes/ForgotPasswordPage';
 import ResetPasswordPage from '@/features/auth/routes/ResetPasswordPage';
 import VerifyEmailPage from '@/features/auth/routes/VerifyEmailPage';
+import GoogleCallbackPage from '@/features/auth/routes/GoogleCallbackPage';
 import DashboardPage from '@/features/account/routes/DashboardPage';
 import UserAccountPage from '@/features/account/routes/UserAccountPage';
 import SecurityPage from '@/features/account/routes/SecurityPage';
@@ -40,6 +41,7 @@ function AppRoutes() {
       <div key={location.pathname} className="route-transition">
         <Routes location={location}>
           <Route path={routes.home} element={<UrlShortenerPage />} />
+          <Route path={routes.googleCallback} element={<GoogleCallbackPage />} />
           {guestRoutes.map(({ path, element }) => (
             <Route
               key={path}

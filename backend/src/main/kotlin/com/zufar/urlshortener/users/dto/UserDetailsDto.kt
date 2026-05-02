@@ -10,9 +10,9 @@ data class UserDetailsDto(
 
     val email: String,
 
-    val country: String,
+    val country: String?,
 
-    val age: Int,
+    val age: Int?,
 
     val createdAt: LocalDateTime?
 )

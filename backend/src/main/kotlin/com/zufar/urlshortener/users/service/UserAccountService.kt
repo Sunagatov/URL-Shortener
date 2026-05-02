@@ -33,6 +33,9 @@ class UserAccountService(
     fun changePassword(request: ChangePasswordRequest) {
         val user = authenticatedUserContext.requireAuthenticatedUser()
 
+        if (user.password == null) {
+            throw ApplicationException.badRequest(INVALID_USER_REQUEST_CODE, "Cannot change password for Google-authenticated accounts")
+        }
         if (!passwordEncoder.matches(request.currentPassword, user.password)) {
             throw ApplicationException.badRequest(INVALID_USER_REQUEST_CODE, "Current password is incorrect")
         }

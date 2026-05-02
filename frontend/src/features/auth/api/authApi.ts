@@ -18,6 +18,11 @@ export async function signUp(data: SignUpRequest): Promise<SignUpResponse> {
   return response.data;
 }
 
+export async function googleAuth(code: string): Promise<AuthTokens> {
+  const response = await httpClient.post(endpoints.auth.google, { code });
+  return response.data;
+}
+
 export async function refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
   const response = await httpClient.post(endpoints.auth.refresh, { refreshToken });
   return response.data;

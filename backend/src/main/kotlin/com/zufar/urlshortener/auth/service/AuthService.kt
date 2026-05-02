@@ -15,6 +15,7 @@ import com.zufar.urlshortener.auth.security.UserDetailsWithTokenVersion
 import com.zufar.urlshortener.auth.security.withTokenVersion
 import com.zufar.urlshortener.shared.logging.LogSanitizer
 import com.zufar.urlshortener.users.entity.UserAccountDocument
+import com.zufar.urlshortener.users.entity.AuthProvider
 import com.zufar.urlshortener.users.repository.UserAccountRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -94,6 +95,7 @@ class AuthService(
             password = encodedPassword,
             country = normalizedRequest.country,
             age = normalizedRequest.age,
+            authProvider = AuthProvider.LOCAL,
             createdAt = now,
             updatedAt = now
         )

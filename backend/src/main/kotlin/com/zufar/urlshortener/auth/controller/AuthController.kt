@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.auth.controller
 
 import com.zufar.urlshortener.auth.dto.AuthResponse
+import com.zufar.urlshortener.auth.dto.GoogleAuthRequest
 import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
 import com.zufar.urlshortener.auth.dto.RefreshTokenResponse
 import com.zufar.urlshortener.auth.dto.ResendVerificationRequest
@@ -10,6 +11,7 @@ import com.zufar.urlshortener.auth.dto.SignUpResponse
 import com.zufar.urlshortener.auth.dto.VerificationChallengeResponse
 import com.zufar.urlshortener.auth.dto.VerifyEmailRequest
 import com.zufar.urlshortener.auth.service.AuthService
+import com.zufar.urlshortener.auth.service.GoogleAuthService
 import com.zufar.urlshortener.shared.web.ApplicationRoutes
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
@@ -21,8 +23,15 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping(ApplicationRoutes.AUTH_BASE_PATH)
 class AuthController(
-    private val authService: AuthService
+    private val authService: AuthService,
+    private val googleAuthService: GoogleAuthService
 ) {
+
+    @PostMapping("/google")
+    fun authenticateWithGoogle(
+        @Valid @RequestBody googleAuthRequest: GoogleAuthRequest
+    ): ResponseEntity<AuthResponse> =
+        ResponseEntity.ok(googleAuthService.authenticate(googleAuthRequest.code))
 
     @PostMapping("/signin")
     fun authenticateUser(

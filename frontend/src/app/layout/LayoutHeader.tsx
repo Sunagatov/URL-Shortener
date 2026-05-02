@@ -82,12 +82,12 @@ export const LayoutHeader = ({
 
               {/* Backdrop */}
               {isUserMenuOpen && (
-                <div className="fixed inset-0 z-10" onClick={onCloseUserMenu} />
+                <div className="fixed inset-0 z-[70]" aria-hidden onClick={onCloseUserMenu} />
               )}
 
               {/* Dropdown — always rendered, toggled via opacity/scale */}
               <div
-                className={`absolute right-0 z-20 mt-2 w-64 rounded-[24px] border border-[color:var(--border)] bg-[color:var(--surface-overlay)] py-2 shadow-[0_24px_50px_rgba(4,10,24,0.42)] backdrop-blur-xl transition-all duration-200 origin-top-right ${
+                className={`absolute right-0 z-[71] mt-2 w-64 rounded-[24px] border border-[color:var(--border)] bg-[color:var(--surface-overlay)] py-2 shadow-[0_24px_50px_rgba(4,10,24,0.42)] backdrop-blur-xl transition-all duration-200 origin-top-right ${
                   isUserMenuOpen
                     ? 'pointer-events-auto scale-100 opacity-100'
                     : 'pointer-events-none scale-95 opacity-0'

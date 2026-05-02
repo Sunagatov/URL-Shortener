@@ -16,6 +16,7 @@ const AUTH_ROUTES = new Set<string>([
   routes.forgotPassword,
   routes.resetPassword,
   routes.verifyEmail,
+  routes.googleCallback,
 ]);
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
@@ -57,7 +58,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <main className={mainClassName}>{children}</main>
 
       {isAuthenticated && <MobileTabBar />}
-      {!isAccountRoute && <LayoutFooter isAuthenticated={isAuthenticated} />}
+      {!isAuthRoute && <LayoutFooter isAuthenticated={isAuthenticated} />}
     </div>
   );
 };

@@ -2,6 +2,7 @@ export const endpoints = {
   auth: {
     signIn: '/api/v1/auth/signin',
     signUp: '/api/v1/auth/signup',
+    google: '/api/v1/auth/google',
     refresh: '/api/v1/auth/refresh-token',
     logout: '/api/v1/auth/logout',
     forgotPassword: '/api/v1/auth/forgot-password',

@@ -1,113 +1,81 @@
 import { Link } from 'react-router-dom';
-import { FaHeart, FaLink } from 'react-icons/fa';
+import { FaLink } from 'react-icons/fa';
 import { footerSocialLinks } from '@/app/config/footerSocialLinks';
 import { routes } from '@/app/routes';
 
-export const LayoutFooter = ({ isAuthenticated }: { isAuthenticated: boolean }) => {
-  return (
-    <footer className="bg-grid-dark border-t border-[color:var(--border)] bg-[rgba(var(--bg-base-rgb),0.68)] text-[color:var(--text-primary)]">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
-          <div className="md:col-span-2">
-            <div className="mb-4 flex items-center space-x-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--accent-border)] bg-[var(--accent-glow)]">
-                <FaLink className="h-4 w-4 text-[color:var(--accent)]" />
-              </div>
-              <span className="bg-gradient-to-r from-[var(--accent)] to-[var(--text-primary)] bg-clip-text text-xl font-bold text-transparent">
-                Shorty URL
-              </span>
-            </div>
-            <p className="mb-6 max-w-md text-sm leading-relaxed text-[color:var(--text-secondary)]">
-              The modern, secure, and reliable URL shortening service. Create short links,
-              track analytics, and manage your URLs with ease.
-            </p>
-            <div className="flex items-center space-x-2 text-sm text-[color:var(--text-muted)]">
-              <span>Made with</span>
-              <FaHeart className="h-3 w-3 text-red-400" />
-              <span>by developers, for developers</span>
-            </div>
-          </div>
+const linkClass =
+  'block text-sm text-[color:var(--text-muted)] transition-colors hover:text-[color:var(--text-primary)]';
 
-          <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[color:var(--text-primary)]">
-              Quick Links
-            </h3>
-            <div className="space-y-3">
-              <Link
-                to={routes.home}
-                className="block text-sm text-[color:var(--text-secondary)] transition-colors duration-200 hover:text-[color:var(--text-primary)]"
-              >
-                Home
-              </Link>
-              {isAuthenticated ? (
-                <>
-                  <Link
-                    to={routes.dashboard}
-                    className="block text-sm text-[color:var(--text-secondary)] transition-colors duration-200 hover:text-[color:var(--text-primary)]"
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    to={routes.urlMappings}
-                    className="block text-sm text-[color:var(--text-secondary)] transition-colors duration-200 hover:text-[color:var(--text-primary)]"
-                  >
-                    My URLs
-                  </Link>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to={routes.signIn}
-                    className="block text-sm text-[color:var(--text-secondary)] transition-colors duration-200 hover:text-[color:var(--text-primary)]"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    to={routes.signUp}
-                    className="block text-sm text-[color:var(--text-secondary)] transition-colors duration-200 hover:text-[color:var(--text-primary)]"
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )}
+export const LayoutFooter = ({ isAuthenticated }: { isAuthenticated: boolean }) => (
+  <footer className="border-t border-[color:var(--border)] bg-[var(--surface)]">
+    <div className="mx-auto max-w-6xl px-5 py-10">
+      {/* Top: brand + nav + social */}
+      <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
+        {/* Brand */}
+        <div className="max-w-xs">
+          <Link to={routes.home} className="mb-3 inline-flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-[color:var(--accent-border)] bg-[var(--accent-glow)]">
+              <FaLink className="h-3.5 w-3.5 text-[color:var(--accent)]" />
             </div>
-          </div>
+            <span className="bg-gradient-to-r from-[var(--accent)] to-[var(--text-primary)] bg-clip-text text-lg font-bold text-transparent">
+              Shorty URL
+            </span>
+          </Link>
+          <p className="mt-2 text-sm leading-relaxed text-[color:var(--text-muted)]">
+            Fast, secure link shortening with built-in analytics.
+          </p>
+        </div>
 
-          <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[color:var(--text-primary)]">
-              Connect
-            </h3>
-            <div className="flex space-x-3">
-              {footerSocialLinks.map((link) => {
-                const Icon = link.icon;
-                return (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={link.label}
-                  className="group flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--border)] bg-[var(--surface-hover)] transition duration-200 hover:-translate-y-0.5 hover:border-[color:var(--accent-border)] hover:bg-[var(--surface-hover)]"
-                >
-                  <Icon className="h-4 w-4 text-[color:var(--text-secondary)] group-hover:text-[color:var(--text-primary)]" />
-                </a>
-              );
-            })}
-            </div>
+        {/* Nav columns */}
+        <div className="flex gap-12 text-sm">
+          <div className="space-y-2.5">
+            <h4 className="text-xs font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">Product</h4>
+            <Link to={routes.home} className={linkClass}>Home</Link>
+            {isAuthenticated ? (
+              <>
+                <Link to={routes.dashboard} className={linkClass}>Dashboard</Link>
+                <Link to={routes.urlMappings} className={linkClass}>My URLs</Link>
+                <Link to={routes.analytics} className={linkClass}>Analytics</Link>
+              </>
+            ) : (
+              <>
+                <Link to={routes.signIn} className={linkClass}>Sign In</Link>
+                <Link to={routes.signUp} className={linkClass}>Sign Up</Link>
+              </>
+            )}
+          </div>
+          <div className="space-y-2.5">
+            <h4 className="text-xs font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">Legal</h4>
+            <span className={linkClass}>Privacy Policy</span>
+            <span className={linkClass}>Terms of Service</span>
           </div>
         </div>
 
-        <div className="mt-8 flex flex-col items-center justify-between border-t border-[color:var(--border)] pt-8 md:flex-row">
-          <p className="mb-4 text-sm text-[color:var(--text-muted)] md:mb-0">
-            © 2026 Shorty URL. All rights reserved.
-          </p>
-          <div className="flex items-center space-x-6 text-sm">
-            <span className="cursor-not-allowed text-[color:var(--text-muted)]">Privacy Policy (coming soon)</span>
-            <span className="cursor-not-allowed text-[color:var(--text-muted)]">Terms of Service (coming soon)</span>
-            <span className="cursor-not-allowed text-[color:var(--text-muted)]">Support (coming soon)</span>
-          </div>
+        {/* Social */}
+        <div className="flex gap-2">
+          {footerSocialLinks.map(link => {
+            const Icon = link.icon;
+            return (
+              <a
+                key={link.href}
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={link.label}
+                className="flex h-9 w-9 items-center justify-center rounded-xl border border-[color:var(--border)] bg-[var(--surface-hover)] transition hover:-translate-y-0.5 hover:border-[color:var(--accent-border)]"
+              >
+                <Icon className="h-4 w-4 text-[color:var(--text-muted)]" />
+              </a>
+            );
+          })}
         </div>
       </div>
-    </footer>
-  );
-};
+
+      {/* Bottom bar */}
+      <div className="mt-8 flex flex-col items-center justify-between gap-2 border-t border-[color:var(--border)] pt-6 text-xs text-[color:var(--text-muted)] sm:flex-row">
+        <span>© {new Date().getFullYear()} Shorty URL</span>
+        <span>Made by developers, for developers</span>
+      </div>
+    </div>
+  </footer>
+);

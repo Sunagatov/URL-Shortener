@@ -12,12 +12,14 @@ data class UserAccountDocument(
     val id: String? = null,
     val firstName: String,
     val lastName: String,
-    val password: String,
-    val country: String,
-    val age: Int,
+    val password: String? = null,
+    val country: String? = null,
+    val age: Int? = null,
 
     @Indexed(unique = true)
     val email: String,
+
+    val authProvider: AuthProvider = AuthProvider.LOCAL,
 
     val emailVerified: Boolean = false,
     val emailVerifiedAt: LocalDateTime? = null,

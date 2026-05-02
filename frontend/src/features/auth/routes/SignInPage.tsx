@@ -13,6 +13,8 @@ import { Button } from '@/shared/ui';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { FaChartLine, FaEnvelope, FaLock, FaRocket, FaShieldAlt } from 'react-icons/fa';
 import { getAuthDestination } from '@/features/auth/lib/authRouting';
+import { PasswordToggle, usePasswordVisibility } from '@/features/auth/ui/PasswordToggle';
+import { GoogleSignInButton } from '@/features/auth/ui/GoogleSignInButton';
 import { AuthAlert } from '@/features/auth/ui/AuthFlowElements';
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
 import { AuthBrandPanel } from '@/features/auth/ui/AuthBrandPanel';
@@ -44,6 +46,7 @@ const signInBrandPanel = (
 
 const SignInPage: React.FC = () => {
   usePageTitle('Sign In');
+  const pw = usePasswordVisibility();
   const location = useLocation();
   const navigate = useNavigate();
   const { login, updateUser } = useAuth();
@@ -128,11 +131,12 @@ const SignInPage: React.FC = () => {
             <input
               {...register('password')}
               id="sign-in-password"
-              type="password"
+              type={pw.type}
               placeholder=" "
               autoComplete="current-password"
-              className={`${authInputClassName} peer pl-10 pt-6 pb-2.5 ${errors.password ? 'animate-error-shake border-[color:var(--danger)] focus:ring-[color:var(--danger)]' : ''}`}
+              className={`${authInputClassName} peer pl-10 pr-10 pt-6 pb-2.5 ${errors.password ? 'animate-error-shake border-[color:var(--danger)] focus:ring-[color:var(--danger)]' : ''}`}
             />
+            <PasswordToggle visible={pw.visible} onToggle={pw.toggle} />
             <label
               htmlFor="sign-in-password"
               className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[color:var(--text-muted)] peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[color:var(--accent)]"
@@ -178,6 +182,14 @@ const SignInPage: React.FC = () => {
           <span>{loading ? 'Signing In…' : 'Sign In'}</span>
         </Button>
       </form>
+
+      <div className="my-5 flex items-center gap-3">
+        <div className="h-px flex-1 bg-[var(--border)]" />
+        <span className="text-xs text-[color:var(--text-muted)]">or</span>
+        <div className="h-px flex-1 bg-[var(--border)]" />
+      </div>
+
+      <GoogleSignInButton state={destination} />
 
       <p className="mt-8 text-center text-sm text-[color:var(--text-muted)]">
         Don't have an account?{' '}
