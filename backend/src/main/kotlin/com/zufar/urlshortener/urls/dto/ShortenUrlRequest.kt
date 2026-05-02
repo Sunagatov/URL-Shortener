@@ -14,5 +14,8 @@ data class ShortenUrlRequest(
 
     @Min(value = 1, message = "Days count must be at least 1")
     @Max(value = 365, message = "Days count cannot exceed 365")
-    val daysCount: Long?
+    val daysCount: Long?,
+
+    @Size(min = 3, max = 30, message = "Custom alias must be between 3 and 30 characters")
+    val customAlias: String? = null
 )

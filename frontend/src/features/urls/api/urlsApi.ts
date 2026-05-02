@@ -79,3 +79,8 @@ export async function getUrlDetails(hash: string): Promise<UrlMapping> {
 export async function deleteUrl(hash: string): Promise<void> {
   await httpClient.delete(endpoints.urls.delete(hash));
 }
+
+export async function updateUrl(hash: string, originalUrl: string): Promise<UrlMapping> {
+  const response = await httpClient.put(endpoints.urls.details(hash), { originalUrl });
+  return { ...response.data, shortUrl: normalizeShortUrl(response.data.shortUrl) };
+}

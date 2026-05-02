@@ -12,6 +12,7 @@ import DashboardPage from '@/features/account/routes/DashboardPage';
 import UserAccountPage from '@/features/account/routes/UserAccountPage';
 import SecurityPage from '@/features/account/routes/SecurityPage';
 import UrlShortenerPage from '@/features/urls/routes/UrlShortenerPage';
+import NotFoundPage from '@/features/urls/routes/NotFoundPage';
 import UserUrlMappingsPage from '@/features/urls/routes/UserUrlMappingsPage';
 import UrlMappingDetailsPage from '@/features/urls/routes/UrlMappingDetailsPage';
 import AccountAnalyticsPage from '@/features/analytics/routes/AccountAnalyticsPage';
@@ -64,7 +65,7 @@ function AppRoutes() {
               element={<AuthRoute access="protected">{element}</AuthRoute>}
             />
           ))}
-          <Route path="*" element={<Navigate to={routes.home} replace />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
     </MainLayout>

@@ -19,4 +19,5 @@ export interface PaginatedResponse<T> {
 export interface CreateUrlRequest {
   originalUrl: string;
   daysCount?: number | undefined;
+  customAlias?: string | undefined;
 }

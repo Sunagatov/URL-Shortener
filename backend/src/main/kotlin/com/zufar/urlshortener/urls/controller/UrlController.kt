@@ -2,6 +2,7 @@ package com.zufar.urlshortener.urls.controller
 
 import com.zufar.urlshortener.shared.web.ApplicationRoutes
 import com.zufar.urlshortener.urls.dto.ShortenUrlRequest
+import com.zufar.urlshortener.urls.dto.UpdateUrlRequest
 import com.zufar.urlshortener.urls.dto.UrlMappingDto
 import com.zufar.urlshortener.urls.dto.UrlMappingPageDto
 import com.zufar.urlshortener.urls.dto.UrlResponse
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -58,4 +60,11 @@ class UrlController(
         urlManagementService.delete(urlHash)
         return ResponseEntity.noContent().build()
     }
+
+    @PutMapping("/{urlHash}", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun updateUrlMapping(
+        @PathVariable urlHash: String,
+        @Valid @RequestBody request: UpdateUrlRequest
+    ): ResponseEntity<UrlMappingDto> =
+        ResponseEntity.ok(urlManagementService.updateOriginalUrl(urlHash, request.originalUrl))
 }

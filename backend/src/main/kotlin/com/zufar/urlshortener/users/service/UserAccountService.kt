@@ -3,7 +3,9 @@ package com.zufar.urlshortener.users.service
 import com.zufar.urlshortener.auth.service.user.AuthenticatedUserContextService
 import com.zufar.urlshortener.shared.exception.ApplicationException
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
+import com.zufar.urlshortener.users.dto.UpdateProfileRequest
 import com.zufar.urlshortener.users.dto.UserDetailsDto
+import com.zufar.urlshortener.users.repository.UserAccountRepository
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.Clock
@@ -14,6 +16,7 @@ private const val INVALID_USER_REQUEST_CODE = "INVALID_USER_REQUEST"
 @Service
 class UserAccountService(
     private val authenticatedUserContext: AuthenticatedUserContextService,
+    private val userAccountRepository: UserAccountRepository,
     private val passwordEncoder: PasswordEncoder,
     private val clock: Clock
 ) {
@@ -27,6 +30,27 @@ class UserAccountService(
             country = user.country,
             age = user.age,
             createdAt = user.createdAt
+        )
+    }
+
+    fun updateProfile(request: UpdateProfileRequest): UserDetailsDto {
+        val user = authenticatedUserContext.requireAuthenticatedUser()
+        val updated = userAccountRepository.save(
+            user.copy(
+                firstName = request.firstName,
+                lastName = request.lastName,
+                country = request.country,
+                age = request.age,
+                updatedAt = LocalDateTime.now(clock)
+            )
+        )
+        return UserDetailsDto(
+            firstName = updated.firstName,
+            lastName = updated.lastName,
+            email = updated.email,
+            country = updated.country,
+            age = updated.age,
+            createdAt = updated.createdAt
         )
     }
 

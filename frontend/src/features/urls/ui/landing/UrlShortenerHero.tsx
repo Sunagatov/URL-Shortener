@@ -153,11 +153,12 @@ export function UrlShortenerHero({
 
 interface UrlShortenerFormProps {
   children?: ReactNode;
+  advancedOptions?: ReactNode;
   isLoading?: boolean;
   onSubmit: React.FormEventHandler<HTMLFormElement>;
 }
 
-export function UrlShortenerForm({ children, isLoading = false, onSubmit }: UrlShortenerFormProps) {
+export function UrlShortenerForm({ children, advancedOptions, isLoading = false, onSubmit }: UrlShortenerFormProps) {
   return (
     <div className="glass-card group relative mb-6 animate-fade-up-d3 overflow-hidden p-2.5">
       <div className="pointer-events-none absolute inset-0 rounded-[20px] border border-[color:var(--border)] transition-all duration-300 group-focus-within:border-blue-400/35 group-focus-within:shadow-[inset_0_0_0_1px_rgba(96,165,250,0.22),inset_0_0_42px_rgba(59,130,246,0.18),0_0_0_1px_rgba(59,130,246,0.12)]" />
@@ -174,12 +175,7 @@ export function UrlShortenerForm({ children, isLoading = false, onSubmit }: UrlS
             <span>{isLoading ? 'Shortening…' : 'Shorten'}</span>
           </Button>
         </div>
-        <div className="mt-2.5 flex items-center justify-between gap-3 px-1.5 text-left">
-          <p className="text-xs text-[color:var(--text-muted)]">Paste shortcut: Ctrl+V to paste your URL</p>
-          <span className="hidden text-[11px] uppercase tracking-[0.2em] text-[color:var(--text-muted)] sm:inline">
-            Fast input
-          </span>
-        </div>
+        {advancedOptions}
       </form>
     </div>
   );

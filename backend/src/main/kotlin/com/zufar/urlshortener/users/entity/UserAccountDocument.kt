@@ -29,6 +29,10 @@ data class UserAccountDocument(
 
     val tokenVersion: Int = 0,
 
+    val passwordResetTokenHash: String? = null,
+    val passwordResetTokenId: String? = null,
+    val passwordResetTokenExpiresAt: LocalDateTime? = null,
+
     val createdAt: LocalDateTime? = null,
     val updatedAt: LocalDateTime? = null
 )

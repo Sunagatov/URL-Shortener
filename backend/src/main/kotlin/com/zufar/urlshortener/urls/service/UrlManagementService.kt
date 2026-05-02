@@ -41,6 +41,21 @@ class UrlManagementService(
 
         urlValidator.validateUrl(normalizedRequest.originalUrl)
 
+        val customAlias = normalizedRequest.customAlias?.trim()
+        if (customAlias != null) {
+            validateCustomAlias(customAlias)
+            val shortUrl = "$normalizedBaseUrl/$customAlias"
+            try {
+                urlRepository.insert(
+                    buildUrlMapping(normalizedRequest, httpRequest, customAlias, shortUrl)
+                )
+                logCreation(customAlias, normalizedRequest)
+                return shortUrl
+            } catch (_: DuplicateKeyException) {
+                throw ApplicationException.conflict("ALIAS_TAKEN", "Custom alias '$customAlias' is already in use")
+            }
+        }
+
         repeat(maxCodeGenerationAttempts) { attempt ->
             val urlHash = StringEncoder.generate()
             val shortUrl = "$normalizedBaseUrl/$urlHash"
@@ -54,13 +69,7 @@ class UrlManagementService(
                         shortUrl = shortUrl
                     )
                 )
-                log.info(
-                    "short_url_created urlHash={} ownerUserId={} targetHost={} expiresInDays={}",
-                    urlHash,
-                    authenticatedUserContext.findAuthenticatedUserIdOrNull() ?: "anonymous",
-                    LogSanitizer.safeUrlHost(normalizedRequest.originalUrl),
-                    normalizedRequest.daysCount ?: defaultExpirationDays
-                )
+                logCreation(urlHash, normalizedRequest)
                 return shortUrl
             } catch (_: DuplicateKeyException) {
                 log.debug("short_url_collision_detected urlHash={} attempt={}", urlHash, attempt + 1)
@@ -93,6 +102,15 @@ class UrlManagementService(
         )
     }
 
+    fun updateOriginalUrl(urlHash: String, newOriginalUrl: String): UrlMappingDto {
+        val trimmedUrl = newOriginalUrl.trim()
+        urlValidator.validateUrl(trimmedUrl)
+        val urlMapping = urlMappingAccessService.getOwnedActiveUrlMapping(urlHash, ACCESS_URL_MAPPING_DENIED_MESSAGE)
+        val updated = urlRepository.save(urlMapping.copy(originalUrl = trimmedUrl))
+        log.info("short_url_updated urlHash={} targetHost={}", urlHash, LogSanitizer.safeUrlHost(trimmedUrl))
+        return UrlMappingDto.fromEntity(updated)
+    }
+
     fun delete(urlHash: String) {
         val urlMapping = urlMappingAccessService.deleteOwnedActiveUrlMapping(urlHash, DELETE_URL_MAPPING_DENIED_MESSAGE)
         log.info(
@@ -101,10 +119,6 @@ class UrlManagementService(
             urlMapping.userId ?: "unknown",
             LogSanitizer.safeUrlHost(urlMapping.originalUrl)
         )
-    }
-
-    fun incrementClickCount(urlHash: String) {
-        urlMappingAccessService.incrementClickCount(urlHash)
     }
 
     fun getActiveUrlMapping(urlHash: String): UrlMapping =
@@ -141,6 +155,23 @@ class UrlManagementService(
         }
         if (size !in 1..maxPageSize) {
             throw ApplicationException.badRequest(INVALID_URL_REQUEST_CODE, "Size must be between 1 and $maxPageSize")
+        }
+    }
+
+    private fun logCreation(urlHash: String, request: ShortenUrlRequest) {
+        log.info(
+            "short_url_created urlHash={} ownerUserId={} targetHost={} expiresInDays={} custom={}",
+            urlHash,
+            authenticatedUserContext.findAuthenticatedUserIdOrNull() ?: "anonymous",
+            LogSanitizer.safeUrlHost(request.originalUrl),
+            request.daysCount ?: defaultExpirationDays,
+            request.customAlias != null
+        )
+    }
+
+    private fun validateCustomAlias(alias: String) {
+        if (!alias.matches(Regex("^[a-zA-Z0-9_-]+$"))) {
+            throw ApplicationException.badRequest(INVALID_URL_REQUEST_CODE, "Custom alias can only contain letters, numbers, hyphens, and underscores")
         }
     }
 

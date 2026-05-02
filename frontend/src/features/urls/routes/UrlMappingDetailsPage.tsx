@@ -6,7 +6,7 @@ import {
   AccountPageLayout,
 } from '@/features/account/ui/layout/AccountPageLayout';
 import { routes } from '@/app/routes';
-import { deleteUrl, getUrlDetails } from '@/features/urls/api/urlsApi';
+import { deleteUrl, getUrlDetails, updateUrl } from '@/features/urls/api/urlsApi';
 import type { UrlMapping } from '@/features/urls/types/url';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 import { useClipboard } from '@/shared/lib/useClipboard';
@@ -36,6 +36,10 @@ const UrlMappingDetailsPage: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [urlMapping, setUrlMapping] = useState<UrlMapping | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState('');
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
   const { copiedValue, copyValue } = useClipboard();
   const analytics = useUrlAnalytics(urlHash);
 
@@ -77,6 +81,30 @@ const UrlMappingDetailsPage: React.FC = () => {
     }
 
     toast.success(urlCopyMessages.success);
+  };
+
+  const handleToggleEdit = () => {
+    if (!isEditing && urlMapping) {
+      setEditValue(urlMapping.originalUrl);
+      setEditError(null);
+    }
+    setIsEditing(v => !v);
+  };
+
+  const handleEditSave = async () => {
+    if (!urlMapping || !editValue.trim()) return;
+    setEditLoading(true);
+    setEditError(null);
+    try {
+      const updated = await updateUrl(urlMapping.urlHash, editValue.trim());
+      setUrlMapping(updated);
+      setIsEditing(false);
+      toast.success('URL updated successfully');
+    } catch (error: unknown) {
+      setEditError(getApiErrorMessage(error, 'Failed to update URL'));
+    } finally {
+      setEditLoading(false);
+    }
   };
 
   const handleDelete = async () => {
@@ -123,10 +151,22 @@ const UrlMappingDetailsPage: React.FC = () => {
         urlMapping={urlMapping}
         onBack={() => navigate(routes.urlMappings)}
         onDelete={() => setShowDeleteModal(true)}
+        onEdit={handleToggleEdit}
+        isEditing={isEditing}
       />
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
-        <UrlInfoCard urlMapping={urlMapping} copiedValue={copiedValue} onCopy={handleCopyUrl} />
+        <UrlInfoCard
+          urlMapping={urlMapping}
+          copiedValue={copiedValue}
+          onCopy={handleCopyUrl}
+          isEditing={isEditing}
+          editValue={editValue}
+          onEditChange={setEditValue}
+          onEditSave={handleEditSave}
+          editLoading={editLoading}
+          editError={editError}
+        />
         <UrlMetadataCard urlMapping={urlMapping} />
       </div>
 
