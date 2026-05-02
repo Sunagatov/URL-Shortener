@@ -29,6 +29,7 @@ class UserAccountService(
             email = user.email,
             country = user.country,
             age = user.age,
+            authProvider = user.authProvider.name,
             createdAt = user.createdAt
         )
     }
@@ -50,6 +51,7 @@ class UserAccountService(
             email = updated.email,
             country = updated.country,
             age = updated.age,
+            authProvider = updated.authProvider.name,
             createdAt = updated.createdAt
         )
     }

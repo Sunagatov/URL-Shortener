@@ -44,8 +44,8 @@ export function useEditProfileForm(
       const updated = await updateUserProfile({
         firstName: data.firstName.trim(),
         lastName: data.lastName.trim(),
-        country: data.country.trim(),
-        age: data.age,
+        country: data.country?.trim() || undefined,
+        age: data.age || undefined,
       });
       updateUser(updated);
       onSuccess(updated);

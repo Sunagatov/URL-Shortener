@@ -14,5 +14,7 @@ data class UserDetailsDto(
 
     val age: Int?,
 
+    val authProvider: String? = null,
+
     val createdAt: LocalDateTime?
 )

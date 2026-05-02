@@ -63,6 +63,11 @@ class AuthService(
     fun signIn(request: SignInRequest): AuthResponse {
         val normalizedRequest = request.copy(email = EmailNormalizer.normalize(request.email))
 
+        val existingUser = userAccountRepository.findByEmailIgnoreCase(normalizedRequest.email)
+        if (existingUser != null && existingUser.password == null) {
+            throw ApplicationException.forbidden("GOOGLE_ONLY_ACCOUNT", "This account uses Google sign-in. Please use the Google button.")
+        }
+
         val authentication = authenticationManager.authenticate(
             UsernamePasswordAuthenticationToken(normalizedRequest.email, request.password)
         )

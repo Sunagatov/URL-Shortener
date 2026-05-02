@@ -107,6 +107,7 @@ class UrlManagementService(
         urlValidator.validateUrl(trimmedUrl)
         val urlMapping = urlMappingAccessService.getOwnedActiveUrlMapping(urlHash, ACCESS_URL_MAPPING_DENIED_MESSAGE)
         val updated = urlRepository.save(urlMapping.copy(originalUrl = trimmedUrl))
+        urlMappingAccessService.evictUrlMapping()
         log.info("short_url_updated urlHash={} targetHost={}", urlHash, LogSanitizer.safeUrlHost(trimmedUrl))
         return UrlMappingDto.fromEntity(updated)
     }
@@ -173,6 +174,19 @@ class UrlManagementService(
         if (!alias.matches(Regex("^[a-zA-Z0-9_-]+$"))) {
             throw ApplicationException.badRequest(INVALID_URL_REQUEST_CODE, "Custom alias can only contain letters, numbers, hyphens, and underscores")
         }
+        if (alias.lowercase() in RESERVED_ALIASES) {
+            throw ApplicationException.conflict("ALIAS_RESERVED", "This alias is reserved and cannot be used")
+        }
+    }
+
+    companion object {
+        private val RESERVED_ALIASES = setOf(
+            "signin", "signup", "login", "logout", "register",
+            "account", "auth", "dashboard", "settings", "profile", "security",
+            "analytics", "admin", "api", "health", "docs",
+            "about", "terms", "privacy", "contact", "help", "support",
+            "favicon.ico", "robots.txt", "sitemap.xml"
+        )
     }
 
     private fun normalize(request: ShortenUrlRequest): ShortenUrlRequest {

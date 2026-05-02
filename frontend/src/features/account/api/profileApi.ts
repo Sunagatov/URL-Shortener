@@ -10,8 +10,8 @@ export async function getUserProfile(): Promise<User> {
 export async function updateUserProfile(data: {
   firstName: string;
   lastName: string;
-  country: string;
-  age: number;
+  country?: string;
+  age?: number;
 }): Promise<User> {
   const response = await httpClient.put(endpoints.user.profile, data);
   return response.data;

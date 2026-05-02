@@ -7,10 +7,6 @@ import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.repository.UrlRepository
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
-import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Query
-import org.springframework.data.mongodb.core.query.Update
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import java.time.Clock
@@ -23,7 +19,6 @@ private const val URL_NOT_FOUND_CODE = "URL_NOT_FOUND"
 class UrlMappingAccessService(
     private val urlRepository: UrlRepository,
     private val authenticatedUserContext: AuthenticatedUserContextService,
-    private val mongoTemplate: MongoTemplate,
     private val clock: Clock
 ) {
 
@@ -47,16 +42,13 @@ class UrlMappingAccessService(
     }
 
     @CacheEvict(cacheNames = [URL_MAPPINGS_CACHE], key = "#urlHash")
+    fun evictUrlMapping() { /* cache eviction only */ }
+
+    @CacheEvict(cacheNames = [URL_MAPPINGS_CACHE], key = "#urlHash")
     fun deleteOwnedActiveUrlMapping(urlHash: String, accessDeniedMessage: String): UrlMapping {
         val urlMapping = getOwnedActiveUrlMapping(urlHash, accessDeniedMessage)
         urlRepository.deleteById(urlMapping.urlHash)
         return urlMapping
-    }
-
-    fun incrementClickCount(urlHash: String) {
-        val query = Query.query(Criteria.where("_id").`is`(urlHash))
-        val update = Update().inc("clickCount", 1)
-        mongoTemplate.updateFirst(query, update, UrlMapping::class.java)
     }
 
     @Cacheable(cacheNames = [URL_MAPPINGS_CACHE], key = "#urlHash")

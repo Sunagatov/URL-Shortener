@@ -19,14 +19,17 @@ export const editProfileSchema = z.object({
   country: z
     .string()
     .trim()
-    .min(1, 'Country is required')
     .max(50, 'Country must be 50 characters or less')
-    .regex(countryPattern, 'Country contains invalid characters'),
+    .regex(countryPattern, 'Country contains invalid characters')
+    .optional()
+    .or(z.literal('')),
   age: z.coerce
     .number()
     .int('Age must be a whole number')
     .min(13, 'Age must be between 13 and 120')
-    .max(120, 'Age must be between 13 and 120'),
+    .max(120, 'Age must be between 13 and 120')
+    .optional()
+    .or(z.literal('')),
 });
 
 export type EditProfileFormData = z.infer<typeof editProfileSchema>;

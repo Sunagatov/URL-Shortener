@@ -5,6 +5,7 @@ export interface User {
   lastName?: string;
   country?: string;
   age?: number;
+  authProvider?: string;
   createdAt?: string;
 }
 
