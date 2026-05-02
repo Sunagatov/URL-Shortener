@@ -4,6 +4,7 @@ import com.zufar.urlshortener.auth.service.user.AuthenticatedUserContextService
 import com.zufar.urlshortener.shared.exception.ApplicationException
 import com.zufar.urlshortener.users.dto.ChangePasswordRequest
 import com.zufar.urlshortener.users.entity.UserAccountDocument
+import com.zufar.urlshortener.users.repository.UserAccountRepository
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
@@ -26,6 +27,7 @@ import kotlin.test.assertEquals
 class UserPasswordChangerTest {
 
     @Mock private lateinit var authenticatedUserContext: AuthenticatedUserContextService
+    @Mock private lateinit var userAccountRepository: UserAccountRepository
     @Mock private lateinit var passwordEncoder: PasswordEncoder
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
 
@@ -48,6 +50,7 @@ class UserPasswordChangerTest {
 
         UserAccountService(
             authenticatedUserContext,
+            userAccountRepository,
             passwordEncoder,
             clock
         ).changePassword(
@@ -83,6 +86,7 @@ class UserPasswordChangerTest {
         val ex = assertThrows<ApplicationException> {
             UserAccountService(
                 authenticatedUserContext,
+                userAccountRepository,
                 passwordEncoder,
                 clock
             ).changePassword(

@@ -41,8 +41,9 @@ class UrlMappingAccessService(
         return urlMapping
     }
 
+    @Suppress("UNUSED_PARAMETER")
     @CacheEvict(cacheNames = [URL_MAPPINGS_CACHE], key = "#urlHash")
-    fun evictUrlMapping() { /* cache eviction only */ }
+    fun evictUrlMapping(urlHash: String) { /* cache eviction only */ }
 
     @CacheEvict(cacheNames = [URL_MAPPINGS_CACHE], key = "#urlHash")
     fun deleteOwnedActiveUrlMapping(urlHash: String, accessDeniedMessage: String): UrlMapping {

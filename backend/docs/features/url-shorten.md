@@ -25,13 +25,15 @@ Authorization: Bearer {accessToken}  # optional
 ```json
 {
   "originalUrl": "https://www.example.com/some/very/long/url/path",
-  "daysCount": 30
+  "daysCount": 30,
+  "customAlias": "my-link"
 }
 ```
 
 ### Validation Rules
 - **originalUrl**: Required, valid URL format, max 2048 characters, no spaces
-- **daysCount**: Optional, positive integer (default: 30 days)
+- **daysCount**: Optional, integer between 1 and 365 (default: 365 days)
+- **customAlias**: Optional, 3–30 characters, letters/numbers/hyphens/underscores only. Reserved aliases (e.g., `signin`, `admin`, `api`) are rejected.
 
 ## Response
 
@@ -55,6 +57,20 @@ Authorization: Bearer {accessToken}  # optional
 ```json
 {
   "errorMessage": "URL too long"
+}
+```
+
+#### 409 Conflict - Custom Alias Taken
+```json
+{
+  "errorMessage": "Custom alias 'my-link' is already in use"
+}
+```
+
+#### 409 Conflict - Reserved Alias
+```json
+{
+  "errorMessage": "This alias is reserved and cannot be used"
 }
 ```
 

@@ -12,7 +12,6 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.*
 import org.springframework.dao.DuplicateKeyException
-import org.springframework.data.mongodb.core.MongoTemplate
 import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
@@ -25,7 +24,6 @@ class UrlShortenerTest {
     @Mock private lateinit var urlRepository: UrlRepository
     @Mock private lateinit var urlValidator: UrlValidator
     @Mock private lateinit var authenticatedUserContext: AuthenticatedUserContextService
-    @Mock private lateinit var mongoTemplate: MongoTemplate
     @Mock private lateinit var httpRequest: HttpServletRequest
     private val baseUrl = "https://localhost:8080"
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
@@ -34,7 +32,7 @@ class UrlShortenerTest {
         urlRepository = urlRepository,
         urlValidator = urlValidator,
         authenticatedUserContext = authenticatedUserContext,
-        urlMappingAccessService = UrlMappingAccessService(urlRepository, authenticatedUserContext, mongoTemplate, clock),
+        urlMappingAccessService = UrlMappingAccessService(urlRepository, authenticatedUserContext, clock),
         baseUrl = baseUrl,
         defaultExpirationDays = 365,
         maxCodeGenerationAttempts = 10,

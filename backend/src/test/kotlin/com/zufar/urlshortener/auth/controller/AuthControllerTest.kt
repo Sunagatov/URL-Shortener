@@ -10,6 +10,8 @@ import com.zufar.urlshortener.auth.dto.SignUpResponse
 import com.zufar.urlshortener.auth.dto.VerificationChallengeResponse
 import com.zufar.urlshortener.auth.dto.VerifyEmailRequest
 import com.zufar.urlshortener.auth.service.AuthService
+import com.zufar.urlshortener.auth.service.GoogleAuthService
+import com.zufar.urlshortener.auth.service.PasswordResetService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -22,10 +24,12 @@ import kotlin.test.assertEquals
 class AuthControllerTest {
 
     @Mock private lateinit var authService: AuthService
+    @Mock private lateinit var googleAuthService: GoogleAuthService
+    @Mock private lateinit var passwordResetService: PasswordResetService
 
     @Test
     fun `authenticateUser delegates to auth service`() {
-        val controller = AuthController(authService)
+        val controller = AuthController(authService, googleAuthService, passwordResetService)
         val request = SignInRequest("user@example.com", "password")
         val response = AuthResponse("access-token", "refresh-token")
         whenever(authService.signIn(request)).thenReturn(response)
@@ -38,7 +42,7 @@ class AuthControllerTest {
 
     @Test
     fun `registerUser delegates to auth service`() {
-        val controller = AuthController(authService)
+        val controller = AuthController(authService, googleAuthService, passwordResetService)
         val request = SignUpRequest(
             firstName = "Jane",
             lastName = "Doe",
@@ -64,7 +68,7 @@ class AuthControllerTest {
 
     @Test
     fun `refreshAccessToken delegates to auth service`() {
-        val controller = AuthController(authService)
+        val controller = AuthController(authService, googleAuthService, passwordResetService)
         val request = RefreshTokenRequest("refresh-token")
         val response = RefreshTokenResponse("new-access-token")
         whenever(authService.refreshAccessToken(request)).thenReturn(response)
@@ -77,7 +81,7 @@ class AuthControllerTest {
 
     @Test
     fun `verifyEmail delegates to auth service`() {
-        val controller = AuthController(authService)
+        val controller = AuthController(authService, googleAuthService, passwordResetService)
         val request = VerifyEmailRequest("user@example.com", "123456")
         val response = AuthResponse("access-token", "refresh-token")
         whenever(authService.verifyEmail(request)).thenReturn(response)
@@ -90,7 +94,7 @@ class AuthControllerTest {
 
     @Test
     fun `resendVerificationCode delegates to auth service`() {
-        val controller = AuthController(authService)
+        val controller = AuthController(authService, googleAuthService, passwordResetService)
         val request = ResendVerificationRequest("user@example.com")
         val response = VerificationChallengeResponse(
             email = "user@example.com",

@@ -56,7 +56,6 @@ class PasswordResetService(
         )
 
         log.info("password_reset_token_generated userId={} emailDomain={}", user.id, LogSanitizer.emailDomain(email))
-        log.info("password_reset_token userId={} token={}", user.id, token)
     }
 
     fun resetPassword(request: ResetPasswordRequest) {

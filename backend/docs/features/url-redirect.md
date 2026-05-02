@@ -29,6 +29,8 @@ None required (public endpoint)
 ```
 HTTP/1.1 302 Found
 Location: https://www.example.com/original-page
+Cache-Control: max-age=3600, public, no-transform
+Referrer-Policy: no-referrer
 ```
 
 ### Error Responses
@@ -43,11 +45,10 @@ Location: https://www.example.com/original-page
 ## Business Logic
 
 1. **Extract URL Hash**: Get hash from path parameter
-2. **Log Request**: Record IP address and User-Agent
-3. **Lookup URL Mapping**: Query database by urlHash
-4. **Check Existence**: Verify mapping exists
-5. **Return Redirect**: Send 302 response with Location header
-6. **Track Analytics** (future): Increment click count
+2. **Lookup URL Mapping**: Query database/cache by urlHash
+3. **Check Expiration**: Reject expired mappings with 404
+4. **Track Analytics**: Emit an async visit event (link click or QR scan)
+5. **Return Redirect**: Send 302 response with Location, Cache-Control, and Referrer-Policy headers
 
 ## Redirect Flow
 
@@ -154,9 +155,10 @@ Location: https://www.example.com/original-page
 ## Edge Cases
 
 1. **Non-existent Hash**: Returns 404 error
-2. **Expired URL**: Still redirects (expiration cleanup is async)
+2. **Expired URL**: Returns 404 error (expired mappings are rejected, not redirected)
 3. **Malformed Hash**: Returns 404 error
 4. **Empty Hash**: Returns 404 error
+5. **QR Scan**: Append `?qr` to the short URL to track QR scan analytics separately
 
 ## Performance
 

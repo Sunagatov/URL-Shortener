@@ -33,20 +33,32 @@ Content-Type: application/json
 ```
 
 ### Validation Rules
-- **firstName**: Required, not blank
-- **lastName**: Required, not blank
-- **email**: Required, valid email format
-- **password**: Required, minimum 8 characters
-- **country**: Required, not blank
-- **age**: Required, must be a positive number
+- **firstName**: Required, not blank, max 50 characters, letters/hyphens/apostrophes only (`^[a-zA-Z'-]+$`)
+- **lastName**: Required, not blank, max 50 characters, letters/hyphens/apostrophes only (`^[a-zA-Z'-]+$`)
+- **email**: Required, valid email format, max 254 characters
+- **password**: Required, minimum 15 characters, max 64 characters
+- **country**: Required, not blank, max 50 characters, letters/hyphens/apostrophes/spaces (`^[a-zA-Z'\-]+(\s[a-zA-Z'\-]+)*$`)
+- **age**: Required, must be between 13 and 120
 
 ## Response
 
-### Success (200 OK)
+### Success — Verification Disabled (200 OK)
 ```json
 {
+  "verificationRequired": false,
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "refreshToken": "dGhpc0lzQVJlZnJlc2hUb2tlbi..."
+}
+```
+
+### Success — Verification Enabled (200 OK)
+```json
+{
+  "verificationRequired": true,
+  "email": "jane.doe@example.com",
+  "expiresInSeconds": 600,
+  "resendAvailableInSeconds": 60,
+  "deliveryMode": "smtp"
 }
 ```
 
@@ -68,12 +80,14 @@ Content-Type: application/json
 
 ## Business Logic
 
-1. **Validate Request**: Check all required fields are present and valid
-2. **Check Email Uniqueness**: Verify email is not already registered
-3. **Hash Password**: Encrypt password using BCrypt
-4. **Create User**: Save user details to MongoDB
-5. **Generate Tokens**: Create access and refresh JWT tokens
-6. **Return Response**: Send tokens to client
+1. **Normalize Email**: Lowercase and trim the email address
+2. **Validate Request**: Check all required fields are present and valid
+3. **Check Email Uniqueness**: Verify email is not already registered (case-insensitive)
+4. **Hash Password**: Encrypt password using BCrypt
+5. **Create User**: Save user details to MongoDB
+6. **Email Verification** (when enabled): Generate a 6-digit verification code, hash it, and send via email. Return a verification challenge response.
+7. **Email Verification** (when disabled): Mark user as verified, generate JWT tokens, and return them immediately.
+8. **Handle Race Condition**: If a `DuplicateKeyException` occurs on save (concurrent sign-up with same email), return 409 Conflict.
 
 ## Security
 
@@ -85,16 +99,23 @@ Content-Type: application/json
 
 ## Database Schema
 
-### Collection: `users`
+### Collection: `user_details`
 ```json
 {
-  "_id": "ObjectId",
+  "_id": "String",
   "firstName": "String",
   "lastName": "String",
   "email": "String (unique, indexed)",
-  "password": "String (hashed)",
+  "password": "String (hashed, nullable for Google users)",
   "country": "String",
   "age": "Number",
+  "authProvider": "String (LOCAL | GOOGLE)",
+  "emailVerified": "Boolean",
+  "emailVerifiedAt": "DateTime",
+  "emailVerificationCodeHash": "String (hashed)",
+  "emailVerificationCodeExpiresAt": "DateTime",
+  "emailVerificationCodeSentAt": "DateTime",
+  "tokenVersion": "Number",
   "createdAt": "DateTime",
   "updatedAt": "DateTime"
 }

@@ -1,0 +1,101 @@
+package com.zufar.urlshortener.urls.service
+
+import com.zufar.urlshortener.auth.service.user.AuthenticatedUserContextService
+import com.zufar.urlshortener.urls.entity.UrlMapping
+import com.zufar.urlshortener.urls.repository.UrlRepository
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mock
+import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import org.springframework.security.access.AccessDeniedException
+import java.time.Clock
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.util.Optional
+import kotlin.test.assertEquals
+
+@ExtendWith(MockitoExtension::class)
+class UrlUpdateTest {
+
+    @Mock private lateinit var urlRepository: UrlRepository
+    @Mock private lateinit var urlValidator: UrlValidator
+    @Mock private lateinit var authenticatedUserContext: AuthenticatedUserContextService
+    private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
+
+    private fun service() = UrlManagementService(
+        urlRepository = urlRepository,
+        urlValidator = urlValidator,
+        authenticatedUserContext = authenticatedUserContext,
+        urlMappingAccessService = UrlMappingAccessService(urlRepository, authenticatedUserContext, clock),
+        baseUrl = "https://localhost:8080",
+        defaultExpirationDays = 365,
+        maxCodeGenerationAttempts = 10,
+        maxPageSize = 100,
+        clock = clock
+    )
+
+    @Test
+    fun `updateOriginalUrl saves new URL for owned mapping`() {
+        val mapping = activeMapping()
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping))
+        whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("user-123")
+        whenever(urlRepository.save(any<UrlMapping>())).thenAnswer { it.arguments[0] }
+
+        val result = service().updateOriginalUrl("abc12345", "https://new-url.com")
+
+        assertEquals("https://new-url.com", result.originalUrl)
+        val captor = argumentCaptor<UrlMapping>()
+        verify(urlRepository).save(captor.capture())
+        assertEquals("https://new-url.com", captor.firstValue.originalUrl)
+    }
+
+    @Test
+    fun `updateOriginalUrl trims whitespace from new URL`() {
+        val mapping = activeMapping()
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping))
+        whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("user-123")
+        whenever(urlRepository.save(any<UrlMapping>())).thenAnswer { it.arguments[0] }
+
+        val result = service().updateOriginalUrl("abc12345", "  https://new-url.com  ")
+
+        assertEquals("https://new-url.com", result.originalUrl)
+    }
+
+    @Test
+    fun `updateOriginalUrl rejects non-owner`() {
+        val mapping = activeMapping()
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping))
+        whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("other-user")
+
+        assertThrows<AccessDeniedException> {
+            service().updateOriginalUrl("abc12345", "https://new-url.com")
+        }
+    }
+
+    @Test
+    fun `updateOriginalUrl validates new URL`() {
+        whenever(urlValidator.validateUrl("https://evil.com")).thenThrow(IllegalArgumentException("blocked"))
+
+        assertThrows<IllegalArgumentException> {
+            service().updateOriginalUrl("abc12345", "https://evil.com")
+        }
+    }
+
+    private fun activeMapping() = UrlMapping(
+        urlHash = "abc12345",
+        shortUrl = "https://localhost:8080/abc12345",
+        originalUrl = "https://example.com",
+        clickCount = 0,
+        createdAt = LocalDateTime.parse("2023-12-31T10:15:30"),
+        expirationDate = LocalDateTime.parse("2024-06-01T10:15:30"),
+        requestIp = "127.0.0.1",
+        userAgent = "JUnit",
+        userId = "user-123"
+    )
+}

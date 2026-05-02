@@ -10,7 +10,6 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import org.springframework.data.mongodb.core.MongoTemplate
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDateTime
@@ -23,7 +22,6 @@ class UrlMappingProviderTest {
 
     @Mock private lateinit var urlRepository: UrlRepository
     @Mock private lateinit var authenticatedUserContext: AuthenticatedUserContextService
-    @Mock private lateinit var mongoTemplate: MongoTemplate
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
 
     @Test
@@ -51,7 +49,7 @@ class UrlMappingProviderTest {
         urlRepository = urlRepository,
         urlValidator = mock(),
         authenticatedUserContext = authenticatedUserContext,
-        urlMappingAccessService = UrlMappingAccessService(urlRepository, authenticatedUserContext, mongoTemplate, clock),
+        urlMappingAccessService = UrlMappingAccessService(urlRepository, authenticatedUserContext, clock),
         baseUrl = "http://localhost:8080",
         defaultExpirationDays = 365,
         maxCodeGenerationAttempts = 10,

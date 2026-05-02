@@ -107,7 +107,7 @@ class UrlManagementService(
         urlValidator.validateUrl(trimmedUrl)
         val urlMapping = urlMappingAccessService.getOwnedActiveUrlMapping(urlHash, ACCESS_URL_MAPPING_DENIED_MESSAGE)
         val updated = urlRepository.save(urlMapping.copy(originalUrl = trimmedUrl))
-        urlMappingAccessService.evictUrlMapping()
+        urlMappingAccessService.evictUrlMapping(urlHash)
         log.info("short_url_updated urlHash={} targetHost={}", urlHash, LogSanitizer.safeUrlHost(trimmedUrl))
         return UrlMappingDto.fromEntity(updated)
     }
