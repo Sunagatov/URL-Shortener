@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.client.RestTemplate
 import java.time.Clock
-import java.time.LocalDateTime
+import java.time.Instant
 
 private const val GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
 private const val GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
@@ -105,11 +105,11 @@ class GoogleAuthService(
         if (existing != null) {
             if (existing.authProvider == AuthProvider.GOOGLE) return existing
             // Auto-link: existing LOCAL user signs in with Google
-            val linked = existing.copy(authProvider = AuthProvider.GOOGLE, updatedAt = LocalDateTime.now(clock))
+            val linked = existing.copy(authProvider = AuthProvider.GOOGLE, updatedAt = Instant.now(clock))
             return userAccountRepository.save(linked)
         }
         googleUser.isNew = true
-        val now = LocalDateTime.now(clock)
+        val now = Instant.now(clock)
         return userAccountRepository.save(
             UserAccountDocument(
                 firstName = googleUser.firstName,

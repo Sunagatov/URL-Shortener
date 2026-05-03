@@ -13,7 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import java.security.SecureRandom
 import java.time.Clock
 import java.time.Duration
-import java.time.LocalDateTime
+import java.time.Instant
 
 private const val EMAIL_ALREADY_VERIFIED_MESSAGE = "Email is already verified"
 private const val INVALID_AUTH_REQUEST_CODE = "INVALID_AUTH_REQUEST"
@@ -37,7 +37,7 @@ internal class EmailVerificationWorkflow(
 ) {
     private val log = LoggerFactory.getLogger(EmailVerificationWorkflow::class.java)
 
-    fun createChallenge(user: UserAccountDocument, now: LocalDateTime): Pair<UserAccountDocument, String> {
+    fun createChallenge(user: UserAccountDocument, now: Instant): Pair<UserAccountDocument, String> {
         val code = generateVerificationCode()
         val codeHash = requireNotNull(passwordEncoder.encode(code)) {
             "Password encoder returned null during email verification code generation"
@@ -46,7 +46,7 @@ internal class EmailVerificationWorkflow(
             emailVerified = false,
             emailVerifiedAt = null,
             emailVerificationCodeHash = codeHash,
-            emailVerificationCodeExpiresAt = now.plusMinutes(verificationExpirationMinutes),
+            emailVerificationCodeExpiresAt = now.plusSeconds(verificationExpirationMinutes * 60),
             emailVerificationCodeSentAt = now,
             updatedAt = now
         ) to code
@@ -65,7 +65,7 @@ internal class EmailVerificationWorkflow(
             throw ApplicationException.badRequest(INVALID_AUTH_REQUEST_CODE, EMAIL_ALREADY_VERIFIED_MESSAGE)
         }
 
-        val now = LocalDateTime.now(clock)
+        val now = Instant.now(clock)
         val isValidCode = user.emailVerificationCodeHash != null &&
             user.emailVerificationCodeExpiresAt != null &&
             !user.emailVerificationCodeExpiresAt.isBefore(now) &&
@@ -102,7 +102,7 @@ internal class EmailVerificationWorkflow(
             throw ApplicationException.badRequest(INVALID_AUTH_REQUEST_CODE, EMAIL_ALREADY_VERIFIED_MESSAGE)
         }
 
-        val now = LocalDateTime.now(clock)
+        val now = Instant.now(clock)
         val retryAfterSeconds = remainingResendCooldownSeconds(user, now)
         if (retryAfterSeconds > 0) {
             throw ApplicationException.tooManyRequests(
@@ -124,7 +124,7 @@ internal class EmailVerificationWorkflow(
         return toChallengeResponse(savedUser, deliveryMode, now)
     }
 
-    fun toSignUpResponse(user: UserAccountDocument, deliveryMode: String, now: LocalDateTime): SignUpResponse {
+    fun toSignUpResponse(user: UserAccountDocument, deliveryMode: String, now: Instant): SignUpResponse {
         val challenge = toChallengeResponse(user, deliveryMode, now)
         return SignUpResponse(
             verificationRequired = true,
@@ -141,7 +141,7 @@ internal class EmailVerificationWorkflow(
     private fun toChallengeResponse(
         user: UserAccountDocument,
         deliveryMode: String,
-        now: LocalDateTime
+        now: Instant
     ): VerificationChallengeResponse {
         val expiresAt = requireNotNull(user.emailVerificationCodeExpiresAt) {
             "Verification code expiration is missing"
@@ -160,7 +160,7 @@ internal class EmailVerificationWorkflow(
         }
     }
 
-    private fun remainingResendCooldownSeconds(user: UserAccountDocument, now: LocalDateTime): Long {
+    private fun remainingResendCooldownSeconds(user: UserAccountDocument, now: Instant): Long {
         val sentAt = user.emailVerificationCodeSentAt ?: return 0
         val resendAllowedAt = sentAt.plusSeconds(verificationResendCooldownSeconds)
         return Duration.between(now, resendAllowedAt).seconds.coerceAtLeast(0)

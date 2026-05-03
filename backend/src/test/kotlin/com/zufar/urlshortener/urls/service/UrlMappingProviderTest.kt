@@ -12,7 +12,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import java.time.Clock
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.Optional
 import kotlin.test.assertEquals
@@ -62,8 +61,8 @@ class UrlMappingProviderTest {
         shortUrl = "http://localhost:8080/abc12345",
         originalUrl = "https://example.com",
         clickCount = 0,
-        createdAt = LocalDateTime.parse("2023-12-31T10:15:30"),
-        expirationDate = LocalDateTime.parse("2024-01-02T10:15:30"),
+        createdAt = Instant.parse("2023-12-31T10:15:30Z"),
+        expirationDate = Instant.parse("2024-01-02T10:15:30Z"),
         requestIp = "127.0.0.1",
         userAgent = "JUnit",
         userId = "user-123"

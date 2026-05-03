@@ -17,7 +17,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.time.Clock
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.ZoneOffset
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -105,7 +104,7 @@ class UrlRedirectEdgeCasesTest {
     @Test
     fun `redirect caps Cache-Control at maxRedirectCacheSeconds`() {
         // Mapping expires far in the future, but max cache is 60 seconds
-        val mapping = activeMapping(expirationDate = LocalDateTime.of(2025, 1, 1, 10, 15, 30))
+        val mapping = activeMapping(expirationDate = Instant.parse("2025-01-01T10:15:30Z"))
         whenever(urlManagementService.getActiveUrlMapping("abc12345")).thenReturn(mapping)
         whenever(clientIpResolver.resolve(httpRequest)).thenReturn("10.0.0.1")
 
@@ -118,7 +117,7 @@ class UrlRedirectEdgeCasesTest {
     @Test
     fun `redirect returns no-store for URL expiring in the past`() {
         // Mapping that just expired (edge case: getActiveUrlMapping still returned it)
-        val mapping = activeMapping(expirationDate = LocalDateTime.of(2024, 1, 1, 10, 15, 29))
+        val mapping = activeMapping(expirationDate = Instant.parse("2024-01-01T10:15:29Z"))
         whenever(urlManagementService.getActiveUrlMapping("abc12345")).thenReturn(mapping)
         whenever(clientIpResolver.resolve(httpRequest)).thenReturn("10.0.0.1")
 
@@ -146,12 +145,12 @@ class UrlRedirectEdgeCasesTest {
         assertEquals("Mozilla/5.0", captor.firstValue.userAgent)
     }
 
-    private fun activeMapping(expirationDate: LocalDateTime = LocalDateTime.of(2024, 6, 1, 10, 15, 30)) = UrlMapping(
+    private fun activeMapping(expirationDate: Instant = Instant.parse("2024-06-01T10:15:30Z")) = UrlMapping(
         urlHash = "abc12345",
         shortUrl = "https://localhost:8080/abc12345",
         originalUrl = "https://example.com",
         clickCount = 0,
-        createdAt = LocalDateTime.parse("2023-12-31T10:15:30"),
+        createdAt = Instant.parse("2023-12-31T10:15:30Z"),
         expirationDate = expirationDate,
         requestIp = "127.0.0.1",
         userAgent = "JUnit",

@@ -11,7 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.security.SecureRandom
 import java.time.Clock
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.Base64
 
 private const val TOKEN_BYTES = 32
@@ -44,13 +44,13 @@ class PasswordResetService(
         val token = generateToken()
         val tokenId = token.take(TOKEN_ID_LENGTH)
         val tokenHash = passwordEncoder.encode(token)
-        val now = LocalDateTime.now(clock)
+        val now = Instant.now(clock)
 
         userAccountRepository.save(
             user.copy(
                 passwordResetTokenHash = tokenHash,
                 passwordResetTokenId = tokenId,
-                passwordResetTokenExpiresAt = now.plusMinutes(TOKEN_LIFETIME_MINUTES),
+                passwordResetTokenExpiresAt = now.plusSeconds(TOKEN_LIFETIME_MINUTES * 60),
                 updatedAt = now
             )
         )
@@ -60,7 +60,7 @@ class PasswordResetService(
 
     fun resetPassword(request: ResetPasswordRequest) {
         val tokenId = request.token.take(TOKEN_ID_LENGTH)
-        val now = LocalDateTime.now(clock)
+        val now = Instant.now(clock)
 
         val user = userAccountRepository.findByPasswordResetTokenId(tokenId)
             ?.takeIf { it.passwordResetTokenExpiresAt?.isAfter(now) == true }

@@ -17,7 +17,6 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import java.time.Clock
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 @ExtendWith(MockitoExtension::class)
@@ -40,12 +39,12 @@ class PageableUrlMappingsProviderTest {
         )
     }
 
-    private fun mapping(urlHash: String, expiration: LocalDateTime) = UrlMapping(
+    private fun mapping(urlHash: String, expiration: Instant) = UrlMapping(
         urlHash = urlHash,
         shortUrl = "https://localhost:8080/$urlHash",
         originalUrl = "https://example.com/$urlHash",
         clickCount = 0,
-        createdAt = LocalDateTime.now().minusDays(1),
+        createdAt = Instant.now().minusSeconds(86400),
         expirationDate = expiration,
         requestIp = "127.0.0.1",
         userAgent = null,
@@ -56,7 +55,7 @@ class PageableUrlMappingsProviderTest {
     fun `getUrlMappingsPage returns only active non-expired mappings`() {
         val hashes = listOf("abc11111", "abc22222")
         val pageable = PageRequest.of(0, 10)
-        val activeMappings = hashes.map { mapping(it, LocalDateTime.now().plusDays(10)) }
+        val activeMappings = hashes.map { mapping(it, Instant.now().plusSeconds(864000)) }
 
         whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("user-123")
         whenever(urlRepository.findAllByUserIdAndExpirationDateAfter(eq("user-123"), any(), eq(pageable)))

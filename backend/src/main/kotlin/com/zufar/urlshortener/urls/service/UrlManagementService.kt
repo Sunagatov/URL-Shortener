@@ -15,7 +15,8 @@ import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import java.time.Clock
-import java.time.LocalDateTime
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 private const val ACCESS_URL_MAPPING_DENIED_MESSAGE = "You are not allowed to access this URL mapping"
 private const val DELETE_URL_MAPPING_DENIED_MESSAGE = "You are not allowed to delete this URL mapping"
@@ -90,7 +91,7 @@ class UrlManagementService(
 
         val pageable = PageRequest.of(page, size)
         val userId = authenticatedUserContext.requireAuthenticatedUserId()
-        val now = LocalDateTime.now(clock)
+        val now = Instant.now(clock)
         val mappingsPage = urlRepository.findAllByUserIdAndExpirationDateAfter(userId, now, pageable)
 
         return UrlMappingPageDto(
@@ -134,14 +135,14 @@ class UrlManagementService(
         urlHash: String,
         shortUrl: String
     ): UrlMapping {
-        val now = LocalDateTime.now(clock)
+        val now = Instant.now(clock)
         val mapping = UrlMapping(
             urlHash = urlHash,
             shortUrl = shortUrl,
             originalUrl = request.originalUrl,
             clickCount = 0,
             createdAt = now,
-            expirationDate = now.plusDays(request.daysCount ?: defaultExpirationDays),
+            expirationDate = now.plus(request.daysCount ?: defaultExpirationDays, ChronoUnit.DAYS),
             requestIp = httpRequest.remoteAddr,
             userAgent = httpRequest.getHeader("User-Agent"),
             userId = authenticatedUserContext.findAuthenticatedUserIdOrNull()

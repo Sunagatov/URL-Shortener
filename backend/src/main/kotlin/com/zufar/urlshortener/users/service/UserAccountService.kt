@@ -9,7 +9,7 @@ import com.zufar.urlshortener.users.repository.UserAccountRepository
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.Clock
-import java.time.LocalDateTime
+import java.time.Instant
 
 private const val INVALID_USER_REQUEST_CODE = "INVALID_USER_REQUEST"
 
@@ -42,7 +42,7 @@ class UserAccountService(
                 lastName = request.lastName,
                 country = request.country,
                 age = request.age,
-                updatedAt = LocalDateTime.now(clock)
+                updatedAt = Instant.now(clock)
             )
         )
         return UserDetailsDto(
@@ -69,6 +69,6 @@ class UserAccountService(
             "Password encoder returned null during password change"
         }
 
-        authenticatedUserContext.updatePassword(user, encodedPassword, LocalDateTime.now(clock))
+        authenticatedUserContext.updatePassword(user, encodedPassword, Instant.now(clock))
     }
 }

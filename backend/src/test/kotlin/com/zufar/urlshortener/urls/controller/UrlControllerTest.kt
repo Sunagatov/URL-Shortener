@@ -9,7 +9,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import java.time.LocalDateTime
+import java.time.Instant
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
@@ -49,8 +49,8 @@ class UrlControllerTest {
             originalUrl = "https://example.com",
             clickCount = 0,
             qrScanCount = 0,
-            createdAt = LocalDateTime.parse("2024-01-01T10:15:30"),
-            expirationDate = LocalDateTime.parse("2024-01-02T10:15:30")
+            createdAt = Instant.parse("2024-01-01T10:15:30Z"),
+            expirationDate = Instant.parse("2024-01-02T10:15:30Z")
         )
         whenever(urlManagementService.getOwnedUrlMapping("abc12345")).thenReturn(urlMapping)
 

@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import java.time.LocalDateTime
+import java.time.Instant
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -91,7 +91,7 @@ class SecurityRestExceptionHandlingTest {
 
     @Test
     fun `public short url redirect remains accessible without auth`() {
-        val now = LocalDateTime.now()
+        val now = Instant.now()
         whenever(urlManagementService.getActiveUrlMapping("abc12345")).thenReturn(
             UrlMapping(
                 urlHash = "abc12345",
@@ -99,7 +99,7 @@ class SecurityRestExceptionHandlingTest {
                 originalUrl = "https://example.com/original",
                 clickCount = 0,
                 createdAt = now,
-                expirationDate = now.plusHours(1),
+                expirationDate = now.plusSeconds(3600),
                 requestIp = null,
                 userAgent = null,
                 userId = null

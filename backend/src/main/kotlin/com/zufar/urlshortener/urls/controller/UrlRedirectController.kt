@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.net.URI
 import java.time.Clock
 import java.time.Duration
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.concurrent.TimeUnit
 
 private const val REFERRER_POLICY_HEADER = "Referrer-Policy"
@@ -65,8 +65,8 @@ class UrlRedirectController(
             .build()
     }
 
-    private fun buildCacheControl(expirationDate: LocalDateTime): CacheControl {
-        val remainingLifetimeSeconds = Duration.between(LocalDateTime.now(clock), expirationDate).seconds
+    private fun buildCacheControl(expirationDate: Instant): CacheControl {
+        val remainingLifetimeSeconds = Duration.between(Instant.now(clock), expirationDate).seconds
 
         if (remainingLifetimeSeconds <= 0) {
             return CacheControl.noStore()

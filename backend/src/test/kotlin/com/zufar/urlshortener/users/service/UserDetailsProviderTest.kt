@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import java.time.Clock
-import java.time.LocalDateTime
+import java.time.Instant
 import kotlin.test.assertEquals
 
 class UserDetailsProviderTest {
@@ -23,7 +23,7 @@ class UserDetailsProviderTest {
 
     @Test
     fun `getUserDetails returns createdAt for authenticated user`() {
-        val createdAt = LocalDateTime.of(2024, 1, 15, 10, 0)
+        val createdAt = Instant.parse("2024-01-15T10:00:00Z")
         whenever(authenticatedUserContext.requireAuthenticatedUser()).thenReturn(
             UserAccountDocument(
                 id = "user-1",

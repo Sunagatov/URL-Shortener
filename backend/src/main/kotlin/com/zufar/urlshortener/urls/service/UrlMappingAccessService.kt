@@ -10,7 +10,7 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import java.time.Clock
-import java.time.LocalDateTime
+import java.time.Instant
 
 private const val URL_MAPPING_NOT_FOUND_MESSAGE = "URL mapping not found"
 private const val URL_NOT_FOUND_CODE = "URL_NOT_FOUND"
@@ -23,7 +23,7 @@ class UrlMappingAccessService(
 ) {
 
     fun getActiveUrlMapping(urlHash: String): UrlMapping {
-        val now = LocalDateTime.now(clock)
+        val now = Instant.now(clock)
 
         return getCachedUrlMapping(urlHash)
             .takeIf { it.expirationDate.isAfter(now) }

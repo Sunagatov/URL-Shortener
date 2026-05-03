@@ -19,7 +19,6 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import java.time.Clock
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.ZoneOffset
 import kotlin.test.assertEquals
 
@@ -53,7 +52,7 @@ class UrlShortenEdgeCasesTest {
 
         val captor = argumentCaptor<UrlMapping>()
         verify(urlRepository).insert(captor.capture())
-        assertEquals(LocalDateTime.of(2024, 12, 31, 10, 15, 30), captor.firstValue.expirationDate)
+        assertEquals(Instant.parse("2024-12-31T10:15:30Z"), captor.firstValue.expirationDate)
     }
 
     @Test
@@ -65,7 +64,7 @@ class UrlShortenEdgeCasesTest {
 
         val captor = argumentCaptor<UrlMapping>()
         verify(urlRepository).insert(captor.capture())
-        assertEquals(LocalDateTime.of(2024, 1, 2, 10, 15, 30), captor.firstValue.expirationDate)
+        assertEquals(Instant.parse("2024-01-02T10:15:30Z"), captor.firstValue.expirationDate)
     }
 
     @Test
@@ -77,7 +76,7 @@ class UrlShortenEdgeCasesTest {
 
         val captor = argumentCaptor<UrlMapping>()
         verify(urlRepository).insert(captor.capture())
-        assertEquals(LocalDateTime.of(2024, 12, 31, 10, 15, 30), captor.firstValue.expirationDate)
+        assertEquals(Instant.parse("2024-12-31T10:15:30Z"), captor.firstValue.expirationDate)
     }
 
     @Test

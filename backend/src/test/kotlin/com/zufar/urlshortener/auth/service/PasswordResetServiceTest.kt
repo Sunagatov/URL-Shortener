@@ -20,7 +20,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.Clock
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.ZoneOffset
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -76,7 +75,7 @@ class PasswordResetServiceTest {
         val user = localUser().copy(
             passwordResetTokenHash = "hashed-token",
             passwordResetTokenId = "abcdefghijklmnop",
-            passwordResetTokenExpiresAt = LocalDateTime.of(2024, 1, 1, 10, 30, 0),
+            passwordResetTokenExpiresAt = Instant.parse("2024-01-01T10:30:00Z"),
             tokenVersion = 3
         )
         whenever(userAccountRepository.findByPasswordResetTokenId("abcdefghijklmnop")).thenReturn(user)
@@ -100,7 +99,7 @@ class PasswordResetServiceTest {
         val user = localUser().copy(
             passwordResetTokenHash = "hashed-token",
             passwordResetTokenId = "abcdefghijklmnop",
-            passwordResetTokenExpiresAt = LocalDateTime.of(2024, 1, 1, 10, 0, 0) // before clock time
+            passwordResetTokenExpiresAt = Instant.parse("2024-01-01T10:00:00Z") // before clock time
         )
         whenever(userAccountRepository.findByPasswordResetTokenId("abcdefghijklmnop")).thenReturn(user)
 
@@ -115,7 +114,7 @@ class PasswordResetServiceTest {
         val user = localUser().copy(
             passwordResetTokenHash = "hashed-token",
             passwordResetTokenId = "abcdefghijklmnop",
-            passwordResetTokenExpiresAt = LocalDateTime.of(2024, 1, 1, 10, 30, 0)
+            passwordResetTokenExpiresAt = Instant.parse("2024-01-01T10:30:00Z")
         )
         whenever(userAccountRepository.findByPasswordResetTokenId("abcdefghijklmnop")).thenReturn(user)
         whenever(passwordEncoder.matches(any<String>(), any<String>())).thenReturn(false)

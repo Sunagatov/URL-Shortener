@@ -10,7 +10,7 @@ import org.springframework.security.authentication.AuthenticationCredentialsNotF
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
+import java.time.Instant
 
 private const val UNAUTHENTICATED_MESSAGE = "User is not authenticated"
 private const val AUTHENTICATED_USER_NOT_FOUND_MESSAGE = "Authenticated user not found"
@@ -48,7 +48,7 @@ class AuthenticatedUserContextService(
         return user.id ?: throw AuthenticationCredentialsNotFoundException(AUTHENTICATED_USER_NOT_FOUND_MESSAGE)
     }
 
-    fun updatePassword(currentUser: UserAccountDocument, encodedPassword: String, updatedAt: LocalDateTime) {
+    fun updatePassword(currentUser: UserAccountDocument, encodedPassword: String, updatedAt: Instant) {
         val userId = currentUser.id ?: throw ApplicationException.notFound(USER_NOT_FOUND_CODE, USER_NOT_FOUND_MESSAGE)
         val currentRecord = userAccountRepository.findById(userId)
             .orElseThrow { ApplicationException.notFound(USER_NOT_FOUND_CODE, USER_NOT_FOUND_MESSAGE) }

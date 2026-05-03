@@ -14,7 +14,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.Clock
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.ZoneOffset
 import kotlin.test.assertEquals
 
@@ -39,7 +38,7 @@ class EmailVerificationEdgeCasesTest {
     @Test
     fun `verifyEmail rejects expired verification code`() {
         val user = unverifiedUser().copy(
-            emailVerificationCodeExpiresAt = LocalDateTime.of(2024, 1, 1, 10, 10, 0) // before clock
+            emailVerificationCodeExpiresAt = Instant.parse("2024-01-01T10:10:00Z") // before clock
         )
         whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
 
@@ -130,7 +129,7 @@ class EmailVerificationEdgeCasesTest {
     fun `resendVerificationCode at exact cooldown boundary allows resend`() {
         // sentAt + 60s == now → remaining cooldown is 0 → should allow
         val user = unverifiedUser().copy(
-            emailVerificationCodeSentAt = LocalDateTime.of(2024, 1, 1, 10, 14, 30)
+            emailVerificationCodeSentAt = Instant.parse("2024-01-01T10:14:30Z")
         )
         whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
         whenever(passwordEncoder.encode(org.mockito.kotlin.any<String>())).thenReturn("new-hash")
@@ -156,7 +155,7 @@ class EmailVerificationEdgeCasesTest {
         )
         whenever(passwordEncoder.encode(org.mockito.kotlin.any<String>())).thenReturn("hash")
 
-        val (_, code) = wf.createChallenge(unverifiedUser(), LocalDateTime.now(clock))
+        val (_, code) = wf.createChallenge(unverifiedUser(), Instant.now(clock))
         assertEquals(6, code.length)
         assert(code.all { it.isDigit() })
     }
@@ -166,7 +165,7 @@ class EmailVerificationEdgeCasesTest {
         email = "user@example.com", password = "hashed",
         emailVerified = false,
         emailVerificationCodeHash = "verification-hash",
-        emailVerificationCodeExpiresAt = LocalDateTime.of(2024, 1, 1, 10, 25, 30),
-        emailVerificationCodeSentAt = LocalDateTime.of(2024, 1, 1, 10, 15, 30)
+        emailVerificationCodeExpiresAt = Instant.parse("2024-01-01T10:25:30Z"),
+        emailVerificationCodeSentAt = Instant.parse("2024-01-01T10:15:30Z")
     )
 }

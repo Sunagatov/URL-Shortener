@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.users.dto
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 data class UserDetailsDto(
 
@@ -16,5 +16,5 @@ data class UserDetailsDto(
 
     val authProvider: String? = null,
 
-    val createdAt: LocalDateTime?
+    val createdAt: Instant?
 )

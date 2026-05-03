@@ -1,7 +1,7 @@
 package com.zufar.urlshortener.urls.dto
 
 import com.zufar.urlshortener.urls.entity.UrlMapping
-import java.time.LocalDateTime
+import java.time.Instant
 
 data class UrlMappingDto(
 
@@ -15,9 +15,9 @@ data class UrlMappingDto(
 
     val qrScanCount: Long,
 
-    val createdAt: LocalDateTime,
+    val createdAt: Instant,
 
-    val expirationDate: LocalDateTime
+    val expirationDate: Instant
 ) {
     companion object {
         fun fromEntity(entity: UrlMapping): UrlMappingDto = UrlMappingDto(

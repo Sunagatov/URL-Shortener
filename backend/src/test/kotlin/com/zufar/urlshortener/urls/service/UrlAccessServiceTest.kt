@@ -14,7 +14,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.security.access.AccessDeniedException
 import java.time.Clock
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.Optional
 import kotlin.test.assertEquals
@@ -42,7 +41,7 @@ class UrlAccessServiceTest {
 
     @Test
     fun `getActiveUrlMapping returns active mapping`() {
-        val urlMapping = mapping(expirationDate = LocalDateTime.parse("2024-01-02T10:15:30"))
+        val urlMapping = mapping(expirationDate = Instant.parse("2024-01-02T10:15:30Z"))
         whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(urlMapping))
 
         val result = service.getActiveUrlMapping("abc12345")
@@ -52,7 +51,7 @@ class UrlAccessServiceTest {
 
     @Test
     fun `getActiveUrlMapping rejects expired mapping`() {
-        val expiredMapping = mapping(expirationDate = LocalDateTime.parse("2023-12-31T10:15:30"))
+        val expiredMapping = mapping(expirationDate = Instant.parse("2023-12-31T10:15:30Z"))
         whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(expiredMapping))
 
         assertThrows<ApplicationException> {
@@ -62,7 +61,7 @@ class UrlAccessServiceTest {
 
     @Test
     fun `getOwnedActiveUrlMapping rejects access to mapping owned by another user`() {
-        val urlMapping = mapping(userId = "another-user", expirationDate = LocalDateTime.parse("2024-01-02T10:15:30"))
+        val urlMapping = mapping(userId = "another-user", expirationDate = Instant.parse("2024-01-02T10:15:30Z"))
         whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(urlMapping))
         whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("user-123")
 
@@ -75,7 +74,7 @@ class UrlAccessServiceTest {
 
     @Test
     fun `getOwnedActiveUrlMapping returns mapping for owner`() {
-        val urlMapping = mapping(userId = "user-123", expirationDate = LocalDateTime.parse("2024-01-02T10:15:30"))
+        val urlMapping = mapping(userId = "user-123", expirationDate = Instant.parse("2024-01-02T10:15:30Z"))
         whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(urlMapping))
         whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("user-123")
 
@@ -86,13 +85,13 @@ class UrlAccessServiceTest {
 
     private fun mapping(
         userId: String? = "user-123",
-        expirationDate: LocalDateTime
+        expirationDate: Instant
     ) = UrlMapping(
         urlHash = "abc12345",
         shortUrl = "http://localhost:8080/abc12345",
         originalUrl = "https://example.com",
         clickCount = 0,
-        createdAt = LocalDateTime.parse("2023-12-31T10:15:30"),
+        createdAt = Instant.parse("2023-12-31T10:15:30Z"),
         expirationDate = expirationDate,
         requestIp = "127.0.0.1",
         userAgent = "JUnit",

@@ -27,7 +27,7 @@ import org.springframework.security.core.userdetails.UserDetails as SecurityUser
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.Clock
-import java.time.LocalDateTime
+import java.time.Instant
 
 private const val INVALID_REFRESH_TOKEN_MESSAGE = "Invalid or expired refresh token"
 private const val INVALID_TOKEN_CODE = "INVALID_TOKEN"
@@ -89,7 +89,7 @@ class AuthService(
         val normalizedRequest = request.copy(email = EmailNormalizer.normalize(request.email))
         ensureEmailIsAvailable(normalizedRequest.email)
 
-        val now = LocalDateTime.now(clock)
+        val now = Instant.now(clock)
         val encodedPassword = requireNotNull(passwordEncoder.encode(normalizedRequest.password)) {
             "Password encoder returned null during sign-up"
         }

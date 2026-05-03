@@ -3,7 +3,7 @@ package com.zufar.urlshortener.users.entity
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Document(collection = "user_details")
 data class UserAccountDocument(
@@ -22,17 +22,17 @@ data class UserAccountDocument(
     val authProvider: AuthProvider = AuthProvider.LOCAL,
 
     val emailVerified: Boolean = false,
-    val emailVerifiedAt: LocalDateTime? = null,
+    val emailVerifiedAt: Instant? = null,
     val emailVerificationCodeHash: String? = null,
-    val emailVerificationCodeExpiresAt: LocalDateTime? = null,
-    val emailVerificationCodeSentAt: LocalDateTime? = null,
+    val emailVerificationCodeExpiresAt: Instant? = null,
+    val emailVerificationCodeSentAt: Instant? = null,
 
     val tokenVersion: Int = 0,
 
     val passwordResetTokenHash: String? = null,
     val passwordResetTokenId: String? = null,
-    val passwordResetTokenExpiresAt: LocalDateTime? = null,
+    val passwordResetTokenExpiresAt: Instant? = null,
 
-    val createdAt: LocalDateTime? = null,
-    val updatedAt: LocalDateTime? = null
+    val createdAt: Instant? = null,
+    val updatedAt: Instant? = null
 )

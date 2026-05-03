@@ -9,7 +9,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import java.time.LocalDateTime
+import java.time.Instant
 import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
@@ -26,7 +26,7 @@ class UserAccountControllerTest {
             email = "jane@example.com",
             country = "USA",
             age = 28,
-            createdAt = LocalDateTime.parse("2024-01-01T10:15:30")
+            createdAt = Instant.parse("2024-01-01T10:15:30Z")
         )
         whenever(userAccountService.getCurrentUserDetails()).thenReturn(responseBody)
 

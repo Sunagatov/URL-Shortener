@@ -21,7 +21,6 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.Clock
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.ZoneOffset
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -78,7 +77,7 @@ class AuthServiceVerificationTest {
         assertEquals("jane.doe@example.com", captor.firstValue.email)
         assertFalse(captor.firstValue.emailVerified)
         assertEquals("verification-code-hash", captor.firstValue.emailVerificationCodeHash)
-        assertEquals("2024-01-01T10:15:30", captor.firstValue.createdAt.toString())
+        assertEquals("2024-01-01T10:15:30Z", captor.firstValue.createdAt.toString())
         assertEquals(captor.firstValue.createdAt, captor.firstValue.updatedAt)
         assertEquals("jane.doe@example.com", response.email)
         assertEquals(600, response.expiresInSeconds)
@@ -150,8 +149,8 @@ class AuthServiceVerificationTest {
             country = "USA",
             age = 30,
             emailVerificationCodeHash = "verification-hash",
-            emailVerificationCodeExpiresAt = LocalDateTime.of(2024, 1, 1, 10, 25, 30),
-            emailVerificationCodeSentAt = LocalDateTime.of(2024, 1, 1, 10, 15, 30)
+            emailVerificationCodeExpiresAt = Instant.parse("2024-01-01T10:25:30Z"),
+            emailVerificationCodeSentAt = Instant.parse("2024-01-01T10:15:30Z")
         )
         whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
         whenever(passwordEncoder.matches("123456", "verification-hash")).thenReturn(true)
@@ -181,7 +180,7 @@ class AuthServiceVerificationTest {
             country = "USA",
             age = 30,
             emailVerificationCodeHash = "verification-hash",
-            emailVerificationCodeExpiresAt = LocalDateTime.of(2024, 1, 1, 10, 25, 30)
+            emailVerificationCodeExpiresAt = Instant.parse("2024-01-01T10:25:30Z")
         )
         whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
         whenever(passwordEncoder.matches("123456", "verification-hash")).thenReturn(false)
@@ -201,7 +200,7 @@ class AuthServiceVerificationTest {
             password = "hashed-password",
             country = "USA",
             age = 30,
-            emailVerificationCodeSentAt = LocalDateTime.of(2024, 1, 1, 10, 15, 5)
+            emailVerificationCodeSentAt = Instant.parse("2024-01-01T10:15:05Z")
         )
         whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
 

@@ -19,7 +19,6 @@ import org.mockito.kotlin.whenever
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.time.Clock
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.ZoneOffset
 import kotlin.test.assertEquals
 
@@ -41,7 +40,7 @@ class UserPasswordChangerTest {
             password = "old-hash",
             country = "USA",
             age = 30,
-            createdAt = LocalDateTime.of(2024, 1, 1, 9, 0),
+            createdAt = Instant.parse("2024-01-01T09:00:00Z"),
             tokenVersion = 0
         )
         whenever(authenticatedUserContext.requireAuthenticatedUser()).thenReturn(user)
@@ -64,7 +63,7 @@ class UserPasswordChangerTest {
             assertEquals("user@example.com", email)
             assertEquals(0, tokenVersion)
             true
-        }, eq("new-hash"), eq(LocalDateTime.of(2024, 1, 1, 10, 15, 30)))
+        }, eq("new-hash"), eq(Instant.parse("2024-01-01T10:15:30Z")))
     }
 
     @Test
@@ -77,7 +76,7 @@ class UserPasswordChangerTest {
             password = "old-hash",
             country = "USA",
             age = 30,
-            createdAt = LocalDateTime.of(2024, 1, 1, 9, 0),
+            createdAt = Instant.parse("2024-01-01T09:00:00Z"),
             tokenVersion = 0
         )
         whenever(authenticatedUserContext.requireAuthenticatedUser()).thenReturn(user)

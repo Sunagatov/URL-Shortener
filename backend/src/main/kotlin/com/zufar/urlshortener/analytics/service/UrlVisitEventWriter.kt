@@ -59,7 +59,7 @@ class UrlVisitEventWriter(
         val update = Update().inc("clickCount", 1)
         if (eventType == EventType.QR_SCAN) {
             update.inc("qrScanCount", 1)
-            update.set("lastQrScannedAt", java.time.LocalDateTime.now())
+            update.set("lastQrScannedAt", java.time.Instant.now())
         }
         mongoTemplate.updateFirst(query, update, UrlMapping::class.java)
     }
