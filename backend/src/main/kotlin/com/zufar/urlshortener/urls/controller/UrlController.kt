@@ -1,6 +1,8 @@
 package com.zufar.urlshortener.urls.controller
 
 import com.zufar.urlshortener.shared.web.ApplicationRoutes
+import com.zufar.urlshortener.shared.turnstile.TurnstileProperties
+import com.zufar.urlshortener.shared.turnstile.TurnstileVerifier
 import com.zufar.urlshortener.urls.dto.ShortenUrlRequest
 import com.zufar.urlshortener.urls.dto.UpdateUrlRequest
 import com.zufar.urlshortener.urls.dto.UrlMappingDto
@@ -26,6 +28,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping(ApplicationRoutes.URLS_BASE_PATH)
 class UrlController(
     private val urlManagementService: UrlManagementService,
+    private val turnstileVerifier: TurnstileVerifier,
+    private val turnstileProperties: TurnstileProperties,
     @Value($$"${app.urls.pagination.default-page:0}") private val defaultPage: Int,
     @Value($$"${app.urls.pagination.default-size:10}") private val defaultSize: Int
 ) {
@@ -37,8 +41,12 @@ class UrlController(
     fun shortenUrl(
         @Valid @RequestBody shortenUrlRequest: ShortenUrlRequest,
         httpServletRequest: HttpServletRequest
-    ): ResponseEntity<UrlResponse> =
-        ResponseEntity.ok(UrlResponse(urlManagementService.shorten(shortenUrlRequest, httpServletRequest)))
+    ): ResponseEntity<UrlResponse> {
+        if (turnstileProperties.urlCreateEnabled) {
+            turnstileVerifier.verify(shortenUrlRequest.turnstileToken)
+        }
+        return ResponseEntity.ok(UrlResponse(urlManagementService.shorten(shortenUrlRequest, httpServletRequest)))
+    }
 
     @GetMapping
     fun getUserUrlMappings(

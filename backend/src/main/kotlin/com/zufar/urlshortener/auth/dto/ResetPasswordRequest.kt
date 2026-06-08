@@ -11,5 +11,8 @@ data class ResetPasswordRequest(
     @field:NotBlank(message = PASSWORD_MUST_NOT_BE_EMPTY)
     @field:Size(min = 15, message = PASSWORD_MUST_BE_AT_LEAST_15_CHARACTERS_LONG)
     @field:Size(max = 64, message = PASSWORD_IS_TOO_LONG)
-    val newPassword: String
+    val newPassword: String,
+
+    @field:Size(max = 2048, message = "Turnstile token is too long")
+    val turnstileToken: String? = null
 )

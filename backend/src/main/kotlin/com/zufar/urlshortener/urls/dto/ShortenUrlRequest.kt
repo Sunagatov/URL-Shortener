@@ -17,5 +17,8 @@ data class ShortenUrlRequest(
     val daysCount: Long?,
 
     @Size(min = 3, max = 30, message = "Custom alias must be between 3 and 30 characters")
-    val customAlias: String? = null
+    val customAlias: String? = null,
+
+    @field:Size(max = 2048, message = "Turnstile token is too long")
+    val turnstileToken: String? = null
 )

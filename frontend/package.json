@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@marsidev/react-turnstile": "^1.5.2",
     "axios": "^1.15.2",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.5",

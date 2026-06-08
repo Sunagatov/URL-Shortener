@@ -9,5 +9,8 @@ data class ForgotPasswordRequest(
     @field:NotBlank(message = EMAIL_MUST_NOT_BE_EMPTY)
     @field:Size(max = 254, message = EMAIL_IS_TOO_LONG)
     @field:Email(message = EMAIL_FORMAT_IS_INVALID)
-    val email: String
+    val email: String,
+
+    @field:Size(max = 2048, message = "Turnstile token is too long")
+    val turnstileToken: String? = null
 )

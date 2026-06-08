@@ -13,5 +13,8 @@ data class VerifyEmailRequest(
     val email: String,
 
     @field:Pattern(regexp = "^\\d{6}$", message = "Verification code must contain exactly 6 digits")
-    val code: String
+    val code: String,
+
+    @field:Size(max = 2048, message = "Turnstile token is too long")
+    val turnstileToken: String? = null
 )

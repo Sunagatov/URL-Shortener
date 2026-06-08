@@ -2,7 +2,7 @@ package com.zufar.urlshortener.shared.exception
 
 import org.springframework.http.HttpStatus
 
-class ApplicationException(
+open class ApplicationException(
     val status: HttpStatus,
     val code: String,
     override val message: String,
