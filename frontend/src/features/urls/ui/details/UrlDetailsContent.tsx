@@ -24,6 +24,7 @@ export function UrlDetailsHeader({
   return (
     <div className="mb-8 mt-3 md:mt-0">
       <button
+        type="button"
         onClick={onBack}
         className="group mb-5 inline-flex items-center gap-1.5 text-sm text-[color:var(--text-muted)] transition-colors hover:text-[color:var(--text-secondary)]"
       >

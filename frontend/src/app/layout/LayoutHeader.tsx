@@ -61,6 +61,7 @@ export const LayoutHeader = ({
           {isAuthenticated ? (
             <div className="relative">
               <button
+                type="button"
                 onClick={onToggleUserMenu}
                 className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--border-strong)] bg-[var(--surface-hover)] transition duration-200 hover:border-[color:var(--accent-border)] hover:bg-[var(--surface-hover)] md:h-auto md:w-auto md:gap-2 md:px-3 md:py-2"
                 aria-label="Open account menu"
@@ -185,6 +186,7 @@ function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
   return (
     <button
+      type="button"
       onClick={toggleTheme}
       className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--border-strong)] bg-[var(--surface-soft)] transition duration-200 hover:border-[color:var(--accent-border)] hover:bg-[var(--surface-hover)]"
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}

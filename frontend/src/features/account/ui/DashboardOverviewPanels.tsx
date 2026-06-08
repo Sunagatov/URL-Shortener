@@ -124,6 +124,7 @@ export const DashboardRecentUrlsPanel: React.FC<{
         : recentUrls.map(mapping => (
             <button
               key={mapping.urlHash}
+              type="button"
               onClick={() => onOpenDetails(mapping.urlHash)}
               className="flex w-full items-center gap-3 px-5 py-3.5 text-left transition-colors hover:bg-[var(--card-bg)]"
             >

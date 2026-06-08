@@ -1,4 +1,4 @@
-import type { MouseEvent } from 'react';
+import type { KeyboardEvent, MouseEvent } from 'react';
 import { useState } from 'react';
 import { FaCheck, FaExternalLinkAlt, FaTrash } from 'react-icons/fa';
 import { getDomainLabel } from '@/features/urls/lib/urlMappings';
@@ -52,10 +52,22 @@ export const UrlMappingCard = ({
 
   const stopPropagation = (event: MouseEvent) => event.stopPropagation();
   const handleCardClick = isSelectMode ? onToggleSelect : onDetails;
+  const handleCardKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+
+    event.preventDefault();
+    handleCardClick?.();
+  };
 
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={isSelectMode ? `Toggle selection for ${domain}` : `Open details for ${domain}`}
       onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
       className={`group cursor-pointer overflow-hidden rounded-2xl border transition-all duration-200 ${
         isSelectMode && isSelected
           ? 'border-blue-500/50 bg-blue-900/10 ring-1 ring-blue-500/30'
@@ -122,6 +134,7 @@ export const UrlMappingCard = ({
               </Tooltip>
               <Tooltip content="Delete URL">
                 <button
+                  type="button"
                   onClick={event => {
                     event.stopPropagation();
                     onDelete();

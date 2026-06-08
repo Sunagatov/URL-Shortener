@@ -36,6 +36,7 @@ export const UrlMappingsPagination = ({
         {getVisiblePages(page, totalPages).map(pageNumber => (
           <button
             key={pageNumber}
+            type="button"
             onClick={() => onPageChange(pageNumber)}
             className={`h-8 w-8 rounded-lg text-xs font-semibold transition-all ${
               pageNumber === page

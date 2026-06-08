@@ -58,6 +58,7 @@ export default function GoogleCallbackPage() {
         <div className="w-full max-w-sm space-y-4 text-center">
           <p className="text-sm text-[color:var(--danger-text)]">{error}</p>
           <button
+            type="button"
             onClick={() => navigate(routes.signIn, { replace: true })}
             className="text-sm font-semibold text-[color:var(--accent)] transition-colors hover:text-[color:var(--text-primary)]"
           >

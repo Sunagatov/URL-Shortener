@@ -26,6 +26,7 @@ export function UrlMappingsSelectionBar({
       <div className="mx-1 h-4 w-px bg-[var(--border)]" />
 
       <button
+        type="button"
         onClick={onToggleSelectAll}
         className="rounded-lg px-3 py-1.5 text-xs font-semibold text-[color:var(--text-secondary)] transition-all hover:bg-[var(--surface-hover)] hover:text-[color:var(--text-secondary)]"
       >

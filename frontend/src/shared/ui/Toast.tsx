@@ -90,6 +90,7 @@ const ToastCard: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }>
         {toast.message}
       </p>
       <button
+        type="button"
         onClick={() => onDismiss(toast.id)}
         className="mt-0.5 flex-shrink-0 text-[color:var(--text-muted)] transition-colors hover:text-[color:var(--text-primary)]"
         aria-label="Dismiss"

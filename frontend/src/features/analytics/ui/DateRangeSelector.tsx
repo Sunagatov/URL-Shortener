@@ -32,6 +32,7 @@ export function DateRangeSelector({ dateRange, onDateRangeChange }: DateRangeSel
         {PRESETS.map(({ label, days }) => (
           <button
             key={label}
+            type="button"
             onClick={() => handlePreset(days)}
             className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${
               activeDays === days

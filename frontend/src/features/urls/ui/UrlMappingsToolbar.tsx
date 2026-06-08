@@ -34,8 +34,10 @@ export const UrlMappingsToolbar = ({
         />
         {search && (
           <button
+            type="button"
             onClick={onClearSearch}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-[color:var(--text-muted)] transition-colors hover:text-[color:var(--text-secondary)]"
+            aria-label="Clear search"
           >
             <FaTimes className="h-3.5 w-3.5" />
           </button>
@@ -43,6 +45,7 @@ export const UrlMappingsToolbar = ({
       </div>
 
       <button
+        type="button"
         onClick={onToggleSortOrder}
         className="flex items-center gap-2 whitespace-nowrap rounded-xl border border-[color:var(--border)] bg-[var(--card-bg)] px-4 py-2.5 text-sm text-[color:var(--text-secondary)] transition-all hover:border-[color:var(--border)] hover:bg-[var(--surface-hover)] hover:text-[color:var(--text-secondary)]"
       >
