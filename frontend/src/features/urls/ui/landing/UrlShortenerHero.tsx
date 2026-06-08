@@ -25,27 +25,27 @@ export function UrlShortenerHero({
   const HeroBadgeIcon = heroBadgeIcon;
 
   return (
-    <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[var(--bg-alt)] pb-24 md:pb-10">
+    <section className="relative flex min-h-[calc(100svh-72px)] flex-col items-center justify-start overflow-hidden bg-[var(--bg-alt)] pb-[calc(env(safe-area-inset-bottom)+7.5rem)] pt-6 md:justify-center md:pb-10 md:pt-0">
       <div className="absolute top-1/4 -left-32 h-[560px] w-[560px] rounded-full bg-blue-600/20 blur-[130px] orb-1 pointer-events-none dark:block hidden" />
       <div className="absolute bottom-1/4 -right-32 h-[560px] w-[560px] rounded-full bg-purple-600/20 blur-[130px] orb-2 pointer-events-none dark:block hidden" />
       <div className="absolute left-1/2 top-1/2 h-[400px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-900/20 blur-[120px] orb-3 pointer-events-none dark:block hidden" />
       <div className="absolute inset-0 bg-grid-dark pointer-events-none" />
 
-      <div className="relative z-10 mx-auto w-full max-w-3xl px-5 py-10 text-center sm:px-6">
-        <div className="mb-6 inline-flex animate-fade-up items-center gap-2 rounded-full border border-[color:var(--border-strong)] bg-[var(--surface-hover)] px-4 py-1.5 text-sm text-[color:var(--text-secondary)] backdrop-blur-sm md:mb-8">
+      <div className="relative z-10 mx-auto w-full max-w-3xl px-4 py-5 text-center sm:px-6 md:py-10">
+        <div className="mb-4 inline-flex animate-fade-up items-center gap-2 rounded-full border border-[color:var(--border-strong)] bg-[var(--surface-hover)] px-3 py-1 text-xs text-[color:var(--text-secondary)] backdrop-blur-sm sm:text-sm md:mb-8">
           <HeroBadgeIcon className="h-3 w-3 text-amber-400" />
           Trusted by 500K+ users worldwide
         </div>
 
         <h1
-          className="mb-5 text-4xl font-bold leading-[1.05] tracking-tight text-[color:var(--text-primary)] animate-fade-up-d1 sm:text-5xl md:mb-6 md:text-[68px]"
+          className="mb-4 text-[2.35rem] font-bold leading-[1.04] tracking-tight text-[color:var(--text-primary)] animate-fade-up-d1 sm:text-5xl md:mb-6 md:text-[68px]"
           style={{ fontFamily: 'var(--font-display)' }}
         >
           URL shortener for
           <span className="gradient-text-animated mt-1 block">powerful short links</span>
         </h1>
 
-        <p className="mx-auto mb-8 max-w-xl text-base leading-relaxed text-[color:var(--text-secondary)] animate-fade-up-d2 md:mb-10 md:text-xl">
+        <p className="mx-auto mb-6 max-w-xl text-[15px] leading-relaxed text-[color:var(--text-secondary)] animate-fade-up-d2 md:mb-10 md:text-xl">
           Create memorable links, track performance, and share with confidence. Free forever — no
           sign-up required.
         </p>

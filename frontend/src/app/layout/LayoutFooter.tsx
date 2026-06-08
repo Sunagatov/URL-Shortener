@@ -8,7 +8,13 @@ const linkClass =
 
 export const LayoutFooter = ({ isAuthenticated }: { isAuthenticated: boolean }) => (
   <footer className="border-t border-[color:var(--border)] bg-[var(--surface)]">
-    <div className="mx-auto max-w-6xl px-5 py-10">
+    <div
+      className={`mx-auto max-w-6xl px-5 pt-10 ${
+        isAuthenticated
+          ? 'pb-[calc(env(safe-area-inset-bottom)+7.5rem)] md:pb-10'
+          : 'pb-10'
+      }`}
+    >
       {/* Top: brand + nav + social */}
       <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
         {/* Brand */}

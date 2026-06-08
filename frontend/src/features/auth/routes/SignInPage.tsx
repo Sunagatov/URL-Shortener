@@ -160,7 +160,7 @@ const SignInPage: React.FC = () => {
           {errors.password ? <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.password.message}</p> : null}
         </div>
 
-        <div className="flex items-center justify-between pt-1">
+        <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-start sm:justify-between">
           <label htmlFor="remember-me" className="flex cursor-pointer items-start gap-3">
             <span className="relative mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
               <input
@@ -174,14 +174,14 @@ const SignInPage: React.FC = () => {
               <span className="block text-sm font-medium leading-snug text-[color:var(--text-secondary)]">
                 Remember me
               </span>
-              <span className="mt-1 block text-xs leading-relaxed text-[color:var(--text-muted)]">
+              <span className="mt-1 hidden text-xs leading-relaxed text-[color:var(--text-muted)] sm:block">
                 Keep this browser signed in on devices you trust.
               </span>
             </span>
           </label>
           <Link
             to={routes.forgotPassword}
-            className="text-sm text-[color:var(--text-muted)] transition-colors hover:text-[color:var(--text-secondary)]"
+            className="shrink-0 whitespace-nowrap text-sm text-[color:var(--text-muted)] transition-colors hover:text-[color:var(--text-secondary)]"
           >
             Forgot password?
           </Link>
@@ -197,6 +197,7 @@ const SignInPage: React.FC = () => {
             action="signin"
             onClear={turnstile.clearToken}
             onVerify={turnstile.handleVerify}
+            size="normal"
             widgetRef={turnstile.widgetRef}
           />
         ) : null}

@@ -37,27 +37,27 @@ export const LayoutHeader = ({
     : 'Account';
 
   return (
-    <header className="fixed z-[60] w-full border-b border-[color:var(--border)] bg-[rgba(var(--bg-base-rgb),0.72)] py-4 text-[color:var(--text-primary)] backdrop-blur-xl">
-      <div className="container relative mx-auto flex items-center justify-between px-4">
-        <div className="w-10 md:hidden" />
-
+    <header className="fixed z-[60] w-full border-b border-[color:var(--border)] bg-[rgba(var(--bg-base-rgb),0.82)] text-[color:var(--text-primary)] backdrop-blur-xl">
+      <div className="container mx-auto flex min-h-[72px] items-center justify-between gap-3 px-4">
         <Link
           to={routes.home}
-          className="absolute left-1/2 flex -translate-x-1/2 items-center gap-2.5 text-xl font-bold transition-opacity duration-200 hover:opacity-80 md:static md:translate-x-0 md:text-2xl"
+          className="flex min-w-0 items-center gap-2 text-lg font-bold transition-opacity duration-200 hover:opacity-80 md:text-2xl"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--accent-border)] bg-[var(--accent-glow)] backdrop-blur-sm">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-[color:var(--accent-border)] bg-[var(--accent-glow)] backdrop-blur-sm md:h-10 md:w-10">
             <FaLink className="h-4 w-4 text-[color:var(--accent)]" />
           </div>
           <span
-            className="bg-gradient-to-r from-[var(--accent)] to-[var(--text-primary)] bg-clip-text font-bold tracking-tight text-transparent"
+            className="max-w-[145px] truncate bg-gradient-to-r from-[var(--accent)] to-[var(--text-primary)] bg-clip-text font-bold tracking-tight text-transparent sm:max-w-none"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             Shorty URL
           </span>
         </Link>
 
-        <div className="flex items-center space-x-3">
-          <ThemeToggle />
+        <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-3">
+          <div className="hidden sm:block">
+            <ThemeToggle />
+          </div>
           {isAuthenticated ? (
             <div className="relative">
               <button
@@ -87,7 +87,7 @@ export const LayoutHeader = ({
 
               {/* Dropdown — always rendered, toggled via opacity/scale */}
               <div
-                className={`absolute right-0 z-[71] mt-2 w-64 rounded-[24px] border border-[color:var(--border)] bg-[color:var(--surface-overlay)] py-2 shadow-[0_24px_50px_rgba(4,10,24,0.42)] backdrop-blur-xl transition-all duration-200 origin-top-right ${
+                className={`fixed right-4 top-[84px] z-[71] w-[min(calc(100vw-2rem),28rem)] origin-top-right rounded-[24px] border border-[color:var(--border)] bg-[color:var(--surface-overlay)] py-2 shadow-[0_24px_50px_rgba(4,10,24,0.42)] backdrop-blur-xl transition-all duration-200 md:absolute md:right-0 md:top-auto md:mt-2 md:w-64 ${
                   isUserMenuOpen
                     ? 'pointer-events-auto scale-100 opacity-100'
                     : 'pointer-events-none scale-95 opacity-0'
@@ -149,7 +149,7 @@ export const LayoutHeader = ({
             <div className="flex items-center space-x-3">
               <Link
                 to={isSignInRoute ? routes.signUp : routes.signIn}
-                className="inline-flex items-center justify-center rounded-2xl border border-[color:var(--accent-border)] bg-[linear-gradient(135deg,var(--accent)_0%,var(--accent-strong)_100%)] px-5 py-2.5 text-sm font-semibold text-[color:var(--text-on-accent)] transition duration-200 hover:-translate-y-0.5"
+                className="inline-flex items-center justify-center rounded-2xl border border-[color:var(--accent-border)] bg-[linear-gradient(135deg,var(--accent)_0%,var(--accent-strong)_100%)] px-4 py-2.5 text-sm font-semibold text-[color:var(--text-on-accent)] transition duration-200 hover:-translate-y-0.5 sm:px-5"
               >
                 {isSignInRoute ? 'Sign Up' : 'Sign In'}
               </Link>

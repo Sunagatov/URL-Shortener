@@ -72,7 +72,7 @@ export function LandingStatsSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden bg-[var(--bg-alt)] py-20">
+    <section ref={sectionRef} className="relative overflow-hidden bg-[var(--bg-alt)] py-14 md:py-20">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--border)] to-transparent" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--border)] to-transparent" />
 

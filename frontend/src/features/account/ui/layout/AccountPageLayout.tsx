@@ -27,7 +27,7 @@ export const AccountPageLayout = ({
   return (
     <div className="bg-grid-dark flex min-h-[calc(100vh-72px)] md:min-h-[calc(100vh-96px)]">
       <AccountSidebar />
-      <div className="flex-grow px-4 pb-10 pt-3 sm:px-6 md:ml-64 md:px-10 md:py-8">
+      <div className="flex-grow px-4 pb-[calc(env(safe-area-inset-bottom)+7.5rem)] pt-3 sm:px-6 md:ml-64 md:px-10 md:py-8">
         <div className={contentClassName}>{children}</div>
       </div>
     </div>

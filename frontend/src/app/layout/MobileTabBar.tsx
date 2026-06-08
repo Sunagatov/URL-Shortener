@@ -30,10 +30,10 @@ export function MobileTabBar() {
   return (
     <nav
       aria-label="Mobile navigation"
-      className="fixed inset-x-3 bottom-3 z-[58] rounded-[1.75rem] border border-[color:var(--border)] bg-[var(--surface-overlay)] p-2 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl md:hidden"
-      style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
+      className="fixed inset-x-4 z-[58] rounded-[1.5rem] border border-[color:var(--border)] bg-[var(--surface-overlay)] p-1.5 shadow-[0_16px_42px_rgba(0,0,0,0.35)] backdrop-blur-2xl md:hidden"
+      style={{ bottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
     >
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-1.5">
         {tabItems.map(item => {
           const Icon = item.icon;
           const active = item.isActive(pathname);
@@ -43,7 +43,7 @@ export function MobileTabBar() {
               key={item.label}
               to={item.path}
               aria-current={active ? 'page' : undefined}
-              className={`flex min-h-[4rem] flex-col items-center justify-center gap-1.5 rounded-2xl px-3 py-2 text-xs font-semibold transition-all duration-200 ${
+              className={`flex min-h-[3.35rem] flex-col items-center justify-center gap-1 rounded-[1.15rem] px-2 py-1.5 text-[11px] font-semibold transition-all duration-200 ${
                 active
                   ? 'bg-[var(--sidebar-active-bg)] text-[color:var(--text-primary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
                   : 'text-[color:var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[color:var(--text-secondary)]'
