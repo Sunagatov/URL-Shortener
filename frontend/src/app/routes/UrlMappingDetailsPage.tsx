@@ -4,7 +4,7 @@ import {
   AccountPageLoadingState,
   AccountPageMessageState,
   AccountPageLayout,
-} from '@/features/account/ui/layout/AccountPageLayout';
+} from '@/app/layout/AccountPageLayout';
 import { routes } from '@/app/routes';
 import { deleteUrl, getUrlDetails, updateUrl } from '@/features/urls/api/urlsApi';
 import type { UrlMapping } from '@/features/urls/types/url';
@@ -70,7 +70,7 @@ const UrlMappingDetailsPage: React.FC = () => {
     };
 
     void fetchUrlMapping();
-  }, [navigate, toast, urlHash]);
+  }, [toast, urlHash]);
 
   const handleCopyUrl = async (url: string) => {
     const didCopy = await copyValue(url);
@@ -88,7 +88,7 @@ const UrlMappingDetailsPage: React.FC = () => {
       setEditValue(urlMapping.originalUrl);
       setEditError(null);
     }
-    setIsEditing(v => !v);
+    setIsEditing((value) => !value);
   };
 
   const handleEditSave = async () => {
@@ -114,20 +114,14 @@ const UrlMappingDetailsPage: React.FC = () => {
 
     setIsDeleting(true);
 
-    let deleted = false;
-
     try {
       await deleteUrl(urlMapping.urlHash);
+      setShowDeleteModal(false);
       navigate(routes.urlMappings);
-      deleted = true;
     } catch (error: unknown) {
       toast.error(getApiErrorMessage(error, urlDeleteMessages.failedSingle));
     } finally {
       setIsDeleting(false);
-    }
-
-    if (deleted) {
-      setShowDeleteModal(false);
     }
   };
 

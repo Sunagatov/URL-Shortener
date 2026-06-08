@@ -8,7 +8,7 @@ import {
   DashboardRecentUrlsPanel,
   DashboardStatsGrid,
 } from '@/features/account/ui/DashboardOverviewPanels';
-import { AccountPageHeader, AccountPageLayout } from '@/features/account/ui/layout/AccountPageLayout';
+import { AccountPageHeader, AccountPageLayout } from '@/app/layout/AccountPageLayout';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { Button } from '@/shared/ui';
 import { FaEye, FaPlus } from 'react-icons/fa';

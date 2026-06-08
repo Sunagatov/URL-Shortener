@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import * as profileApi from '@/features/account/api/profileApi';
+import * as profileApi from '@/shared/api/profileApi';
 import UserAccountPage from '@/features/account/routes/UserAccountPage';
 
-vi.mock('@/features/account/api/profileApi', () => ({
+vi.mock('@/shared/api/profileApi', () => ({
   getUserProfile: vi.fn(),
 }));
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { useChangePasswordForm } from '@/features/account/model/useChangePasswordForm';
 import { PasswordChangeForm } from '@/features/account/ui/PasswordChangeForm';
 import { SecurityStatusCard } from '@/features/account/ui/SecurityStatusCard';
-import { AccountPageHeader, AccountPageLayout } from '@/features/account/ui/layout/AccountPageLayout';
+import { AccountPageHeader, AccountPageLayout } from '@/app/layout/AccountPageLayout';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { useAuth } from '@/shared/auth/useAuth';
 import { FcGoogle } from 'react-icons/fc';

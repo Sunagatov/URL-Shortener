@@ -1,5 +1,5 @@
 import React from 'react';
-import { AccountPageHeader, AccountPageLayout } from '@/features/account/ui/layout/AccountPageLayout';
+import { AccountPageHeader, AccountPageLayout } from '@/app/layout/AccountPageLayout';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { useAccountAnalytics } from '@/features/analytics/model/useAccountAnalytics';
 import { DateRangeSelector } from '@/features/analytics/ui/DateRangeSelector';

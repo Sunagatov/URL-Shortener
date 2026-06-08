@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getUserProfile } from '@/features/account/api/profileApi';
+import { getUserProfile } from '@/shared/api/profileApi';
 import type { User } from '@/shared/auth/types';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 import { useToast } from '@/shared/ui';

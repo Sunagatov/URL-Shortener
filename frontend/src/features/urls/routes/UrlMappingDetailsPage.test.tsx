@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import * as urlsApi from '@/features/urls/api/urlsApi';
-import UrlMappingDetailsPage from '@/features/urls/routes/UrlMappingDetailsPage';
+import UrlMappingDetailsPage from '@/app/routes/UrlMappingDetailsPage';
 
 vi.mock('@/features/urls/api/urlsApi', () => ({
   getUrlDetails: vi.fn(),

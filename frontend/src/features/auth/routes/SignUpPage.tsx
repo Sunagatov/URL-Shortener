@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { getUserProfile } from '@/features/account/api/profileApi';
+import { getUserProfile } from '@/shared/api/profileApi';
 import { signUp } from '@/features/auth/api/authApi';
 import {
   signUpSchema,

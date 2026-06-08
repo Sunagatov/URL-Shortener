@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { googleAuth } from '@/features/auth/api/authApi';
-import { getUserProfile } from '@/features/account/api/profileApi';
+import { getUserProfile } from '@/shared/api/profileApi';
 import { routes } from '@/app/routes';
 import { useAuth } from '@/shared/auth/useAuth';
 import { usePageTitle } from '@/shared/lib/usePageTitle';

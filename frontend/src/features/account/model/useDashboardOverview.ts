@@ -3,9 +3,8 @@ import {
   formatUrlDate,
   getDomainLabel,
   getShortUrlSlug,
-} from '@/features/urls/lib/urlMappings';
-import { getUserUrlsUpTo } from '@/features/urls/api/urlsApi';
-import type { UrlMapping as DashboardUrlMapping } from '@/features/urls/types/url';
+} from '@/shared/lib/urlMappings';
+import { getUserUrlsUpTo, type UrlMapping as DashboardUrlMapping } from '@/shared/api/urlMappingsApi';
 import type {
   DashboardActivityItem,
   DashboardRecentUrlItem,

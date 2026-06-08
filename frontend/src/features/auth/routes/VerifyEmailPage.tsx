@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaClock, FaEnvelope, FaExclamationTriangle, FaRedo, FaShieldAlt } from 'react-icons/fa';
 import { routes } from '@/app/routes';
-import { getUserProfile } from '@/features/account/api/profileApi';
+import { getUserProfile } from '@/shared/api/profileApi';
 import { useVerificationCodeFlow } from '@/features/auth/model/verificationCodeFlow';
 import {
   AuthAlert,

@@ -4,7 +4,7 @@ import {
   AccountPageHeader,
   AccountPageLayout,
   AccountPageLoadingState,
-} from '@/features/account/ui/layout/AccountPageLayout';
+} from '@/app/layout/AccountPageLayout';
 import { routes } from '@/app/routes';
 import { deleteUrl, getAllUserUrls } from '@/features/urls/api/urlsApi';
 import { PAGE_SIZE } from '@/features/urls/lib/urlMappings';
@@ -175,13 +175,9 @@ const UserUrlMappingsPage: React.FC = () => {
   const handleConfirmBulkDelete = async () => {
     setIsBulkDeleting(true);
 
-    let deleted = false;
-
-    try {
-      deleted = await handleBulkDelete([...selectedHashes]);
-    } finally {
+    const deleted = await handleBulkDelete([...selectedHashes]).finally(() => {
       setIsBulkDeleting(false);
-    }
+    });
 
     if (deleted) {
       clearSelection();

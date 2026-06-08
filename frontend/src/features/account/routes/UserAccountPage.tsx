@@ -9,7 +9,7 @@ import {
   AccountPageLayout,
   AccountPageLoadingState,
   AccountPageMessageState,
-} from '@/features/account/ui/layout/AccountPageLayout';
+} from '@/app/layout/AccountPageLayout';
 import type { User } from '@/shared/auth/types';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { routes } from '@/app/routes';

@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { getUserProfile } from '@/features/account/api/profileApi';
+import { getUserProfile } from '@/shared/api/profileApi';
 import { signIn } from '@/features/auth/api/authApi';
 import type { AuthTokens } from '@/shared/auth/types';
 import { useAuth } from '@/shared/auth/useAuth';

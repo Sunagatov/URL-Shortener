@@ -15,7 +15,7 @@ import UrlShortenerPage from '@/features/urls/routes/UrlShortenerPage';
 import AbuseReportPage from '@/features/urls/routes/AbuseReportPage';
 import NotFoundPage from '@/features/urls/routes/NotFoundPage';
 import UserUrlMappingsPage from '@/features/urls/routes/UserUrlMappingsPage';
-import UrlMappingDetailsPage from '@/features/urls/routes/UrlMappingDetailsPage';
+import UrlMappingDetailsPage from '@/app/routes/UrlMappingDetailsPage';
 import AccountAnalyticsPage from '@/features/analytics/routes/AccountAnalyticsPage';
 
 const guestRoutes = [
