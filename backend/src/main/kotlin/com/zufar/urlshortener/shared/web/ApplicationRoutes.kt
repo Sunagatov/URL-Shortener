@@ -23,6 +23,7 @@ object ApplicationRoutes {
     const val AUTH_BASE_PATH = "/api/v1/auth"
     const val AUTH_LEGACY_BASE_PATH = "/v1/auth"
     const val URLS_BASE_PATH = "/api/v1/urls"
+    const val ADMIN_URL_MAPPINGS_BASE_PATH = "/api/v1/admin/url-mappings"
     const val ABUSE_REPORTS_BASE_PATH = "/api/v1/abuse-reports"
     const val FRONTEND_LOGS_BASE_PATH = "/api/v1/frontend/logs"
     const val HEALTH_BASE_PATH = "/api/v1/health"

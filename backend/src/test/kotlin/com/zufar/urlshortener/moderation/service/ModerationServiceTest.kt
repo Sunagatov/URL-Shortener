@@ -20,6 +20,7 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.time.Clock
@@ -79,6 +80,18 @@ class ModerationServiceTest {
         }
 
         assertEquals("MODERATION_FORBIDDEN", ex.code)
+    }
+
+    @Test
+    fun `disableUrlMapping rejects malformed url hash before loading mapping`() {
+        whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("admin-user")
+
+        val ex = assertThrows<ApplicationException> {
+            service().disableUrlMapping("../abc12345", DisableUrlMappingRequest("phishing"))
+        }
+
+        assertEquals("INVALID_ABUSE_REPORT", ex.code)
+        verify(urlRepository, never()).findByUrlHash(any())
     }
 
     @Test

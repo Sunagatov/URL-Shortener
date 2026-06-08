@@ -11,6 +11,7 @@ import com.zufar.urlshortener.shared.exception.ApplicationException
 import com.zufar.urlshortener.shared.http.ClientIpResolver
 import com.zufar.urlshortener.shared.security.AuditLogService
 import com.zufar.urlshortener.shared.security.PrivacyHasher
+import com.zufar.urlshortener.urls.api.UrlHashFormat
 import com.zufar.urlshortener.urls.dto.UrlMappingDto
 import com.zufar.urlshortener.urls.repository.UrlRepository
 import com.zufar.urlshortener.urls.service.UrlMappingAccessService
@@ -23,6 +24,7 @@ import java.time.Instant
 private const val URL_NOT_FOUND_CODE = "URL_NOT_FOUND"
 private const val MODERATION_FORBIDDEN_CODE = "MODERATION_FORBIDDEN"
 private const val INVALID_ABUSE_REPORT_CODE = "INVALID_ABUSE_REPORT"
+private val URL_HASH_REGEX = Regex("^(${UrlHashFormat.COMBINED_REGEX})$")
 
 @Service
 class ModerationService(
@@ -57,24 +59,26 @@ class ModerationService(
     fun disableUrlMapping(urlHash: String, request: DisableUrlMappingRequest): UrlMappingDto {
         val actorUserId = authenticatedUserContext.requireAuthenticatedUserId()
         requireModerator(actorUserId)
+        val normalizedUrlHash = normalizeUrlHash(urlHash)
+        val reason = request.reason.trim()
 
-        val mapping = urlRepository.findByUrlHash(urlHash)
+        val mapping = urlRepository.findByUrlHash(normalizedUrlHash)
             .orElseThrow { ApplicationException.notFound(URL_NOT_FOUND_CODE, "URL mapping not found") }
         val disabled = urlRepository.save(
             mapping.copy(
                 disabled = true,
-                disabledReason = request.reason.trim(),
+                disabledReason = reason,
                 disabledAt = Instant.now(clock)
             )
         )
-        urlMappingAccessService.evictUrlMapping(urlHash)
+        urlMappingAccessService.evictUrlMapping(normalizedUrlHash)
         auditLogService.record(
             "short_url_disabled",
             "success",
             actorUserId,
-            urlHash,
+            normalizedUrlHash,
             mapping.originalUrl,
-            request.reason
+            reason
         )
         return UrlMappingDto.fromEntity(disabled)
     }
@@ -93,9 +97,14 @@ class ModerationService(
             .substringBefore("?")
             .substringBefore("#")
 
-        if (!candidate.matches(Regex("^[a-zA-Z0-9_-]{3,30}$"))) {
+        return normalizeUrlHash(candidate)
+    }
+
+    private fun normalizeUrlHash(value: String): String {
+        val normalized = value.trim()
+        if (!URL_HASH_REGEX.matches(normalized)) {
             throw ApplicationException.badRequest(INVALID_ABUSE_REPORT_CODE, "Invalid short URL or hash")
         }
-        return candidate
+        return normalized
     }
 }

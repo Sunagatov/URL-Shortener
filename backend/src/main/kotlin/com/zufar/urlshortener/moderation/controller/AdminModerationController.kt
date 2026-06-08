@@ -2,6 +2,8 @@ package com.zufar.urlshortener.moderation.controller
 
 import com.zufar.urlshortener.moderation.dto.DisableUrlMappingRequest
 import com.zufar.urlshortener.moderation.service.ModerationService
+import com.zufar.urlshortener.shared.web.ApplicationRoutes
+import com.zufar.urlshortener.urls.api.UrlHashFormat
 import com.zufar.urlshortener.urls.dto.UrlMappingDto
 import jakarta.validation.Valid
 import org.springframework.http.MediaType
@@ -13,11 +15,15 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/v1/admin/url-mappings")
+@RequestMapping(ApplicationRoutes.ADMIN_URL_MAPPINGS_BASE_PATH)
 class AdminModerationController(
     private val moderationService: ModerationService
 ) {
-    @PostMapping("/{urlHash}/disable", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(
+        UrlHashFormat.PATH_VARIABLE_REGEX + "/disable",
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
     fun disableUrlMapping(
         @PathVariable urlHash: String,
         @Valid @RequestBody request: DisableUrlMappingRequest
