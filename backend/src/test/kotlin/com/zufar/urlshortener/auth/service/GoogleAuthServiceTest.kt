@@ -86,23 +86,57 @@ class GoogleAuthServiceTest {
     }
 
     @Test
-    fun `authenticate rejects existing LOCAL user instead of implicitly linking account`() {
+    fun `authenticate returns existing LOCAL user when Google proves the same verified email`() {
         val existing = UserAccountDocument(
             id = "local-id", firstName = "Jane", lastName = "Doe",
-            email = "user@gmail.com", password = "hashed", authProvider = AuthProvider.LOCAL
+            email = "user@gmail.com", password = "hashed", authProvider = AuthProvider.LOCAL, emailVerified = true
         )
         val restTemplate = mockRestTemplate(
             tokenResponse = mapOf("access_token" to "google-access-token"),
             userInfoResponse = mapOf("email" to "user@gmail.com", "email_verified" to true, "given_name" to "Jane", "family_name" to "Doe")
         )
         whenever(userAccountRepository.findByEmailIgnoreCase("user@gmail.com")).thenReturn(existing)
+        whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access-token")
+        whenever(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh-token")
 
-        val ex = assertThrows<ApplicationException> {
-            service(restTemplate).authenticate("auth-code")
-        }
+        val response = service(restTemplate).authenticate("auth-code")
 
-        assertEquals("GOOGLE_ACCOUNT_LINK_REQUIRED", ex.code)
+        assertEquals("access-token", response.accessToken)
         verify(userAccountRepository, never()).save(any())
+    }
+
+    @Test
+    fun `authenticate verifies existing LOCAL user when Google proves the same verified email`() {
+        val existing = UserAccountDocument(
+            id = "local-id",
+            firstName = "Jane",
+            lastName = "Doe",
+            email = "user@gmail.com",
+            password = "hashed",
+            authProvider = AuthProvider.LOCAL,
+            emailVerified = false,
+            emailVerificationCodeHash = "challenge-hash",
+            emailVerificationCodeExpiresAt = Instant.parse("2024-01-01T10:20:30Z")
+        )
+        val restTemplate = mockRestTemplate(
+            tokenResponse = mapOf("access_token" to "google-access-token"),
+            userInfoResponse = mapOf("email" to "user@gmail.com", "email_verified" to true, "given_name" to "Jane", "family_name" to "Doe")
+        )
+        whenever(userAccountRepository.findByEmailIgnoreCase("user@gmail.com")).thenReturn(existing)
+        whenever(userAccountRepository.save(any<UserAccountDocument>())).thenAnswer { it.arguments[0] }
+        whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access-token")
+        whenever(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh-token")
+
+        service(restTemplate).authenticate("auth-code")
+
+        val captor = argumentCaptor<UserAccountDocument>()
+        verify(userAccountRepository).save(captor.capture())
+        assertEquals(AuthProvider.LOCAL, captor.firstValue.authProvider)
+        assertEquals("hashed", captor.firstValue.password)
+        assertEquals(true, captor.firstValue.emailVerified)
+        assertEquals(Instant.parse("2024-01-01T10:15:30Z"), captor.firstValue.emailVerifiedAt)
+        assertEquals(null, captor.firstValue.emailVerificationCodeHash)
+        assertEquals(null, captor.firstValue.emailVerificationCodeExpiresAt)
     }
 
     @Test

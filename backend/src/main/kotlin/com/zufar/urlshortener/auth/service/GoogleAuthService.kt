@@ -23,7 +23,6 @@ import java.time.Instant
 private const val GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
 private const val GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
 private const val GOOGLE_AUTH_FAILED_CODE = "GOOGLE_AUTH_FAILED"
-private const val GOOGLE_ACCOUNT_LINK_REQUIRED_CODE = "GOOGLE_ACCOUNT_LINK_REQUIRED"
 
 @Service
 class GoogleAuthService(
@@ -104,13 +103,7 @@ class GoogleAuthService(
     private fun findOrCreateUser(googleUser: GoogleUserInfo): GoogleAuthUserResult {
         val existing = userAccountRepository.findByEmailIgnoreCase(googleUser.email)
         if (existing != null) {
-            if (existing.authProvider == AuthProvider.GOOGLE) {
-                return GoogleAuthUserResult(existing, isNewUser = false)
-            }
-            throw ApplicationException.conflict(
-                GOOGLE_ACCOUNT_LINK_REQUIRED_CODE,
-                "An account already exists for this email. Sign in with your password first."
-            )
+            return GoogleAuthUserResult(verifyExistingAccountFromGoogle(existing), isNewUser = false)
         }
         val now = Instant.now(clock)
         val user = userAccountRepository.save(
@@ -126,6 +119,28 @@ class GoogleAuthService(
             )
         )
         return GoogleAuthUserResult(user, isNewUser = true)
+    }
+
+    private fun verifyExistingAccountFromGoogle(user: UserAccountDocument): UserAccountDocument {
+        if (user.emailVerified &&
+            user.emailVerificationCodeHash == null &&
+            user.emailVerificationCodeExpiresAt == null &&
+            user.emailVerificationCodeSentAt == null
+        ) {
+            return user
+        }
+
+        val now = Instant.now(clock)
+        return userAccountRepository.save(
+            user.copy(
+                emailVerified = true,
+                emailVerifiedAt = user.emailVerifiedAt ?: now,
+                emailVerificationCodeHash = null,
+                emailVerificationCodeExpiresAt = null,
+                emailVerificationCodeSentAt = null,
+                updatedAt = now
+            )
+        )
     }
 
     private fun issueTokens(user: UserAccountDocument): AuthResponse {
