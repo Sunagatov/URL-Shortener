@@ -21,6 +21,16 @@ class AnalyticsRequestValidationTest {
     }
 
     @Test
+    fun `resolveAnalyticsDateRange defaults to seven days ending at provided now`() {
+        val now = Instant.parse("2024-01-08T00:00:00Z")
+
+        val range = resolveAnalyticsDateRange(from = null, to = null, timezone = "UTC", now = now)
+
+        assertEquals(Instant.parse("2024-01-01T00:00:00Z"), range.from)
+        assertEquals(now, range.to)
+    }
+
+    @Test
     fun `resolveAnalyticsDateRange rejects inverted range`() {
         val ex = assertThrows<ApplicationException> {
             resolveAnalyticsDateRange(

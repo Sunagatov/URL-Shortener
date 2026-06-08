@@ -6,11 +6,13 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Service
+import java.time.Clock
 import java.time.Instant
 
 @Service
 class UrlVisitCounterService(
-    private val mongoTemplate: MongoTemplate
+    private val mongoTemplate: MongoTemplate,
+    private val clock: Clock
 ) {
 
     fun incrementVisitCounters(urlHash: String, qrScan: Boolean) {
@@ -18,7 +20,7 @@ class UrlVisitCounterService(
         val update = Update().inc("clickCount", 1)
         if (qrScan) {
             update.inc("qrScanCount", 1)
-            update.set("lastQrScannedAt", Instant.now())
+            update.set("lastQrScannedAt", Instant.now(clock))
         }
         mongoTemplate.updateFirst(query, update, UrlMapping::class.java)
     }

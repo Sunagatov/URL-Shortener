@@ -9,15 +9,20 @@ import java.time.temporal.ChronoUnit
 private const val INVALID_ANALYTICS_REQUEST_CODE = "INVALID_ANALYTICS_REQUEST"
 private const val MAX_ANALYTICS_LIMIT = 100
 
-data class AnalyticsDateRangeParams(
+internal data class AnalyticsDateRangeParams(
     val from: Instant,
     val to: Instant,
     val timezone: String
 )
 
-fun resolveAnalyticsDateRange(from: Instant?, to: Instant?, timezone: String): AnalyticsDateRangeParams {
+internal fun resolveAnalyticsDateRange(
+    from: Instant?,
+    to: Instant?,
+    timezone: String,
+    now: Instant = Instant.now()
+): AnalyticsDateRangeParams {
     val resolvedTimezone = validateTimezone(timezone)
-    val resolvedTo = to ?: Instant.now()
+    val resolvedTo = to ?: now
     val resolvedFrom = from ?: resolvedTo.minus(7, ChronoUnit.DAYS)
     if (!resolvedFrom.isBefore(resolvedTo)) {
         throw ApplicationException.badRequest(INVALID_ANALYTICS_REQUEST_CODE, "from must be before to")
@@ -25,7 +30,7 @@ fun resolveAnalyticsDateRange(from: Instant?, to: Instant?, timezone: String): A
     return AnalyticsDateRangeParams(resolvedFrom, resolvedTo, resolvedTimezone)
 }
 
-fun parseAnalyticsEventType(eventType: String?): EventType? {
+internal fun parseAnalyticsEventType(eventType: String?): EventType? {
     if (eventType.isNullOrBlank()) return null
     return runCatching { EventType.valueOf(eventType.trim().uppercase()) }
         .getOrElse {
@@ -36,7 +41,7 @@ fun parseAnalyticsEventType(eventType: String?): EventType? {
         }
 }
 
-fun validateAnalyticsLimit(limit: Int): Int {
+internal fun validateAnalyticsLimit(limit: Int): Int {
     if (limit !in 1..MAX_ANALYTICS_LIMIT) {
         throw ApplicationException.badRequest(
             INVALID_ANALYTICS_REQUEST_CODE,

@@ -105,7 +105,7 @@ class AnalyticsAggregationService(
             )
         }
 
-        val total = items.sumOf { it.count }.toDouble()
+        val total = countEvents(criteria).toDouble()
         return items.map { item ->
             item.copy(percentage = if (total > 0) Math.round(item.count / total * 10000) / 100.0 else 0.0)
         }
