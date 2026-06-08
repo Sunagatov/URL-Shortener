@@ -54,6 +54,33 @@ class UrlValidatorTest {
     }
 
     @Test
+    fun `non http schemes are rejected`() {
+        val validator = UrlValidator("https://short.example.com", stubResolver())
+
+        assertThrows<ApplicationException> {
+            validator.validateUrl("file:///etc/passwd")
+        }
+    }
+
+    @Test
+    fun `ipv6 unique local addresses are rejected`() {
+        val validator = UrlValidator("https://short.example.com", stubResolver())
+
+        assertThrows<ApplicationException> {
+            validator.validateUrl("https://[fc00::1]/internal")
+        }
+    }
+
+    @Test
+    fun `ipv6 documentation addresses are rejected`() {
+        val validator = UrlValidator("https://short.example.com", stubResolver())
+
+        assertThrows<ApplicationException> {
+            validator.validateUrl("https://[2001:db8::1]/example")
+        }
+    }
+
+    @Test
     fun `urls with embedded credentials are rejected`() {
         val validator = UrlValidator("https://short.example.com", stubResolver())
 

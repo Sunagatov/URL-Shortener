@@ -2,6 +2,7 @@ package com.zufar.urlshortener.shared.filter
 
 import com.github.benmanes.caffeine.cache.Cache
 import com.github.benmanes.caffeine.cache.Caffeine
+import com.zufar.urlshortener.shared.AUTHENTICATED_USER_ID_ATTRIBUTE
 import com.zufar.urlshortener.shared.config.BucketPolicyProperties
 import com.zufar.urlshortener.shared.config.RateLimitBucketFactory
 import com.zufar.urlshortener.shared.config.RateLimitConfig
@@ -67,7 +68,7 @@ class RateLimitEdgeCasesTest {
     }
 
     @Test
-    fun `POST urls endpoint uses public_create policy`() {
+    fun `POST urls endpoint uses public_create policy for anonymous IP`() {
         val filter = createFilter(createConfig(publicCreateCapacity = 1))
         val request = MockHttpServletRequest("POST", "/api/v1/urls").apply {
             requestURI = "/api/v1/urls"
@@ -81,6 +82,23 @@ class RateLimitEdgeCasesTest {
 
         assertEquals(429, response.status)
         assertTrue(buckets.getIfPresent("public_create:ip:10.0.0.2") != null)
+    }
+
+    @Test
+    fun `POST urls endpoint keys public_create policy on authenticated user when present`() {
+        val filter = createFilter(createConfig(publicCreateCapacity = 1))
+        val request = MockHttpServletRequest("POST", "/api/v1/urls").apply {
+            requestURI = "/api/v1/urls"
+            servletPath = "/api/v1/urls"
+            remoteAddr = "10.0.0.2"
+            setAttribute(AUTHENTICATED_USER_ID_ATTRIBUTE, "user-123")
+        }
+        val response = MockHttpServletResponse()
+
+        filter.doFilter(request, response, filterChain)
+
+        assertEquals(200, response.status)
+        assertTrue(buckets.getIfPresent("public_create:user:user-123") != null)
     }
 
     @Test

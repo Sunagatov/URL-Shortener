@@ -6,6 +6,9 @@ export interface UrlMapping {
   qrScanCount: number;
   createdAt: string;
   expirationDate: string;
+  disabled?: boolean;
+  disabledReason?: string | null;
+  disabledAt?: string | null;
 }
 
 export interface PaginatedResponse<T> {

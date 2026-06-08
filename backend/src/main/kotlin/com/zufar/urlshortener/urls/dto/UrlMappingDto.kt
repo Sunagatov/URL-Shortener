@@ -17,7 +17,13 @@ data class UrlMappingDto(
 
     val createdAt: Instant,
 
-    val expirationDate: Instant
+    val expirationDate: Instant,
+
+    val disabled: Boolean = false,
+
+    val disabledReason: String? = null,
+
+    val disabledAt: Instant? = null
 ) {
     companion object {
         fun fromEntity(entity: UrlMapping): UrlMappingDto = UrlMappingDto(
@@ -27,7 +33,10 @@ data class UrlMappingDto(
             clickCount = entity.clickCount,
             qrScanCount = entity.qrScanCount,
             createdAt = entity.createdAt,
-            expirationDate = entity.expirationDate
+            expirationDate = entity.expirationDate,
+            disabled = entity.disabled,
+            disabledReason = entity.disabledReason,
+            disabledAt = entity.disabledAt
         )
     }
 }

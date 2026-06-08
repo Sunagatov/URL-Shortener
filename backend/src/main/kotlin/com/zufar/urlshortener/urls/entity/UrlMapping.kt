@@ -24,5 +24,9 @@ data class UrlMapping(
     val userAgent: String?,
 
     @Indexed(name = "user_id_idx")
-    val userId: String?
+    val userId: String?,
+
+    val disabled: Boolean = false,
+    val disabledReason: String? = null,
+    val disabledAt: Instant? = null
 )

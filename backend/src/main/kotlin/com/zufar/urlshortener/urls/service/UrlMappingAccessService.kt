@@ -24,10 +24,13 @@ class UrlMappingAccessService(
 
     fun getActiveUrlMapping(urlHash: String): UrlMapping {
         val now = Instant.now(clock)
+        val urlMapping = getCachedUrlMapping(urlHash)
 
-        return getCachedUrlMapping(urlHash)
-            .takeIf { it.expirationDate.isAfter(now) }
-            ?: throw ApplicationException.notFound(URL_NOT_FOUND_CODE, URL_MAPPING_NOT_FOUND_MESSAGE)
+        if (urlMapping.disabled || !urlMapping.expirationDate.isAfter(now)) {
+            throw ApplicationException.notFound(URL_NOT_FOUND_CODE, URL_MAPPING_NOT_FOUND_MESSAGE)
+        }
+
+        return urlMapping
     }
 
     fun getOwnedActiveUrlMapping(urlHash: String, accessDeniedMessage: String): UrlMapping {

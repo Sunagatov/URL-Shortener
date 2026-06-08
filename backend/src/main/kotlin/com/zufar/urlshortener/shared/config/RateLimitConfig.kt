@@ -27,7 +27,7 @@ class RateLimitConfig(
 
     private val policiesByRoute = mapOf(
         RateLimitedRoute.AUTH to policy("auth", rateLimitProperties.auth, RateLimitSubjectKey.CLIENT_IP),
-        RateLimitedRoute.PUBLIC_CREATE to policy("public_create", rateLimitProperties.publicCreate, RateLimitSubjectKey.CLIENT_IP),
+        RateLimitedRoute.PUBLIC_CREATE to policy("public_create", rateLimitProperties.publicCreate, RateLimitSubjectKey.AUTHENTICATED_USER_OR_IP),
         RateLimitedRoute.PUBLIC_REDIRECT to policy("public_redirect", rateLimitProperties.publicRedirect, RateLimitSubjectKey.CLIENT_IP),
         RateLimitedRoute.FRONTEND_LOGS to policy("frontend_logs", rateLimitProperties.frontendLogs, RateLimitSubjectKey.CLIENT_IP),
         RateLimitedRoute.AUTHENTICATED_API to policy("authenticated_api", rateLimitProperties.authenticatedApi, RateLimitSubjectKey.AUTHENTICATED_USER_OR_IP)

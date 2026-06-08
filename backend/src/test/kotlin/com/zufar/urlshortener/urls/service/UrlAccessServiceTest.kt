@@ -60,6 +60,19 @@ class UrlAccessServiceTest {
     }
 
     @Test
+    fun `getActiveUrlMapping rejects disabled mapping`() {
+        val disabledMapping = mapping(
+            expirationDate = Instant.parse("2024-01-02T10:15:30Z"),
+            disabled = true
+        )
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(disabledMapping))
+
+        assertThrows<ApplicationException> {
+            service.getActiveUrlMapping("abc12345")
+        }
+    }
+
+    @Test
     fun `getOwnedActiveUrlMapping rejects access to mapping owned by another user`() {
         val urlMapping = mapping(userId = "another-user", expirationDate = Instant.parse("2024-01-02T10:15:30Z"))
         whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(urlMapping))
@@ -85,7 +98,8 @@ class UrlAccessServiceTest {
 
     private fun mapping(
         userId: String? = "user-123",
-        expirationDate: Instant
+        expirationDate: Instant,
+        disabled: Boolean = false
     ) = UrlMapping(
         urlHash = "abc12345",
         shortUrl = "http://localhost:8080/abc12345",
@@ -95,6 +109,9 @@ class UrlAccessServiceTest {
         expirationDate = expirationDate,
         requestIp = "127.0.0.1",
         userAgent = "JUnit",
-        userId = userId
+        userId = userId,
+        disabled = disabled,
+        disabledReason = if (disabled) "abuse" else null,
+        disabledAt = if (disabled) Instant.parse("2024-01-01T10:00:00Z") else null
     )
 }
