@@ -3,9 +3,11 @@ package com.zufar.urlshortener.analytics.service
 import com.zufar.urlshortener.analytics.entity.DeviceType
 import com.zufar.urlshortener.analytics.entity.EventType
 import com.zufar.urlshortener.analytics.entity.SourceType
-import com.zufar.urlshortener.analytics.entity.TrackUrlVisitCommand
 import com.zufar.urlshortener.analytics.entity.UrlVisitEvent
 import com.zufar.urlshortener.analytics.repository.UrlVisitEventRepository
+import com.zufar.urlshortener.urls.service.UrlVisitEventType
+import com.zufar.urlshortener.urls.service.UrlVisitSourceType
+import com.zufar.urlshortener.urls.service.UrlVisitTrackingCommand
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
@@ -36,21 +38,23 @@ class UrlVisitEventWriterTest {
         whenever(botDetectionService.detect(anyOrNull(), any())).thenReturn(BotInfo(false, null))
 
         writer().enrichAndPersist(
-            TrackUrlVisitCommand(
+            UrlVisitTrackingCommand(
                 urlHash = "abc12345",
                 userId = "user-123",
                 occurredAt = Instant.parse("2024-01-01T10:15:30Z"),
                 clientIp = "127.0.0.1",
                 referer = "https://example.com/path?token=secret#private",
                 userAgent = "JUnit",
-                sourceType = SourceType.REDIRECT,
-                eventType = EventType.LINK_CLICK
+                sourceType = UrlVisitSourceType.REDIRECT,
+                eventType = UrlVisitEventType.LINK_CLICK
             )
         )
 
         val captor = argumentCaptor<UrlVisitEvent>()
         verify(repository).save(captor.capture())
         assertEquals("https://example.com/path", captor.firstValue.referrerRaw)
+        assertEquals(SourceType.REDIRECT, captor.firstValue.sourceType)
+        assertEquals(EventType.LINK_CLICK, captor.firstValue.eventType)
         assertEquals(64, captor.firstValue.ipHash?.length)
         assertEquals(64, captor.firstValue.userAgentHash?.length)
         verify(urlVisitCounterService).incrementVisitCounters("abc12345", false)
@@ -64,15 +68,15 @@ class UrlVisitEventWriterTest {
         whenever(botDetectionService.detect(anyOrNull(), any())).thenReturn(BotInfo(false, null))
 
         writer().enrichAndPersist(
-            TrackUrlVisitCommand(
+            UrlVisitTrackingCommand(
                 urlHash = "abc12345",
                 userId = "user-123",
                 occurredAt = Instant.parse("2024-01-01T10:15:30Z"),
                 clientIp = "127.0.0.1",
                 referer = null,
                 userAgent = "JUnit",
-                sourceType = SourceType.QR,
-                eventType = EventType.QR_SCAN
+                sourceType = UrlVisitSourceType.QR,
+                eventType = UrlVisitEventType.QR_SCAN
             )
         )
 

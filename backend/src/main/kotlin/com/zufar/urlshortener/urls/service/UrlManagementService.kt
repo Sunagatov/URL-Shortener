@@ -1,9 +1,9 @@
 package com.zufar.urlshortener.urls.service
 
-import com.zufar.urlshortener.auth.service.user.AuthenticatedUserContextService
 import com.zufar.urlshortener.shared.exception.ApplicationException
 import com.zufar.urlshortener.shared.logging.LogSanitizer
 import com.zufar.urlshortener.shared.security.AuditLogService
+import com.zufar.urlshortener.shared.security.AuthenticatedUserIdProvider
 import com.zufar.urlshortener.shared.security.PrivacyHasher
 import com.zufar.urlshortener.urls.dto.ShortenUrlRequest
 import com.zufar.urlshortener.urls.dto.UrlMappingDto
@@ -28,7 +28,7 @@ private const val INVALID_URL_REQUEST_CODE = "INVALID_URL_REQUEST"
 class UrlManagementService(
     private val urlRepository: UrlRepository,
     private val urlValidator: UrlValidator,
-    private val authenticatedUserContext: AuthenticatedUserContextService,
+    private val authenticatedUserIdProvider: AuthenticatedUserIdProvider,
     private val urlMappingAccessService: UrlMappingAccessService,
     private val urlCreationProtectionService: UrlCreationProtectionService,
     private val auditLogService: AuditLogService,
@@ -50,7 +50,7 @@ class UrlManagementService(
             validateCustomAlias(customAlias)
         }
         val now = Instant.now(clock)
-        val userId = authenticatedUserContext.findAuthenticatedUserIdOrNull()
+        val userId = authenticatedUserIdProvider.findAuthenticatedUserIdOrNull()
         val protection = urlCreationProtectionService.prepareCreation(
             normalizedRequest.originalUrl,
             userId,
@@ -107,7 +107,7 @@ class UrlManagementService(
         validatePageRequest(page, size)
 
         val pageable = PageRequest.of(page, size)
-        val userId = authenticatedUserContext.requireAuthenticatedUserId()
+        val userId = authenticatedUserIdProvider.requireAuthenticatedUserId()
         val now = Instant.now(clock)
         val mappingsPage = urlRepository.findAllByUserIdAndExpirationDateAfter(userId, now, pageable)
 

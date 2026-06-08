@@ -1,6 +1,5 @@
 package com.zufar.urlshortener.moderation.service
 
-import com.zufar.urlshortener.auth.service.user.AuthenticatedUserContextService
 import com.zufar.urlshortener.moderation.config.ModerationProperties
 import com.zufar.urlshortener.moderation.dto.AbuseReportRequest
 import com.zufar.urlshortener.moderation.dto.AbuseReportResponse
@@ -10,6 +9,7 @@ import com.zufar.urlshortener.moderation.repository.AbuseReportRepository
 import com.zufar.urlshortener.shared.exception.ApplicationException
 import com.zufar.urlshortener.shared.http.ClientIpResolver
 import com.zufar.urlshortener.shared.security.AuditLogService
+import com.zufar.urlshortener.shared.security.AuthenticatedUserIdProvider
 import com.zufar.urlshortener.shared.security.PrivacyHasher
 import com.zufar.urlshortener.urls.api.UrlHashFormat
 import com.zufar.urlshortener.urls.dto.UrlMappingDto
@@ -31,7 +31,7 @@ class ModerationService(
     private val abuseReportRepository: AbuseReportRepository,
     private val urlRepository: UrlRepository,
     private val urlMappingAccessService: UrlMappingAccessService,
-    private val authenticatedUserContext: AuthenticatedUserContextService,
+    private val authenticatedUserIdProvider: AuthenticatedUserIdProvider,
     private val clientIpResolver: ClientIpResolver,
     private val moderationProperties: ModerationProperties,
     private val auditLogService: AuditLogService,
@@ -57,7 +57,7 @@ class ModerationService(
     }
 
     fun disableUrlMapping(urlHash: String, request: DisableUrlMappingRequest): UrlMappingDto {
-        val actorUserId = authenticatedUserContext.requireAuthenticatedUserId()
+        val actorUserId = authenticatedUserIdProvider.requireAuthenticatedUserId()
         requireModerator(actorUserId)
         val normalizedUrlHash = normalizeUrlHash(urlHash)
         val reason = request.reason.trim()

@@ -6,7 +6,7 @@ import com.zufar.urlshortener.analytics.dto.AnalyticsTimeseriesResponse
 import com.zufar.urlshortener.analytics.dto.AnalyticsTopLinksResponse
 import com.zufar.urlshortener.analytics.service.AccountAnalyticsQueryService
 import com.zufar.urlshortener.analytics.service.AnalyticsCsvExportService
-import com.zufar.urlshortener.auth.service.user.AuthenticatedUserContextService
+import com.zufar.urlshortener.shared.security.AuthenticatedUserIdProvider
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -18,7 +18,7 @@ import java.time.Instant
 class AccountAnalyticsController(
     private val queryService: AccountAnalyticsQueryService,
     private val csvExportService: AnalyticsCsvExportService,
-    private val authenticatedUserContext: AuthenticatedUserContextService
+    private val authenticatedUserIdProvider: AuthenticatedUserIdProvider
 ) {
 
     @GetMapping("/summary")
@@ -29,7 +29,7 @@ class AccountAnalyticsController(
         @RequestParam(defaultValue = "false") includeBots: Boolean,
         @RequestParam(required = false) eventType: String?
     ): ResponseEntity<AnalyticsSummaryResponse> {
-        val userId = authenticatedUserContext.requireAuthenticatedUserId()
+        val userId = authenticatedUserIdProvider.requireAuthenticatedUserId()
         val range = resolveAnalyticsDateRange(from, to, timezone)
         return ResponseEntity.ok(
             queryService.summary(userId, range.from, range.to, range.timezone, includeBots, parseAnalyticsEventType(eventType))
@@ -44,7 +44,7 @@ class AccountAnalyticsController(
         @RequestParam(defaultValue = "false") includeBots: Boolean,
         @RequestParam(required = false) eventType: String?
     ): ResponseEntity<AnalyticsTimeseriesResponse> {
-        val userId = authenticatedUserContext.requireAuthenticatedUserId()
+        val userId = authenticatedUserIdProvider.requireAuthenticatedUserId()
         val range = resolveAnalyticsDateRange(from, to, timezone)
         return ResponseEntity.ok(
             queryService.timeseries(userId, range.from, range.to, range.timezone, includeBots, parseAnalyticsEventType(eventType))
@@ -59,7 +59,7 @@ class AccountAnalyticsController(
         @RequestParam(defaultValue = "10") limit: Int,
         @RequestParam(required = false) eventType: String?
     ): ResponseEntity<AnalyticsTopLinksResponse> {
-        val userId = authenticatedUserContext.requireAuthenticatedUserId()
+        val userId = authenticatedUserIdProvider.requireAuthenticatedUserId()
         val range = resolveAnalyticsDateRange(from, to, "UTC")
         return ResponseEntity.ok(
             queryService.topLinks(userId, range.from, range.to, includeBots, validateAnalyticsLimit(limit), parseAnalyticsEventType(eventType))
@@ -75,7 +75,7 @@ class AccountAnalyticsController(
         @RequestParam(defaultValue = "10") limit: Int,
         @RequestParam(required = false) eventType: String?
     ): ResponseEntity<AnalyticsBreakdownResponse> {
-        val userId = authenticatedUserContext.requireAuthenticatedUserId()
+        val userId = authenticatedUserIdProvider.requireAuthenticatedUserId()
         val range = resolveAnalyticsDateRange(from, to, "UTC")
         return ResponseEntity.ok(
             queryService.breakdown(userId, range.from, range.to, dimension, includeBots, validateAnalyticsLimit(limit), parseAnalyticsEventType(eventType))
@@ -89,7 +89,7 @@ class AccountAnalyticsController(
         @RequestParam(defaultValue = "false") includeBots: Boolean,
         @RequestParam(required = false) eventType: String?
     ): ResponseEntity<String> {
-        val userId = authenticatedUserContext.requireAuthenticatedUserId()
+        val userId = authenticatedUserIdProvider.requireAuthenticatedUserId()
         val range = resolveAnalyticsDateRange(from, to, "UTC")
         val csv = csvExportService.exportAccountEvents(userId, range.from, range.to, includeBots, parseAnalyticsEventType(eventType))
         return ResponseEntity.ok()

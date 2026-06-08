@@ -1,12 +1,12 @@
 package com.zufar.urlshortener.urls.controller
 
-import com.zufar.urlshortener.analytics.entity.EventType
-import com.zufar.urlshortener.analytics.entity.SourceType
-import com.zufar.urlshortener.analytics.entity.TrackUrlVisitCommand
-import com.zufar.urlshortener.analytics.service.TrackUrlVisitService
 import com.zufar.urlshortener.shared.http.ClientIpResolver
 import com.zufar.urlshortener.urls.api.UrlHashFormat
 import com.zufar.urlshortener.urls.service.UrlManagementService
+import com.zufar.urlshortener.urls.service.UrlVisitEventType
+import com.zufar.urlshortener.urls.service.UrlVisitSourceType
+import com.zufar.urlshortener.urls.service.UrlVisitTracker
+import com.zufar.urlshortener.urls.service.UrlVisitTrackingCommand
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.CacheControl
@@ -33,7 +33,7 @@ private const val CONTINUE_PARAM = "continue"
 @RequestMapping
 class UrlRedirectController(
     private val urlManagementService: UrlManagementService,
-    private val trackUrlVisitService: TrackUrlVisitService,
+    private val urlVisitTracker: UrlVisitTracker,
     private val clientIpResolver: ClientIpResolver,
     @Value("\${app.urls.redirect.max-cache-seconds:3600}") private val maxRedirectCacheSeconds: Long,
     private val clock: Clock
@@ -52,16 +52,16 @@ class UrlRedirectController(
             return safetyInterstitial(urlHash, urlMapping.originalUrl, isQrScan)
         }
 
-        trackUrlVisitService.trackAsync(
-            TrackUrlVisitCommand(
+        urlVisitTracker.track(
+            UrlVisitTrackingCommand(
                 urlHash = urlHash,
                 userId = urlMapping.userId,
                 occurredAt = clock.instant(),
                 clientIp = clientIpResolver.resolve(request),
                 referer = request.getHeader(REFERER_HEADER),
                 userAgent = request.getHeader("User-Agent"),
-                sourceType = if (isQrScan) SourceType.QR else SourceType.REDIRECT,
-                eventType = if (isQrScan) EventType.QR_SCAN else EventType.LINK_CLICK
+                sourceType = if (isQrScan) UrlVisitSourceType.QR else UrlVisitSourceType.REDIRECT,
+                eventType = if (isQrScan) UrlVisitEventType.QR_SCAN else UrlVisitEventType.LINK_CLICK
             )
         )
 

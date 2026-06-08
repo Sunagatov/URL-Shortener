@@ -1,6 +1,6 @@
 package com.zufar.urlshortener.shared.security
 
-import com.zufar.urlshortener.analytics.service.TrackUrlVisitService
+import com.zufar.urlshortener.urls.service.UrlVisitTracker
 import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.service.UrlManagementService
 import org.junit.jupiter.api.Test
@@ -131,6 +131,6 @@ class SecurityRestExceptionHandlingTest {
 
         @Bean
         @Primary
-        fun trackUrlVisitService(): TrackUrlVisitService = mock()
+        fun urlVisitTracker(): UrlVisitTracker = mock()
     }
 }

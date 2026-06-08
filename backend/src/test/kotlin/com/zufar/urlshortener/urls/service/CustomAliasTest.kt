@@ -33,7 +33,7 @@ class CustomAliasTest {
     private fun service() = UrlManagementService(
         urlRepository = urlRepository,
         urlValidator = urlValidator,
-        authenticatedUserContext = authenticatedUserContext,
+        authenticatedUserIdProvider = authenticatedUserContext,
         urlMappingAccessService = UrlMappingAccessService(urlRepository, authenticatedUserContext, clock),
         urlCreationProtectionService = testUrlCreationProtectionService(urlRepository),
         auditLogService = testAuditLogService(),

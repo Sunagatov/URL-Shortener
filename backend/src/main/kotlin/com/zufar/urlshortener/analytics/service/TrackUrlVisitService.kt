@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.analytics.service
 
-import com.zufar.urlshortener.analytics.entity.TrackUrlVisitCommand
+import com.zufar.urlshortener.urls.service.UrlVisitTracker
+import com.zufar.urlshortener.urls.service.UrlVisitTrackingCommand
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Service
@@ -8,12 +9,12 @@ import org.springframework.stereotype.Service
 @Service
 class TrackUrlVisitService(
     private val eventWriter: UrlVisitEventWriter
-) {
+) : UrlVisitTracker {
 
     private val log = LoggerFactory.getLogger(TrackUrlVisitService::class.java)
 
     @Async
-    fun trackAsync(command: TrackUrlVisitCommand) {
+    override fun track(command: UrlVisitTrackingCommand) {
         try {
             eventWriter.enrichAndPersist(command)
         } catch (e: Exception) {

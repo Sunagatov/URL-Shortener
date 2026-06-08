@@ -1,8 +1,5 @@
 package com.zufar.urlshortener.users.dto
 
-import com.zufar.urlshortener.auth.dto.PASSWORD_IS_TOO_LONG
-import com.zufar.urlshortener.auth.dto.PASSWORD_MUST_BE_AT_LEAST_15_CHARACTERS_LONG
-import com.zufar.urlshortener.auth.dto.PASSWORD_MUST_NOT_BE_EMPTY
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 

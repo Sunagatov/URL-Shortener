@@ -31,7 +31,7 @@ class UrlShortenerTest {
     private fun createShortener(baseUrl: String = this.baseUrl) = UrlManagementService(
         urlRepository = urlRepository,
         urlValidator = urlValidator,
-        authenticatedUserContext = authenticatedUserContext,
+        authenticatedUserIdProvider = authenticatedUserContext,
         urlMappingAccessService = UrlMappingAccessService(urlRepository, authenticatedUserContext, clock),
         urlCreationProtectionService = testUrlCreationProtectionService(urlRepository),
         auditLogService = testAuditLogService(),

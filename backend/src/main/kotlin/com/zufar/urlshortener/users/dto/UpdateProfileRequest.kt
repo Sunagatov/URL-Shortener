@@ -1,14 +1,5 @@
 package com.zufar.urlshortener.users.dto
 
-import com.zufar.urlshortener.auth.dto.FIRST_NAME_CONTAINS_INVALID_CHARACTERS
-import com.zufar.urlshortener.auth.dto.FIRST_NAME_IS_TOO_LONG
-import com.zufar.urlshortener.auth.dto.FIRST_NAME_MUST_NOT_BE_EMPTY
-import com.zufar.urlshortener.auth.dto.LAST_NAME_CONTAINS_INVALID_CHARACTERS
-import com.zufar.urlshortener.auth.dto.LAST_NAME_IS_TOO_LONG
-import com.zufar.urlshortener.auth.dto.LAST_NAME_MUST_NOT_BE_EMPTY
-import com.zufar.urlshortener.auth.dto.COUNTRY_NAME_CONTAINS_INVALID_CHARACTERS
-import com.zufar.urlshortener.auth.dto.COUNTRY_NAME_IS_TOO_LONG
-import com.zufar.urlshortener.auth.dto.AGE_MUST_BE_BETWEEN_13_AND_120
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank

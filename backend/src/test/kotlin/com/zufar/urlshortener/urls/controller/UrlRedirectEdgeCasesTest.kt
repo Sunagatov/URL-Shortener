@@ -1,12 +1,12 @@
 package com.zufar.urlshortener.urls.controller
 
-import com.zufar.urlshortener.analytics.entity.EventType
-import com.zufar.urlshortener.analytics.entity.SourceType
-import com.zufar.urlshortener.analytics.entity.TrackUrlVisitCommand
-import com.zufar.urlshortener.analytics.service.TrackUrlVisitService
 import com.zufar.urlshortener.shared.http.ClientIpResolver
 import com.zufar.urlshortener.urls.entity.UrlMapping
 import com.zufar.urlshortener.urls.service.UrlManagementService
+import com.zufar.urlshortener.urls.service.UrlVisitEventType
+import com.zufar.urlshortener.urls.service.UrlVisitSourceType
+import com.zufar.urlshortener.urls.service.UrlVisitTracker
+import com.zufar.urlshortener.urls.service.UrlVisitTrackingCommand
 import jakarta.servlet.http.HttpServletRequest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -26,14 +26,14 @@ import kotlin.test.assertTrue
 class UrlRedirectEdgeCasesTest {
 
     @Mock private lateinit var urlManagementService: UrlManagementService
-    @Mock private lateinit var trackUrlVisitService: TrackUrlVisitService
+    @Mock private lateinit var urlVisitTracker: UrlVisitTracker
     @Mock private lateinit var clientIpResolver: ClientIpResolver
     @Mock private lateinit var httpRequest: HttpServletRequest
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
 
     private fun controller(maxCacheSeconds: Long = 3600) = UrlRedirectController(
         urlManagementService = urlManagementService,
-        trackUrlVisitService = trackUrlVisitService,
+        urlVisitTracker = urlVisitTracker,
         clientIpResolver = clientIpResolver,
         maxRedirectCacheSeconds = maxCacheSeconds,
         clock = clock
@@ -47,10 +47,10 @@ class UrlRedirectEdgeCasesTest {
 
         controller().redirect("abc12345", "true", null, httpRequest)
 
-        val captor = argumentCaptor<TrackUrlVisitCommand>()
-        verify(trackUrlVisitService).trackAsync(captor.capture())
-        assertEquals(SourceType.QR, captor.firstValue.sourceType)
-        assertEquals(EventType.QR_SCAN, captor.firstValue.eventType)
+        val captor = argumentCaptor<UrlVisitTrackingCommand>()
+        verify(urlVisitTracker).track(captor.capture())
+        assertEquals(UrlVisitSourceType.QR, captor.firstValue.sourceType)
+        assertEquals(UrlVisitEventType.QR_SCAN, captor.firstValue.eventType)
     }
 
     @Test
@@ -61,10 +61,10 @@ class UrlRedirectEdgeCasesTest {
 
         controller().redirect("abc12345", null, null, httpRequest)
 
-        val captor = argumentCaptor<TrackUrlVisitCommand>()
-        verify(trackUrlVisitService).trackAsync(captor.capture())
-        assertEquals(SourceType.REDIRECT, captor.firstValue.sourceType)
-        assertEquals(EventType.LINK_CLICK, captor.firstValue.eventType)
+        val captor = argumentCaptor<UrlVisitTrackingCommand>()
+        verify(urlVisitTracker).track(captor.capture())
+        assertEquals(UrlVisitSourceType.REDIRECT, captor.firstValue.sourceType)
+        assertEquals(UrlVisitEventType.LINK_CLICK, captor.firstValue.eventType)
     }
 
     @Test
@@ -138,8 +138,8 @@ class UrlRedirectEdgeCasesTest {
 
         controller().redirect("abc12345", null, null, httpRequest)
 
-        val captor = argumentCaptor<TrackUrlVisitCommand>()
-        verify(trackUrlVisitService).trackAsync(captor.capture())
+        val captor = argumentCaptor<UrlVisitTrackingCommand>()
+        verify(urlVisitTracker).track(captor.capture())
         assertEquals("abc12345", captor.firstValue.urlHash)
         assertEquals("user-123", captor.firstValue.userId)
         assertEquals("https://twitter.com", captor.firstValue.referer)
@@ -156,7 +156,7 @@ class UrlRedirectEdgeCasesTest {
         assertEquals(200, response.statusCode.value())
         assertTrue((response.body as String).contains("Continue to external site"))
         assertTrue((response.body as String).contains("/abc12345?continue=1"))
-        verify(trackUrlVisitService, never()).trackAsync(org.mockito.kotlin.any())
+        verify(urlVisitTracker, never()).track(org.mockito.kotlin.any())
     }
 
     @Test
@@ -169,7 +169,7 @@ class UrlRedirectEdgeCasesTest {
 
         assertEquals(302, response.statusCode.value())
         assertEquals("https://example.com", response.headers.location.toString())
-        verify(trackUrlVisitService).trackAsync(org.mockito.kotlin.any())
+        verify(urlVisitTracker).track(org.mockito.kotlin.any())
     }
 
     private fun activeMapping(

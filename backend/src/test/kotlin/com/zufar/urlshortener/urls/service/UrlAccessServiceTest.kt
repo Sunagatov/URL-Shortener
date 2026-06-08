@@ -29,7 +29,7 @@ class UrlAccessServiceTest {
         UrlManagementService(
             urlRepository = urlRepository,
             urlValidator = mock(),
-            authenticatedUserContext = authenticatedUserContext,
+            authenticatedUserIdProvider = authenticatedUserContext,
             urlMappingAccessService = UrlMappingAccessService(urlRepository, authenticatedUserContext, clock),
             urlCreationProtectionService = testUrlCreationProtectionService(urlRepository),
             auditLogService = testAuditLogService(),

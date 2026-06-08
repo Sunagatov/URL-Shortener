@@ -42,7 +42,7 @@ class ModerationServiceTest {
         abuseReportRepository = abuseReportRepository,
         urlRepository = urlRepository,
         urlMappingAccessService = UrlMappingAccessService(urlRepository, authenticatedUserContext, clock),
-        authenticatedUserContext = authenticatedUserContext,
+        authenticatedUserIdProvider = authenticatedUserContext,
         clientIpResolver = clientIpResolver,
         moderationProperties = ModerationProperties(adminUserIds),
         auditLogService = AuditLogService(),
