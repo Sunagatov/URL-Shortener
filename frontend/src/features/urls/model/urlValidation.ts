@@ -38,7 +38,7 @@ function isSafeDestinationUrl(value: string): boolean {
     return false;
   }
 
-  const hostname = url.hostname.toLowerCase();
+  const hostname = normalizeHostname(url.hostname);
 
   if (hostname === 'localhost' || hostname.endsWith('.localhost')) {
     return false;
@@ -114,8 +114,12 @@ function addHostname(hostnames: Set<string>, value: string | null | undefined) {
   }
 
   try {
-    hostnames.add(new URL(value).hostname.toLowerCase());
+    hostnames.add(normalizeHostname(new URL(value).hostname));
   } catch {
     // Ignore invalid build-time configuration; backend validation remains authoritative.
   }
+}
+
+function normalizeHostname(value: string): string {
+  return value.toLowerCase().replace(/\.+$/, '');
 }

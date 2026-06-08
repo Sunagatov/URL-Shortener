@@ -57,6 +57,43 @@ class UrlUpdateTest {
     }
 
     @Test
+    fun `updateOriginalUrl recomputes safety interstitial for risky destination`() {
+        val mapping = activeMapping()
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping))
+        whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("user-123")
+        whenever(urlRepository.save(any<UrlMapping>())).thenAnswer { it.arguments[0] }
+
+        val result = service().updateOriginalUrl("abc12345", "https://93.184.216.34/login")
+
+        assertEquals(true, result.safetyInterstitialRequired)
+        assertEquals("ip_destination", result.safetyInterstitialReason)
+        val captor = argumentCaptor<UrlMapping>()
+        verify(urlRepository).save(captor.capture())
+        assertEquals(true, captor.firstValue.safetyInterstitialRequired)
+        assertEquals("ip_destination", captor.firstValue.safetyInterstitialReason)
+    }
+
+    @Test
+    fun `updateOriginalUrl clears stale safety interstitial for safe authenticated destination`() {
+        val mapping = activeMapping().copy(
+            safetyInterstitialRequired = true,
+            safetyInterstitialReason = "ip_destination"
+        )
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping))
+        whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("user-123")
+        whenever(urlRepository.save(any<UrlMapping>())).thenAnswer { it.arguments[0] }
+
+        val result = service().updateOriginalUrl("abc12345", "https://example.org")
+
+        assertEquals(false, result.safetyInterstitialRequired)
+        assertEquals(null, result.safetyInterstitialReason)
+        val captor = argumentCaptor<UrlMapping>()
+        verify(urlRepository).save(captor.capture())
+        assertEquals(false, captor.firstValue.safetyInterstitialRequired)
+        assertEquals(null, captor.firstValue.safetyInterstitialReason)
+    }
+
+    @Test
     fun `updateOriginalUrl trims whitespace from new URL`() {
         val mapping = activeMapping()
         whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping))

@@ -2,6 +2,7 @@ package com.zufar.urlshortener.urls.service
 
 import com.zufar.urlshortener.shared.exception.ApplicationException
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import java.net.Inet4Address
 import java.net.Inet6Address
@@ -15,11 +16,12 @@ private const val INVALID_URL_REQUEST_CODE = "INVALID_URL_REQUEST"
 @Service
 class UrlValidator(
     @Value($$"${app.base-url}") private val baseUrl: String,
-    private val hostLookup: (String) -> Array<InetAddress> = ::getAllByName
+    @Value($$"${app.urls.protection.blocked-hosts:}") blockedHostnames: String = "",
+    private val hostResolver: HostResolver
 ) {
     private val allowedProtocols = setOf("http", "https")
     private val validator = org.apache.commons.validator.routines.UrlValidator(allowedProtocols.toTypedArray())
-    private val blockedHosts = setOf("localhost") + listOfNotNull(parseHost(baseUrl))
+    private val blockedHosts = setOf("localhost") + listOfNotNull(parseHost(baseUrl)) + parseCsv(blockedHostnames)
 
     fun validateUrl(url: String) {
         validate(url.isNotBlank(), "URL must not be empty or blank.")
@@ -46,13 +48,13 @@ class UrlValidator(
         allowedProtocols.any { url.startsWith("$it://") }
 
     private fun isValidHost(uri: URI): Boolean {
-        val host = uri.host?.lowercase()?.takeIf { it.isNotBlank() } ?: return false
+        val host = uri.host?.normalizeHost()?.takeIf { it.isNotBlank() } ?: return false
 
-        if (host in blockedHosts) {
+        if (isBlockedHostName(host)) {
             return false
         }
 
-        val addresses = runCatching { hostLookup(host).toList() }
+        val addresses = runCatching { hostResolver.resolve(host) }
             .getOrElse { return false }
 
         if (addresses.isEmpty()) {
@@ -64,11 +66,25 @@ class UrlValidator(
 
     private fun parseHost(value: String): String? {
         return try {
-            parseUri(value).host?.lowercase()?.takeIf { it.isNotBlank() }
+            parseUri(value).host?.normalizeHost()?.takeIf { it.isNotBlank() }
         } catch (_: Exception) {
             null
         }
     }
+
+    private fun parseCsv(value: String): Set<String> =
+        value
+            .split(",")
+            .map(String::trim)
+            .map { it.normalizeHost() }
+            .filter(String::isNotEmpty)
+            .toSet()
+
+    private fun isBlockedHostName(host: String): Boolean =
+        host in blockedHosts || host.endsWith(".localhost")
+
+    private fun String.normalizeHost(): String =
+        lowercase().trimEnd('.')
 
     private fun parseUri(value: String): URI = URI(value)
 
@@ -121,4 +137,14 @@ class UrlValidator(
         return (first and 0xFE) == 0xFC ||
             (first == 0x20 && second == 0x01 && third == 0x0D && fourth == 0xB8)
     }
+}
+
+fun interface HostResolver {
+    fun resolve(host: String): List<InetAddress>
+}
+
+@Component
+class DnsHostResolver : HostResolver {
+    override fun resolve(host: String): List<InetAddress> =
+        getAllByName(host).toList()
 }

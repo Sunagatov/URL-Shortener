@@ -13,16 +13,14 @@ import org.springframework.web.client.RestClient
 private const val VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 
 @Component
-class TurnstileVerifier @Autowired constructor(
-    private val properties: TurnstileProperties
+class TurnstileVerifier internal constructor(
+    private val properties: TurnstileProperties,
+    private val client: RestClient
 ) {
-    private var client: RestClient = restClient(properties)
-
-    internal constructor(properties: TurnstileProperties, restClient: RestClient) : this(properties) {
-        client = restClient
-    }
-
     private val log = LoggerFactory.getLogger(TurnstileVerifier::class.java)
+
+    @Autowired
+    constructor(properties: TurnstileProperties) : this(properties, restClient(properties))
 
     fun verify(token: String?, expectedActions: Set<String> = emptySet()) {
         if (!properties.enabled) {

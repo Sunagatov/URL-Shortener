@@ -3,6 +3,7 @@ package com.zufar.urlshortener.shared.logging
 import java.net.URI
 
 object LogSanitizer {
+    private val LOG_CONTROL_CHARS = Regex("[\\r\\n]")
 
     fun maskEmail(email: String?): String {
         val normalized = email?.trim()?.lowercase().orEmpty()
@@ -41,4 +42,10 @@ object LogSanitizer {
             ?.ifBlank { "unknown" }
             ?: "invalid"
     }
+
+    fun safeLogValue(value: String?): String =
+        value
+            ?.takeIf(String::isNotBlank)
+            ?.replace(LOG_CONTROL_CHARS, "_")
+            ?: "unknown"
 }

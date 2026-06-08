@@ -16,6 +16,12 @@ class AuditLogService {
         targetUrl: String? = null,
         reason: String? = null
     ) {
+        val safeReason = reason
+            ?.take(120)
+            ?.let(LogSanitizer::safeLogValue)
+            ?.takeUnless { it == "unknown" }
+            ?: "-"
+
         log.info(
             "audit_event action={} outcome={} actorUserId={} targetId={} targetHost={} reason={}",
             action,
@@ -23,7 +29,7 @@ class AuditLogService {
             actorUserId ?: "anonymous",
             targetId ?: "-",
             LogSanitizer.safeUrlHost(targetUrl),
-            reason?.take(120)?.replace(Regex("[\\r\\n]"), " ") ?: "-"
+            safeReason
         )
     }
 }

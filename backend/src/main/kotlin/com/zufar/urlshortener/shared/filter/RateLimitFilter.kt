@@ -9,6 +9,7 @@ import com.zufar.urlshortener.shared.config.RateLimitPolicy
 import com.zufar.urlshortener.shared.config.RateLimitSubjectKey
 import com.zufar.urlshortener.shared.http.ClientIpResolver
 import com.zufar.urlshortener.shared.http.ErrorResponseWriter
+import com.zufar.urlshortener.shared.logging.LogSanitizer
 import com.zufar.urlshortener.shared.web.ApplicationRoutes
 import io.github.bucket4j.Bucket
 import io.github.bucket4j.ConsumptionProbe
@@ -80,10 +81,10 @@ class RateLimitFilter(
                 "rate_limit_exceeded policy={} method={} path={} subjectType={} subject={} clientIp={} retryAfterSeconds={}",
                 policy.name,
                 request.method,
-                request.requestURI,
+                LogSanitizer.safeLogValue(request.requestURI),
                 policy.subjectKey.name.lowercase(),
-                subject,
-                clientIp,
+                LogSanitizer.safeLogValue(subject),
+                LogSanitizer.safeLogValue(clientIp),
                 toRetryAfterSeconds(probe)
             )
             writeRateLimitExceededResponse(request, response, probe)

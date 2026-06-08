@@ -6,6 +6,7 @@ import com.zufar.urlshortener.shared.API_DOCS_PATH_PREFIX
 import com.zufar.urlshortener.shared.AUTHENTICATED_USER_ID_ATTRIBUTE
 import com.zufar.urlshortener.shared.DOCS_PATH_PREFIX
 import com.zufar.urlshortener.shared.http.ClientIpResolver
+import com.zufar.urlshortener.shared.logging.LogSanitizer
 import com.zufar.urlshortener.shared.security.PrivacyHasher
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -87,7 +88,7 @@ class RequestCompletionLoggingFilter(
             ?.takeUnless { it == "/**" }
             ?: request.requestURI
 
-        return resolved.replace(Regex("[\\r\\n]"), "_")
+        return LogSanitizer.safeLogValue(resolved)
     }
 
     private fun resolveOutcome(status: Int): String = when {

@@ -14,6 +14,9 @@ describe('createUrlSchema', () => {
     'https://[::1]/internal',
     'https://[fc00::1]/internal',
     'https://zuf.uk/abc12345',
+    'https://api.zuf.uk/abc12345',
+    'https://api.zuf.uk./abc12345',
+    'https://anything.localhost/path',
   ])('rejects unsafe destination %s', originalUrl => {
     expect(createUrlSchema.safeParse({ originalUrl }).success).toBe(false);
   });

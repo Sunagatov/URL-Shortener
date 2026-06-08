@@ -29,7 +29,7 @@ class UrlCreationProtectionService(
         val creatorKey = creatorKey(userId, clientIp)
         enforceDailyQuota(creatorKey, userId, now)
 
-        val interstitial = safetyInterstitial(originalUrl, userId)
+        val interstitial = classifySafetyInterstitial(originalUrl, userId)
         return UrlCreationProtection(
             clientIp = clientIp,
             creatorKey = creatorKey,
@@ -58,22 +58,22 @@ class UrlCreationProtectionService(
     private fun creatorKey(userId: String?, clientIp: String): String =
         userId?.let { "user:$it" } ?: "ip:${PrivacyHasher.sha256(clientIp) ?: "unknown"}"
 
-    private fun safetyInterstitial(originalUrl: String, userId: String?): SafetyInterstitial {
+    fun classifySafetyInterstitial(originalUrl: String, userId: String?): UrlSafetyInterstitial {
         val host = runCatching { URI(originalUrl).host.orEmpty() }.getOrDefault("")
         if (protectionProperties.safetyInterstitialForIpDestinations && host.isIpLiteral()) {
-            return SafetyInterstitial(true, "ip_destination")
+            return UrlSafetyInterstitial(true, "ip_destination")
         }
         if (protectionProperties.safetyInterstitialForAnonymous && userId == null) {
-            return SafetyInterstitial(true, "anonymous_creator")
+            return UrlSafetyInterstitial(true, "anonymous_creator")
         }
-        return SafetyInterstitial(false, null)
+        return UrlSafetyInterstitial(false, null)
     }
 
     private fun String.isIpLiteral(): Boolean =
         matches(Regex("^\\d{1,3}(\\.\\d{1,3}){3}$")) || contains(":")
-
-    private data class SafetyInterstitial(val required: Boolean, val reason: String?)
 }
+
+data class UrlSafetyInterstitial(val required: Boolean, val reason: String?)
 
 data class UrlCreationProtection(
     val clientIp: String,

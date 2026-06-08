@@ -124,7 +124,14 @@ class UrlManagementService(
         val trimmedUrl = newOriginalUrl.trim()
         urlValidator.validateUrl(trimmedUrl)
         val urlMapping = urlMappingAccessService.getOwnedActiveUrlMapping(urlHash, ACCESS_URL_MAPPING_DENIED_MESSAGE)
-        val updated = urlRepository.save(urlMapping.copy(originalUrl = trimmedUrl))
+        val interstitial = urlCreationProtectionService.classifySafetyInterstitial(trimmedUrl, urlMapping.userId)
+        val updated = urlRepository.save(
+            urlMapping.copy(
+                originalUrl = trimmedUrl,
+                safetyInterstitialRequired = interstitial.required,
+                safetyInterstitialReason = interstitial.reason
+            )
+        )
         urlMappingAccessService.evictUrlMapping(urlHash)
         log.info("short_url_updated urlHash={} targetHost={}", urlHash, LogSanitizer.safeUrlHost(trimmedUrl))
         auditLogService.record("short_url_updated", "success", urlMapping.userId, urlHash, trimmedUrl)
