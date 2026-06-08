@@ -10,6 +10,8 @@ export type RetryableRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean;
 };
 
+let refreshTokenRequest: Promise<AuthTokens> | null = null;
+
 export async function refreshFailedSession(path?: string, error?: unknown) {
   if (error) {
     logger.error('frontend.auth.refresh_failed', {
@@ -39,9 +41,10 @@ export async function refreshAccessTokenForRequest(
     status: 401,
   });
 
-  const response = await rawAxios.post(endpoints.auth.refresh, { refreshToken });
-  const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-    response.data as Partial<AuthTokens>;
+  const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await refreshTokens(
+    rawAxios,
+    refreshToken
+  );
 
   if (!newAccessToken) {
     logger.error('frontend.auth.refresh_missing_access_token', {
@@ -65,4 +68,15 @@ export async function refreshAccessTokenForRequest(
   });
 
   return axiosInstance(originalRequest);
+}
+
+function refreshTokens(rawAxios: AxiosInstance, refreshToken: string): Promise<AuthTokens> {
+  refreshTokenRequest ??= rawAxios
+    .post(endpoints.auth.refresh, { refreshToken })
+    .then(response => response.data as AuthTokens)
+    .finally(() => {
+      refreshTokenRequest = null;
+    });
+
+  return refreshTokenRequest;
 }

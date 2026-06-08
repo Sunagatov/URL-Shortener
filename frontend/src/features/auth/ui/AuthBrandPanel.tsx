@@ -32,8 +32,6 @@ export function AuthBrandPanel({
 }: AuthBrandPanelProps) {
   return (
     <div className={className}>
-      <div className="absolute top-1/4 -left-20 h-72 w-72 rounded-full bg-[var(--avatar-bg)] blur-[90px] pointer-events-none" />
-      <div className="absolute bottom-1/3 right-0 h-56 w-56 rounded-full bg-[var(--avatar-bg)] blur-[80px] pointer-events-none" />
       <div className="absolute inset-0 bg-grid-dark pointer-events-none" />
 
       <div className="relative z-10 mb-16 flex items-center gap-3">

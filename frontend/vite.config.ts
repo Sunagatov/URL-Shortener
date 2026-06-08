@@ -17,6 +17,12 @@ function backendOrigin(mode: string): string | null {
 }
 
 function securityHeaders(mode: string) {
+  const scriptSources = ["'self'", 'https://challenges.cloudflare.com'];
+
+  if (mode === 'development') {
+    scriptSources.push("'unsafe-inline'");
+  }
+
   const connectSources = [
     "'self'",
     'http://localhost:8080',
@@ -29,12 +35,12 @@ function securityHeaders(mode: string) {
   return {
     'Content-Security-Policy': [
       "default-src 'self'",
-      "script-src 'self' https://challenges.cloudflare.com",
-      "style-src 'self' 'unsafe-inline'",
+      `script-src ${scriptSources.join(' ')}`,
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: https:",
-      "font-src 'self' data:",
+      "font-src 'self' data: https://fonts.gstatic.com",
       `connect-src ${connectSources.join(' ')}`,
-      "frame-src https://challenges.cloudflare.com",
+      'frame-src https://challenges.cloudflare.com',
       "base-uri 'self'",
       "form-action 'self'",
       "frame-ancestors 'none'",
@@ -67,7 +73,7 @@ export default defineConfig(({ mode }) => ({
       output: {
         entryFileNames: 'assets/app.js',
         assetFileNames(assetInfo) {
-          if (assetInfo.names.some((name) => name.endsWith('.css'))) {
+          if (assetInfo.names.some(name => name.endsWith('.css'))) {
             return 'assets/app.css';
           }
 
@@ -78,25 +84,15 @@ export default defineConfig(({ mode }) => ({
             return undefined;
           }
 
-          if (
-            id.includes('/react-router/') ||
-            id.includes('/react-router-dom/')
-          ) {
+          if (id.includes('/react-router/') || id.includes('/react-router-dom/')) {
             return 'router-vendor';
           }
 
-          if (
-            id.includes('/react-dom/') ||
-            id.includes('/react/') ||
-            id.includes('/scheduler/')
-          ) {
+          if (id.includes('/react-dom/') || id.includes('/react/') || id.includes('/scheduler/')) {
             return 'react-vendor';
           }
 
-          if (
-            id.includes('/react-hook-form/') ||
-            id.includes('/@hookform/resolvers/')
-          ) {
+          if (id.includes('/react-hook-form/') || id.includes('/@hookform/resolvers/')) {
             return 'form-vendor';
           }
 

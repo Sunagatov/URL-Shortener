@@ -187,6 +187,64 @@ describe('httpClient auth interceptors', () => {
     expect(axiosInstance).toHaveBeenCalledWith(originalRequest);
   });
 
+  it('shares one refresh request across concurrent protected 401 responses', async () => {
+    const { axiosInstance, raw, api } = await loadHttpClient();
+    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, 'old-refresh-token');
+
+    let resolveRefresh: (value: {
+      data: { accessToken: string; refreshToken: string };
+    }) => void = () => {};
+    raw.instance.post.mockReturnValue(
+      new Promise(resolve => {
+        resolveRefresh = resolve;
+      })
+    );
+
+    const firstRequest = {
+      url: endpoints.urls.list,
+      headers: {},
+    };
+    const secondRequest = {
+      url: endpoints.user.profile,
+      headers: {},
+    };
+
+    const firstRetry = api.responseInterceptor.rejected?.({
+      config: firstRequest,
+      response: { status: 401 },
+    });
+    const secondRetry = api.responseInterceptor.rejected?.({
+      config: secondRequest,
+      response: { status: 401 },
+    });
+
+    expect(raw.instance.post).toHaveBeenCalledTimes(1);
+
+    resolveRefresh({
+      data: {
+        accessToken: 'new-access-token',
+        refreshToken: 'new-refresh-token',
+      },
+    });
+
+    await Promise.all([firstRetry, secondRetry]);
+
+    expect(raw.instance.post).toHaveBeenCalledWith(endpoints.auth.refresh, {
+      refreshToken: 'old-refresh-token',
+    });
+    expect(localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)).toBe('new-access-token');
+    expect(localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)).toBe('new-refresh-token');
+    expect((firstRequest.headers as Record<string, string>).Authorization).toBe(
+      'Bearer new-access-token'
+    );
+    expect((secondRequest.headers as Record<string, string>).Authorization).toBe(
+      'Bearer new-access-token'
+    );
+    expect(axiosInstance).toHaveBeenCalledTimes(2);
+    expect(axiosInstance).toHaveBeenCalledWith(firstRequest);
+    expect(axiosInstance).toHaveBeenCalledWith(secondRequest);
+  });
+
   it('logs out and redirects protected pages to sign-in when refresh fails', async () => {
     const { raw, api } = await loadHttpClient();
     const replace = vi.fn();
