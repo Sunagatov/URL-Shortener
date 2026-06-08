@@ -11,7 +11,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 private const val ACCESS_DENIED_MESSAGE = "You are not allowed to access analytics for this URL"
 
@@ -33,8 +32,10 @@ class UrlAnalyticsController(
         @RequestParam(required = false) eventType: String?
     ): ResponseEntity<AnalyticsSummaryResponse> {
         urlManagementService.getOwnedActiveUrlMapping(urlHash, ACCESS_DENIED_MESSAGE)
-        val (resolvedFrom, resolvedTo) = resolveRange(from, to)
-        return ResponseEntity.ok(queryService.summary(urlHash, resolvedFrom, resolvedTo, timezone, includeBots, eventType))
+        val range = resolveAnalyticsDateRange(from, to, timezone)
+        return ResponseEntity.ok(
+            queryService.summary(urlHash, range.from, range.to, range.timezone, includeBots, parseAnalyticsEventType(eventType))
+        )
     }
 
     @GetMapping("/timeseries")
@@ -47,8 +48,10 @@ class UrlAnalyticsController(
         @RequestParam(required = false) eventType: String?
     ): ResponseEntity<AnalyticsTimeseriesResponse> {
         urlManagementService.getOwnedActiveUrlMapping(urlHash, ACCESS_DENIED_MESSAGE)
-        val (resolvedFrom, resolvedTo) = resolveRange(from, to)
-        return ResponseEntity.ok(queryService.timeseries(urlHash, resolvedFrom, resolvedTo, timezone, includeBots, eventType))
+        val range = resolveAnalyticsDateRange(from, to, timezone)
+        return ResponseEntity.ok(
+            queryService.timeseries(urlHash, range.from, range.to, range.timezone, includeBots, parseAnalyticsEventType(eventType))
+        )
     }
 
     @GetMapping("/{dimension:referrers|locations|devices|browsers|operating-systems}")
@@ -62,8 +65,10 @@ class UrlAnalyticsController(
         @RequestParam(required = false) eventType: String?
     ): ResponseEntity<AnalyticsBreakdownResponse> {
         urlManagementService.getOwnedActiveUrlMapping(urlHash, ACCESS_DENIED_MESSAGE)
-        val (resolvedFrom, resolvedTo) = resolveRange(from, to)
-        return ResponseEntity.ok(queryService.breakdown(urlHash, resolvedFrom, resolvedTo, dimension, includeBots, limit, eventType))
+        val range = resolveAnalyticsDateRange(from, to, "UTC")
+        return ResponseEntity.ok(
+            queryService.breakdown(urlHash, range.from, range.to, dimension, includeBots, validateAnalyticsLimit(limit), parseAnalyticsEventType(eventType))
+        )
     }
 
     @GetMapping("/export.csv", produces = ["text/csv"])
@@ -75,16 +80,10 @@ class UrlAnalyticsController(
         @RequestParam(required = false) eventType: String?
     ): ResponseEntity<String> {
         urlManagementService.getOwnedActiveUrlMapping(urlHash, ACCESS_DENIED_MESSAGE)
-        val (resolvedFrom, resolvedTo) = resolveRange(from, to)
-        val csv = csvExportService.exportUrlEvents(urlHash, resolvedFrom, resolvedTo, includeBots, eventType)
+        val range = resolveAnalyticsDateRange(from, to, "UTC")
+        val csv = csvExportService.exportUrlEvents(urlHash, range.from, range.to, includeBots, parseAnalyticsEventType(eventType))
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"analytics-$urlHash.csv\"")
             .body(csv)
-    }
-
-    private fun resolveRange(from: Instant?, to: Instant?): Pair<Instant, Instant> {
-        val resolvedTo = to ?: Instant.now()
-        val resolvedFrom = from ?: resolvedTo.minus(7, ChronoUnit.DAYS)
-        return resolvedFrom to resolvedTo
     }
 }

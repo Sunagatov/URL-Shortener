@@ -1,5 +1,6 @@
 package com.zufar.urlshortener.analytics.service
 
+import com.zufar.urlshortener.analytics.entity.EventType
 import com.zufar.urlshortener.analytics.entity.UrlVisitEvent
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
@@ -7,23 +8,25 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
 import java.time.Instant
 
+private const val MAX_CSV_EXPORT_EVENTS = 10_000
+
 @Service
 class AnalyticsCsvExportService(
     private val mongoTemplate: MongoTemplate
 ) {
 
-    fun exportUrlEvents(urlHash: String, from: Instant, to: Instant, includeBots: Boolean, eventType: String?): String {
+    fun exportUrlEvents(urlHash: String, from: Instant, to: Instant, includeBots: Boolean, eventType: EventType?): String {
         val criteria = Criteria.where("urlHash").`is`(urlHash).and("occurredAt").gte(from).lt(to)
         if (!includeBots) criteria.and("isBot").`is`(false)
         if (eventType != null) criteria.and("eventType").`is`(eventType)
-        return toCsv(mongoTemplate.find(Query.query(criteria), UrlVisitEvent::class.java))
+        return toCsv(mongoTemplate.find(Query.query(criteria).limit(MAX_CSV_EXPORT_EVENTS), UrlVisitEvent::class.java))
     }
 
-    fun exportAccountEvents(userId: String, from: Instant, to: Instant, includeBots: Boolean, eventType: String?): String {
+    fun exportAccountEvents(userId: String, from: Instant, to: Instant, includeBots: Boolean, eventType: EventType?): String {
         val criteria = Criteria.where("userId").`is`(userId).and("occurredAt").gte(from).lt(to)
         if (!includeBots) criteria.and("isBot").`is`(false)
         if (eventType != null) criteria.and("eventType").`is`(eventType)
-        return toCsv(mongoTemplate.find(Query.query(criteria), UrlVisitEvent::class.java))
+        return toCsv(mongoTemplate.find(Query.query(criteria).limit(MAX_CSV_EXPORT_EVENTS), UrlVisitEvent::class.java))
     }
 
     private fun toCsv(events: List<UrlVisitEvent>): String {

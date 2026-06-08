@@ -12,7 +12,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 @RestController
 @RequestMapping("/api/v1/analytics", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -31,8 +30,10 @@ class AccountAnalyticsController(
         @RequestParam(required = false) eventType: String?
     ): ResponseEntity<AnalyticsSummaryResponse> {
         val userId = authenticatedUserContext.requireAuthenticatedUserId()
-        val (resolvedFrom, resolvedTo) = resolveRange(from, to)
-        return ResponseEntity.ok(queryService.summary(userId, resolvedFrom, resolvedTo, timezone, includeBots, eventType))
+        val range = resolveAnalyticsDateRange(from, to, timezone)
+        return ResponseEntity.ok(
+            queryService.summary(userId, range.from, range.to, range.timezone, includeBots, parseAnalyticsEventType(eventType))
+        )
     }
 
     @GetMapping("/timeseries")
@@ -44,8 +45,10 @@ class AccountAnalyticsController(
         @RequestParam(required = false) eventType: String?
     ): ResponseEntity<AnalyticsTimeseriesResponse> {
         val userId = authenticatedUserContext.requireAuthenticatedUserId()
-        val (resolvedFrom, resolvedTo) = resolveRange(from, to)
-        return ResponseEntity.ok(queryService.timeseries(userId, resolvedFrom, resolvedTo, timezone, includeBots, eventType))
+        val range = resolveAnalyticsDateRange(from, to, timezone)
+        return ResponseEntity.ok(
+            queryService.timeseries(userId, range.from, range.to, range.timezone, includeBots, parseAnalyticsEventType(eventType))
+        )
     }
 
     @GetMapping("/top-links")
@@ -57,8 +60,10 @@ class AccountAnalyticsController(
         @RequestParam(required = false) eventType: String?
     ): ResponseEntity<AnalyticsTopLinksResponse> {
         val userId = authenticatedUserContext.requireAuthenticatedUserId()
-        val (resolvedFrom, resolvedTo) = resolveRange(from, to)
-        return ResponseEntity.ok(queryService.topLinks(userId, resolvedFrom, resolvedTo, includeBots, limit, eventType))
+        val range = resolveAnalyticsDateRange(from, to, "UTC")
+        return ResponseEntity.ok(
+            queryService.topLinks(userId, range.from, range.to, includeBots, validateAnalyticsLimit(limit), parseAnalyticsEventType(eventType))
+        )
     }
 
     @GetMapping("/{dimension:referrers|locations|devices|browsers|operating-systems}")
@@ -71,8 +76,10 @@ class AccountAnalyticsController(
         @RequestParam(required = false) eventType: String?
     ): ResponseEntity<AnalyticsBreakdownResponse> {
         val userId = authenticatedUserContext.requireAuthenticatedUserId()
-        val (resolvedFrom, resolvedTo) = resolveRange(from, to)
-        return ResponseEntity.ok(queryService.breakdown(userId, resolvedFrom, resolvedTo, dimension, includeBots, limit, eventType))
+        val range = resolveAnalyticsDateRange(from, to, "UTC")
+        return ResponseEntity.ok(
+            queryService.breakdown(userId, range.from, range.to, dimension, includeBots, validateAnalyticsLimit(limit), parseAnalyticsEventType(eventType))
+        )
     }
 
     @GetMapping("/export.csv", produces = ["text/csv"])
@@ -83,16 +90,10 @@ class AccountAnalyticsController(
         @RequestParam(required = false) eventType: String?
     ): ResponseEntity<String> {
         val userId = authenticatedUserContext.requireAuthenticatedUserId()
-        val (resolvedFrom, resolvedTo) = resolveRange(from, to)
-        val csv = csvExportService.exportAccountEvents(userId, resolvedFrom, resolvedTo, includeBots, eventType)
+        val range = resolveAnalyticsDateRange(from, to, "UTC")
+        val csv = csvExportService.exportAccountEvents(userId, range.from, range.to, includeBots, parseAnalyticsEventType(eventType))
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"analytics-account.csv\"")
             .body(csv)
-    }
-
-    private fun resolveRange(from: Instant?, to: Instant?): Pair<Instant, Instant> {
-        val resolvedTo = to ?: Instant.now()
-        val resolvedFrom = from ?: resolvedTo.minus(7, ChronoUnit.DAYS)
-        return resolvedFrom to resolvedTo
     }
 }
