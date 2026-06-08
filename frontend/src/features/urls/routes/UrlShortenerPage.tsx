@@ -105,7 +105,7 @@ const UrlShortenerPage: React.FC = () => {
                 ) : null}
                 <TurnstileWidget
                   action="url_create"
-                  appearance="interaction-only"
+                  appearance="always"
                   onClear={turnstile.clearToken}
                   onVerify={turnstile.handleVerify}
                   size="normal"
