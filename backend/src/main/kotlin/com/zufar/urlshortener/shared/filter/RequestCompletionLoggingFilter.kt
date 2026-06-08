@@ -6,6 +6,7 @@ import com.zufar.urlshortener.shared.API_DOCS_PATH_PREFIX
 import com.zufar.urlshortener.shared.AUTHENTICATED_USER_ID_ATTRIBUTE
 import com.zufar.urlshortener.shared.DOCS_PATH_PREFIX
 import com.zufar.urlshortener.shared.http.ClientIpResolver
+import com.zufar.urlshortener.shared.security.PrivacyHasher
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -17,7 +18,7 @@ import org.springframework.web.filter.OncePerRequestFilter
 import org.springframework.web.servlet.HandlerMapping
 
 private const val OUTCOME_TEMPLATE =
-    "http_request_completed method={} path={} status={} durationMs={} clientIp={} authenticated={} outcome={}"
+    "http_request_completed method={} path={} status={} durationMs={} clientIpHash={} authenticated={} outcome={}"
 
 @Component
 @Order(2)
@@ -63,7 +64,7 @@ class RequestCompletionLoggingFilter(
             path,
             status,
             durationMs,
-            clientIpResolver.resolve(request),
+            PrivacyHasher.sha256(clientIpResolver.resolve(request)) ?: "unknown",
             authenticated,
             resolveOutcome(status)
         )

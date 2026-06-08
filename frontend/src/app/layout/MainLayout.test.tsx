@@ -89,7 +89,7 @@ describe('placeholder flows', () => {
     expect(screen.queryByRole('link', { name: /privacy policy/i })).not.toBeInTheDocument();
   });
 
-  it('renders footer policy and support controls as non-clickable text', () => {
+  it('renders footer policy text and report abuse link', () => {
     render(
       <MemoryRouter>
         <MainLayout>
@@ -98,12 +98,11 @@ describe('placeholder flows', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText(/privacy policy \(coming soon\)/i)).toBeInTheDocument();
-    expect(screen.getByText(/terms of service \(coming soon\)/i)).toBeInTheDocument();
-    expect(screen.getByText(/support \(coming soon\)/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /report abuse/i })).toHaveAttribute('href', '/abuse');
+    expect(screen.getByText(/privacy policy/i)).toBeInTheDocument();
+    expect(screen.getByText(/terms of service/i)).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /privacy policy/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /terms of service/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: /support/i })).not.toBeInTheDocument();
   });
 
   it('renders a mobile bottom tab bar for authenticated users', () => {
@@ -123,12 +122,13 @@ describe('placeholder flows', () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByRole('navigation', { name: 'Mobile navigation' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/');
-    expect(screen.getByRole('link', { name: 'My URLs' })).toHaveAttribute(
+    const mobileNavigation = screen.getByRole('navigation', { name: 'Mobile navigation' });
+    expect(mobileNavigation).toBeInTheDocument();
+    expect(within(mobileNavigation).getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/');
+    expect(within(mobileNavigation).getByRole('link', { name: 'My URLs' })).toHaveAttribute(
       'href',
       '/account/url-mappings'
     );
-    expect(screen.getByRole('link', { name: 'Account' })).toHaveAttribute('href', '/account');
+    expect(within(mobileNavigation).getByRole('link', { name: 'Account' })).toHaveAttribute('href', '/account');
   });
 });

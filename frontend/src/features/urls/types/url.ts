@@ -9,6 +9,8 @@ export interface UrlMapping {
   disabled?: boolean;
   disabledReason?: string | null;
   disabledAt?: string | null;
+  safetyInterstitialRequired?: boolean;
+  safetyInterstitialReason?: string | null;
 }
 
 export interface PaginatedResponse<T> {
@@ -24,4 +26,14 @@ export interface CreateUrlRequest {
   daysCount?: number | undefined;
   customAlias?: string | undefined;
   turnstileToken?: string | undefined;
+}
+
+export interface AbuseReportRequest {
+  shortUrlOrHash: string;
+  reason?: string | undefined;
+}
+
+export interface AbuseReportResponse {
+  reportId: string | null;
+  urlHash: string;
 }

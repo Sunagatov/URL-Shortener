@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.time.Clock
@@ -44,7 +45,7 @@ class UrlRedirectEdgeCasesTest {
         whenever(urlManagementService.getActiveUrlMapping("abc12345")).thenReturn(mapping)
         whenever(clientIpResolver.resolve(httpRequest)).thenReturn("10.0.0.1")
 
-        controller().redirect("abc12345", "true", httpRequest)
+        controller().redirect("abc12345", "true", null, httpRequest)
 
         val captor = argumentCaptor<TrackUrlVisitCommand>()
         verify(trackUrlVisitService).trackAsync(captor.capture())
@@ -58,7 +59,7 @@ class UrlRedirectEdgeCasesTest {
         whenever(urlManagementService.getActiveUrlMapping("abc12345")).thenReturn(mapping)
         whenever(clientIpResolver.resolve(httpRequest)).thenReturn("10.0.0.1")
 
-        controller().redirect("abc12345", null, httpRequest)
+        controller().redirect("abc12345", null, null, httpRequest)
 
         val captor = argumentCaptor<TrackUrlVisitCommand>()
         verify(trackUrlVisitService).trackAsync(captor.capture())
@@ -72,7 +73,7 @@ class UrlRedirectEdgeCasesTest {
         whenever(urlManagementService.getActiveUrlMapping("abc12345")).thenReturn(mapping)
         whenever(clientIpResolver.resolve(httpRequest)).thenReturn("10.0.0.1")
 
-        val response = controller().redirect("abc12345", null, httpRequest)
+        val response = controller().redirect("abc12345", null, null, httpRequest)
 
         assertEquals(302, response.statusCode.value())
         assertEquals("https://example.com", response.headers.location.toString())
@@ -84,7 +85,7 @@ class UrlRedirectEdgeCasesTest {
         whenever(urlManagementService.getActiveUrlMapping("abc12345")).thenReturn(mapping)
         whenever(clientIpResolver.resolve(httpRequest)).thenReturn("10.0.0.1")
 
-        val response = controller().redirect("abc12345", null, httpRequest)
+        val response = controller().redirect("abc12345", null, null, httpRequest)
 
         assertEquals("no-referrer", response.headers.getFirst("Referrer-Policy"))
     }
@@ -95,7 +96,7 @@ class UrlRedirectEdgeCasesTest {
         whenever(urlManagementService.getActiveUrlMapping("abc12345")).thenReturn(mapping)
         whenever(clientIpResolver.resolve(httpRequest)).thenReturn("10.0.0.1")
 
-        val response = controller().redirect("abc12345", null, httpRequest)
+        val response = controller().redirect("abc12345", null, null, httpRequest)
 
         val cacheControl = response.headers.cacheControl
         assertTrue(cacheControl!!.contains("public"))
@@ -108,7 +109,7 @@ class UrlRedirectEdgeCasesTest {
         whenever(urlManagementService.getActiveUrlMapping("abc12345")).thenReturn(mapping)
         whenever(clientIpResolver.resolve(httpRequest)).thenReturn("10.0.0.1")
 
-        val response = controller(maxCacheSeconds = 60).redirect("abc12345", null, httpRequest)
+        val response = controller(maxCacheSeconds = 60).redirect("abc12345", null, null, httpRequest)
 
         val cacheControl = response.headers.cacheControl!!
         assertTrue(cacheControl.contains("max-age=60"))
@@ -121,7 +122,7 @@ class UrlRedirectEdgeCasesTest {
         whenever(urlManagementService.getActiveUrlMapping("abc12345")).thenReturn(mapping)
         whenever(clientIpResolver.resolve(httpRequest)).thenReturn("10.0.0.1")
 
-        val response = controller().redirect("abc12345", null, httpRequest)
+        val response = controller().redirect("abc12345", null, null, httpRequest)
 
         val cacheControl = response.headers.cacheControl!!
         assertTrue(cacheControl.contains("no-store"))
@@ -135,7 +136,7 @@ class UrlRedirectEdgeCasesTest {
         whenever(httpRequest.getHeader("Referer")).thenReturn("https://twitter.com")
         whenever(httpRequest.getHeader("User-Agent")).thenReturn("Mozilla/5.0")
 
-        controller().redirect("abc12345", null, httpRequest)
+        controller().redirect("abc12345", null, null, httpRequest)
 
         val captor = argumentCaptor<TrackUrlVisitCommand>()
         verify(trackUrlVisitService).trackAsync(captor.capture())
@@ -145,7 +146,36 @@ class UrlRedirectEdgeCasesTest {
         assertEquals("Mozilla/5.0", captor.firstValue.userAgent)
     }
 
-    private fun activeMapping(expirationDate: Instant = Instant.parse("2024-06-01T10:15:30Z")) = UrlMapping(
+    @Test
+    fun `redirect shows safety interstitial before suspicious link redirect`() {
+        val mapping = activeMapping(safetyInterstitialRequired = true)
+        whenever(urlManagementService.getActiveUrlMapping("abc12345")).thenReturn(mapping)
+
+        val response = controller().redirect("abc12345", null, null, httpRequest)
+
+        assertEquals(200, response.statusCode.value())
+        assertTrue((response.body as String).contains("Continue to external site"))
+        assertTrue((response.body as String).contains("/abc12345?continue=1"))
+        verify(trackUrlVisitService, never()).trackAsync(org.mockito.kotlin.any())
+    }
+
+    @Test
+    fun `redirect continues through safety interstitial when continue flag is present`() {
+        val mapping = activeMapping(safetyInterstitialRequired = true)
+        whenever(urlManagementService.getActiveUrlMapping("abc12345")).thenReturn(mapping)
+        whenever(clientIpResolver.resolve(httpRequest)).thenReturn("10.0.0.1")
+
+        val response = controller().redirect("abc12345", null, "1", httpRequest)
+
+        assertEquals(302, response.statusCode.value())
+        assertEquals("https://example.com", response.headers.location.toString())
+        verify(trackUrlVisitService).trackAsync(org.mockito.kotlin.any())
+    }
+
+    private fun activeMapping(
+        expirationDate: Instant = Instant.parse("2024-06-01T10:15:30Z"),
+        safetyInterstitialRequired: Boolean = false
+    ) = UrlMapping(
         urlHash = "abc12345",
         shortUrl = "https://localhost:8080/abc12345",
         originalUrl = "https://example.com",
@@ -154,6 +184,8 @@ class UrlRedirectEdgeCasesTest {
         expirationDate = expirationDate,
         requestIp = "127.0.0.1",
         userAgent = "JUnit",
-        userId = "user-123"
+        userId = "user-123",
+        safetyInterstitialRequired = safetyInterstitialRequired,
+        safetyInterstitialReason = if (safetyInterstitialRequired) "anonymous_creator" else null
     )
 }

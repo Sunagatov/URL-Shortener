@@ -2,6 +2,25 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
 
+const securityHeaders = {
+  'Content-Security-Policy': [
+    "default-src 'self'",
+    "script-src 'self' https://challenges.cloudflare.com",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: https:",
+    "font-src 'self' data:",
+    "connect-src 'self' http://localhost:8080 http://127.0.0.1:8080 https://api.zuf.uk",
+    "frame-src https://challenges.cloudflare.com",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+  ].join('; '),
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'DENY',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=()',
+};
+
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -12,6 +31,10 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
+    headers: securityHeaders,
+  },
+  preview: {
+    headers: securityHeaders,
   },
   build: {
     outDir: 'build',

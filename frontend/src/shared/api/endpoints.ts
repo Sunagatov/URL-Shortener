@@ -21,6 +21,9 @@ export const endpoints = {
       breakdown: (hash: string, dimension: string) => `/api/v1/urls/${hash}/analytics/${dimension}`,
     },
   },
+  abuseReports: {
+    create: '/api/v1/abuse-reports',
+  },
   user: {
     profile: '/api/v1/users',
     changePassword: '/api/v1/users/change-password',

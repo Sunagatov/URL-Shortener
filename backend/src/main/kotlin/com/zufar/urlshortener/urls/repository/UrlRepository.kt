@@ -14,4 +14,6 @@ interface UrlRepository : MongoRepository<UrlMapping, String> {
     fun findAllByUserIdAndExpirationDateAfter(userId: String,
                                               now: Instant,
                                               pageable: Pageable): Page<UrlMapping>
+
+    fun countByCreatorKeyAndCreatedAtAfter(creatorKey: String, createdAt: Instant): Long
 }

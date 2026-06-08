@@ -40,6 +40,9 @@ class SecurityRestExceptionHandlingTest {
             .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
             .andExpect(header().exists("X-Correlation-ID"))
             .andExpect(header().exists("X-Request-ID"))
+            .andExpect(header().string("X-Content-Type-Options", "nosniff"))
+            .andExpect(header().string("X-Frame-Options", "DENY"))
+            .andExpect(header().string("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload"))
             .andExpect(jsonPath("$.errorMessage").value("Unauthorized access"))
             .andExpect(jsonPath("$.requestId").isNotEmpty)
     }

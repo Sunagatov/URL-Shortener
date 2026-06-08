@@ -23,12 +23,14 @@ object ApplicationRoutes {
     const val AUTH_BASE_PATH = "/api/v1/auth"
     const val AUTH_LEGACY_BASE_PATH = "/v1/auth"
     const val URLS_BASE_PATH = "/api/v1/urls"
+    const val ABUSE_REPORTS_BASE_PATH = "/api/v1/abuse-reports"
     const val FRONTEND_LOGS_BASE_PATH = "/api/v1/frontend/logs"
     const val HEALTH_BASE_PATH = "/api/v1/health"
 
     private const val FAVICON_PATH = "/favicon.ico"
     private val optionsMatcher = withDefaults().matcher(HttpMethod.OPTIONS, "/**")
     private val frontendLogsMatcher = withDefaults().matcher(HttpMethod.POST, FRONTEND_LOGS_BASE_PATH)
+    private val abuseReportsMatcher = withDefaults().matcher(HttpMethod.POST, ABUSE_REPORTS_BASE_PATH)
     private val publicCreateMatcher = withDefaults().matcher(HttpMethod.POST, URLS_BASE_PATH)
     private val faviconMatcher = withDefaults().matcher(HttpMethod.GET, FAVICON_PATH)
     private val publicRedirectMatcher = RegexRequestMatcher(UrlHashFormat.SECURITY_REGEX, HttpMethod.GET.name())
@@ -46,6 +48,7 @@ object ApplicationRoutes {
     private val securityPermitAllMatchers = arrayOf(
         optionsMatcher,
         frontendLogsMatcher,
+        abuseReportsMatcher,
         publicCreateMatcher,
         faviconMatcher,
         publicRedirectMatcher,

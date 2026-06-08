@@ -46,6 +46,7 @@ export const LayoutFooter = ({ isAuthenticated }: { isAuthenticated: boolean }) 
           </div>
           <div className="space-y-2.5">
             <h4 className="text-xs font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">Legal</h4>
+            <Link to={routes.abuse} className={linkClass}>Report Abuse</Link>
             <span className={linkClass}>Privacy Policy</span>
             <span className={linkClass}>Terms of Service</span>
           </div>

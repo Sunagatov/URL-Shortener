@@ -118,6 +118,63 @@ class UrlShortenEdgeCasesTest {
     }
 
     @Test
+    fun `shorten stores hashed creator metadata instead of raw client metadata`() {
+        whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
+        whenever(httpRequest.getHeader("X-Forwarded-For")).thenReturn(null)
+        whenever(httpRequest.getHeader("User-Agent")).thenReturn("JUnit")
+        whenever(urlRepository.insert(any<UrlMapping>())).thenAnswer { it.arguments[0] }
+
+        service().shorten(ShortenUrlRequest("https://example.com", null), httpRequest)
+
+        val captor = argumentCaptor<UrlMapping>()
+        verify(urlRepository).insert(captor.capture())
+        assertEquals(null, captor.firstValue.requestIp)
+        assertEquals(null, captor.firstValue.userAgent)
+        assertEquals(64, captor.firstValue.requestIpHash?.length)
+        assertEquals(64, captor.firstValue.userAgentHash?.length)
+        assertEquals("ip:${captor.firstValue.requestIpHash}", captor.firstValue.creatorKey)
+    }
+
+    @Test
+    fun `shorten blocks anonymous creator after daily quota is reached`() {
+        whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
+        whenever(urlRepository.countByCreatorKeyAndCreatedAtAfter(any(), any())).thenReturn(25)
+
+        val ex = assertThrows<ApplicationException> {
+            service().shorten(ShortenUrlRequest("https://example.com", null), httpRequest)
+        }
+
+        assertEquals("URL_DAILY_QUOTA_EXCEEDED", ex.code)
+    }
+
+    @Test
+    fun `anonymous links require safety interstitial by default`() {
+        whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
+        whenever(urlRepository.insert(any<UrlMapping>())).thenAnswer { it.arguments[0] }
+
+        service().shorten(ShortenUrlRequest("https://example.com", null), httpRequest)
+
+        val captor = argumentCaptor<UrlMapping>()
+        verify(urlRepository).insert(captor.capture())
+        assertEquals(true, captor.firstValue.safetyInterstitialRequired)
+        assertEquals("anonymous_creator", captor.firstValue.safetyInterstitialReason)
+    }
+
+    @Test
+    fun `authenticated links use user quota and skip anonymous safety interstitial`() {
+        whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
+        whenever(authenticatedUserContext.findAuthenticatedUserIdOrNull()).thenReturn("user-123")
+        whenever(urlRepository.insert(any<UrlMapping>())).thenAnswer { it.arguments[0] }
+
+        service().shorten(ShortenUrlRequest("https://example.com", null), httpRequest)
+
+        val captor = argumentCaptor<UrlMapping>()
+        verify(urlRepository).insert(captor.capture())
+        assertEquals("user:user-123", captor.firstValue.creatorKey)
+        assertEquals(false, captor.firstValue.safetyInterstitialRequired)
+    }
+
+    @Test
     fun `getUserUrlMappings rejects negative page`() {
         val ex = assertThrows<ApplicationException> { service().getUserUrlMappings(-1, 10) }
         assertEquals("INVALID_URL_REQUEST", ex.code)

@@ -20,9 +20,24 @@ class CorsConfig(
         val configuration = CorsConfiguration()
         configuration.allowedOrigins = parseCsv(allowedOrigins)
         configuration.allowedOriginPatterns = parseCsv(allowedOriginPatterns)
-        configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
-        configuration.allowedHeaders = listOf("*")
-        configuration.exposedHeaders = listOf("Authorization", "Content-Type")
+        configuration.allowedMethods = listOf("GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+        configuration.allowedHeaders = listOf(
+            "Authorization",
+            "Content-Type",
+            "X-Correlation-ID",
+            "X-Request-ID",
+            "X-Trace-ID"
+        )
+        configuration.exposedHeaders = listOf(
+            "Authorization",
+            "Content-Type",
+            "X-Correlation-ID",
+            "X-Request-ID",
+            "X-RateLimit-Limit",
+            "X-RateLimit-Remaining",
+            "X-RateLimit-Reset",
+            "Retry-After"
+        )
         configuration.allowCredentials = true
         configuration.maxAge = TimeUnit.HOURS.toSeconds(1)
         

@@ -5,6 +5,7 @@ import com.zufar.urlshortener.auth.security.JwtAuthenticationFilter
 import com.zufar.urlshortener.shared.filter.CorrelationIdFilter
 import com.zufar.urlshortener.shared.filter.RateLimitFilter
 import com.zufar.urlshortener.shared.filter.RequestCompletionLoggingFilter
+import com.zufar.urlshortener.shared.filter.SecurityHeadersFilter
 import com.zufar.urlshortener.shared.security.RestAccessDeniedHandler
 import com.zufar.urlshortener.shared.security.RestAuthenticationEntryPoint
 import com.zufar.urlshortener.shared.web.ApplicationRoutes
@@ -27,6 +28,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 class SecurityConfig(
     private val customUserDetailsService: CustomUserDetailsService,
     private val correlationIdFilter: CorrelationIdFilter,
+    private val securityHeadersFilter: SecurityHeadersFilter,
     private val requestCompletionLoggingFilter: RequestCompletionLoggingFilter,
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
     private val rateLimitFilter: RateLimitFilter,
@@ -58,6 +60,10 @@ class SecurityConfig(
         FilterRegistrationBean(filter).apply { isEnabled = false }
 
     @Bean
+    fun securityHeadersFilterRegistration(filter: SecurityHeadersFilter): FilterRegistrationBean<SecurityHeadersFilter> =
+        FilterRegistrationBean(filter).apply { isEnabled = false }
+
+    @Bean
     fun securityFilterChain(
         http: HttpSecurity,
         passwordEncoder: PasswordEncoder
@@ -77,6 +83,7 @@ class SecurityConfig(
             }
             .authenticationProvider(daoAuthenticationProvider(passwordEncoder))
             .addFilterBefore(correlationIdFilter, UsernamePasswordAuthenticationFilter::class.java)
+            .addFilterAfter(securityHeadersFilter, CorrelationIdFilter::class.java)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
             .addFilterAfter(rateLimitFilter, JwtAuthenticationFilter::class.java)
             .addFilterAfter(requestCompletionLoggingFilter, RateLimitFilter::class.java)

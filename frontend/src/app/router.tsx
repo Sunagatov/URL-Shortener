@@ -12,6 +12,7 @@ import DashboardPage from '@/features/account/routes/DashboardPage';
 import UserAccountPage from '@/features/account/routes/UserAccountPage';
 import SecurityPage from '@/features/account/routes/SecurityPage';
 import UrlShortenerPage from '@/features/urls/routes/UrlShortenerPage';
+import AbuseReportPage from '@/features/urls/routes/AbuseReportPage';
 import NotFoundPage from '@/features/urls/routes/NotFoundPage';
 import UserUrlMappingsPage from '@/features/urls/routes/UserUrlMappingsPage';
 import UrlMappingDetailsPage from '@/features/urls/routes/UrlMappingDetailsPage';
@@ -42,6 +43,7 @@ function AppRoutes() {
       <div key={location.pathname} className="route-transition">
         <Routes location={location}>
           <Route path={routes.home} element={<UrlShortenerPage />} />
+          <Route path={routes.abuse} element={<AbuseReportPage />} />
           <Route path={routes.googleCallback} element={<GoogleCallbackPage />} />
           {guestRoutes.map(({ path, element }) => (
             <Route

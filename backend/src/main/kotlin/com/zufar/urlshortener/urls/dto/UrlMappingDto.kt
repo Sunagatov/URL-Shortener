@@ -19,6 +19,10 @@ data class UrlMappingDto(
 
     val expirationDate: Instant,
 
+    val safetyInterstitialRequired: Boolean = false,
+
+    val safetyInterstitialReason: String? = null,
+
     val disabled: Boolean = false,
 
     val disabledReason: String? = null,
@@ -34,6 +38,8 @@ data class UrlMappingDto(
             qrScanCount = entity.qrScanCount,
             createdAt = entity.createdAt,
             expirationDate = entity.expirationDate,
+            safetyInterstitialRequired = entity.safetyInterstitialRequired,
+            safetyInterstitialReason = entity.safetyInterstitialReason,
             disabled = entity.disabled,
             disabledReason = entity.disabledReason,
             disabledAt = entity.disabledAt

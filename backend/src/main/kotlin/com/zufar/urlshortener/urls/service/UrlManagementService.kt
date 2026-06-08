@@ -1,8 +1,14 @@
 package com.zufar.urlshortener.urls.service
 
 import com.zufar.urlshortener.auth.service.user.AuthenticatedUserContextService
+import com.zufar.urlshortener.shared.config.RateLimitConfig
+import com.zufar.urlshortener.shared.config.RateLimitProperties
 import com.zufar.urlshortener.shared.exception.ApplicationException
+import com.zufar.urlshortener.shared.http.ClientIpResolver
 import com.zufar.urlshortener.shared.logging.LogSanitizer
+import com.zufar.urlshortener.shared.security.AuditLogService
+import com.zufar.urlshortener.shared.security.PrivacyHasher
+import com.zufar.urlshortener.urls.config.UrlProtectionProperties
 import com.zufar.urlshortener.urls.dto.ShortenUrlRequest
 import com.zufar.urlshortener.urls.dto.UrlMappingDto
 import com.zufar.urlshortener.urls.dto.UrlMappingPageDto
@@ -14,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import java.net.URI
 import java.time.Clock
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -28,6 +35,9 @@ class UrlManagementService(
     private val urlValidator: UrlValidator,
     private val authenticatedUserContext: AuthenticatedUserContextService,
     private val urlMappingAccessService: UrlMappingAccessService,
+    private val clientIpResolver: ClientIpResolver = ClientIpResolver(RateLimitConfig(RateLimitProperties())),
+    private val protectionProperties: UrlProtectionProperties = UrlProtectionProperties(),
+    private val auditLogService: AuditLogService = AuditLogService(),
     @Value($$"${app.base-url}") private val baseUrl: String,
     @Value($$"${app.urls.expiration.default-days:365}") private val defaultExpirationDays: Long,
     @Value($$"${app.urls.short-code.max-generation-attempts:10}") private val maxCodeGenerationAttempts: Int,
@@ -41,16 +51,23 @@ class UrlManagementService(
         val normalizedBaseUrl = baseUrl.trimEnd('/')
 
         urlValidator.validateUrl(normalizedRequest.originalUrl)
-
         val customAlias = normalizedRequest.customAlias?.trim()
         if (customAlias != null) {
             validateCustomAlias(customAlias)
+        }
+        val now = Instant.now(clock)
+        val userId = authenticatedUserContext.findAuthenticatedUserIdOrNull()
+        val clientIp = clientIpResolver.resolve(httpRequest)
+        val creatorKey = creatorKey(userId, clientIp)
+        enforceDailyQuota(creatorKey, userId, now)
+
+        if (customAlias != null) {
             val shortUrl = "$normalizedBaseUrl/$customAlias"
             try {
                 urlRepository.insert(
-                    buildUrlMapping(normalizedRequest, httpRequest, customAlias, shortUrl)
+                    buildUrlMapping(normalizedRequest, httpRequest, customAlias, shortUrl, userId, clientIp, creatorKey, now)
                 )
-                logCreation(customAlias, normalizedRequest)
+                logCreation(customAlias, normalizedRequest, userId)
                 return shortUrl
             } catch (_: DuplicateKeyException) {
                 throw ApplicationException.conflict("ALIAS_TAKEN", "Custom alias '$customAlias' is already in use")
@@ -67,10 +84,14 @@ class UrlManagementService(
                         request = normalizedRequest,
                         httpRequest = httpRequest,
                         urlHash = urlHash,
-                        shortUrl = shortUrl
+                        shortUrl = shortUrl,
+                        userId = userId,
+                        clientIp = clientIp,
+                        creatorKey = creatorKey,
+                        now = now
                     )
                 )
-                logCreation(urlHash, normalizedRequest)
+                logCreation(urlHash, normalizedRequest, userId)
                 return shortUrl
             } catch (_: DuplicateKeyException) {
                 log.debug("short_url_collision_detected urlHash={} attempt={}", urlHash, attempt + 1)
@@ -110,6 +131,7 @@ class UrlManagementService(
         val updated = urlRepository.save(urlMapping.copy(originalUrl = trimmedUrl))
         urlMappingAccessService.evictUrlMapping(urlHash)
         log.info("short_url_updated urlHash={} targetHost={}", urlHash, LogSanitizer.safeUrlHost(trimmedUrl))
+        auditLogService.record("short_url_updated", "success", urlMapping.userId, urlHash, trimmedUrl)
         return UrlMappingDto.fromEntity(updated)
     }
 
@@ -121,6 +143,7 @@ class UrlManagementService(
             urlMapping.userId ?: "unknown",
             LogSanitizer.safeUrlHost(urlMapping.originalUrl)
         )
+        auditLogService.record("short_url_deleted", "success", urlMapping.userId, urlHash, urlMapping.originalUrl)
     }
 
     fun getActiveUrlMapping(urlHash: String): UrlMapping =
@@ -133,9 +156,14 @@ class UrlManagementService(
         request: ShortenUrlRequest,
         httpRequest: HttpServletRequest,
         urlHash: String,
-        shortUrl: String
+        shortUrl: String,
+        userId: String?,
+        clientIp: String,
+        creatorKey: String,
+        now: Instant
     ): UrlMapping {
-        val now = Instant.now(clock)
+        val userAgent = httpRequest.getHeader("User-Agent")
+        val interstitial = safetyInterstitial(request.originalUrl, userId)
         val mapping = UrlMapping(
             urlHash = urlHash,
             shortUrl = shortUrl,
@@ -143,12 +171,34 @@ class UrlManagementService(
             clickCount = 0,
             createdAt = now,
             expirationDate = now.plus(request.daysCount ?: defaultExpirationDays, ChronoUnit.DAYS),
-            requestIp = httpRequest.remoteAddr,
-            userAgent = httpRequest.getHeader("User-Agent"),
-            userId = authenticatedUserContext.findAuthenticatedUserIdOrNull()
+            requestIp = null,
+            userAgent = null,
+            requestIpHash = PrivacyHasher.sha256(clientIp),
+            userAgentHash = PrivacyHasher.sha256(userAgent),
+            creatorKey = creatorKey,
+            userId = userId,
+            safetyInterstitialRequired = interstitial.required,
+            safetyInterstitialReason = interstitial.reason
         )
 
         return mapping
+    }
+
+    private fun enforceDailyQuota(creatorKey: String, userId: String?, now: Instant) {
+        val limit = if (userId == null) {
+            protectionProperties.anonymousDailyQuota
+        } else {
+            protectionProperties.authenticatedDailyQuota
+        }
+        val count = urlRepository.countByCreatorKeyAndCreatedAtAfter(creatorKey, now.minus(1, ChronoUnit.DAYS))
+        if (count >= limit) {
+            auditLogService.record("short_url_create_quota_exceeded", "blocked", userId)
+            throw ApplicationException.tooManyRequests(
+                "URL_DAILY_QUOTA_EXCEEDED",
+                "Daily URL creation quota exceeded",
+                retryAfterSeconds = ChronoUnit.DAYS.duration.seconds
+            )
+        }
     }
 
     private fun validatePageRequest(page: Int, size: Int) {
@@ -160,14 +210,21 @@ class UrlManagementService(
         }
     }
 
-    private fun logCreation(urlHash: String, request: ShortenUrlRequest) {
+    private fun logCreation(urlHash: String, request: ShortenUrlRequest, userId: String?) {
         log.info(
             "short_url_created urlHash={} ownerUserId={} targetHost={} expiresInDays={} custom={}",
             urlHash,
-            authenticatedUserContext.findAuthenticatedUserIdOrNull() ?: "anonymous",
+            userId ?: "anonymous",
             LogSanitizer.safeUrlHost(request.originalUrl),
             request.daysCount ?: defaultExpirationDays,
             request.customAlias != null
+        )
+        auditLogService.record(
+            "short_url_created",
+            "success",
+            userId,
+            urlHash,
+            request.originalUrl
         )
     }
 
@@ -198,4 +255,23 @@ class UrlManagementService(
             request.copy(originalUrl = trimmedOriginalUrl)
         }
     }
+
+    private fun creatorKey(userId: String?, clientIp: String): String =
+        userId?.let { "user:$it" } ?: "ip:${PrivacyHasher.sha256(clientIp) ?: "unknown"}"
+
+    private fun safetyInterstitial(originalUrl: String, userId: String?): SafetyInterstitial {
+        val host = runCatching { URI(originalUrl).host.orEmpty() }.getOrDefault("")
+        if (protectionProperties.safetyInterstitialForIpDestinations && host.isIpLiteral()) {
+            return SafetyInterstitial(true, "ip_destination")
+        }
+        if (protectionProperties.safetyInterstitialForAnonymous && userId == null) {
+            return SafetyInterstitial(true, "anonymous_creator")
+        }
+        return SafetyInterstitial(false, null)
+    }
+
+    private fun String.isIpLiteral(): Boolean =
+        matches(Regex("^\\d{1,3}(\\.\\d{1,3}){3}$")) || contains(":")
+
+    private data class SafetyInterstitial(val required: Boolean, val reason: String?)
 }

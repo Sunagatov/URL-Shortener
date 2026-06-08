@@ -1,0 +1,8 @@
+package com.zufar.urlshortener.urls.config
+
+import org.springframework.boot.context.properties.EnableConfigurationProperties
+import org.springframework.context.annotation.Configuration
+
+@Configuration
+@EnableConfigurationProperties(UrlProtectionProperties::class)
+class UrlProtectionConfig

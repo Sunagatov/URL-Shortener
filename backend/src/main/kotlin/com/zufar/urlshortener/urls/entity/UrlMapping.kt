@@ -22,10 +22,16 @@ data class UrlMapping(
 
     val requestIp: String?,
     val userAgent: String?,
+    val requestIpHash: String? = null,
+    val userAgentHash: String? = null,
+    @Indexed(name = "creator_key_idx")
+    val creatorKey: String? = null,
 
     @Indexed(name = "user_id_idx")
     val userId: String?,
 
+    val safetyInterstitialRequired: Boolean = false,
+    val safetyInterstitialReason: String? = null,
     val disabled: Boolean = false,
     val disabledReason: String? = null,
     val disabledAt: Instant? = null
