@@ -13,6 +13,9 @@ export function useVerificationCodeFlow({
   initialExpiresInSeconds,
   initialResendAvailableInSeconds,
   initialDeliveryMode,
+  requireTurnstileVerified,
+  resetTurnstileChallenge,
+  turnstileToken,
 }: {
   completeAuth: (tokens: AuthTokens, destination: string) => Promise<void>;
   destination: string;
@@ -20,6 +23,9 @@ export function useVerificationCodeFlow({
   initialExpiresInSeconds?: number;
   initialResendAvailableInSeconds?: number;
   initialDeliveryMode?: VerificationChallengeResponse['deliveryMode'];
+  requireTurnstileVerified?: () => boolean;
+  resetTurnstileChallenge?: () => void;
+  turnstileToken?: string;
 }) {
   const [digits, setDigits] = useState<string[]>(Array(VERIFICATION_CODE_LENGTH).fill(''));
   const [isLoading, setIsLoading] = useState(false);
@@ -64,23 +70,32 @@ export function useVerificationCodeFlow({
         return false;
       }
 
+      if (requireTurnstileVerified && !requireTurnstileVerified()) {
+        return false;
+      }
+
       setIsLoading(true);
       setError('');
 
       try {
-        const tokens = await verifyEmail({ email, code });
+        const tokens = await verifyEmail({
+          email,
+          code,
+          ...(turnstileToken ? { turnstileToken } : {}),
+        });
         await completeAuth(tokens, destination);
         return true;
       } catch (err: unknown) {
         setError(getApiErrorMessage(err, 'Invalid or expired code. Please try again.'));
         setDigits(Array(VERIFICATION_CODE_LENGTH).fill(''));
+        resetTurnstileChallenge?.();
         focusFirstInput();
         return false;
       } finally {
         setIsLoading(false);
       }
     },
-    [completeAuth, destination, email, isLoading],
+    [completeAuth, destination, email, isLoading, requireTurnstileVerified, resetTurnstileChallenge, turnstileToken],
   );
 
   const handleChange = (index: number, value: string) => {
@@ -160,18 +175,24 @@ export function useVerificationCodeFlow({
       return;
     }
 
+    if (requireTurnstileVerified && !requireTurnstileVerified()) {
+      return;
+    }
+
     setIsResending(true);
     setError('');
 
     try {
-      const response = await resendVerificationCode(email);
+      const response = await resendVerificationCode(email, turnstileToken);
       setCountdown(response.resendAvailableInSeconds);
       setExpiresInSeconds(response.expiresInSeconds);
       setDeliveryMode(response.deliveryMode);
       setDigits(Array(VERIFICATION_CODE_LENGTH).fill(''));
+      resetTurnstileChallenge?.();
       focusFirstInput();
     } catch (err: unknown) {
       setError(getApiErrorMessage(err, 'Failed to resend code. Please try again.'));
+      resetTurnstileChallenge?.();
     } finally {
       setIsResending(false);
     }

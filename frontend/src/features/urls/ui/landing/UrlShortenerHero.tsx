@@ -154,11 +154,18 @@ export function UrlShortenerHero({
 interface UrlShortenerFormProps {
   children?: ReactNode;
   advancedOptions?: ReactNode;
+  challenge?: ReactNode;
   isLoading?: boolean;
   onSubmit: React.FormEventHandler<HTMLFormElement>;
 }
 
-export function UrlShortenerForm({ children, advancedOptions, isLoading = false, onSubmit }: UrlShortenerFormProps) {
+export function UrlShortenerForm({
+  children,
+  advancedOptions,
+  challenge,
+  isLoading = false,
+  onSubmit,
+}: UrlShortenerFormProps) {
   return (
     <div className="glass-card group relative mb-6 animate-fade-up-d3 overflow-hidden p-2.5">
       <div className="pointer-events-none absolute inset-0 rounded-[20px] border border-[color:var(--border)] transition-all duration-300 group-focus-within:border-blue-400/35 group-focus-within:shadow-[inset_0_0_0_1px_rgba(96,165,250,0.22),inset_0_0_42px_rgba(59,130,246,0.18),0_0_0_1px_rgba(59,130,246,0.12)]" />
@@ -175,6 +182,7 @@ export function UrlShortenerForm({ children, advancedOptions, isLoading = false,
             <span>{isLoading ? 'Shortening…' : 'Shorten'}</span>
           </Button>
         </div>
+        {challenge}
         {advancedOptions}
       </form>
     </div>

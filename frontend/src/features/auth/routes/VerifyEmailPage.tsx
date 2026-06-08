@@ -17,7 +17,9 @@ import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
 import type { AuthTokens } from '@/shared/auth/types';
 import { useAuth } from '@/shared/auth/useAuth';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
-import { Button } from '@/shared/ui';
+import { Button, TurnstileWidget } from '@/shared/ui';
+import { features } from '@/shared/config/features';
+import { useTurnstileVerification } from '@/shared/hooks/useTurnstileVerification';
 
 const verifyEmailBrandPanel = (
   <AuthBrandPanel
@@ -60,6 +62,7 @@ const VerifyEmailPage: React.FC = () => {
   const { login, updateUser } = useAuth();
   const locationState = state as LocationState;
   const email = locationState?.email ?? '';
+  const turnstile = useTurnstileVerification(features.authTurnstile);
   const destination = locationState?.destination ?? routes.dashboard;
   const completeAuth = useCallback(
     async (tokens: AuthTokens, targetDestination: string) => {
@@ -97,6 +100,9 @@ const VerifyEmailPage: React.FC = () => {
     initialExpiresInSeconds: locationState?.expiresInSeconds,
     initialResendAvailableInSeconds: locationState?.resendAvailableInSeconds,
     initialDeliveryMode: locationState?.deliveryMode,
+    requireTurnstileVerified: turnstile.requireVerified,
+    resetTurnstileChallenge: turnstile.resetChallenge,
+    turnstileToken: features.authTurnstile ? turnstile.token : undefined,
   });
 
   if (!email) {
@@ -177,6 +183,16 @@ const VerifyEmailPage: React.FC = () => {
         </div>
 
         {error ? <AuthAlert>{error}</AuthAlert> : null}
+        {turnstile.error ? <AuthAlert>{turnstile.error}</AuthAlert> : null}
+
+        {features.authTurnstile ? (
+          <TurnstileWidget
+            action="verify_email"
+            onClear={turnstile.clearToken}
+            onVerify={turnstile.handleVerify}
+            widgetRef={turnstile.widgetRef}
+          />
+        ) : null}
 
         <Button
           type="button"

@@ -19,7 +19,9 @@ import { authInputClassName } from '@/features/auth/ui/authStyles';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 import { getPasswordStrength, passwordChecks } from '@/shared/lib/passwordStrength';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
-import { Button } from '@/shared/ui';
+import { Button, TurnstileWidget } from '@/shared/ui';
+import { features } from '@/shared/config/features';
+import { useTurnstileVerification } from '@/shared/hooks/useTurnstileVerification';
 
 const resetPasswordBrandPanel = (
   <AuthBrandPanel
@@ -56,6 +58,7 @@ const ResetPasswordPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const turnstile = useTurnstileVerification(features.authTurnstile);
 
   const passwordStrength = getPasswordStrength(newPassword);
   const passwordsMatch = confirmPassword.length === 0 || newPassword === confirmPassword;
@@ -86,13 +89,22 @@ const ResetPasswordPage: React.FC = () => {
       return;
     }
 
+    if (!turnstile.requireVerified()) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      await resetPassword({ token, newPassword });
+      await resetPassword({
+        token,
+        newPassword,
+        ...(features.authTurnstile ? { turnstileToken: turnstile.token } : {}),
+      });
       setSuccess(true);
     } catch (submitError: unknown) {
       setError(getApiErrorMessage(submitError, 'Failed to reset password. The link may have expired.'));
+      turnstile.resetChallenge();
     } finally {
       setIsLoading(false);
     }
@@ -269,6 +281,16 @@ const ResetPasswordPage: React.FC = () => {
           </div>
 
           {error ? <AuthAlert>{error}</AuthAlert> : null}
+          {turnstile.error ? <AuthAlert>{turnstile.error}</AuthAlert> : null}
+
+          {features.authTurnstile ? (
+            <TurnstileWidget
+              action="reset_password"
+              onClear={turnstile.clearToken}
+              onVerify={turnstile.handleVerify}
+              widgetRef={turnstile.widgetRef}
+            />
+          ) : null}
 
           <Button
             type="submit"

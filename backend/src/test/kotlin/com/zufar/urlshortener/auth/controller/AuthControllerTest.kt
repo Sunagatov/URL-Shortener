@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.auth.controller
 
 import com.zufar.urlshortener.auth.dto.AuthResponse
+import com.zufar.urlshortener.auth.dto.ForgotPasswordRequest
 import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
 import com.zufar.urlshortener.auth.dto.RefreshTokenResponse
 import com.zufar.urlshortener.auth.dto.ResendVerificationRequest
@@ -66,7 +67,7 @@ class AuthControllerTest {
 
         val result = controller.authenticateUser(request)
 
-        verify(turnstileVerifier).verify("turnstile-token")
+        verify(turnstileVerifier).verify("turnstile-token", setOf("signin"))
         verify(authService).signIn(request)
         assertEquals(response, result.body)
     }
@@ -139,5 +140,20 @@ class AuthControllerTest {
 
         verify(authService).resendVerificationCode(request)
         assertEquals(response, result.body)
+    }
+
+    @Test
+    fun `forgotPassword accepts initial and resend Turnstile actions when auth protection is enabled`() {
+        val controller = controller(authTurnstileEnabled = true)
+        val request = ForgotPasswordRequest("user@example.com", "turnstile-token")
+
+        val result = controller.forgotPassword(request)
+
+        verify(turnstileVerifier).verify(
+            "turnstile-token",
+            setOf("forgot_password", "forgot_password_resend")
+        )
+        verify(passwordResetService).requestReset(request)
+        assertEquals(200, result.statusCode.value())
     }
 }

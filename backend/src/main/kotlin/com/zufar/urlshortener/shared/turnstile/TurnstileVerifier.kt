@@ -3,6 +3,7 @@ package com.zufar.urlshortener.shared.turnstile
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.stereotype.Component
@@ -12,14 +13,18 @@ import org.springframework.web.client.RestClient
 private const val VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 
 @Component
-class TurnstileVerifier(
-    private val properties: TurnstileProperties,
-    restClient: RestClient? = null
+class TurnstileVerifier @Autowired constructor(
+    private val properties: TurnstileProperties
 ) {
-    private val log = LoggerFactory.getLogger(TurnstileVerifier::class.java)
-    private val client = restClient ?: restClient(properties)
+    private var client: RestClient = restClient(properties)
 
-    fun verify(token: String?) {
+    internal constructor(properties: TurnstileProperties, restClient: RestClient) : this(properties) {
+        client = restClient
+    }
+
+    private val log = LoggerFactory.getLogger(TurnstileVerifier::class.java)
+
+    fun verify(token: String?, expectedActions: Set<String> = emptySet()) {
         if (!properties.enabled) {
             return
         }
@@ -43,7 +48,16 @@ class TurnstileVerifier(
                 .body(TurnstileResponse::class.java)
 
             if (result?.success != true) {
-                log.info("turnstile_verification_failed")
+                log.info("turnstile_verification_failed errorCodes={}", result?.errorCodes.orEmpty())
+                throw TurnstileVerificationException("Turnstile verification failed")
+            }
+
+            if (expectedActions.isNotEmpty() && result.action !in expectedActions) {
+                log.info(
+                    "turnstile_action_mismatch expectedActions={} receivedAction={}",
+                    expectedActions,
+                    result.action
+                )
                 throw TurnstileVerificationException("Turnstile verification failed")
             }
         } catch (ex: TurnstileVerificationException) {
@@ -54,16 +68,20 @@ class TurnstileVerifier(
         }
     }
 
-    private fun restClient(properties: TurnstileProperties): RestClient {
-        val requestFactory = SimpleClientHttpRequestFactory().apply {
-            setConnectTimeout(properties.connectTimeout)
-            setReadTimeout(properties.readTimeout)
-        }
-        return RestClient.builder().requestFactory(requestFactory).build()
-    }
-
     @JsonIgnoreProperties(ignoreUnknown = true)
     private data class TurnstileResponse(
-        @JsonProperty("success") val success: Boolean = false
+        @JsonProperty("success") val success: Boolean = false,
+        @JsonProperty("action") val action: String? = null,
+        @JsonProperty("error-codes") val errorCodes: List<String> = emptyList()
     )
+
+    companion object {
+        private fun restClient(properties: TurnstileProperties): RestClient {
+            val requestFactory = SimpleClientHttpRequestFactory().apply {
+                setConnectTimeout(properties.connectTimeout)
+                setReadTimeout(properties.readTimeout)
+            }
+            return RestClient.builder().requestFactory(requestFactory).build()
+        }
+    }
 }

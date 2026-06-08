@@ -16,7 +16,9 @@ import {
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
 import { authInputClassName } from '@/features/auth/ui/authStyles';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
-import { Button } from '@/shared/ui';
+import { Button, TurnstileWidget } from '@/shared/ui';
+import { features } from '@/shared/config/features';
+import { useTurnstileVerification } from '@/shared/hooks/useTurnstileVerification';
 
 const forgotPasswordBrandPanel = (
   <AuthBrandPanel
@@ -60,6 +62,7 @@ const ForgotPasswordPage: React.FC = () => {
   const [cooldownSeconds, setCooldownSeconds] = useState(0);
   const [error, setError] = useState('');
   const [inlineNotice, setInlineNotice] = useState('');
+  const turnstile = useTurnstileVerification(features.authTurnstile);
 
   useEffect(() => {
     if (!submitted || cooldownSeconds <= 0) {
@@ -81,6 +84,10 @@ const ForgotPasswordPage: React.FC = () => {
   };
 
   const sendRecoveryLink = async (targetEmail: string, mode: 'initial' | 'resend') => {
+    if (!turnstile.requireVerified()) {
+      return;
+    }
+
     if (mode === 'initial') {
       setError('');
       setIsLoading(true);
@@ -90,12 +97,19 @@ const ForgotPasswordPage: React.FC = () => {
     }
 
     try {
-      await requestPasswordReset(targetEmail);
+      if (features.authTurnstile) {
+        await requestPasswordReset(targetEmail, turnstile.token);
+      } else {
+        await requestPasswordReset(targetEmail);
+      }
       completeSubmission(
         targetEmail,
         mode === 'resend' ? 'If that account exists, we sent a fresh recovery email.' : '',
       );
+      turnstile.resetChallenge();
     } catch (requestError: unknown) {
+      turnstile.resetChallenge();
+
       if (getApiErrorStatus(requestError) !== undefined) {
         completeSubmission(
           targetEmail,
@@ -160,6 +174,16 @@ const ForgotPasswordPage: React.FC = () => {
                 <AuthSupportCard>
                   <p className="text-sm text-[color:var(--text-secondary)]">{inlineNotice}</p>
                 </AuthSupportCard>
+              ) : null}
+              {turnstile.error ? <AuthAlert>{turnstile.error}</AuthAlert> : null}
+
+              {features.authTurnstile ? (
+                <TurnstileWidget
+                  action="forgot_password_resend"
+                  onClear={turnstile.clearToken}
+                  onVerify={turnstile.handleVerify}
+                  widgetRef={turnstile.widgetRef}
+                />
               ) : null}
 
               <div className="grid gap-3 sm:grid-cols-2">
@@ -240,6 +264,16 @@ const ForgotPasswordPage: React.FC = () => {
           </div>
 
           {error ? <AuthAlert>{error}</AuthAlert> : null}
+          {turnstile.error ? <AuthAlert>{turnstile.error}</AuthAlert> : null}
+
+          {features.authTurnstile ? (
+            <TurnstileWidget
+              action="forgot_password"
+              onClear={turnstile.clearToken}
+              onVerify={turnstile.handleVerify}
+              widgetRef={turnstile.widgetRef}
+            />
+          ) : null}
 
           <Button type="submit" loading={isLoading} className="w-full" size="lg">
             <FaEnvelope className="h-4 w-4" />

@@ -25,6 +25,13 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
+private const val TURNSTILE_ACTION_FORGOT_PASSWORD = "forgot_password"
+private const val TURNSTILE_ACTION_FORGOT_PASSWORD_RESEND = "forgot_password_resend"
+private const val TURNSTILE_ACTION_RESET_PASSWORD = "reset_password"
+private const val TURNSTILE_ACTION_SIGNIN = "signin"
+private const val TURNSTILE_ACTION_SIGNUP = "signup"
+private const val TURNSTILE_ACTION_VERIFY_EMAIL = "verify_email"
+
 @RestController
 @RequestMapping(ApplicationRoutes.AUTH_BASE_PATH)
 class AuthController(
@@ -46,7 +53,7 @@ class AuthController(
     fun authenticateUser(
         @Valid @RequestBody signInRequest: SignInRequest
     ): ResponseEntity<AuthResponse> {
-        verifyAuthTurnstile(signInRequest.turnstileToken)
+        verifyAuthTurnstile(signInRequest.turnstileToken, TURNSTILE_ACTION_SIGNIN)
         return ResponseEntity.ok(authService.signIn(signInRequest))
     }
 
@@ -54,7 +61,7 @@ class AuthController(
     fun registerUser(
         @Valid @RequestBody signUpRequest: SignUpRequest
     ): ResponseEntity<SignUpResponse> {
-        verifyAuthTurnstile(signUpRequest.turnstileToken)
+        verifyAuthTurnstile(signUpRequest.turnstileToken, TURNSTILE_ACTION_SIGNUP)
         return ResponseEntity.ok(authService.signUp(signUpRequest))
     }
 
@@ -68,7 +75,7 @@ class AuthController(
     fun verifyEmail(
         @Valid @RequestBody verifyEmailRequest: VerifyEmailRequest
     ): ResponseEntity<AuthResponse> {
-        verifyAuthTurnstile(verifyEmailRequest.turnstileToken)
+        verifyAuthTurnstile(verifyEmailRequest.turnstileToken, TURNSTILE_ACTION_VERIFY_EMAIL)
         return ResponseEntity.ok(authService.verifyEmail(verifyEmailRequest))
     }
 
@@ -76,7 +83,7 @@ class AuthController(
     fun resendVerificationCode(
         @Valid @RequestBody resendVerificationRequest: ResendVerificationRequest
     ): ResponseEntity<VerificationChallengeResponse> {
-        verifyAuthTurnstile(resendVerificationRequest.turnstileToken)
+        verifyAuthTurnstile(resendVerificationRequest.turnstileToken, TURNSTILE_ACTION_VERIFY_EMAIL)
         return ResponseEntity.ok(authService.resendVerificationCode(resendVerificationRequest))
     }
 
@@ -84,7 +91,11 @@ class AuthController(
     fun forgotPassword(
         @Valid @RequestBody request: ForgotPasswordRequest
     ): ResponseEntity<Void> {
-        verifyAuthTurnstile(request.turnstileToken)
+        verifyAuthTurnstile(
+            request.turnstileToken,
+            TURNSTILE_ACTION_FORGOT_PASSWORD,
+            TURNSTILE_ACTION_FORGOT_PASSWORD_RESEND
+        )
         passwordResetService.requestReset(request)
         return ResponseEntity.ok().build()
     }
@@ -93,14 +104,14 @@ class AuthController(
     fun resetPassword(
         @Valid @RequestBody request: ResetPasswordRequest
     ): ResponseEntity<Void> {
-        verifyAuthTurnstile(request.turnstileToken)
+        verifyAuthTurnstile(request.turnstileToken, TURNSTILE_ACTION_RESET_PASSWORD)
         passwordResetService.resetPassword(request)
         return ResponseEntity.noContent().build()
     }
 
-    private fun verifyAuthTurnstile(token: String?) {
+    private fun verifyAuthTurnstile(token: String?, vararg expectedActions: String) {
         if (turnstileProperties.authEnabled) {
-            turnstileVerifier.verify(token)
+            turnstileVerifier.verify(token, expectedActions.toSet())
         }
     }
 }

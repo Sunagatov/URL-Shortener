@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
+private const val TURNSTILE_ACTION_URL_CREATE = "url_create"
+
 @RestController
 @RequestMapping(ApplicationRoutes.URLS_BASE_PATH)
 class UrlController(
@@ -43,7 +45,7 @@ class UrlController(
         httpServletRequest: HttpServletRequest
     ): ResponseEntity<UrlResponse> {
         if (turnstileProperties.urlCreateEnabled) {
-            turnstileVerifier.verify(shortenUrlRequest.turnstileToken)
+            turnstileVerifier.verify(shortenUrlRequest.turnstileToken, setOf(TURNSTILE_ACTION_URL_CREATE))
         }
         return ResponseEntity.ok(UrlResponse(urlManagementService.shorten(shortenUrlRequest, httpServletRequest)))
     }

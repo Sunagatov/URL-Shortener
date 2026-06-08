@@ -70,7 +70,7 @@ class UrlControllerTest {
 
         val response = controller.shortenUrl(shortenRequest, request)
 
-        verify(turnstileVerifier).verify("turnstile-token")
+        verify(turnstileVerifier).verify("turnstile-token", setOf("url_create"))
         verify(urlManagementService).shorten(shortenRequest, request)
         assertEquals(UrlResponse("http://localhost:8080/abc12345"), response.body)
     }
