@@ -59,7 +59,9 @@ const signUpBrandPanel = (
     footer={
       <div className="rounded-2xl border border-[color:var(--card-border)] bg-[var(--card-bg)] p-4">
         <p className="mb-1 text-xs text-[color:var(--text-muted)]">Trusted by teams at</p>
-        <p className="text-sm font-semibold text-[color:var(--text-muted)]">Startups · Agencies · Developers</p>
+        <p className="text-sm font-semibold text-[color:var(--text-muted)]">
+          Startups · Agencies · Developers
+        </p>
       </div>
     }
   />
@@ -98,7 +100,7 @@ const SignUpPage: React.FC = () => {
 
       navigate(targetDestination, { replace: true });
     },
-    [login, navigate, updateUser],
+    [login, navigate, updateUser]
   );
 
   const onSubmit = async (data: SignUpFormData) => {
@@ -106,20 +108,21 @@ const SignUpPage: React.FC = () => {
       return;
     }
 
-    const result = await execute(() =>
-      signUp({
-        firstName: data.firstName.trim(),
-        lastName: data.lastName.trim(),
-        email: data.email.trim(),
-        password: data.password,
-        country: data.country.trim(),
-        age: data.age,
-        ...(features.authTurnstile ? { turnstileToken: turnstile.token } : {}),
-      }),
+    const result = await execute(
+      () =>
+        signUp({
+          firstName: data.firstName.trim(),
+          lastName: data.lastName.trim(),
+          email: data.email.trim(),
+          password: data.password,
+          country: data.country.trim(),
+          age: data.age,
+          ...(features.authTurnstile ? { turnstileToken: turnstile.token } : {}),
+        }),
       {
         action: 'auth.sign_up',
         onError: () => turnstile.resetChallenge(),
-      },
+      }
     );
 
     if (!result) {
@@ -137,7 +140,12 @@ const SignUpPage: React.FC = () => {
       return;
     }
 
-    if (result.email && result.expiresInSeconds && result.resendAvailableInSeconds && result.deliveryMode) {
+    if (
+      result.email &&
+      result.expiresInSeconds &&
+      result.resendAvailableInSeconds &&
+      result.deliveryMode
+    ) {
       navigate(routes.verifyEmail, {
         state: {
           email: result.email,
@@ -170,9 +178,18 @@ const SignUpPage: React.FC = () => {
                 placeholder=" "
                 className={`${authInputClassName} peer pl-10 pt-6 pb-2.5 ${errors.firstName ? 'animate-error-shake border-[color:var(--danger)] focus:ring-[color:var(--danger)]' : ''}`}
               />
-              <label htmlFor="sign-up-first-name" className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[color:var(--text-muted)] peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[color:var(--accent)]">First Name</label>
+              <label
+                htmlFor="sign-up-first-name"
+                className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[color:var(--text-muted)] peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[color:var(--accent)]"
+              >
+                First Name
+              </label>
             </div>
-            {errors.firstName ? <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.firstName.message}</p> : null}
+            {errors.firstName ? (
+              <p className="mt-1 text-xs text-[color:var(--danger-text)]">
+                {errors.firstName.message}
+              </p>
+            ) : null}
           </div>
           <div className="space-y-1.5">
             <div className="relative">
@@ -184,9 +201,18 @@ const SignUpPage: React.FC = () => {
                 placeholder=" "
                 className={`${authInputClassName} peer pl-10 pt-6 pb-2.5 ${errors.lastName ? 'animate-error-shake border-[color:var(--danger)] focus:ring-[color:var(--danger)]' : ''}`}
               />
-              <label htmlFor="sign-up-last-name" className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[color:var(--text-muted)] peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[color:var(--accent)]">Last Name</label>
+              <label
+                htmlFor="sign-up-last-name"
+                className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[color:var(--text-muted)] peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[color:var(--accent)]"
+              >
+                Last Name
+              </label>
             </div>
-            {errors.lastName ? <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.lastName.message}</p> : null}
+            {errors.lastName ? (
+              <p className="mt-1 text-xs text-[color:var(--danger-text)]">
+                {errors.lastName.message}
+              </p>
+            ) : null}
           </div>
         </div>
 
@@ -201,9 +227,16 @@ const SignUpPage: React.FC = () => {
               autoComplete="email"
               className={`${authInputClassName} peer pl-10 pt-6 pb-2.5 ${errors.email ? 'animate-error-shake border-[color:var(--danger)] focus:ring-[color:var(--danger)]' : ''}`}
             />
-            <label htmlFor="sign-up-email" className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[color:var(--text-muted)] peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[color:var(--accent)]">Email Address</label>
+            <label
+              htmlFor="sign-up-email"
+              className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[color:var(--text-muted)] peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[color:var(--accent)]"
+            >
+              Email Address
+            </label>
           </div>
-          {errors.email ? <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.email.message}</p> : null}
+          {errors.email ? (
+            <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.email.message}</p>
+          ) : null}
         </div>
         <div className="space-y-1.5">
           <div className="relative">
@@ -217,9 +250,18 @@ const SignUpPage: React.FC = () => {
               className={`${authInputClassName} peer pl-10 pr-10 pt-6 pb-2.5 ${errors.password ? 'animate-error-shake border-[color:var(--danger)] focus:ring-[color:var(--danger)]' : ''}`}
             />
             <PasswordToggle visible={pw.visible} onToggle={pw.toggle} />
-            <label htmlFor="sign-up-password" className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[color:var(--text-muted)] peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[color:var(--accent)]">Password</label>
+            <label
+              htmlFor="sign-up-password"
+              className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[color:var(--text-muted)] peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[color:var(--accent)]"
+            >
+              Password
+            </label>
           </div>
-          {errors.password ? <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.password.message}</p> : null}
+          {errors.password ? (
+            <p className="mt-1 text-xs text-[color:var(--danger-text)]">
+              {errors.password.message}
+            </p>
+          ) : null}
         </div>
         <div className="rounded-2xl border border-[color:var(--card-border)] bg-[var(--card-bg)] px-4 py-3">
           <div className="flex items-center justify-between">
@@ -239,7 +281,7 @@ const SignUpPage: React.FC = () => {
             />
           </div>
           <div className="mt-3 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-            {passwordChecks.map((check) => {
+            {passwordChecks.map(check => {
               const passes = check.isValid(password);
 
               return (
@@ -272,9 +314,18 @@ const SignUpPage: React.FC = () => {
                 placeholder=" "
                 className={`${authInputClassName} peer pl-10 pt-6 pb-2.5 ${errors.country ? 'animate-error-shake border-[color:var(--danger)] focus:ring-[color:var(--danger)]' : ''}`}
               />
-              <label htmlFor="sign-up-country" className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[color:var(--text-muted)] peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[color:var(--accent)]">Country</label>
+              <label
+                htmlFor="sign-up-country"
+                className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[color:var(--text-muted)] peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[color:var(--accent)]"
+              >
+                Country
+              </label>
             </div>
-            {errors.country ? <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.country.message}</p> : null}
+            {errors.country ? (
+              <p className="mt-1 text-xs text-[color:var(--danger-text)]">
+                {errors.country.message}
+              </p>
+            ) : null}
           </div>
           <div className="space-y-1.5">
             <div className="relative">
@@ -288,9 +339,16 @@ const SignUpPage: React.FC = () => {
                 max="150"
                 className={`${authInputClassName} peer pl-10 pr-4 pt-6 pb-2.5 ${errors.age ? 'animate-error-shake border-[color:var(--danger)] focus:ring-[color:var(--danger)]' : ''}`}
               />
-              <label htmlFor="sign-up-age" className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[color:var(--text-muted)] peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[color:var(--accent)]">Age</label>
+              <label
+                htmlFor="sign-up-age"
+                className="pointer-events-none absolute left-10 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[color:var(--text-muted)] transition-all duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-placeholder-shown:text-[color:var(--text-muted)] peer-focus:top-3 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-semibold peer-focus:uppercase peer-focus:tracking-[0.18em] peer-focus:text-[color:var(--accent)]"
+              >
+                Age
+              </label>
             </div>
-            {errors.age ? <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.age.message}</p> : null}
+            {errors.age ? (
+              <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.age.message}</p>
+            ) : null}
           </div>
         </div>
 
@@ -309,20 +367,26 @@ const SignUpPage: React.FC = () => {
             </span>
             <span className="min-w-0">
               <span className="block text-sm font-medium leading-snug text-[color:var(--text-secondary)]">
-                I agree to the <span className="text-[color:var(--text-muted)]">Terms of Service (coming soon)</span>{' '}
-                and <span className="text-[color:var(--text-muted)]">Privacy Policy (coming soon)</span>
+                I agree to the{' '}
+                <span className="text-[color:var(--text-muted)]">
+                  Terms of Service (coming soon)
+                </span>{' '}
+                and{' '}
+                <span className="text-[color:var(--text-muted)]">Privacy Policy (coming soon)</span>
               </span>
               <span className="mt-1 block text-xs leading-relaxed text-[color:var(--text-muted)]">
                 Account creation requires accepting the current platform terms.
               </span>
             </span>
           </label>
-          {errors.acceptTerms?.message ? <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.acceptTerms.message}</p> : null}
+          {errors.acceptTerms?.message ? (
+            <p className="mt-1 text-xs text-[color:var(--danger-text)]">
+              {errors.acceptTerms.message}
+            </p>
+          ) : null}
         </div>
 
-        {error ? (
-          <AuthAlert>{error.errorMessage}</AuthAlert>
-        ) : null}
+        {error ? <AuthAlert>{error.errorMessage}</AuthAlert> : null}
         {turnstile.error ? <AuthAlert>{turnstile.error}</AuthAlert> : null}
 
         {features.authTurnstile ? (
@@ -334,7 +398,13 @@ const SignUpPage: React.FC = () => {
           />
         ) : null}
 
-        <Button type="submit" loading={loading} shake={hasValidationErrors} className="w-full" size="lg">
+        <Button
+          type="submit"
+          loading={loading}
+          shake={hasValidationErrors}
+          className="w-full"
+          size="lg"
+        >
           <span>{loading ? 'Creating Account…' : 'Create Account'}</span>
         </Button>
       </form>

@@ -56,7 +56,9 @@ export function AuthBrandPanel({
         >
           {heading}
         </h2>
-        <p className="mb-10 max-w-sm text-base leading-relaxed text-[color:var(--text-muted)]">{description}</p>
+        <p className="mb-10 max-w-sm text-base leading-relaxed text-[color:var(--text-muted)]">
+          {description}
+        </p>
 
         <div className="space-y-4">
           {features.map(feature => {

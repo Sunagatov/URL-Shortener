@@ -1,11 +1,5 @@
 import type { PropsWithChildren, ReactEventHandler, ReactNode } from 'react';
-import {
-  FaCalendarAlt,
-  FaCheck,
-  FaCopy,
-  FaExternalLinkAlt,
-  FaLink,
-} from 'react-icons/fa';
+import { FaCalendarAlt, FaCheck, FaCopy, FaExternalLinkAlt, FaLink } from 'react-icons/fa';
 import { Tooltip } from '@/shared/ui';
 
 export function UrlSurfaceCard({
@@ -14,9 +8,13 @@ export function UrlSurfaceCard({
   title,
 }: PropsWithChildren<{ className?: string; title: string }>) {
   return (
-    <div className={`overflow-hidden rounded-2xl border border-[color:var(--card-border)] bg-[var(--card-bg)] ${className}`}>
+    <div
+      className={`overflow-hidden rounded-2xl border border-[color:var(--card-border)] bg-[var(--card-bg)] ${className}`}
+    >
       <div className="border-b border-[color:var(--border)] px-5 py-3.5">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">{title}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">
+          {title}
+        </p>
       </div>
       <div className="p-5">{children}</div>
     </div>
@@ -78,7 +76,9 @@ export function UrlCopyButton({
       }
     >
       {copied ? (
-        <FaCheck className={`h-3 w-3 ${primary ? 'text-[color:var(--avatar-text)]' : 'text-[color:var(--text-secondary)]'}`} />
+        <FaCheck
+          className={`h-3 w-3 ${primary ? 'text-[color:var(--avatar-text)]' : 'text-[color:var(--text-secondary)]'}`}
+        />
       ) : (
         <FaCopy className="h-3 w-3" />
       )}
@@ -138,7 +138,8 @@ export function UrlMetadataRow({
     tone === 'warning'
       ? 'border-amber-500/15 bg-amber-500/15 text-amber-400'
       : 'border-blue-500/15 bg-blue-600/15 text-[color:var(--avatar-text)]';
-  const textClassName = tone === 'warning' ? 'text-amber-300/80' : 'text-[color:var(--text-secondary)]';
+  const textClassName =
+    tone === 'warning' ? 'text-amber-300/80' : 'text-[color:var(--text-secondary)]';
 
   return (
     <div className={`flex items-center gap-3 rounded-xl border p-3 ${containerClassName}`}>
@@ -148,8 +149,13 @@ export function UrlMetadataRow({
         <Icon className="h-3.5 w-3.5" />
       </div>
       <div>
-        <p className="mb-0.5 text-[10px] uppercase tracking-widest text-[color:var(--text-muted)]">{label}</p>
-        <p className={`text-xs font-semibold ${textClassName}`} style={{ fontFamily: 'var(--font-mono)' }}>
+        <p className="mb-0.5 text-[10px] uppercase tracking-widest text-[color:var(--text-muted)]">
+          {label}
+        </p>
+        <p
+          className={`text-xs font-semibold ${textClassName}`}
+          style={{ fontFamily: 'var(--font-mono)' }}
+        >
           {value}
         </p>
       </div>

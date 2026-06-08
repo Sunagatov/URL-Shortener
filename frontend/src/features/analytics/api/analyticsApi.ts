@@ -19,37 +19,66 @@ function buildParams(params: AnalyticsParams) {
   };
 }
 
-export async function getUrlSummary(hash: string, params: AnalyticsParams = {}): Promise<AnalyticsSummary> {
-  const response = await httpClient.get(endpoints.urls.analytics.summary(hash), { params: buildParams(params) });
+export async function getUrlSummary(
+  hash: string,
+  params: AnalyticsParams = {}
+): Promise<AnalyticsSummary> {
+  const response = await httpClient.get(endpoints.urls.analytics.summary(hash), {
+    params: buildParams(params),
+  });
   return response.data;
 }
 
-export async function getUrlTimeseries(hash: string, params: AnalyticsParams = {}): Promise<AnalyticsTimeseries> {
-  const response = await httpClient.get(endpoints.urls.analytics.timeseries(hash), { params: buildParams(params) });
+export async function getUrlTimeseries(
+  hash: string,
+  params: AnalyticsParams = {}
+): Promise<AnalyticsTimeseries> {
+  const response = await httpClient.get(endpoints.urls.analytics.timeseries(hash), {
+    params: buildParams(params),
+  });
   return response.data;
 }
 
-export async function getUrlBreakdown(hash: string, dimension: string, params: AnalyticsParams = {}): Promise<AnalyticsBreakdown> {
-  const response = await httpClient.get(endpoints.urls.analytics.breakdown(hash, dimension), { params: buildParams(params) });
+export async function getUrlBreakdown(
+  hash: string,
+  dimension: string,
+  params: AnalyticsParams = {}
+): Promise<AnalyticsBreakdown> {
+  const response = await httpClient.get(endpoints.urls.analytics.breakdown(hash, dimension), {
+    params: buildParams(params),
+  });
   return response.data;
 }
 
 export async function getAccountSummary(params: AnalyticsParams = {}): Promise<AnalyticsSummary> {
-  const response = await httpClient.get(endpoints.analytics.summary, { params: buildParams(params) });
+  const response = await httpClient.get(endpoints.analytics.summary, {
+    params: buildParams(params),
+  });
   return response.data;
 }
 
-export async function getAccountTimeseries(params: AnalyticsParams = {}): Promise<AnalyticsTimeseries> {
-  const response = await httpClient.get(endpoints.analytics.timeseries, { params: buildParams(params) });
+export async function getAccountTimeseries(
+  params: AnalyticsParams = {}
+): Promise<AnalyticsTimeseries> {
+  const response = await httpClient.get(endpoints.analytics.timeseries, {
+    params: buildParams(params),
+  });
   return response.data;
 }
 
 export async function getAccountTopLinks(params: AnalyticsParams = {}): Promise<AnalyticsTopLinks> {
-  const response = await httpClient.get(endpoints.analytics.topLinks, { params: buildParams(params) });
+  const response = await httpClient.get(endpoints.analytics.topLinks, {
+    params: buildParams(params),
+  });
   return response.data;
 }
 
-export async function getAccountBreakdown(dimension: string, params: AnalyticsParams = {}): Promise<AnalyticsBreakdown> {
-  const response = await httpClient.get(endpoints.analytics.breakdown(dimension), { params: buildParams(params) });
+export async function getAccountBreakdown(
+  dimension: string,
+  params: AnalyticsParams = {}
+): Promise<AnalyticsBreakdown> {
+  const response = await httpClient.get(endpoints.analytics.breakdown(dimension), {
+    params: buildParams(params),
+  });
   return response.data;
 }

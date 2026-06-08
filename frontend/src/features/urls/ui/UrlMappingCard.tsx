@@ -3,10 +3,7 @@ import { useState } from 'react';
 import { FaCheck, FaExternalLinkAlt, FaTrash } from 'react-icons/fa';
 import { getDomainLabel } from '@/features/urls/lib/urlMappings';
 import type { UrlMapping } from '@/features/urls/types/url';
-import {
-  UrlFallbackIcon,
-  UrlFavicon,
-} from '@/features/urls/ui/UrlSurfacePrimitives';
+import { UrlFallbackIcon, UrlFavicon } from '@/features/urls/ui/UrlSurfacePrimitives';
 import { UrlValueField } from '@/features/urls/ui/UrlValueField';
 import { Tooltip } from '@/shared/ui';
 
@@ -70,7 +67,9 @@ export const UrlMappingCard = ({
         {isSelectMode ? (
           <div
             className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md border-2 transition-all duration-150 ${
-              isSelected ? 'border-blue-500 bg-blue-500' : 'border-[color:var(--text-muted)] bg-transparent'
+              isSelected
+                ? 'border-blue-500 bg-blue-500'
+                : 'border-[color:var(--text-muted)] bg-transparent'
             }`}
           >
             {isSelected && <FaCheck className="h-2.5 w-2.5 text-[color:var(--text-on-accent)]" />}
@@ -82,8 +81,12 @@ export const UrlMappingCard = ({
         )}
 
         <div className="min-w-0 flex-1">
-          <span className="truncate text-xs font-medium text-[color:var(--text-secondary)]">{domain}</span>
-          <p className="mt-0.5 text-xs text-[color:var(--text-muted)]">{formatDate(mapping.createdAt)}</p>
+          <span className="truncate text-xs font-medium text-[color:var(--text-secondary)]">
+            {domain}
+          </span>
+          <p className="mt-0.5 text-xs text-[color:var(--text-muted)]">
+            {formatDate(mapping.createdAt)}
+          </p>
         </div>
 
         {/* Click count + sparkbar + actions */}
@@ -119,7 +122,7 @@ export const UrlMappingCard = ({
               </Tooltip>
               <Tooltip content="Delete URL">
                 <button
-                  onClick={(event) => {
+                  onClick={event => {
                     event.stopPropagation();
                     onDelete();
                   }}

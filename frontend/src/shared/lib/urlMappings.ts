@@ -5,7 +5,7 @@ const backendRestApiUrl = import.meta.env.VITE_BACKEND_REST_API_URL;
 export const getVisiblePages = (page: number, totalPages: number, maxVisiblePages = 5) => {
   const startPage = Math.max(
     0,
-    Math.min(page - Math.floor(maxVisiblePages / 2), Math.max(0, totalPages - maxVisiblePages)),
+    Math.min(page - Math.floor(maxVisiblePages / 2), Math.max(0, totalPages - maxVisiblePages))
   );
   const endPage = Math.min(totalPages, startPage + maxVisiblePages);
   return Array.from({ length: endPage - startPage }, (_, index) => startPage + index);
@@ -44,10 +44,9 @@ export const getPublicShortUrlBase = () => {
     const trimmedPathname = parsedBackendUrl.pathname.replace(/\/+$/, '');
     const publicPathname = trimmedPathname.replace(/\/api(?:\/v\d+)?$/, '');
     const normalizedPathname = publicPathname ? `${publicPathname}/` : '/';
-    return new URL(
-      normalizedPathname,
-      `${parsedBackendUrl.protocol}//${publicAuthority}`,
-    ).toString().replace(/\/$/, '');
+    return new URL(normalizedPathname, `${parsedBackendUrl.protocol}//${publicAuthority}`)
+      .toString()
+      .replace(/\/$/, '');
   } catch {
     return null;
   }

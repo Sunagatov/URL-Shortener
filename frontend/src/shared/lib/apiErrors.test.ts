@@ -19,7 +19,7 @@ describe('apiErrors', () => {
     };
 
     expect(getApiErrorMessage(error, 'Fallback message')).toBe(
-      'Too many requests. Please wait 12 seconds and try again.',
+      'Too many requests. Please wait 12 seconds and try again.'
     );
     expect(getApiErrorRetryAfterSeconds(error)).toBe(12);
     expect(getApiErrorCode(error)).toBe('RATE_LIMIT_EXCEEDED');
@@ -37,7 +37,7 @@ describe('apiErrors', () => {
     };
 
     expect(getApiErrorMessage(error, 'Fallback message')).toBe(
-      'Too many requests. Please try again later.',
+      'Too many requests. Please try again later.'
     );
     expect(getApiErrorRetryAfterSeconds(error)).toBeUndefined();
   });

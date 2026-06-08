@@ -88,7 +88,7 @@ const UrlMappingDetailsPage: React.FC = () => {
       setEditValue(urlMapping.originalUrl);
       setEditError(null);
     }
-    setIsEditing((value) => !value);
+    setIsEditing(value => !value);
   };
 
   const handleEditSave = async () => {
@@ -174,10 +174,15 @@ const UrlMappingDetailsPage: React.FC = () => {
           </h2>
           <div className="flex items-center gap-2">
             <EventTypeFilter value={analytics.eventType} onChange={analytics.setEventType} />
-            <DateRangeSelector dateRange={analytics.dateRange} onDateRangeChange={analytics.setDateRange} />
+            <DateRangeSelector
+              dateRange={analytics.dateRange}
+              onDateRangeChange={analytics.setDateRange}
+            />
           </div>
         </div>
-        <p className="mb-4 text-[10px] text-[color:var(--text-muted)]">Bot traffic excluded from analytics</p>
+        <p className="mb-4 text-[10px] text-[color:var(--text-muted)]">
+          Bot traffic excluded from analytics
+        </p>
 
         {analytics.loading ? (
           <AnalyticsLoadingSkeleton />

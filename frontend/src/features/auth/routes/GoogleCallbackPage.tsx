@@ -21,7 +21,9 @@ export default function GoogleCallbackPage() {
     const destination = state || routes.dashboard;
 
     if (errorParam) {
-      setError(errorParam === 'access_denied' ? 'Google sign-in was cancelled.' : 'Google sign-in failed.');
+      setError(
+        errorParam === 'access_denied' ? 'Google sign-in was cancelled.' : 'Google sign-in failed.'
+      );
       return;
     }
     if (!code) {
@@ -35,7 +37,9 @@ export default function GoogleCallbackPage() {
       try {
         const profile = await getUserProfile();
         updateUser(profile);
-      } catch { /* best-effort profile hydration */ }
+      } catch {
+        /* best-effort profile hydration */
+      }
       navigate(destination, { replace: true });
     } catch {
       setError('Failed to sign in with Google. Please try again.');

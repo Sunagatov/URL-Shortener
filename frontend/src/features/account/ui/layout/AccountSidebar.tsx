@@ -47,7 +47,9 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
             </span>
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold leading-tight text-[color:var(--text-primary)]">{displayName}</p>
+            <p className="truncate text-sm font-semibold leading-tight text-[color:var(--text-primary)]">
+              {displayName}
+            </p>
             {user?.email && displayName !== user.email ? (
               <p className="mt-0.5 truncate text-xs text-[color:var(--text-muted)]">{user.email}</p>
             ) : null}
@@ -58,7 +60,7 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
       <div className="mx-4 mb-2 border-t border-[color:var(--border)]" />
 
       <nav className="flex-1 space-y-0.5 overflow-y-auto px-3">
-        {accountNavigationItems.map((item) => {
+        {accountNavigationItems.map(item => {
           const Icon = item.icon;
           const active = isActive(item.path);
 
@@ -77,7 +79,9 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
             >
               <Icon
                 className={`h-4 w-4 flex-shrink-0 transition-colors ${
-                  active ? 'text-[color:var(--avatar-text)]' : 'text-[color:var(--text-muted)] group-hover:text-[color:var(--text-secondary)]'
+                  active
+                    ? 'text-[color:var(--avatar-text)]'
+                    : 'text-[color:var(--text-muted)] group-hover:text-[color:var(--text-secondary)]'
                 }`}
               />
               <span className="text-sm font-medium">{item.label}</span>

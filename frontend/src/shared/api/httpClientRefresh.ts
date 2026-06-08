@@ -25,7 +25,7 @@ export async function refreshFailedSession(path?: string, error?: unknown) {
 export async function refreshAccessTokenForRequest(
   axiosInstance: AxiosInstance,
   rawAxios: AxiosInstance,
-  originalRequest: RetryableRequestConfig,
+  originalRequest: RetryableRequestConfig
 ) {
   const refreshToken = storage.getRefreshToken();
 

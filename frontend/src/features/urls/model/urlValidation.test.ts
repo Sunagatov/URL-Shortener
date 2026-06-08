@@ -21,11 +21,23 @@ describe('createUrlSchema', () => {
     expect(createUrlSchema.safeParse({ originalUrl }).success).toBe(false);
   });
 
-  it.each([
-    'https://example.com/path',
-    'http://example.org',
-    'https://93.184.216.34/path',
-  ])('accepts public destination %s', originalUrl => {
-    expect(createUrlSchema.safeParse({ originalUrl }).success).toBe(true);
+  it.each(['https://example.com/path', 'http://example.org', 'https://93.184.216.34/path'])(
+    'accepts public destination %s',
+    originalUrl => {
+      expect(createUrlSchema.safeParse({ originalUrl }).success).toBe(true);
+    }
+  );
+
+  it('treats the blank expiration option as the default expiration', () => {
+    const result = createUrlSchema.safeParse({
+      originalUrl: 'https://example.com/path',
+      daysCount: '',
+    });
+
+    if (!result.success) {
+      throw new Error('Expected blank expiration to be accepted');
+    }
+
+    expect(result.data.daysCount).toBeUndefined();
   });
 });

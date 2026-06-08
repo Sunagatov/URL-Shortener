@@ -22,12 +22,17 @@ const AccountAnalyticsPage: React.FC = () => {
         actions={
           <div className="flex items-center gap-2">
             <EventTypeFilter value={analytics.eventType} onChange={analytics.setEventType} />
-            <DateRangeSelector dateRange={analytics.dateRange} onDateRangeChange={analytics.setDateRange} />
+            <DateRangeSelector
+              dateRange={analytics.dateRange}
+              onDateRangeChange={analytics.setDateRange}
+            />
           </div>
         }
       />
 
-      <p className="mb-4 -mt-4 text-[10px] text-[color:var(--text-muted)]">Bot traffic excluded from analytics</p>
+      <p className="mb-4 -mt-4 text-[10px] text-[color:var(--text-muted)]">
+        Bot traffic excluded from analytics
+      </p>
 
       {analytics.loading ? (
         <AnalyticsLoadingSkeleton />

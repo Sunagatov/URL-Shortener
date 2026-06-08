@@ -54,11 +54,11 @@ function AppRoutes() {
           ))}
           <Route
             path={routes.account}
-            element={(
+            element={
               <AuthRoute access="protected">
                 <Navigate to={routes.dashboard} replace />
               </AuthRoute>
-            )}
+            }
           />
           {protectedRoutes.map(({ path, element }) => (
             <Route

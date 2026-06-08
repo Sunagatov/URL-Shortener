@@ -64,7 +64,7 @@ const UserUrlMappingsPage: React.FC = () => {
   const filteredAndSorted = useMemo(() => {
     const query = search.toLowerCase().trim();
     const filtered = query
-      ? allMappings.filter((mapping) => {
+      ? allMappings.filter(mapping => {
           return (
             mapping.originalUrl.toLowerCase().includes(query) ||
             mapping.shortUrl.toLowerCase().includes(query)
@@ -83,7 +83,7 @@ const UserUrlMappingsPage: React.FC = () => {
   const displayTotalPages = Math.ceil(totalElements / PAGE_SIZE);
   const displayMappings = filteredAndSorted.slice(
     clientPage * PAGE_SIZE,
-    (clientPage + 1) * PAGE_SIZE,
+    (clientPage + 1) * PAGE_SIZE
   );
 
   const {
@@ -100,8 +100,8 @@ const UserUrlMappingsPage: React.FC = () => {
 
   const updateMappingsAfterDelete = (hashes: string[]) => {
     setPageError(null);
-    setAllMappings((current) => {
-      const nextMappings = current.filter((mapping) => !hashes.includes(mapping.urlHash));
+    setAllMappings(current => {
+      const nextMappings = current.filter(mapping => !hashes.includes(mapping.urlHash));
       const nextFilteredCount = (() => {
         const query = search.toLowerCase().trim();
 
@@ -109,7 +109,7 @@ const UserUrlMappingsPage: React.FC = () => {
           return nextMappings.length;
         }
 
-        return nextMappings.filter((mapping) => {
+        return nextMappings.filter(mapping => {
           return (
             mapping.originalUrl.toLowerCase().includes(query) ||
             mapping.shortUrl.toLowerCase().includes(query)
@@ -118,7 +118,7 @@ const UserUrlMappingsPage: React.FC = () => {
       })();
       const nextTotalPages = Math.ceil(nextFilteredCount / PAGE_SIZE);
 
-      setClientPage((currentPage) => Math.min(currentPage, Math.max(nextTotalPages - 1, 0)));
+      setClientPage(currentPage => Math.min(currentPage, Math.max(nextTotalPages - 1, 0)));
       return nextMappings;
     });
   };
@@ -141,7 +141,7 @@ const UserUrlMappingsPage: React.FC = () => {
 
   const handleBulkDelete = async (hashes: string[]) => {
     try {
-      await Promise.all(hashes.map((hash) => deleteUrl(hash)));
+      await Promise.all(hashes.map(hash => deleteUrl(hash)));
       toast.success(`${hashes.length} URL${hashes.length !== 1 ? 's' : ''} deleted.`);
       updateMappingsAfterDelete(hashes);
       return true;
@@ -225,7 +225,7 @@ const UserUrlMappingsPage: React.FC = () => {
         onClearSearch={() => setSearch('')}
         onSearchChange={setSearch}
         onToggleSortOrder={() =>
-          setSortOrder((current) => (current === 'newest' ? 'oldest' : 'newest'))
+          setSortOrder(current => (current === 'newest' ? 'oldest' : 'newest'))
         }
       />
 
@@ -244,7 +244,7 @@ const UserUrlMappingsPage: React.FC = () => {
           selectedHashes={selectedHashes}
           onCopy={handleCopyUrl}
           onDelete={setPendingDeleteHash}
-          onDetails={(urlHash) => navigate(routes.urlDetails(urlHash))}
+          onDetails={urlHash => navigate(routes.urlDetails(urlHash))}
           onToggleSelect={toggleSelect}
         />
       ) : isSearchMode ? (

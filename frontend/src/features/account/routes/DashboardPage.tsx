@@ -51,7 +51,7 @@ const DashboardPage: React.FC = () => {
         <DashboardRecentUrlsPanel
           isLoading={isLoading}
           onOpenAll={() => navigate(routes.urlMappings)}
-          onOpenDetails={(urlHash) => navigate(routes.urlDetails(urlHash))}
+          onOpenDetails={urlHash => navigate(routes.urlDetails(urlHash))}
           recentUrls={recentUrls}
         />
         <DashboardActivityPanel activity={activity} isLoading={isLoading} />

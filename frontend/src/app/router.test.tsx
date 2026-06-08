@@ -14,11 +14,21 @@ vi.mock('@/app/layout/MainLayout', () => ({
 vi.mock('@/features/urls/routes/UrlShortenerPage', () => ({ default: () => <div>Home Page</div> }));
 vi.mock('@/features/auth/routes/SignInPage', () => ({ default: () => <div>Sign In Page</div> }));
 vi.mock('@/features/auth/routes/SignUpPage', () => ({ default: () => <div>Sign Up Page</div> }));
-vi.mock('@/features/account/routes/UserAccountPage', () => ({ default: () => <div>Profile Page</div> }));
-vi.mock('@/features/urls/routes/UserUrlMappingsPage', () => ({ default: () => <div>URL Mappings Page</div> }));
-vi.mock('@/features/urls/routes/UrlMappingDetailsPage', () => ({ default: () => <div>URL Mapping Details Page</div> }));
-vi.mock('@/features/account/routes/SecurityPage', () => ({ default: () => <div>Security Page</div> }));
-vi.mock('@/features/account/routes/DashboardPage', () => ({ default: () => <div>Dashboard Page</div> }));
+vi.mock('@/features/account/routes/UserAccountPage', () => ({
+  default: () => <div>Profile Page</div>,
+}));
+vi.mock('@/features/urls/routes/UserUrlMappingsPage', () => ({
+  default: () => <div>URL Mappings Page</div>,
+}));
+vi.mock('@/features/urls/routes/UrlMappingDetailsPage', () => ({
+  default: () => <div>URL Mapping Details Page</div>,
+}));
+vi.mock('@/features/account/routes/SecurityPage', () => ({
+  default: () => <div>Security Page</div>,
+}));
+vi.mock('@/features/account/routes/DashboardPage', () => ({
+  default: () => <div>Dashboard Page</div>,
+}));
 
 const mockUseAuth = vi.mocked(useAuth);
 

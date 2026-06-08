@@ -27,7 +27,13 @@ const fieldInputClass =
   'w-full rounded-xl border border-[color:var(--border)] bg-[var(--bg-alt)] py-3 pl-10 pr-4 text-sm text-[color:var(--text-primary)] ' +
   'placeholder-[color:var(--text-muted)] transition-all duration-200 focus:border-blue-500/30 focus:outline-none focus:ring-2 focus:ring-blue-500/40';
 
-function ProfileField({ error, icon: Icon, label, registration, ...inputProps }: ProfileFieldProps) {
+function ProfileField({
+  error,
+  icon: Icon,
+  label,
+  registration,
+  ...inputProps
+}: ProfileFieldProps) {
   return (
     <div>
       <label className="mb-2 block text-[10px] font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">
@@ -41,7 +47,9 @@ function ProfileField({ error, icon: Icon, label, registration, ...inputProps }:
           className={`${fieldInputClass} ${error ? 'animate-error-shake border-red-500/30 focus:ring-red-500/30' : ''}`}
         />
       </div>
-      {error?.message ? <p className="mt-1 text-xs text-[color:var(--danger-text)]">{error.message}</p> : null}
+      {error?.message ? (
+        <p className="mt-1 text-xs text-[color:var(--danger-text)]">{error.message}</p>
+      ) : null}
     </div>
   );
 }
@@ -162,7 +170,9 @@ export function EditProfileForm({ user, onCancel, onSuccess }: EditProfileFormPr
               />
               <FaLock className="absolute right-3.5 top-1/2 h-3 w-3 -translate-y-1/2 text-[color:var(--text-muted)]" />
             </div>
-            <p className="mt-1 text-[10px] text-[color:var(--text-muted)]">Email address cannot be changed</p>
+            <p className="mt-1 text-[10px] text-[color:var(--text-muted)]">
+              Email address cannot be changed
+            </p>
           </div>
         </div>
 
@@ -183,7 +193,12 @@ export function EditProfileForm({ user, onCancel, onSuccess }: EditProfileFormPr
           >
             Cancel
           </Button>
-          <Button type="submit" loading={isLoading} shake={hasValidationErrors} className="w-full sm:w-auto">
+          <Button
+            type="submit"
+            loading={isLoading}
+            shake={hasValidationErrors}
+            className="w-full sm:w-auto"
+          >
             <span>{isLoading ? 'Saving…' : 'Save Changes'}</span>
           </Button>
         </div>

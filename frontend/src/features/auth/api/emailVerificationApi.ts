@@ -14,7 +14,7 @@ export async function verifyEmail(data: {
 
 export async function resendVerificationCode(
   email: string,
-  turnstileToken?: string,
+  turnstileToken?: string
 ): Promise<VerificationChallengeResponse> {
   const response = await httpClient.post(endpoints.auth.resendVerification, {
     email,

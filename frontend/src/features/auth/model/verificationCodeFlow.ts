@@ -36,14 +36,16 @@ export function useVerificationCodeFlow({
   const [deliveryMode, setDeliveryMode] = useState<VerificationChallengeResponse['deliveryMode']>(
     initialDeliveryMode ?? 'email'
   );
-  const inputRefs = useRef<Array<HTMLInputElement | null>>(Array(VERIFICATION_CODE_LENGTH).fill(null));
+  const inputRefs = useRef<Array<HTMLInputElement | null>>(
+    Array(VERIFICATION_CODE_LENGTH).fill(null)
+  );
 
   useEffect(() => {
     if (countdown <= 0) {
       return;
     }
 
-    const timer = setTimeout(() => setCountdown((value) => value - 1), 1000);
+    const timer = setTimeout(() => setCountdown(value => value - 1), 1000);
     return () => clearTimeout(timer);
   }, [countdown]);
 
@@ -56,7 +58,7 @@ export function useVerificationCodeFlow({
       return;
     }
 
-    const timer = setTimeout(() => setExpiresInSeconds((value) => value - 1), 1000);
+    const timer = setTimeout(() => setExpiresInSeconds(value => value - 1), 1000);
     return () => clearTimeout(timer);
   }, [expiresInSeconds]);
 
@@ -95,7 +97,15 @@ export function useVerificationCodeFlow({
         setIsLoading(false);
       }
     },
-    [completeAuth, destination, email, isLoading, requireTurnstileVerified, resetTurnstileChallenge, turnstileToken],
+    [
+      completeAuth,
+      destination,
+      email,
+      isLoading,
+      requireTurnstileVerified,
+      resetTurnstileChallenge,
+      turnstileToken,
+    ]
   );
 
   const handleChange = (index: number, value: string) => {
@@ -147,7 +157,10 @@ export function useVerificationCodeFlow({
 
   const handlePaste = (event: React.ClipboardEvent) => {
     event.preventDefault();
-    const pasted = event.clipboardData.getData('text').replace(/\D/g, '').slice(0, VERIFICATION_CODE_LENGTH);
+    const pasted = event.clipboardData
+      .getData('text')
+      .replace(/\D/g, '')
+      .slice(0, VERIFICATION_CODE_LENGTH);
 
     if (!pasted) {
       return;
@@ -162,8 +175,10 @@ export function useVerificationCodeFlow({
     setDigits(nextDigits);
     setError('');
 
-    const nextEmptyIndex = nextDigits.findIndex((digit) => !digit);
-    inputRefs.current[nextEmptyIndex === -1 ? VERIFICATION_CODE_LENGTH - 1 : nextEmptyIndex]?.focus();
+    const nextEmptyIndex = nextDigits.findIndex(digit => !digit);
+    inputRefs.current[
+      nextEmptyIndex === -1 ? VERIFICATION_CODE_LENGTH - 1 : nextEmptyIndex
+    ]?.focus();
 
     if (pasted.length === VERIFICATION_CODE_LENGTH) {
       void verifyCode(pasted);

@@ -13,5 +13,5 @@ root.render(
         <App />
       </Providers>
     </AppErrorBoundary>
-  </StrictMode>,
+  </StrictMode>
 );

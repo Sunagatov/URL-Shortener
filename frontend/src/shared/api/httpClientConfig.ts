@@ -8,11 +8,7 @@ if (!backendRestApiUrl) {
   throw new Error('VITE_BACKEND_REST_API_URL environment variable is not set');
 }
 
-const AUTH_PATHS = [
-  endpoints.auth.signIn,
-  endpoints.auth.signUp,
-  endpoints.auth.refresh,
-];
+const AUTH_PATHS = [endpoints.auth.signIn, endpoints.auth.signUp, endpoints.auth.refresh];
 
 export const defaultHttpClientConfig = {
   baseURL: backendRestApiUrl,
@@ -27,5 +23,5 @@ export function isAuthRequest(url?: string): boolean {
     return false;
   }
 
-  return AUTH_PATHS.some((path) => url === path || url.endsWith(path));
+  return AUTH_PATHS.some(path => url === path || url.endsWith(path));
 }

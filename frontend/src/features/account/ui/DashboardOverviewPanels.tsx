@@ -17,7 +17,11 @@ import {
 } from 'react-icons/fa';
 
 const statMeta = [
-  { icon: FaLink, iconColor: 'text-[color:var(--avatar-text)]', iconBg: 'bg-[var(--avatar-bg)] border border-blue-500/20' },
+  {
+    icon: FaLink,
+    iconColor: 'text-[color:var(--avatar-text)]',
+    iconBg: 'bg-[var(--avatar-bg)] border border-blue-500/20',
+  },
   {
     icon: FaMousePointer,
     iconColor: 'text-indigo-400',
@@ -28,17 +32,16 @@ const statMeta = [
     iconColor: 'text-violet-400',
     iconBg: 'bg-violet-600/20 border border-violet-500/20',
   },
-  { icon: FaChartBar, iconColor: 'text-slate-400', iconBg: 'bg-slate-600/20 border border-slate-500/20' },
+  {
+    icon: FaChartBar,
+    iconColor: 'text-slate-400',
+    iconBg: 'bg-slate-600/20 border border-slate-500/20',
+  },
 ] as const;
 
-const StatCard: React.FC<DashboardStat & { icon: React.ElementType; iconBg: string; iconColor: string }> = ({
-  changeLabel,
-  icon: Icon,
-  iconBg,
-  iconColor,
-  label,
-  value,
-}) => (
+const StatCard: React.FC<
+  DashboardStat & { icon: React.ElementType; iconBg: string; iconColor: string }
+> = ({ changeLabel, icon: Icon, iconBg, iconColor, label, value }) => (
   <div className="flex flex-col gap-4 rounded-2xl border border-[color:var(--card-border)] bg-[var(--card-bg)] p-5">
     <div className="flex items-center justify-between">
       <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${iconBg}`}>
@@ -118,7 +121,7 @@ export const DashboardRecentUrlsPanel: React.FC<{
               <div className="skeleton h-3 w-16" />
             </div>
           ))
-        : recentUrls.map((mapping) => (
+        : recentUrls.map(mapping => (
             <button
               key={mapping.urlHash}
               onClick={() => onOpenDetails(mapping.urlHash)}
@@ -128,12 +131,20 @@ export const DashboardRecentUrlsPanel: React.FC<{
                 <FaLink className="h-3 w-3 text-[color:var(--avatar-text)]" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-[color:var(--text-primary)]">{mapping.domain}</p>
-                <p className="truncate text-xs text-[color:var(--text-muted)]">.../{mapping.shortSlug}</p>
+                <p className="truncate text-sm font-medium text-[color:var(--text-primary)]">
+                  {mapping.domain}
+                </p>
+                <p className="truncate text-xs text-[color:var(--text-muted)]">
+                  .../{mapping.shortSlug}
+                </p>
               </div>
               <div className="text-right">
-                <p className="text-xs font-medium text-[color:var(--text-secondary)]">{mapping.clickCount} clicks</p>
-                <p className="text-[11px] text-[color:var(--text-muted)]">{mapping.createdAtLabel}</p>
+                <p className="text-xs font-medium text-[color:var(--text-secondary)]">
+                  {mapping.clickCount} clicks
+                </p>
+                <p className="text-[11px] text-[color:var(--text-muted)]">
+                  {mapping.createdAtLabel}
+                </p>
               </div>
               <FaChevronRight className="h-3 w-3 text-[color:var(--text-muted)]" />
             </button>
@@ -141,7 +152,9 @@ export const DashboardRecentUrlsPanel: React.FC<{
       {!isLoading && recentUrls.length === 0 ? (
         <div className="px-5 py-8 text-center">
           <p className="text-sm text-[color:var(--text-muted)]">No URLs yet.</p>
-          <p className="mt-1 text-xs text-[color:var(--text-muted)]">Create your first short link to populate the dashboard.</p>
+          <p className="mt-1 text-xs text-[color:var(--text-muted)]">
+            Create your first short link to populate the dashboard.
+          </p>
         </div>
       ) : null}
     </div>
@@ -155,7 +168,9 @@ export const DashboardActivityPanel: React.FC<{
   <div className="overflow-hidden rounded-2xl border border-[color:var(--card-border)] bg-[var(--card-bg)]">
     <div className="border-b border-[color:var(--card-border)] px-5 py-4">
       <h3 className="text-sm font-semibold text-[color:var(--text-primary)]">Activity</h3>
-      <p className="mt-0.5 text-xs text-[color:var(--text-muted)]">Recent events inferred from your links</p>
+      <p className="mt-0.5 text-xs text-[color:var(--text-muted)]">
+        Recent events inferred from your links
+      </p>
     </div>
     <div className="space-y-3 p-5">
       {isLoading
@@ -168,8 +183,11 @@ export const DashboardActivityPanel: React.FC<{
               </div>
             </div>
           ))
-        : activity.map((item) => (
-            <div key={item.id} className="flex items-start gap-3 rounded-xl border border-[color:var(--border)] bg-[var(--card-bg)] p-3">
+        : activity.map(item => (
+            <div
+              key={item.id}
+              className="flex items-start gap-3 rounded-xl border border-[color:var(--border)] bg-[var(--card-bg)] p-3"
+            >
               <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-cyan-500/20 bg-[var(--badge-bg)]">
                 <FaChartBar className="h-3 w-3 text-[color:var(--accent)]" />
               </div>
@@ -180,7 +198,9 @@ export const DashboardActivityPanel: React.FC<{
             </div>
           ))}
       {!isLoading && activity.length === 0 ? (
-        <p className="pt-2 text-center text-xs text-[color:var(--text-muted)]">Activity will appear after you create links.</p>
+        <p className="pt-2 text-center text-xs text-[color:var(--text-muted)]">
+          Activity will appear after you create links.
+        </p>
       ) : null}
     </div>
   </div>

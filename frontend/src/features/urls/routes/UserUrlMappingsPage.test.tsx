@@ -78,7 +78,7 @@ describe('UserUrlMappings', () => {
         ...mapping,
         urlHash: `hash-${index}`,
         shortUrl: `https://sho.rt/hash-${index}`,
-      })),
+      }))
     );
     mockDeleteUrl.mockResolvedValue(undefined);
 
@@ -92,7 +92,9 @@ describe('UserUrlMappings', () => {
     expect(screen.getByText('7–7')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTitle('Delete URL'));
-    await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete' }));
+    await userEvent.click(
+      within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete' })
+    );
 
     await waitFor(() => expect(mockDeleteUrl).toHaveBeenCalledWith('hash-6'));
     expect(screen.queryByRole('button', { name: '2' })).not.toBeInTheDocument();
@@ -116,7 +118,9 @@ describe('UserUrlMappings', () => {
     );
 
     await userEvent.click(await screen.findByTitle('Delete URL'));
-    await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete' }));
+    await userEvent.click(
+      within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete' })
+    );
 
     expect(
       await screen.findByText('You are not allowed to delete this URL mapping')

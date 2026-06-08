@@ -30,7 +30,9 @@ export const getApiErrorCode = (error: unknown): string | undefined => {
 
 export const getApiErrorRetryAfterSeconds = (error: unknown): number | undefined => {
   const retryAfterSeconds = asErrorWithResponse(error)?.response?.data?.retryAfterSeconds;
-  return typeof retryAfterSeconds === 'number' && retryAfterSeconds > 0 ? retryAfterSeconds : undefined;
+  return typeof retryAfterSeconds === 'number' && retryAfterSeconds > 0
+    ? retryAfterSeconds
+    : undefined;
 };
 
 export const getApiErrorMessage = (error: unknown, fallback: string): string => {

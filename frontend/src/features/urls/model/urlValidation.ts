@@ -9,7 +9,10 @@ export const createUrlSchema = z.object({
     .min(1, 'URL is required')
     .url('Please enter a valid URL')
     .refine(isSafeDestinationUrl, unsafeDestinationMessage),
-  daysCount: z.coerce.number().int().min(1).max(365).optional(),
+  daysCount: z.preprocess(
+    value => (value === '' ? undefined : value),
+    z.coerce.number().int().min(1).max(365).optional()
+  ),
   customAlias: z
     .string()
     .regex(/^[a-zA-Z0-9_-]*$/, 'Only letters, numbers, hyphens, and underscores')

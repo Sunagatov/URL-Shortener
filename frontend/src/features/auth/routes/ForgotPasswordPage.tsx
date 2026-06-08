@@ -70,7 +70,7 @@ const ForgotPasswordPage: React.FC = () => {
     }
 
     const timer = window.setInterval(() => {
-      setCooldownSeconds((seconds) => (seconds <= 1 ? 0 : seconds - 1));
+      setCooldownSeconds(seconds => (seconds <= 1 ? 0 : seconds - 1));
     }, 1000);
 
     return () => window.clearInterval(timer);
@@ -104,7 +104,7 @@ const ForgotPasswordPage: React.FC = () => {
       }
       completeSubmission(
         targetEmail,
-        mode === 'resend' ? 'If that account exists, we sent a fresh recovery email.' : '',
+        mode === 'resend' ? 'If that account exists, we sent a fresh recovery email.' : ''
       );
       turnstile.resetChallenge();
     } catch (requestError: unknown) {
@@ -113,7 +113,7 @@ const ForgotPasswordPage: React.FC = () => {
       if (getApiErrorStatus(requestError) !== undefined) {
         completeSubmission(
           targetEmail,
-          mode === 'resend' ? 'If that account exists, we sent a fresh recovery email.' : '',
+          mode === 'resend' ? 'If that account exists, we sent a fresh recovery email.' : ''
         );
         return;
       }
@@ -146,23 +146,28 @@ const ForgotPasswordPage: React.FC = () => {
       >
         <AuthStatusView
           title="Recovery requested"
-          description={(
+          description={
             <>
               <p className="text-sm text-[color:var(--text-muted)]">Recovery requested for</p>
-              <p className="mt-1 break-all text-sm font-semibold text-[color:var(--text-primary)]">{submittedEmail}</p>
+              <p className="mt-1 break-all text-sm font-semibold text-[color:var(--text-primary)]">
+                {submittedEmail}
+              </p>
             </>
-          )}
-          icon={(
+          }
+          icon={
             <AuthStatusIcon badge="success">
               <FaInbox className="h-8 w-8 text-emerald-400" />
             </AuthStatusIcon>
-          )}
-          action={(
+          }
+          action={
             <>
               <AuthSupportCard>
                 <div className="space-y-3">
-                  {recoveryHints.map((hint) => (
-                    <div key={hint} className="flex items-start gap-2.5 text-sm text-[color:var(--text-muted)]">
+                  {recoveryHints.map(hint => (
+                    <div
+                      key={hint}
+                      className="flex items-start gap-2.5 text-sm text-[color:var(--text-muted)]"
+                    >
                       <FaCheck className="mt-0.5 h-3 w-3 flex-shrink-0 text-emerald-500/70" />
                       <span>{hint}</span>
                     </div>
@@ -197,7 +202,9 @@ const ForgotPasswordPage: React.FC = () => {
                   disabled={cooldownSeconds > 0}
                 >
                   <FaEnvelope className="h-4 w-4" />
-                  <span>{cooldownSeconds > 0 ? `Resend in ${cooldownSeconds}s` : 'Resend email'}</span>
+                  <span>
+                    {cooldownSeconds > 0 ? `Resend in ${cooldownSeconds}s` : 'Resend email'}
+                  </span>
                 </Button>
 
                 <Button
@@ -219,7 +226,7 @@ const ForgotPasswordPage: React.FC = () => {
                 <AuthBackLink to={routes.signIn}>Back to Sign In</AuthBackLink>
               </div>
             </>
-          )}
+          }
         />
       </AuthPageShell>
     );
@@ -248,7 +255,7 @@ const ForgotPasswordPage: React.FC = () => {
                 type="email"
                 required
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={event => setEmail(event.target.value)}
                 placeholder="your@email.com"
                 autoComplete="username"
                 autoCapitalize="none"
@@ -259,7 +266,8 @@ const ForgotPasswordPage: React.FC = () => {
               />
             </div>
             <p className="mt-2 text-xs text-[color:var(--text-muted)]">
-              We keep this response neutral so no one can use it to confirm whether an account exists.
+              We keep this response neutral so no one can use it to confirm whether an account
+              exists.
             </p>
           </div>
 

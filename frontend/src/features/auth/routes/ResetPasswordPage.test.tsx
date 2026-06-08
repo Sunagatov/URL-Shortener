@@ -30,10 +30,7 @@ describe('ResetPasswordPage', () => {
     renderResetPassword();
 
     await user.type(screen.getByLabelText(/^new password$/i), 'correct horse battery staple');
-    await user.type(
-      screen.getByLabelText(/confirm new password/i),
-      'correct horse battery staple'
-    );
+    await user.type(screen.getByLabelText(/confirm new password/i), 'correct horse battery staple');
     await user.click(screen.getByRole('button', { name: /save new password/i }));
 
     expect(await screen.findByText(/password updated/i)).toBeInTheDocument();

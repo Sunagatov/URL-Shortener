@@ -79,11 +79,15 @@ export function AuthStatusIcon({
 
   return (
     <div className="relative">
-      <div className={`flex h-20 w-20 items-center justify-center rounded-3xl border ${outerClassName[badge]}`}>
+      <div
+        className={`flex h-20 w-20 items-center justify-center rounded-3xl border ${outerClassName[badge]}`}
+      >
         {children}
       </div>
       {badge === 'success' ? (
-        <div className={`absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full border ${badgeClassName[badge]}`}>
+        <div
+          className={`absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full border ${badgeClassName[badge]}`}
+        >
           <FaCheck className="h-3 w-3" />
         </div>
       ) : null}
@@ -110,14 +114,10 @@ export function PasswordVisibilityToggle({
   );
 }
 
-export function AuthChecklist({
-  items,
-}: {
-  items: Array<{ label: string; passes: boolean }>;
-}) {
+export function AuthChecklist({ items }: { items: Array<{ label: string; passes: boolean }> }) {
   return (
     <div className="grid grid-cols-2 gap-1.5 pt-1">
-      {items.map((item) => (
+      {items.map(item => (
         <div
           key={item.label}
           className={`flex items-center gap-1.5 text-xs ${item.passes ? 'text-[color:var(--accent)]' : 'text-[color:var(--text-muted)]'}`}

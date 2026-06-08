@@ -54,7 +54,9 @@ export function useAccountAnalytics() {
       ]);
 
       const breakdowns: Record<string, AnalyticsBreakdown> = {};
-      DIMENSIONS.forEach((d, i) => { breakdowns[d] = breakdownResults[i]; });
+      DIMENSIONS.forEach((d, i) => {
+        breakdowns[d] = breakdownResults[i];
+      });
 
       setState({ summary, timeseries, topLinks, breakdowns, loading: false, error: null });
     } catch {
@@ -62,7 +64,9 @@ export function useAccountAnalytics() {
     }
   }, [dateRange, eventType]);
 
-  useEffect(() => { void fetchAnalytics(); }, [fetchAnalytics]);
+  useEffect(() => {
+    void fetchAnalytics();
+  }, [fetchAnalytics]);
 
   return { ...state, dateRange, setDateRange, eventType, setEventType, refresh: fetchAnalytics };
 }

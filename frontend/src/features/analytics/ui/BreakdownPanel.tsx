@@ -19,7 +19,9 @@ export function BreakdownPanel({ breakdown, title }: BreakdownPanelProps) {
   return (
     <div className="rounded-2xl border border-[color:var(--card-border)] bg-[var(--card-bg)]">
       <div className="border-b border-[color:var(--border)] px-5 py-3.5">
-        <p className="text-[10px] font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">{label}</p>
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">
+          {label}
+        </p>
       </div>
       <div className="p-5">
         {breakdown.items.length === 0 ? (
@@ -29,8 +31,13 @@ export function BreakdownPanel({ breakdown, title }: BreakdownPanelProps) {
             {breakdown.items.map(item => (
               <div key={item.label}>
                 <div className="mb-1 flex items-center justify-between">
-                  <span className="text-xs font-medium text-[color:var(--text-secondary)]">{item.label}</span>
-                  <span className="text-xs text-[color:var(--text-muted)]" style={{ fontFamily: 'var(--font-mono)' }}>
+                  <span className="text-xs font-medium text-[color:var(--text-secondary)]">
+                    {item.label}
+                  </span>
+                  <span
+                    className="text-xs text-[color:var(--text-muted)]"
+                    style={{ fontFamily: 'var(--font-mono)' }}
+                  >
                     {item.count.toLocaleString()} ({item.percentage}%)
                   </span>
                 </div>

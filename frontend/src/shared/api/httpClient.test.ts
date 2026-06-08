@@ -20,7 +20,9 @@ type MockAxiosInstance = ReturnType<typeof vi.fn> & {
 const createMockAxiosInstance = () => {
   const requestInterceptor: InterceptorPair = {};
   const responseInterceptor: InterceptorPair = {};
-  const instance = vi.fn((config: InternalAxiosRequestConfig) => Promise.resolve({ config })) as MockAxiosInstance;
+  const instance = vi.fn((config: InternalAxiosRequestConfig) =>
+    Promise.resolve({ config })
+  ) as MockAxiosInstance;
 
   instance.interceptors = {
     request: {
@@ -77,12 +79,11 @@ describe('httpClient auth interceptors', () => {
     const { api } = await loadHttpClient();
     localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, 'access-token');
 
-    for (const url of [
-      endpoints.auth.signIn,
-      endpoints.auth.signUp,
-      endpoints.auth.refresh,
-    ]) {
-      const config = api.requestInterceptor.fulfilled?.({ url, headers: {} }) as InternalAxiosRequestConfig;
+    for (const url of [endpoints.auth.signIn, endpoints.auth.signUp, endpoints.auth.refresh]) {
+      const config = api.requestInterceptor.fulfilled?.({
+        url,
+        headers: {},
+      }) as InternalAxiosRequestConfig;
 
       expect(config.headers.Authorization).toBeUndefined();
       expect(config.headers['X-Trace-ID']).toBe(CLIENT_TRACE_ID);
@@ -93,7 +94,10 @@ describe('httpClient auth interceptors', () => {
     const { api } = await loadHttpClient();
     localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, 'access-token');
 
-    const config = api.requestInterceptor.fulfilled?.({ url: endpoints.urls.list, headers: {} }) as InternalAxiosRequestConfig;
+    const config = api.requestInterceptor.fulfilled?.({
+      url: endpoints.urls.list,
+      headers: {},
+    }) as InternalAxiosRequestConfig;
 
     expect(config.headers.Authorization).toBe('Bearer access-token');
     expect(config.headers['X-Trace-ID']).toBe(CLIENT_TRACE_ID);
@@ -102,7 +106,10 @@ describe('httpClient auth interceptors', () => {
   it('attaches trace header to raw refresh client requests', async () => {
     const { raw } = await loadHttpClient();
 
-    const config = raw.requestInterceptor.fulfilled?.({ url: endpoints.auth.refresh, headers: {} }) as InternalAxiosRequestConfig;
+    const config = raw.requestInterceptor.fulfilled?.({
+      url: endpoints.auth.refresh,
+      headers: {},
+    }) as InternalAxiosRequestConfig;
 
     expect(config.headers['X-Trace-ID']).toBe(CLIENT_TRACE_ID);
   });
@@ -173,7 +180,9 @@ describe('httpClient auth interceptors', () => {
     });
     expect(localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)).toBe('new-access-token');
     expect(localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN)).toBe('new-refresh-token');
-    expect((originalRequest.headers as Record<string, string>).Authorization).toBe('Bearer new-access-token');
+    expect((originalRequest.headers as Record<string, string>).Authorization).toBe(
+      'Bearer new-access-token'
+    );
     expect(axiosInstance).toHaveBeenCalledTimes(1);
     expect(axiosInstance).toHaveBeenCalledWith(originalRequest);
   });

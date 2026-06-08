@@ -19,7 +19,9 @@ const consoleThresholdByLevel: Record<LogLevel, number> = {
   warn: 30,
   error: 40,
 };
-const consoleThreshold = isDevelopment ? consoleThresholdByLevel.debug : consoleThresholdByLevel.warn;
+const consoleThreshold = isDevelopment
+  ? consoleThresholdByLevel.debug
+  : consoleThresholdByLevel.warn;
 
 export const loggerSessionId = crypto.randomUUID();
 
@@ -70,7 +72,7 @@ function serializeContext(context?: LogContext) {
         }
 
         return value;
-      }),
+      })
     ) as LogContext;
   } catch {
     return {

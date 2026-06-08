@@ -51,7 +51,9 @@ export function useUrlAnalytics(urlHash: string | undefined) {
       ]);
 
       const breakdowns: Record<string, AnalyticsBreakdown> = {};
-      DIMENSIONS.forEach((d, i) => { breakdowns[d] = breakdownResults[i]; });
+      DIMENSIONS.forEach((d, i) => {
+        breakdowns[d] = breakdownResults[i];
+      });
 
       setState({ summary, timeseries, breakdowns, loading: false, error: null });
     } catch {
@@ -59,7 +61,9 @@ export function useUrlAnalytics(urlHash: string | undefined) {
     }
   }, [urlHash, dateRange, eventType]);
 
-  useEffect(() => { void fetchAnalytics(); }, [fetchAnalytics]);
+  useEffect(() => {
+    void fetchAnalytics();
+  }, [fetchAnalytics]);
 
   return { ...state, dateRange, setDateRange, eventType, setEventType, refresh: fetchAnalytics };
 }

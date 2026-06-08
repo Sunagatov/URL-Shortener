@@ -75,11 +75,7 @@ export function UrlValueField({
             title="Copy"
           />
           {href ? (
-            <UrlExternalLinkButton
-              href={href}
-              primary={tone === 'primary'}
-              title="Open"
-            />
+            <UrlExternalLinkButton href={href} primary={tone === 'primary'} title="Open" />
           ) : null}
         </div>
         {copiedValue === effectiveCopyValue ? (

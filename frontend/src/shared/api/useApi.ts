@@ -88,7 +88,7 @@ export const useApi = <T>(): UseApiReturn<T> => {
         return null;
       }
     },
-    [],
+    []
   );
 
   const reset = useCallback(() => {

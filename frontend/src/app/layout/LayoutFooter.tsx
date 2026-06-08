@@ -10,9 +10,7 @@ export const LayoutFooter = ({ isAuthenticated }: { isAuthenticated: boolean }) 
   <footer className="border-t border-[color:var(--border)] bg-[var(--surface)]">
     <div
       className={`mx-auto max-w-6xl px-5 pt-10 ${
-        isAuthenticated
-          ? 'pb-[calc(env(safe-area-inset-bottom)+7.5rem)] md:pb-10'
-          : 'pb-10'
+        isAuthenticated ? 'pb-[calc(env(safe-area-inset-bottom)+7.5rem)] md:pb-10' : 'pb-10'
       }`}
     >
       {/* Top: brand + nav + social */}
@@ -35,24 +33,42 @@ export const LayoutFooter = ({ isAuthenticated }: { isAuthenticated: boolean }) 
         {/* Nav columns */}
         <div className="flex gap-12 text-sm">
           <div className="space-y-2.5">
-            <h4 className="text-xs font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">Product</h4>
-            <Link to={routes.home} className={linkClass}>Home</Link>
+            <h4 className="text-xs font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">
+              Product
+            </h4>
+            <Link to={routes.home} className={linkClass}>
+              Home
+            </Link>
             {isAuthenticated ? (
               <>
-                <Link to={routes.dashboard} className={linkClass}>Dashboard</Link>
-                <Link to={routes.urlMappings} className={linkClass}>My URLs</Link>
-                <Link to={routes.analytics} className={linkClass}>Analytics</Link>
+                <Link to={routes.dashboard} className={linkClass}>
+                  Dashboard
+                </Link>
+                <Link to={routes.urlMappings} className={linkClass}>
+                  My URLs
+                </Link>
+                <Link to={routes.analytics} className={linkClass}>
+                  Analytics
+                </Link>
               </>
             ) : (
               <>
-                <Link to={routes.signIn} className={linkClass}>Sign In</Link>
-                <Link to={routes.signUp} className={linkClass}>Sign Up</Link>
+                <Link to={routes.signIn} className={linkClass}>
+                  Sign In
+                </Link>
+                <Link to={routes.signUp} className={linkClass}>
+                  Sign Up
+                </Link>
               </>
             )}
           </div>
           <div className="space-y-2.5">
-            <h4 className="text-xs font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">Legal</h4>
-            <Link to={routes.abuse} className={linkClass}>Report Abuse</Link>
+            <h4 className="text-xs font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">
+              Legal
+            </h4>
+            <Link to={routes.abuse} className={linkClass}>
+              Report Abuse
+            </Link>
             <span className={linkClass}>Privacy Policy</span>
             <span className={linkClass}>Terms of Service</span>
           </div>

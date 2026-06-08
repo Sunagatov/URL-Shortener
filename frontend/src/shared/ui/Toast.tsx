@@ -6,10 +6,10 @@ import { FaCheck, FaTimes, FaExclamationTriangle, FaInfoCircle } from 'react-ico
 type ToastType = 'success' | 'error' | 'info';
 
 interface ToastItem {
-    id: string;
-    type: ToastType;
-    message: string;
-    leaving: boolean;
+  id: string;
+  type: ToastType;
+  message: string;
+  leaving: boolean;
 }
 
 interface ToastContextValue {
@@ -23,9 +23,9 @@ interface ToastContextValue {
 const noop = () => {};
 
 const defaultToastContext: ToastContextValue = {
-    success: noop,
-    error: noop,
-    info: noop,
+  success: noop,
+  error: noop,
+  info: noop,
 };
 
 const ToastContext = createContext<ToastContextValue>(defaultToastContext);
@@ -39,27 +39,27 @@ export const useToast = (): ToastContextValue => {
 // ─── Single toast component ───────────────────────────────────────────────────
 
 const ICONS: Record<ToastType, React.ElementType> = {
-    success: FaCheck,
-    error:   FaExclamationTriangle,
-    info:    FaInfoCircle,
+  success: FaCheck,
+  error: FaExclamationTriangle,
+  info: FaInfoCircle,
 };
 
 const STYLES: Record<ToastType, { icon: string; bar: string; border: string }> = {
-    success: {
-        icon:   'bg-[var(--avatar-bg)] border-[color:var(--avatar-border)] text-[color:var(--avatar-text)]',
-        bar:    'bg-blue-500',
-        border: 'border-blue-500/15',
-    },
-    error: {
-        icon:   'bg-[var(--danger-bg)] border-red-500/30 text-[color:var(--danger)]',
-        bar:    'bg-red-500',
-        border: 'border-red-500/15',
-    },
-    info: {
-        icon:   'bg-[var(--surface-hover)] border-[color:var(--border-strong)] text-[color:var(--text-secondary)]',
-        bar:    'bg-[var(--text-muted)]',
-        border: 'border-[color:var(--border)]',
-    },
+  success: {
+    icon: 'bg-[var(--avatar-bg)] border-[color:var(--avatar-border)] text-[color:var(--avatar-text)]',
+    bar: 'bg-blue-500',
+    border: 'border-blue-500/15',
+  },
+  error: {
+    icon: 'bg-[var(--danger-bg)] border-red-500/30 text-[color:var(--danger)]',
+    bar: 'bg-red-500',
+    border: 'border-red-500/15',
+  },
+  info: {
+    icon: 'bg-[var(--surface-hover)] border-[color:var(--border-strong)] text-[color:var(--text-secondary)]',
+    bar: 'bg-[var(--text-muted)]',
+    border: 'border-[color:var(--border)]',
+  },
 };
 
 const ToastCard: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }> = ({
@@ -81,7 +81,9 @@ const ToastCard: React.FC<{ toast: ToastItem; onDismiss: (id: string) => void }>
         className={`absolute bottom-0 left-0 h-[2px] rounded-b-[24px] ${style.bar} opacity-50`}
         style={{ animation: 'toast-progress 3.5s linear forwards' }}
       />
-      <div className={`mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl border ${style.icon}`}>
+      <div
+        className={`mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl border ${style.icon}`}
+      >
         <Icon className="h-3.5 w-3.5" />
       </div>
       <p className="flex-1 pt-0.5 text-sm leading-snug text-[color:var(--text-primary)]">
@@ -109,10 +111,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const nextToastId = useRef(0);
 
   const dismiss = useCallback((id: string) => {
-    setToasts((current) => current.map((toast) => (toast.id === id ? { ...toast, leaving: true } : toast)));
+    setToasts(current =>
+      current.map(toast => (toast.id === id ? { ...toast, leaving: true } : toast))
+    );
 
     const removalTimer = setTimeout(() => {
-      setToasts((current) => current.filter((toast) => toast.id !== id));
+      setToasts(current => current.filter(toast => toast.id !== id));
       removalTimers.current.delete(id);
     }, 250);
 
@@ -130,10 +134,13 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     (type: ToastType, message: string) => {
       nextToastId.current += 1;
       const id = `toast-${nextToastId.current}`;
-      setToasts((current) => [...current.slice(-3), { id, type, message, leaving: false }]);
-      timers.current.set(id, setTimeout(() => dismiss(id), DURATION));
+      setToasts(current => [...current.slice(-3), { id, type, message, leaving: false }]);
+      timers.current.set(
+        id,
+        setTimeout(() => dismiss(id), DURATION)
+      );
     },
-    [dismiss],
+    [dismiss]
   );
 
   React.useEffect(() => {
@@ -149,9 +156,9 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
 
   const api: ToastContextValue = {
-    success: (message) => push('success', message),
-    error: (message) => push('error', message),
-    info: (message) => push('info', message),
+    success: message => push('success', message),
+    error: message => push('error', message),
+    info: message => push('info', message),
   };
 
   return (
@@ -161,7 +168,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         aria-live="polite"
         className="pointer-events-none fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-3"
       >
-        {toasts.map((toast) => (
+        {toasts.map(toast => (
           <div key={toast.id} className="pointer-events-auto">
             <ToastCard toast={toast} onDismiss={dismiss} />
           </div>

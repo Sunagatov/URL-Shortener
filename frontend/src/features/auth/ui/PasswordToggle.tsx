@@ -16,5 +16,9 @@ export function PasswordToggle({ visible, onToggle }: { visible: boolean; onTogg
 
 export function usePasswordVisibility() {
   const [visible, setVisible] = useState(false);
-  return { visible, toggle: () => setVisible(v => !v), type: visible ? 'text' as const : 'password' as const };
+  return {
+    visible,
+    toggle: () => setVisible(v => !v),
+    type: visible ? ('text' as const) : ('password' as const),
+  };
 }

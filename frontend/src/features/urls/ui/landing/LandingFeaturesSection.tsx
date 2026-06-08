@@ -35,8 +35,12 @@ export function LandingFeaturesSection() {
                 >
                   <Icon className="h-5 w-5 text-[color:var(--text-on-accent)]" />
                 </div>
-                <h3 className="mb-2 text-base font-bold text-[color:var(--text-primary)]">{feature.title}</h3>
-                <p className="text-sm leading-relaxed text-[color:var(--text-muted)]">{feature.description}</p>
+                <h3 className="mb-2 text-base font-bold text-[color:var(--text-primary)]">
+                  {feature.title}
+                </h3>
+                <p className="text-sm leading-relaxed text-[color:var(--text-muted)]">
+                  {feature.description}
+                </p>
               </div>
             );
           })}

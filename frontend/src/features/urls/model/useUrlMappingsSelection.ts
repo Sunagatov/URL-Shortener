@@ -8,27 +8,25 @@ export function useUrlMappingsSelection(displayMappings: UrlMapping[]) {
   const [selectedHashes, setSelectedHashes] = useState<SelectionSet>(new Set());
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const visibleHashes = useMemo(
-    () => new Set(displayMappings.map((mapping) => mapping.urlHash)),
-    [displayMappings],
+    () => new Set(displayMappings.map(mapping => mapping.urlHash)),
+    [displayMappings]
   );
 
   useEffect(() => {
-    setSelectedHashes((current) => {
-      const next = new Set(
-        [...current].filter((hash) => visibleHashes.has(hash)),
-      );
+    setSelectedHashes(current => {
+      const next = new Set([...current].filter(hash => visibleHashes.has(hash)));
 
       return next.size === current.size ? current : next;
     });
   }, [visibleHashes]);
 
   const toggleSelectMode = useCallback(() => {
-    setIsSelectMode((current) => !current);
+    setIsSelectMode(current => !current);
     setSelectedHashes(new Set());
   }, []);
 
   const toggleSelect = useCallback((hash: string) => {
-    setSelectedHashes((current) => {
+    setSelectedHashes(current => {
       const next = new Set(current);
 
       if (next.has(hash)) {
@@ -41,7 +39,9 @@ export function useUrlMappingsSelection(displayMappings: UrlMapping[]) {
     });
   }, []);
 
-  const isAllSelected = displayMappings.length > 0 && displayMappings.every((mapping) => selectedHashes.has(mapping.urlHash));
+  const isAllSelected =
+    displayMappings.length > 0 &&
+    displayMappings.every(mapping => selectedHashes.has(mapping.urlHash));
 
   const toggleSelectAll = useCallback(() => {
     if (isAllSelected) {
@@ -49,7 +49,7 @@ export function useUrlMappingsSelection(displayMappings: UrlMapping[]) {
       return;
     }
 
-    setSelectedHashes(new Set(displayMappings.map((mapping) => mapping.urlHash)));
+    setSelectedHashes(new Set(displayMappings.map(mapping => mapping.urlHash)));
   }, [displayMappings, isAllSelected]);
 
   return {

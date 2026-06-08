@@ -12,10 +12,15 @@ export default function NotFoundPage() {
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border border-[color:var(--border)] bg-[var(--surface-hover)]">
           <FaLink className="h-8 w-8 text-[color:var(--text-muted)]" />
         </div>
-        <h1 className="mb-2 text-6xl font-bold text-[color:var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="mb-2 text-6xl font-bold text-[color:var(--text-primary)]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           404
         </h1>
-        <p className="mb-1 text-lg font-semibold text-[color:var(--text-primary)]">Page not found</p>
+        <p className="mb-1 text-lg font-semibold text-[color:var(--text-primary)]">
+          Page not found
+        </p>
         <p className="mb-8 text-sm text-[color:var(--text-muted)]">
           The link you followed may be broken, expired, or doesn't exist.
         </p>

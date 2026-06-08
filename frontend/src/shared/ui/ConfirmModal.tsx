@@ -49,10 +49,7 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
       className="fixed inset-0 z-[200] flex items-center justify-center px-4"
       style={{ animation: 'modal-backdrop-in 0.15s ease both' }}
     >
-      <div
-        className="absolute inset-0 bg-[var(--backdrop)] backdrop-blur-sm"
-        onClick={onCancel}
-      />
+      <div className="absolute inset-0 bg-[var(--backdrop)] backdrop-blur-sm" onClick={onCancel} />
 
       <div
         role="dialog"
@@ -61,9 +58,13 @@ export const ConfirmModal: React.FC<ConfirmModalProps> = ({
         className="relative w-full max-w-sm overflow-hidden rounded-[28px] border border-[color:var(--border-strong)] bg-[color:var(--surface-overlay)] p-6 shadow-[0_24px_64px_rgba(0,0,0,0.6)]"
         style={{ animation: 'modal-in 0.2s cubic-bezier(0.22,1,0.36,1) both' }}
       >
-        <div className={`pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b ${accentClassName}`} />
+        <div
+          className={`pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b ${accentClassName}`}
+        />
         <div className="mb-4 flex items-center justify-center">
-          <div className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${iconClassName}`}>
+          <div
+            className={`flex h-12 w-12 items-center justify-center rounded-2xl border ${iconClassName}`}
+          >
             <Icon className="h-5 w-5" />
           </div>
         </div>

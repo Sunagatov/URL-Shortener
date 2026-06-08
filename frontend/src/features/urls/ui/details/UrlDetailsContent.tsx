@@ -1,19 +1,9 @@
-import {
-  FaCalendarAlt,
-  FaClock,
-  FaEdit,
-  FaLink,
-  FaQrcode,
-  FaTrash,
-} from 'react-icons/fa';
+import { FaCalendarAlt, FaClock, FaEdit, FaLink, FaQrcode, FaTrash } from 'react-icons/fa';
 import { QRCodeSVG } from 'qrcode.react';
 import { Button } from '@/shared/ui';
 import type { UrlMapping } from '@/features/urls/types/url';
 import { formatUrlDate, getDomainLabel } from '@/features/urls/lib/urlMappings';
-import {
-  UrlMetadataRow,
-  UrlSurfaceCard,
-} from '@/features/urls/ui/UrlSurfacePrimitives';
+import { UrlMetadataRow, UrlSurfaceCard } from '@/features/urls/ui/UrlSurfacePrimitives';
 import { UrlValueField } from '@/features/urls/ui/UrlValueField';
 
 interface UrlDetailsHeaderProps {
@@ -24,7 +14,13 @@ interface UrlDetailsHeaderProps {
   urlMapping: UrlMapping;
 }
 
-export function UrlDetailsHeader({ onBack, onDelete, onEdit, isEditing, urlMapping }: UrlDetailsHeaderProps) {
+export function UrlDetailsHeader({
+  onBack,
+  onDelete,
+  onEdit,
+  isEditing,
+  urlMapping,
+}: UrlDetailsHeaderProps) {
   return (
     <div className="mb-8 mt-3 md:mt-0">
       <button
@@ -46,7 +42,9 @@ export function UrlDetailsHeader({ onBack, onDelete, onEdit, isEditing, urlMappi
             >
               URL Details
             </h1>
-            <p className="mt-0.5 text-sm text-[color:var(--text-muted)]">{getDomainLabel(urlMapping.originalUrl)}</p>
+            <p className="mt-0.5 text-sm text-[color:var(--text-muted)]">
+              {getDomainLabel(urlMapping.originalUrl)}
+            </p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -76,7 +74,17 @@ interface UrlInfoCardProps {
   editError: string | null;
 }
 
-export function UrlInfoCard({ copiedValue, onCopy, urlMapping, isEditing, editValue, onEditChange, onEditSave, editLoading, editError }: UrlInfoCardProps) {
+export function UrlInfoCard({
+  copiedValue,
+  onCopy,
+  urlMapping,
+  isEditing,
+  editValue,
+  onEditChange,
+  onEditSave,
+  editLoading,
+  editError,
+}: UrlInfoCardProps) {
   return (
     <UrlSurfaceCard title="URL Information" className="lg:col-span-3">
       <div className="space-y-4">
@@ -91,16 +99,25 @@ export function UrlInfoCard({ copiedValue, onCopy, urlMapping, isEditing, editVa
         />
         {isEditing ? (
           <div className="space-y-2">
-            <label className="block text-[10px] font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">Original URL</label>
+            <label className="block text-[10px] font-semibold uppercase tracking-widest text-[color:var(--text-muted)]">
+              Original URL
+            </label>
             <div className="flex gap-2">
               <input
                 value={editValue}
                 onChange={e => onEditChange(e.target.value)}
                 className="flex-1 rounded-xl border border-[color:var(--border)] bg-[var(--input-bg)] px-3 py-2.5 text-sm text-[color:var(--text-primary)] focus:border-[color:var(--accent-border)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-ring)]"
                 autoFocus
-                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); onEditSave(); } }}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    onEditSave();
+                  }
+                }}
               />
-              <Button onClick={onEditSave} size="sm" loading={editLoading}>Save</Button>
+              <Button onClick={onEditSave} size="sm" loading={editLoading}>
+                Save
+              </Button>
             </div>
             {editError && <p className="text-xs text-[color:var(--danger-text)]">{editError}</p>}
           </div>
@@ -143,8 +160,12 @@ export function UrlMetadataCard({ urlMapping }: { urlMapping: UrlMapping }) {
               <FaQrcode className="h-3.5 w-3.5 text-emerald-300" />
             </div>
             <div>
-              <p className="mb-0.5 text-[10px] uppercase tracking-widest text-[color:var(--text-muted)]">QR Code</p>
-              <p className="text-xs text-[color:var(--text-muted)]">Scan to open the short link on another device</p>
+              <p className="mb-0.5 text-[10px] uppercase tracking-widest text-[color:var(--text-muted)]">
+                QR Code
+              </p>
+              <p className="text-xs text-[color:var(--text-muted)]">
+                Scan to open the short link on another device
+              </p>
             </div>
           </div>
           <div className="flex justify-center rounded-2xl border border-[color:var(--border)] bg-white px-4 py-5">

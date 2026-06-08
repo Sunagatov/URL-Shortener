@@ -19,7 +19,7 @@ describe('urlMappings helpers', () => {
 
     expect(helpers.getPublicShortUrlBase()).toBe('http://116.203.197.65');
     expect(helpers.normalizeShortUrl('http://116.203.197.65/api/FkMwSG2B')).toBe(
-      'http://116.203.197.65/FkMwSG2B',
+      'http://116.203.197.65/FkMwSG2B'
     );
   });
 
@@ -31,7 +31,7 @@ describe('urlMappings helpers', () => {
 
     expect(helpers.getPublicShortUrlBase()).toBe('http://localhost:8080');
     expect(helpers.normalizeShortUrl('http://localhost:8080/HZezBeaR')).toBe(
-      'http://localhost:8080/HZezBeaR',
+      'http://localhost:8080/HZezBeaR'
     );
   });
 
@@ -52,7 +52,7 @@ describe('urlMappings helpers', () => {
 
     expect(helpers.getPublicShortUrlBase()).toBe('https://zuf.uk');
     expect(helpers.normalizeShortUrl('http://116.203.197.65/api/a7kvs1gB')).toBe(
-      'https://zuf.uk/a7kvs1gB',
+      'https://zuf.uk/a7kvs1gB'
     );
   });
 });

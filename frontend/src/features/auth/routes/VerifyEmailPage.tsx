@@ -77,7 +77,7 @@ const VerifyEmailPage: React.FC = () => {
 
       navigate(targetDestination, { replace: true });
     },
-    [login, navigate, updateUser],
+    [login, navigate, updateUser]
   );
   const {
     countdown,
@@ -115,19 +115,19 @@ const VerifyEmailPage: React.FC = () => {
         <AuthStatusView
           title="No email provided"
           description="This page requires an active sign-up session. Please start from the sign-up page."
-          icon={(
+          icon={
             <AuthStatusIcon badge="warning">
               <FaExclamationTriangle className="h-8 w-8 text-amber-300" />
             </AuthStatusIcon>
-          )}
-          action={(
+          }
+          action={
             <>
               <AuthPrimaryLink to={routes.signUp}>Go to Sign Up</AuthPrimaryLink>
               <div className="text-center">
                 <AuthBackLink to={routes.signIn}>Back to Sign In</AuthBackLink>
               </div>
             </>
-          )}
+          }
         />
       </AuthPageShell>
     );
@@ -144,7 +144,8 @@ const VerifyEmailPage: React.FC = () => {
           <p>Code expires in {Math.max(1, Math.ceil(expiresInSeconds / 60))} minute(s).</p>
           {deliveryMode === 'log' ? (
             <p className="mt-1 text-amber-200/80">
-              Local development mode is active. The latest verification code is written to the backend logs.
+              Local development mode is active. The latest verification code is written to the
+              backend logs.
             </p>
           ) : null}
         </div>
@@ -157,7 +158,7 @@ const VerifyEmailPage: React.FC = () => {
             {digits.map((digit, index) => (
               <input
                 key={index}
-                ref={(element) => {
+                ref={element => {
                   inputRefs.current[index] = element;
                 }}
                 type="text"
@@ -165,8 +166,8 @@ const VerifyEmailPage: React.FC = () => {
                 pattern="[0-9]*"
                 maxLength={1}
                 value={digit}
-                onChange={(event) => handleChange(index, event.target.value)}
-                onKeyDown={(event) => handleKeyDown(index, event)}
+                onChange={event => handleChange(index, event.target.value)}
+                onKeyDown={event => handleKeyDown(index, event)}
                 disabled={isLoading}
                 autoComplete="one-time-code"
                 aria-label={`Digit ${index + 1} of ${CODE_LENGTH}`}
@@ -198,7 +199,7 @@ const VerifyEmailPage: React.FC = () => {
           type="button"
           onClick={() => void verifyCode(digits.join(''))}
           loading={isLoading}
-          disabled={digits.some((digit) => !digit)}
+          disabled={digits.some(digit => !digit)}
           className="w-full"
           size="lg"
         >
@@ -208,7 +209,9 @@ const VerifyEmailPage: React.FC = () => {
 
         <AuthSupportCard>
           <div className="text-center">
-            <p className="mb-3 text-sm text-[color:var(--text-secondary)]">Didn't receive a code?</p>
+            <p className="mb-3 text-sm text-[color:var(--text-secondary)]">
+              Didn't receive a code?
+            </p>
             <button
               type="button"
               onClick={() => void resendCode()}

@@ -1,8 +1,8 @@
 /* ── Shared tokens (theme-independent) ── */
 :root {
-  --font-display: "Syne", sans-serif;
-  --font-body: "DM Sans", sans-serif;
-  --font-mono: "DM Mono", monospace;
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'DM Mono', monospace;
 }
 
 /* ── Light theme (default) ── */
@@ -136,7 +136,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background: var(--bg-base);
   color: var(--text-primary);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 .dark body {
@@ -147,7 +149,7 @@ body {
 }
 
 body::before {
-  content: "";
+  content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
@@ -163,7 +165,7 @@ body::before {
 }
 
 body::after {
-  content: "";
+  content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
@@ -239,7 +241,7 @@ input:-webkit-autofill:active {
 }
 
 @media (hover: none) and (pointer: coarse) {
-  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='file']),
   textarea,
   select {
     font-size: 16px;
@@ -248,14 +250,25 @@ input:-webkit-autofill:active {
 
 /* ── Utility classes ── */
 .gradient-text {
-  background: linear-gradient(135deg, var(--gradient-text-from) 0%, var(--gradient-text-via) 45%, var(--gradient-text-to) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--gradient-text-from) 0%,
+    var(--gradient-text-via) 45%,
+    var(--gradient-text-to) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gradient-text-animated {
-  background: linear-gradient(90deg, var(--gradient-text-from) 0%, var(--accent) 35%, var(--gradient-text-via) 65%, var(--gradient-text-to) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--gradient-text-from) 0%,
+    var(--accent) 35%,
+    var(--gradient-text-via) 65%,
+    var(--gradient-text-to) 100%
+  );
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -265,7 +278,12 @@ input:-webkit-autofill:active {
 
 .skeleton {
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--skeleton-from) 0%, var(--skeleton-via) 50%, var(--skeleton-from) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-from) 0%,
+    var(--skeleton-via) 50%,
+    var(--skeleton-from) 100%
+  );
   background-size: 600px 100%;
   animation: skeleton-shimmer 1.6s ease-in-out infinite;
 }
@@ -292,7 +310,7 @@ input:-webkit-autofill:active {
 }
 
 .gradient-border-card::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: -1px;
   z-index: -1;
@@ -343,7 +361,7 @@ input:-webkit-autofill:active {
 }
 
 .sidebar-item-active::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   top: 50%;
@@ -361,7 +379,12 @@ input:-webkit-autofill:active {
 .dark .auth-brand-panel {
   background:
     radial-gradient(circle at top left, rgba(34, 211, 238, 0.12), transparent 28%),
-    linear-gradient(160deg, rgba(11, 20, 35, 0.94) 0%, rgba(7, 17, 31, 0.98) 58%, rgba(4, 11, 21, 1) 100%);
+    linear-gradient(
+      160deg,
+      rgba(11, 20, 35, 0.94) 0%,
+      rgba(7, 17, 31, 0.98) 58%,
+      rgba(4, 11, 21, 1) 100%
+    );
 }
 
 :root:not(.dark) .auth-brand-panel {

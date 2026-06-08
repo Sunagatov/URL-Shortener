@@ -81,7 +81,9 @@ export function UserProfileCard({ user, onEdit }: UserProfileCardProps) {
                   <p className="text-[10px] font-medium uppercase tracking-widest text-[color:var(--text-muted)]">
                     {field.label}
                   </p>
-                  <p className="mt-0.5 text-sm font-semibold text-[color:var(--text-secondary)]">{field.value}</p>
+                  <p className="mt-0.5 text-sm font-semibold text-[color:var(--text-secondary)]">
+                    {field.value}
+                  </p>
                 </div>
               </div>
             );

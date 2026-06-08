@@ -66,7 +66,10 @@ export const LayoutHeader = ({
                 aria-label="Open account menu"
               >
                 <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-xl border border-[color:var(--avatar-border)] bg-[var(--avatar-bg)]">
-                  <span className="text-xs font-bold text-[color:var(--avatar-text)]" style={{ fontFamily: 'var(--font-display)' }}>
+                  <span
+                    className="text-xs font-bold text-[color:var(--avatar-text)]"
+                    style={{ fontFamily: 'var(--font-display)' }}
+                  >
                     {initials}
                   </span>
                 </div>
@@ -96,20 +99,27 @@ export const LayoutHeader = ({
                 <div className="border-b border-[color:var(--border)] px-4 py-3">
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-[color:var(--avatar-border)] bg-[var(--avatar-bg)]">
-                      <span className="text-sm font-bold text-[color:var(--avatar-text)]" style={{ fontFamily: 'var(--font-display)' }}>
+                      <span
+                        className="text-sm font-bold text-[color:var(--avatar-text)]"
+                        style={{ fontFamily: 'var(--font-display)' }}
+                      >
                         {initials}
                       </span>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold leading-tight text-[color:var(--text-primary)]">{displayName}</p>
+                      <p className="truncate text-sm font-semibold leading-tight text-[color:var(--text-primary)]">
+                        {displayName}
+                      </p>
                       {user?.email && displayName !== user.email && (
-                        <p className="mt-0.5 truncate text-xs text-[color:var(--text-muted)]">{user.email}</p>
+                        <p className="mt-0.5 truncate text-xs text-[color:var(--text-muted)]">
+                          {user.email}
+                        </p>
                       )}
                     </div>
                   </div>
                 </div>
                 <div className="py-1.5">
-                  {accountNavigationItems.map((item) => {
+                  {accountNavigationItems.map(item => {
                     const Icon = item.icon;
                     const active = pathname === item.path;
                     return (
@@ -127,7 +137,9 @@ export const LayoutHeader = ({
                         {active && (
                           <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-[var(--accent)]" />
                         )}
-                        <Icon className={`h-3.5 w-3.5 ${active ? 'text-[color:var(--accent)]' : ''}`} />
+                        <Icon
+                          className={`h-3.5 w-3.5 ${active ? 'text-[color:var(--accent)]' : ''}`}
+                        />
                         <span className="text-sm font-medium">{item.label}</span>
                       </Link>
                     );
@@ -177,7 +189,11 @@ function ThemeToggle() {
       className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[color:var(--border-strong)] bg-[var(--surface-soft)] transition duration-200 hover:border-[color:var(--accent-border)] hover:bg-[var(--surface-hover)]"
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
     >
-      {theme === 'dark' ? <FaSun className="h-4 w-4 text-amber-400" /> : <FaMoon className="h-4 w-4 text-slate-500" />}
+      {theme === 'dark' ? (
+        <FaSun className="h-4 w-4 text-amber-400" />
+      ) : (
+        <FaMoon className="h-4 w-4 text-slate-500" />
+      )}
     </button>
   );
 }

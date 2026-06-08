@@ -26,7 +26,9 @@ export function UrlMappingsEmptyState({
           <Icon className="h-5 w-5 text-[color:var(--text-muted)]" />
         </div>
         <h3 className="mb-2 text-lg font-bold text-[color:var(--text-primary)]">{title}</h3>
-        <div className="mb-6 text-sm leading-relaxed text-[color:var(--text-muted)]">{description}</div>
+        <div className="mb-6 text-sm leading-relaxed text-[color:var(--text-muted)]">
+          {description}
+        </div>
         <Button
           onClick={onAction}
           variant={icon === 'search' ? 'secondary' : 'primary'}

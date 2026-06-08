@@ -44,7 +44,9 @@ export interface AbuseReportResponse {
 
 export const MAX_USER_URLS_PAGE_SIZE = 100;
 
-function normalizeUrlMappingsPage(responseData: PaginatedResponse<UrlMapping>): PaginatedResponse<UrlMapping> {
+function normalizeUrlMappingsPage(
+  responseData: PaginatedResponse<UrlMapping>
+): PaginatedResponse<UrlMapping> {
   return {
     ...responseData,
     content: responseData.content.map((mapping: UrlMapping) => ({

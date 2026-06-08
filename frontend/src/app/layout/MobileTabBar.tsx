@@ -49,7 +49,9 @@ export function MobileTabBar() {
                   : 'text-[color:var(--text-muted)] hover:bg-[var(--surface-hover)] hover:text-[color:var(--text-secondary)]'
               }`}
             >
-              <Icon className={`h-4 w-4 ${active ? 'text-[color:var(--accent)]' : 'text-[color:var(--text-muted)]'}`} />
+              <Icon
+                className={`h-4 w-4 ${active ? 'text-[color:var(--accent)]' : 'text-[color:var(--text-muted)]'}`}
+              />
               <span>{item.label}</span>
             </Link>
           );

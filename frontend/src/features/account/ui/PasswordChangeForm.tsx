@@ -183,7 +183,9 @@ export function PasswordChangeForm({
           type="submit"
           disabled={passwordStrength.strength === 'Weak' || !passwordsMatch}
           loading={isLoading}
-          shake={Boolean(confirmPassword) && (!passwordsMatch || passwordStrength.strength === 'Weak')}
+          shake={
+            Boolean(confirmPassword) && (!passwordsMatch || passwordStrength.strength === 'Weak')
+          }
           className="w-full"
         >
           <FaLock className="h-4 w-4" />

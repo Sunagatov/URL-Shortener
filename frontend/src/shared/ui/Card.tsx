@@ -14,9 +14,5 @@ export const Card: React.FC<CardProps> = ({ children, className = '', hover = fa
     ? 'transition duration-300 hover:-translate-y-1 hover:border-[color:var(--accent-border)] hover:shadow-[0_22px_50px_rgba(4,10,24,0.46)]'
     : '';
 
-  return (
-    <div className={`${baseStyles} ${hoverStyles} ${className}`}>
-      {children}
-    </div>
-  );
+  return <div className={`${baseStyles} ${hoverStyles} ${className}`}>{children}</div>;
 };

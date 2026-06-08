@@ -29,12 +29,18 @@ vi.mock('@/shared/api/useApi', () => ({
   useApi: () => ({
     execute: async (
       apiCall: () => Promise<unknown>,
-      options?: { onError?: (error: { code?: string; errorMessage: string; status: number }) => void }
+      options?: {
+        onError?: (error: { code?: string; errorMessage: string; status: number }) => void;
+      }
     ) => {
       try {
         return await apiCall();
       } catch (error: unknown) {
-        const response = (error as { response?: { status?: number; data?: { code?: string; errorMessage?: string } } }).response;
+        const response = (
+          error as {
+            response?: { status?: number; data?: { code?: string; errorMessage?: string } };
+          }
+        ).response;
         options?.onError?.({
           code: response?.data?.code,
           errorMessage: response?.data?.errorMessage ?? 'An error occurred',

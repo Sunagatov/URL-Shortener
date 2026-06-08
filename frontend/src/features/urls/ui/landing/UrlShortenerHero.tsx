@@ -1,6 +1,14 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { FaArrowRight, FaCheck, FaCopy, FaExternalLinkAlt, FaGlobe, FaLink, FaShareAlt } from 'react-icons/fa';
+import {
+  FaArrowRight,
+  FaCheck,
+  FaCopy,
+  FaExternalLinkAlt,
+  FaGlobe,
+  FaLink,
+  FaShareAlt,
+} from 'react-icons/fa';
 import { routes } from '@/app/routes';
 import { Button, Tooltip } from '@/shared/ui';
 import { heroBadgeIcon, heroHighlights } from './landingContent';
@@ -26,9 +34,6 @@ export function UrlShortenerHero({
 
   return (
     <section className="relative flex min-h-[calc(100svh-72px)] flex-col items-center justify-start overflow-hidden bg-[var(--bg-alt)] pb-[calc(env(safe-area-inset-bottom)+7.5rem)] pt-6 md:justify-center md:pb-10 md:pt-0">
-      <div className="absolute top-1/4 -left-32 h-[560px] w-[560px] rounded-full bg-blue-600/20 blur-[130px] orb-1 pointer-events-none dark:block hidden" />
-      <div className="absolute bottom-1/4 -right-32 h-[560px] w-[560px] rounded-full bg-purple-600/20 blur-[130px] orb-2 pointer-events-none dark:block hidden" />
-      <div className="absolute left-1/2 top-1/2 h-[400px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-900/20 blur-[120px] orb-3 pointer-events-none dark:block hidden" />
       <div className="absolute inset-0 bg-grid-dark pointer-events-none" />
 
       <div className="relative z-10 mx-auto w-full max-w-3xl px-4 py-5 text-center sm:px-6 md:py-10">
@@ -59,7 +64,9 @@ export function UrlShortenerHero({
                 <FaCheck className="h-4 w-4 text-emerald-400" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-[color:var(--text-primary)]">Your link is ready!</p>
+                <p className="text-sm font-semibold text-[color:var(--text-primary)]">
+                  Your link is ready!
+                </p>
                 <p className="text-xs text-[color:var(--text-muted)]">Copy the short URL below</p>
               </div>
             </div>

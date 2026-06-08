@@ -51,7 +51,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         pathname={pathname}
         user={user}
         onLogout={handleLogout}
-        onToggleUserMenu={() => setIsUserMenuOpen((current) => !current)}
+        onToggleUserMenu={() => setIsUserMenuOpen(current => !current)}
         onCloseUserMenu={() => setIsUserMenuOpen(false)}
       />
 

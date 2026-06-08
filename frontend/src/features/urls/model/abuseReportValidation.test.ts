@@ -19,9 +19,11 @@ describe('abuseReportSchema', () => {
   });
 
   it('rejects overly long reasons', () => {
-    expect(() => abuseReportSchema.parse({
-      shortUrlOrHash: 'abc12345',
-      reason: 'x'.repeat(501),
-    })).toThrow();
+    expect(() =>
+      abuseReportSchema.parse({
+        shortUrlOrHash: 'abc12345',
+        reason: 'x'.repeat(501),
+      })
+    ).toThrow();
   });
 });

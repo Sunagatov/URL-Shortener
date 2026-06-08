@@ -42,7 +42,8 @@ const accountFeatureBoundaryRules = {
       patterns: [
         {
           group: ['@/features/auth/*', '@/features/urls/*'],
-          message: 'account/ must not import other features directly. Use shared/ or app/ boundaries instead.',
+          message:
+            'account/ must not import other features directly. Use shared/ or app/ boundaries instead.',
         },
       ],
     },
@@ -56,7 +57,8 @@ const authFeatureBoundaryRules = {
       patterns: [
         {
           group: ['@/features/account/*', '@/features/urls/*'],
-          message: 'auth/ must not import other features directly. Use shared/ or app/ boundaries instead.',
+          message:
+            'auth/ must not import other features directly. Use shared/ or app/ boundaries instead.',
         },
       ],
     },
@@ -70,7 +72,23 @@ const urlsFeatureBoundaryRules = {
       patterns: [
         {
           group: ['@/features/account/*', '@/features/auth/*'],
-          message: 'urls/ must not import other features directly. Use shared/ or app/ boundaries instead.',
+          message:
+            'urls/ must not import other features directly. Use shared/ or app/ boundaries instead.',
+        },
+      ],
+    },
+  ],
+};
+
+const analyticsFeatureBoundaryRules = {
+  'no-restricted-imports': [
+    'error',
+    {
+      patterns: [
+        {
+          group: ['@/features/account/*', '@/features/auth/*', '@/features/urls/*'],
+          message:
+            'analytics/ must not import other features directly. Use shared/ or app/ boundaries instead.',
         },
       ],
     },
@@ -79,7 +97,14 @@ const urlsFeatureBoundaryRules = {
 
 export default tseslint.config(
   {
-    ignores: ['build/**', 'dist/**', 'coverage/**', 'node_modules/**', 'playwright-report/**', 'test-results/**'],
+    ignores: [
+      'build/**',
+      'dist/**',
+      'coverage/**',
+      'node_modules/**',
+      'playwright-report/**',
+      'test-results/**',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -128,5 +153,10 @@ export default tseslint.config(
     files: ['src/features/urls/**/*.{ts,tsx}'],
     ignores: ['src/features/urls/**/*.test.{ts,tsx}'],
     rules: urlsFeatureBoundaryRules,
+  },
+  {
+    files: ['src/features/analytics/**/*.{ts,tsx}'],
+    ignores: ['src/features/analytics/**/*.test.{ts,tsx}'],
+    rules: analyticsFeatureBoundaryRules,
   }
 );

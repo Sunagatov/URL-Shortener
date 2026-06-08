@@ -45,7 +45,10 @@ describe('placeholder flows', () => {
     );
 
     const header = screen.getByRole('banner');
-    expect(within(header).getByRole('link', { name: 'Sign Up' })).toHaveAttribute('href', '/signup');
+    expect(within(header).getByRole('link', { name: 'Sign Up' })).toHaveAttribute(
+      'href',
+      '/signup'
+    );
     expect(within(header).queryByRole('link', { name: 'Sign In' })).not.toBeInTheDocument();
   });
 
@@ -59,7 +62,10 @@ describe('placeholder flows', () => {
     );
 
     const header = screen.getByRole('banner');
-    expect(within(header).getByRole('link', { name: 'Sign In' })).toHaveAttribute('href', '/signin');
+    expect(within(header).getByRole('link', { name: 'Sign In' })).toHaveAttribute(
+      'href',
+      '/signin'
+    );
     expect(within(header).queryByRole('link', { name: 'Sign Up' })).not.toBeInTheDocument();
   });
 
@@ -124,11 +130,17 @@ describe('placeholder flows', () => {
 
     const mobileNavigation = screen.getByRole('navigation', { name: 'Mobile navigation' });
     expect(mobileNavigation).toBeInTheDocument();
-    expect(within(mobileNavigation).getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/');
+    expect(within(mobileNavigation).getByRole('link', { name: 'Home' })).toHaveAttribute(
+      'href',
+      '/'
+    );
     expect(within(mobileNavigation).getByRole('link', { name: 'My URLs' })).toHaveAttribute(
       'href',
       '/account/url-mappings'
     );
-    expect(within(mobileNavigation).getByRole('link', { name: 'Account' })).toHaveAttribute('href', '/account');
+    expect(within(mobileNavigation).getByRole('link', { name: 'Account' })).toHaveAttribute(
+      'href',
+      '/account'
+    );
   });
 });

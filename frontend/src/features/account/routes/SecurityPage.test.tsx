@@ -83,8 +83,14 @@ describe('Security', () => {
     renderSecurity();
 
     await user.type(screen.getByPlaceholderText('Enter your current password'), 'OldPassword123!');
-    await user.type(screen.getByPlaceholderText('Enter your new password'), 'correct horse battery staple');
-    await user.type(screen.getByPlaceholderText('Confirm your new password'), 'correct horse battery staple');
+    await user.type(
+      screen.getByPlaceholderText('Enter your new password'),
+      'correct horse battery staple'
+    );
+    await user.type(
+      screen.getByPlaceholderText('Confirm your new password'),
+      'correct horse battery staple'
+    );
     await user.click(screen.getByRole('button', { name: /update password/i }));
 
     expect(accountApi.changePassword).toHaveBeenCalledWith({
@@ -107,8 +113,14 @@ describe('Security', () => {
     renderSecurity();
 
     await user.type(screen.getByPlaceholderText('Enter your current password'), 'OldPassword123!');
-    await user.type(screen.getByPlaceholderText('Enter your new password'), 'correct horse battery staple');
-    await user.type(screen.getByPlaceholderText('Confirm your new password'), 'correct horse battery staple');
+    await user.type(
+      screen.getByPlaceholderText('Enter your new password'),
+      'correct horse battery staple'
+    );
+    await user.type(
+      screen.getByPlaceholderText('Confirm your new password'),
+      'correct horse battery staple'
+    );
     await user.click(screen.getByRole('button', { name: /update password/i }));
 
     expect(screen.getByRole('heading', { name: 'Security' })).toBeInTheDocument();

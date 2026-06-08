@@ -77,7 +77,7 @@ const SignInPage: React.FC = () => {
 
       navigate(targetDestination, { replace: true });
     },
-    [login, navigate, updateUser],
+    [login, navigate, updateUser]
   );
 
   const onSubmit = async (data: SignInFormData) => {
@@ -85,26 +85,30 @@ const SignInPage: React.FC = () => {
       return;
     }
 
-    const result = await execute(() => signIn({
-      ...data,
-      ...(features.authTurnstile ? { turnstileToken: turnstile.token } : {}),
-    }), {
-      action: 'auth.sign_in',
-      onError: (apiError) => {
-        turnstile.resetChallenge();
+    const result = await execute(
+      () =>
+        signIn({
+          ...data,
+          ...(features.authTurnstile ? { turnstileToken: turnstile.token } : {}),
+        }),
+      {
+        action: 'auth.sign_in',
+        onError: apiError => {
+          turnstile.resetChallenge();
 
-        if (apiError.code !== 'EMAIL_NOT_VERIFIED') {
-          return;
-        }
+          if (apiError.code !== 'EMAIL_NOT_VERIFIED') {
+            return;
+          }
 
-        navigate(routes.verifyEmail, {
-          state: {
-            email: data.email.trim(),
-            destination,
-          },
-        });
-      },
-    });
+          navigate(routes.verifyEmail, {
+            state: {
+              email: data.email.trim(),
+              destination,
+            },
+          });
+        },
+      }
+    );
 
     if (result) {
       await completeAuth(result, destination);
@@ -136,7 +140,9 @@ const SignInPage: React.FC = () => {
               Email Address
             </label>
           </div>
-          {errors.email ? <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.email.message}</p> : null}
+          {errors.email ? (
+            <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.email.message}</p>
+          ) : null}
         </div>
         <div className="space-y-1.5">
           <div className="relative">
@@ -157,7 +163,11 @@ const SignInPage: React.FC = () => {
               Password
             </label>
           </div>
-          {errors.password ? <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.password.message}</p> : null}
+          {errors.password ? (
+            <p className="mt-1 text-xs text-[color:var(--danger-text)]">
+              {errors.password.message}
+            </p>
+          ) : null}
         </div>
 
         <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-start sm:justify-between">
@@ -187,9 +197,7 @@ const SignInPage: React.FC = () => {
           </Link>
         </div>
 
-        {error ? (
-          <AuthAlert>{error.errorMessage}</AuthAlert>
-        ) : null}
+        {error ? <AuthAlert>{error.errorMessage}</AuthAlert> : null}
         {turnstile.error ? <AuthAlert>{turnstile.error}</AuthAlert> : null}
 
         {features.authTurnstile ? (
@@ -202,7 +210,13 @@ const SignInPage: React.FC = () => {
           />
         ) : null}
 
-        <Button type="submit" loading={loading} shake={hasValidationErrors} className="w-full" size="lg">
+        <Button
+          type="submit"
+          loading={loading}
+          shake={hasValidationErrors}
+          className="w-full"
+          size="lg"
+        >
           <span>{loading ? 'Signing In…' : 'Sign In'}</span>
         </Button>
       </form>

@@ -32,7 +32,9 @@ export function TurnstileWidget({
   }
 
   return (
-    <div className={`mx-auto flex max-w-full justify-center overflow-hidden rounded-xl bg-transparent ${className}`}>
+    <div
+      className={`mx-auto flex max-w-full justify-center overflow-hidden rounded-xl bg-transparent ${className}`}
+    >
       <Turnstile
         ref={widgetRef}
         siteKey={turnstileSiteKey}

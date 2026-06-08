@@ -5,10 +5,7 @@ type UrlShortenerInputFieldProps = {
   registration: UseFormRegisterReturn<'originalUrl'>;
 };
 
-export function UrlShortenerInputField({
-  error,
-  registration,
-}: UrlShortenerInputFieldProps) {
+export function UrlShortenerInputField({ error, registration }: UrlShortenerInputFieldProps) {
   const errorId = 'url-shortener-original-url-error';
 
   return (
@@ -24,7 +21,10 @@ export function UrlShortenerInputField({
         spellCheck={false}
       />
       {error ? (
-        <p id={errorId} className="mt-1.5 flex items-center gap-1.5 px-3 text-sm text-[color:var(--danger-text)]">
+        <p
+          id={errorId}
+          className="mt-1.5 flex items-center gap-1.5 px-3 text-sm text-[color:var(--danger-text)]"
+        >
           <span aria-hidden="true">⚠</span>
           {error.message}
         </p>

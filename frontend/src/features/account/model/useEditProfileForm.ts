@@ -15,7 +15,7 @@ import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 export function useEditProfileForm(
   user: User,
   onSuccess: (updated: User) => void,
-  onCancel: () => void,
+  onCancel: () => void
 ) {
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState('');
@@ -33,7 +33,7 @@ export function useEditProfileForm(
       firstName: user.firstName ?? '',
       lastName: user.lastName ?? '',
       country: user.country ?? '',
-      age: (user.age ?? '') as unknown as number,
+      age: user.age ?? '',
     },
   });
 

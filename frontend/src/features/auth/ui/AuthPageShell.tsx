@@ -46,7 +46,9 @@ export function AuthPageShell({
             >
               {title}
             </h1>
-            <p className="text-sm leading-relaxed text-[color:var(--text-secondary)]">{description}</p>
+            <p className="text-sm leading-relaxed text-[color:var(--text-secondary)]">
+              {description}
+            </p>
           </div>
 
           {children}

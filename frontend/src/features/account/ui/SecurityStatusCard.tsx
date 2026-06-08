@@ -32,8 +32,12 @@ export function SecurityStatusCard() {
                 <Icon className="h-3 w-3 text-[color:var(--avatar-text)]" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-semibold text-[color:var(--text-secondary)]">{feature.label}</p>
-                <p className="truncate text-[10px] text-[color:var(--text-muted)]">{feature.description}</p>
+                <p className="truncate text-xs font-semibold text-[color:var(--text-secondary)]">
+                  {feature.label}
+                </p>
+                <p className="truncate text-[10px] text-[color:var(--text-muted)]">
+                  {feature.description}
+                </p>
               </div>
               <span className="flex-shrink-0 rounded-full border border-emerald-500/20 bg-emerald-900/30 px-2 py-0.5 text-[10px] font-medium text-emerald-400">
                 Active

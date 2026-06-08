@@ -103,7 +103,9 @@ const ResetPasswordPage: React.FC = () => {
       });
       setSuccess(true);
     } catch (submitError: unknown) {
-      setError(getApiErrorMessage(submitError, 'Failed to reset password. The link may have expired.'));
+      setError(
+        getApiErrorMessage(submitError, 'Failed to reset password. The link may have expired.')
+      );
       turnstile.resetChallenge();
     } finally {
       setIsLoading(false);
@@ -120,19 +122,19 @@ const ResetPasswordPage: React.FC = () => {
         <AuthStatusView
           title="Token missing"
           description="The recovery link you followed is missing information or has already been cleaned up. Request a fresh one to continue."
-          icon={(
+          icon={
             <AuthStatusIcon badge="error">
               <FaLock className="h-8 w-8 text-[color:var(--danger-text)]" />
             </AuthStatusIcon>
-          )}
-          action={(
+          }
+          action={
             <>
               <AuthPrimaryLink to={routes.forgotPassword}>Request a new reset link</AuthPrimaryLink>
               <div className="text-center">
                 <AuthBackLink to={routes.signIn}>Back to Sign In</AuthBackLink>
               </div>
             </>
-          )}
+          }
         />
       </AuthPageShell>
     );
@@ -148,12 +150,12 @@ const ResetPasswordPage: React.FC = () => {
         <AuthStatusView
           title="You can sign in now"
           description="You can now sign in with your new password. Older recovery links no longer work."
-          icon={(
+          icon={
             <AuthStatusIcon badge="success">
               <FaShieldAlt className="h-8 w-8 text-emerald-400" />
             </AuthStatusIcon>
-          )}
-          action={(
+          }
+          action={
             <>
               <AuthSupportCard>
                 <p className="text-sm text-[color:var(--text-secondary)]">
@@ -167,7 +169,7 @@ const ResetPasswordPage: React.FC = () => {
                 </>
               </AuthPrimaryLink>
             </>
-          )}
+          }
         />
       </AuthPageShell>
     );
@@ -183,8 +185,8 @@ const ResetPasswordPage: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-5">
           <AuthSupportCard>
             <p className="text-sm text-[color:var(--text-secondary)]">
-              Use 15 or more characters. Spaces are supported, and the browser can suggest a generated
-              password if you prefer.
+              Use 15 or more characters. Spaces are supported, and the browser can suggest a
+              generated password if you prefer.
             </p>
           </AuthSupportCard>
 
@@ -202,7 +204,7 @@ const ResetPasswordPage: React.FC = () => {
                 type={showNew ? 'text' : 'password'}
                 required
                 value={newPassword}
-                onChange={(event) => setNewPassword(event.target.value)}
+                onChange={event => setNewPassword(event.target.value)}
                 placeholder="Create a strong password"
                 autoComplete="new-password"
                 spellCheck={false}
@@ -210,7 +212,10 @@ const ResetPasswordPage: React.FC = () => {
                 className={`${authInputClassName} pr-12`}
                 aria-describedby="reset-password-guidance"
               />
-              <PasswordVisibilityToggle show={showNew} onToggle={() => setShowNew((value) => !value)} />
+              <PasswordVisibilityToggle
+                show={showNew}
+                onToggle={() => setShowNew(value => !value)}
+              />
             </div>
             <div
               id="reset-password-guidance"
@@ -223,7 +228,9 @@ const ResetPasswordPage: React.FC = () => {
             {newPassword ? (
               <div className="mt-3 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase tracking-widest text-[color:var(--text-muted)]">Strength</span>
+                  <span className="text-[10px] uppercase tracking-widest text-[color:var(--text-muted)]">
+                    Strength
+                  </span>
                   <span className={`text-xs font-semibold ${passwordStrength.textClass}`}>
                     {passwordStrength.strength}
                   </span>
@@ -235,7 +242,7 @@ const ResetPasswordPage: React.FC = () => {
                   />
                 </div>
                 <AuthChecklist
-                  items={passwordChecks.map((check) => ({
+                  items={passwordChecks.map(check => ({
                     label: check.getLabel(),
                     passes: check.isValid(newPassword),
                   }))}
@@ -258,7 +265,7 @@ const ResetPasswordPage: React.FC = () => {
                 type={showConfirm ? 'text' : 'password'}
                 required
                 value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
+                onChange={event => setConfirmPassword(event.target.value)}
                 placeholder="Confirm your new password"
                 autoComplete="new-password"
                 spellCheck={false}
@@ -270,7 +277,7 @@ const ResetPasswordPage: React.FC = () => {
               />
               <PasswordVisibilityToggle
                 show={showConfirm}
-                onToggle={() => setShowConfirm((value) => !value)}
+                onToggle={() => setShowConfirm(value => !value)}
               />
             </div>
             {confirmPassword && !passwordsMatch ? (
@@ -296,7 +303,9 @@ const ResetPasswordPage: React.FC = () => {
             type="submit"
             disabled={isSubmitDisabled}
             loading={isLoading}
-            shake={Boolean(confirmPassword) && (!passwordsMatch || passwordStrength.strength === 'Weak')}
+            shake={
+              Boolean(confirmPassword) && (!passwordsMatch || passwordStrength.strength === 'Weak')
+            }
             className="w-full"
             size="lg"
           >

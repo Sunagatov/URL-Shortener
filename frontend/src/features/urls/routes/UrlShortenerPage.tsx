@@ -94,7 +94,9 @@ const UrlShortenerPage: React.FC = () => {
         onClear={handleClear}
         onCopy={handleCopyShortUrl}
       >
-        <UrlShortenerForm onSubmit={handleSubmit(onSubmit)} isLoading={loading}
+        <UrlShortenerForm
+          onSubmit={handleSubmit(onSubmit)}
+          isLoading={loading}
           challenge={
             features.urlCreateTurnstile ? (
               <div className="mt-2">
@@ -114,23 +116,38 @@ const UrlShortenerPage: React.FC = () => {
           }
           advancedOptions={
             <div className="mt-2 px-1.5">
-              <button type="button" onClick={() => setShowAdvanced(v => !v)}
-                className="flex items-center gap-1.5 text-xs text-[color:var(--text-muted)] transition-colors hover:text-[color:var(--text-secondary)]">
-                <FaChevronDown className={`h-2.5 w-2.5 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+              <button
+                type="button"
+                onClick={() => setShowAdvanced(v => !v)}
+                className="flex items-center gap-1.5 text-xs text-[color:var(--text-muted)] transition-colors hover:text-[color:var(--text-secondary)]"
+              >
+                <FaChevronDown
+                  className={`h-2.5 w-2.5 transition-transform ${showAdvanced ? 'rotate-180' : ''}`}
+                />
                 Advanced options
               </button>
               {showAdvanced && (
                 <div className="mt-2.5 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                   <div className="relative">
                     <FaTag className="pointer-events-none absolute left-3 top-1/2 h-3 w-3 -translate-y-1/2 text-[color:var(--text-muted)]" />
-                    <input {...register('customAlias')} placeholder="Custom alias (e.g. my-link)"
-                      className="w-full rounded-xl border border-[color:var(--border)] bg-[var(--input-bg)] py-2.5 pl-9 pr-3 text-sm text-[color:var(--text-primary)] placeholder-[color:var(--text-muted)] focus:border-[color:var(--accent-border)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-ring)]" />
-                    {errors.customAlias && <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.customAlias.message}</p>}
+                    <input
+                      {...register('customAlias')}
+                      placeholder="Custom alias (e.g. my-link)"
+                      className="w-full rounded-xl border border-[color:var(--border)] bg-[var(--input-bg)] py-2.5 pl-9 pr-3 text-sm text-[color:var(--text-primary)] placeholder-[color:var(--text-muted)] focus:border-[color:var(--accent-border)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-ring)]"
+                    />
+                    {errors.customAlias && (
+                      <p className="mt-1 text-xs text-[color:var(--danger-text)]">
+                        {errors.customAlias.message}
+                      </p>
+                    )}
                   </div>
                   <div className="relative">
                     <FaClock className="pointer-events-none absolute left-3 top-1/2 h-3 w-3 -translate-y-1/2 text-[color:var(--text-muted)]" />
-                    <select {...register('daysCount')} defaultValue=""
-                      className="w-full appearance-none rounded-xl border border-[color:var(--border)] bg-[var(--input-bg)] py-2.5 pl-9 pr-3 text-sm text-[color:var(--text-primary)] focus:border-[color:var(--accent-border)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-ring)]">
+                    <select
+                      {...register('daysCount')}
+                      defaultValue=""
+                      className="w-full appearance-none rounded-xl border border-[color:var(--border)] bg-[var(--input-bg)] py-2.5 pl-9 pr-3 text-sm text-[color:var(--text-primary)] focus:border-[color:var(--accent-border)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-ring)]"
+                    >
                       <option value="">Expires in 1 year (default)</option>
                       <option value="1">1 day</option>
                       <option value="7">7 days</option>

@@ -42,11 +42,14 @@ function StatItem({ stat, active }: { stat: Stat; active: boolean }) {
           className={`bg-gradient-to-br ${stat.gradient} bg-clip-text text-4xl font-bold text-transparent md:text-5xl`}
           style={{ fontFamily: 'var(--font-display)' }}
         >
-          {display}{suffix}
+          {display}
+          {suffix}
         </span>
       </div>
       <div className="text-sm tracking-wide text-[color:var(--text-secondary)]">{stat.label}</div>
-      <div className="mt-0.5 text-[11px] uppercase tracking-widest text-[color:var(--text-muted)]">{stat.sublabel}</div>
+      <div className="mt-0.5 text-[11px] uppercase tracking-widest text-[color:var(--text-muted)]">
+        {stat.sublabel}
+      </div>
     </div>
   );
 }
@@ -65,21 +68,22 @@ export function LandingStatsSection() {
           observer.disconnect();
         }
       },
-      { threshold: 0.25 },
+      { threshold: 0.25 }
     );
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden bg-[var(--bg-alt)] py-14 md:py-20">
+    <section
+      ref={sectionRef}
+      className="relative overflow-hidden bg-[var(--bg-alt)] py-14 md:py-20"
+    >
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[var(--border)] to-transparent" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[var(--border)] to-transparent" />
 
       <div className="relative z-10 mx-auto max-w-4xl px-6">
-        <div
-          className="flex flex-col gap-8 sm:flex-row sm:gap-0 sm:items-center sm:justify-between"
-        >
+        <div className="flex flex-col gap-8 sm:flex-row sm:gap-0 sm:items-center sm:justify-between">
           {landingStats.map((stat, index) => (
             <React.Fragment key={stat.label}>
               <StatItem stat={stat} active={active} />

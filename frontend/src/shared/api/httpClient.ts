@@ -25,7 +25,7 @@ const attachRequestContext = (config: InternalAxiosRequestConfig): InternalAxios
 
 rawAxios.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => attachRequestContext(config),
-  (error: AxiosError) => Promise.reject(error),
+  (error: AxiosError) => Promise.reject(error)
 );
 
 // Request interceptor to add shared trace context and access token headers
@@ -42,12 +42,12 @@ axiosInstance.interceptors.request.use(
 
     return config;
   },
-  (error: AxiosError) => Promise.reject(error),
+  (error: AxiosError) => Promise.reject(error)
 );
 
 // Response interceptor to handle token refresh
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  response => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as RetryableRequestConfig | undefined;
     const refreshToken = storage.getRefreshToken();
@@ -70,7 +70,7 @@ axiosInstance.interceptors.response.use(
       const retriedResponse = await refreshAccessTokenForRequest(
         axiosInstance,
         rawAxios,
-        originalRequest,
+        originalRequest
       );
 
       if (!retriedResponse) {
@@ -82,7 +82,7 @@ axiosInstance.interceptors.response.use(
       await refreshFailedSession(originalRequest.url, refreshError);
       return Promise.reject(refreshError);
     }
-  },
+  }
 );
 
 export default axiosInstance;

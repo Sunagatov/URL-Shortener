@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { formatUrlDate, getDomainLabel, getShortUrlSlug } from '@/shared/lib/urlMappings';
 import {
-  formatUrlDate,
-  getDomainLabel,
-  getShortUrlSlug,
-} from '@/shared/lib/urlMappings';
-import { getUserUrlsUpTo, type UrlMapping as DashboardUrlMapping } from '@/shared/api/urlMappingsApi';
+  getUserUrlsUpTo,
+  type UrlMapping as DashboardUrlMapping,
+} from '@/shared/api/urlMappingsApi';
 import type {
   DashboardActivityItem,
   DashboardRecentUrlItem,
@@ -27,7 +26,7 @@ function getMonthSpan(urlMappings: DashboardUrlMapping[]) {
     return 1;
   }
 
-  const timestamps = urlMappings.map((mapping) => new Date(mapping.createdAt).getTime());
+  const timestamps = urlMappings.map(mapping => new Date(mapping.createdAt).getTime());
   const newest = Math.max(...timestamps);
   const oldest = Math.min(...timestamps);
   const months = Math.ceil((newest - oldest) / (1000 * 60 * 60 * 24 * 30));
@@ -35,7 +34,7 @@ function getMonthSpan(urlMappings: DashboardUrlMapping[]) {
 }
 
 function buildActivity(urlMappings: DashboardUrlMapping[]): DashboardActivityItem[] {
-  return urlMappings.slice(0, 4).map((mapping) => {
+  return urlMappings.slice(0, 4).map(mapping => {
     const domain = getDomainLabel(mapping.originalUrl);
     const hasClicks = mapping.clickCount > 0;
 
@@ -63,8 +62,8 @@ export function useDashboardOverview() {
       const mappings = await getUserUrlsUpTo(DASHBOARD_SAMPLE_SIZE);
       setUrlMappings(
         [...mappings].sort(
-          (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime(),
-        ),
+          (left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()
+        )
       );
       setError(null);
     } catch (requestError: unknown) {
@@ -112,7 +111,7 @@ export function useDashboardOverview() {
 
     return {
       activity: buildActivity(urlMappings),
-      recentUrls: urlMappings.slice(0, 5).map<DashboardRecentUrlItem>((mapping) => ({
+      recentUrls: urlMappings.slice(0, 5).map<DashboardRecentUrlItem>(mapping => ({
         clickCount: mapping.clickCount,
         createdAtLabel: formatUrlDate(mapping.createdAt),
         domain: getDomainLabel(mapping.originalUrl),

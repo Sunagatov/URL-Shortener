@@ -29,10 +29,13 @@ const SecurityPage: React.FC = () => {
             <div className="rounded-2xl border border-[color:var(--card-border)] bg-[var(--card-bg)] p-6">
               <div className="flex items-center gap-3 mb-3">
                 <FcGoogle className="h-6 w-6" />
-                <h3 className="text-sm font-semibold text-[color:var(--text-primary)]">Google Account</h3>
+                <h3 className="text-sm font-semibold text-[color:var(--text-primary)]">
+                  Google Account
+                </h3>
               </div>
               <p className="text-sm text-[color:var(--text-muted)]">
-                Your account is secured through Google sign-in. Password management is handled by your Google account.
+                Your account is secured through Google sign-in. Password management is handled by
+                your Google account.
               </p>
             </div>
           </div>

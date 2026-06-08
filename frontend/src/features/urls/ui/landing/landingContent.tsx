@@ -32,10 +32,34 @@ export const landingFeatures = [
 ] as const;
 
 export const landingStats = [
-  { number: '10M+', label: 'URLs Shortened', sublabel: 'tracked & growing', dotColor: 'bg-blue-400', gradient: 'from-blue-400 to-cyan-300' },
-  { number: '500K+', label: 'Happy Users', sublabel: 'trusting our platform', dotColor: 'bg-violet-400', gradient: 'from-violet-400 to-purple-300' },
-  { number: '99.9%', label: 'Uptime SLA', sublabel: 'guaranteed reliability', dotColor: 'bg-emerald-400', gradient: 'from-emerald-400 to-teal-300' },
-  { number: '24/7', label: 'Support', sublabel: 'human, always available', dotColor: 'bg-rose-400', gradient: 'from-rose-400 to-pink-300' },
+  {
+    number: '10M+',
+    label: 'URLs Shortened',
+    sublabel: 'tracked & growing',
+    dotColor: 'bg-blue-400',
+    gradient: 'from-blue-400 to-cyan-300',
+  },
+  {
+    number: '500K+',
+    label: 'Happy Users',
+    sublabel: 'trusting our platform',
+    dotColor: 'bg-violet-400',
+    gradient: 'from-violet-400 to-purple-300',
+  },
+  {
+    number: '99.9%',
+    label: 'Uptime SLA',
+    sublabel: 'guaranteed reliability',
+    dotColor: 'bg-emerald-400',
+    gradient: 'from-emerald-400 to-teal-300',
+  },
+  {
+    number: '24/7',
+    label: 'Support',
+    sublabel: 'human, always available',
+    dotColor: 'bg-rose-400',
+    gradient: 'from-rose-400 to-pink-300',
+  },
 ] as const;
 
 export const heroHighlights = [

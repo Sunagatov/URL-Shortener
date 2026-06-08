@@ -3,7 +3,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FaFlag } from 'react-icons/fa';
 import { reportAbuse } from '@/features/urls/api/urlsApi';
-import { abuseReportSchema, type AbuseReportFormData } from '@/features/urls/model/abuseReportValidation';
+import {
+  abuseReportSchema,
+  type AbuseReportFormData,
+} from '@/features/urls/model/abuseReportValidation';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 import { Button, Card, useToast } from '@/shared/ui';
@@ -54,7 +57,9 @@ const AbuseReportPage: React.FC = () => {
           </div>
           <div>
             <h1 className="text-xl font-bold text-[color:var(--text-primary)]">Report abuse</h1>
-            <p className="mt-1 text-sm text-[color:var(--text-muted)]">Send a suspicious short link for review.</p>
+            <p className="mt-1 text-sm text-[color:var(--text-muted)]">
+              Send a suspicious short link for review.
+            </p>
           </div>
         </div>
 
@@ -69,7 +74,9 @@ const AbuseReportPage: React.FC = () => {
               placeholder="https://zuf.uk/abc12345"
             />
             {errors.shortUrlOrHash ? (
-              <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.shortUrlOrHash.message}</p>
+              <p className="mt-1 text-xs text-[color:var(--danger-text)]">
+                {errors.shortUrlOrHash.message}
+              </p>
             ) : null}
           </div>
 
@@ -83,7 +90,9 @@ const AbuseReportPage: React.FC = () => {
               placeholder="Phishing, malware, spam, impersonation, or another concern"
             />
             {errors.reason ? (
-              <p className="mt-1 text-xs text-[color:var(--danger-text)]">{errors.reason.message}</p>
+              <p className="mt-1 text-xs text-[color:var(--danger-text)]">
+                {errors.reason.message}
+              </p>
             ) : null}
           </div>
 

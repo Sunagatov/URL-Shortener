@@ -1,5 +1,9 @@
 import { FcGoogle } from 'react-icons/fc';
-import { googleOAuthClientId, getGoogleOAuthUrl, getGoogleRedirectUri } from '@/features/auth/lib/googleOAuth';
+import {
+  googleOAuthClientId,
+  getGoogleOAuthUrl,
+  getGoogleRedirectUri,
+} from '@/features/auth/lib/googleOAuth';
 
 export function GoogleSignInButton({ state }: { state?: string }) {
   if (!googleOAuthClientId) return null;

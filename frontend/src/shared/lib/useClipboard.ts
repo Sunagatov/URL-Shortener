@@ -16,22 +16,25 @@ export const useClipboard = () => {
     setCopiedValue(null);
   }, []);
 
-  const copyValue = useCallback(async (value: string): Promise<boolean> => {
-    const didCopy = await copyToClipboard(value);
+  const copyValue = useCallback(
+    async (value: string): Promise<boolean> => {
+      const didCopy = await copyToClipboard(value);
 
-    if (!didCopy) {
-      return false;
-    }
+      if (!didCopy) {
+        return false;
+      }
 
-    clearCopiedValue();
-    setCopiedValue(value);
-    resetTimerRef.current = setTimeout(() => {
-      setCopiedValue(null);
-      resetTimerRef.current = null;
-    }, RESET_DELAY_MS);
+      clearCopiedValue();
+      setCopiedValue(value);
+      resetTimerRef.current = setTimeout(() => {
+        setCopiedValue(null);
+        resetTimerRef.current = null;
+      }, RESET_DELAY_MS);
 
-    return true;
-  }, [clearCopiedValue]);
+      return true;
+    },
+    [clearCopiedValue]
+  );
 
   useEffect(() => {
     return () => {
