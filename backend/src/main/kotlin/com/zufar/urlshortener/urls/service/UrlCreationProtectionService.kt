@@ -28,6 +28,7 @@ class UrlCreationProtectionService(
         val clientIp = clientIpResolver.resolve(request)
         val creatorKey = creatorKey(userId, clientIp)
         enforceDailyQuota(creatorKey, userId, now)
+        enforceDestinationHostQuota(originalUrl, now)
 
         val interstitial = classifySafetyInterstitial(originalUrl, userId)
         return UrlCreationProtection(
@@ -58,14 +59,21 @@ class UrlCreationProtectionService(
     private fun creatorKey(userId: String?, clientIp: String): String =
         userId?.let { "user:$it" } ?: "ip:${PrivacyHasher.sha256(clientIp) ?: "unknown"}"
 
+    fun targetHost(originalUrl: String): String? =
+        runCatching { URI(originalUrl).host?.lowercase()?.trimEnd('.')?.takeIf(String::isNotBlank) }
+            .getOrNull()
+
     fun classifySafetyInterstitial(originalUrl: String, userId: String?): UrlSafetyInterstitial {
         val uri = runCatching { URI(originalUrl) }.getOrNull()
-        val host = uri?.host.orEmpty()
+        val host = uri?.host.orEmpty().lowercase().trimEnd('.')
         if (protectionProperties.safetyInterstitialForIpDestinations && host.isIpLiteral()) {
             return UrlSafetyInterstitial(true, "ip_destination")
         }
         if (protectionProperties.safetyInterstitialForHttpDestinations && uri?.scheme.equals("http", ignoreCase = true)) {
             return UrlSafetyInterstitial(true, "http_destination")
+        }
+        if (protectionProperties.safetyInterstitialForSuspiciousDestinations && host.isSuspiciousDestinationHost()) {
+            return UrlSafetyInterstitial(true, "suspicious_destination")
         }
         if (protectionProperties.safetyInterstitialForAnonymous && userId == null) {
             return UrlSafetyInterstitial(true, "anonymous_creator")
@@ -73,8 +81,38 @@ class UrlCreationProtectionService(
         return UrlSafetyInterstitial(false, null)
     }
 
+    private fun enforceDestinationHostQuota(originalUrl: String, now: Instant) {
+        val host = targetHost(originalUrl) ?: return
+        val count = urlRepository.countByTargetHostAndCreatedAtAfter(host, now.minus(1, ChronoUnit.DAYS))
+        if (count >= protectionProperties.destinationHostDailyQuota) {
+            auditLogService.record("short_url_destination_quota_exceeded", "blocked", targetId = host)
+            throw ApplicationException.tooManyRequests(
+                "URL_DESTINATION_QUOTA_EXCEEDED",
+                "Daily URL creation quota exceeded for this destination",
+                retryAfterSeconds = ChronoUnit.DAYS.duration.seconds
+            )
+        }
+    }
+
     private fun String.isIpLiteral(): Boolean =
         matches(Regex("^\\d{1,3}(\\.\\d{1,3}){3}$")) || contains(":")
+
+    private fun String.isSuspiciousDestinationHost(): Boolean {
+        if (isBlank() || isIpLiteral()) {
+            return false
+        }
+
+        val labels = split(".")
+        val tld = labels.lastOrNull().orEmpty()
+        return contains("xn--") ||
+            labels.size > 4 ||
+            length > 80 ||
+            tld in HIGH_RISK_TLDS
+    }
+
+    companion object {
+        private val HIGH_RISK_TLDS = setOf("zip", "mov")
+    }
 }
 
 data class UrlSafetyInterstitial(val required: Boolean, val reason: String?)

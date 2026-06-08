@@ -36,6 +36,15 @@ class UrlValidatorTest {
     }
 
     @Test
+    fun `configured blocked hosts also reject subdomains`() {
+        val validator = validator("https://short.example.com", "bad.example")
+
+        assertThrows<ApplicationException> {
+            validator.validateUrl("https://login.bad.example/path")
+        }
+    }
+
+    @Test
     fun `configured blocked alias hosts are rejected with trailing dot`() {
         val validator = validator("https://zuf.uk", "www.zuf.uk, api.zuf.uk")
 

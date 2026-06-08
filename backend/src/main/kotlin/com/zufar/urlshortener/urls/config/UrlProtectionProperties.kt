@@ -9,7 +9,9 @@ import org.springframework.validation.annotation.Validated
 data class UrlProtectionProperties(
     @field:Min(1) val anonymousDailyQuota: Long = 25,
     @field:Min(1) val authenticatedDailyQuota: Long = 250,
+    @field:Min(1) val destinationHostDailyQuota: Long = 500,
     val safetyInterstitialForAnonymous: Boolean = true,
     val safetyInterstitialForIpDestinations: Boolean = true,
-    val safetyInterstitialForHttpDestinations: Boolean = true
+    val safetyInterstitialForHttpDestinations: Boolean = true,
+    val safetyInterstitialForSuspiciousDestinations: Boolean = true
 )

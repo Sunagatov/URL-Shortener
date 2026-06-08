@@ -81,7 +81,7 @@ class UrlValidator(
             .toSet()
 
     private fun isBlockedHostName(host: String): Boolean =
-        host in blockedHosts ||
+        blockedHosts.any { host == it || host.endsWith(".$it") } ||
             host.endsWith(".localhost") ||
             !host.isIpLiteral() && !host.contains(".")
 

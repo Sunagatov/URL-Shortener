@@ -9,7 +9,9 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.mock
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.security.access.AccessDeniedException
 import java.time.Clock
@@ -23,12 +25,13 @@ class UrlAccessServiceTest {
 
     @Mock private lateinit var urlRepository: UrlRepository
     @Mock private lateinit var authenticatedUserContext: AuthenticatedUserContextService
+    @Mock private lateinit var urlValidator: UrlValidator
 
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
     private val service by lazy {
         UrlManagementService(
             urlRepository = urlRepository,
-            urlValidator = mock(),
+            urlValidator = urlValidator,
             authenticatedUserIdProvider = authenticatedUserContext,
             urlMappingAccessService = UrlMappingAccessService(urlRepository, authenticatedUserContext, clock),
             urlCreationProtectionService = testUrlCreationProtectionService(urlRepository),
@@ -49,6 +52,25 @@ class UrlAccessServiceTest {
         val result = service.getActiveUrlMapping("abc12345")
 
         assertEquals(urlMapping, result)
+    }
+
+    @Test
+    fun `ensureSafeRedirectDestination disables mapping when stored destination fails current validation`() {
+        val urlMapping = mapping(expirationDate = Instant.parse("2024-01-02T10:15:30Z"))
+        whenever(urlValidator.validateUrl("https://example.com"))
+            .thenThrow(ApplicationException.badRequest("INVALID_URL_REQUEST", "blocked"))
+        whenever(urlRepository.save(any<UrlMapping>())).thenAnswer { it.arguments[0] }
+
+        val ex = assertThrows<ApplicationException> {
+            service.ensureSafeRedirectDestination(urlMapping)
+        }
+
+        val captor = argumentCaptor<UrlMapping>()
+        verify(urlRepository).save(captor.capture())
+        assertEquals("URL_NOT_FOUND", ex.code)
+        assertEquals(true, captor.firstValue.disabled)
+        assertEquals("destination_failed_redirect_validation", captor.firstValue.disabledReason)
+        assertEquals(Instant.parse("2024-01-01T10:15:30Z"), captor.firstValue.disabledAt)
     }
 
     @Test

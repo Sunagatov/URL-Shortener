@@ -16,4 +16,6 @@ interface UrlRepository : MongoRepository<UrlMapping, String> {
                                               pageable: Pageable): Page<UrlMapping>
 
     fun countByCreatorKeyAndCreatedAtAfter(creatorKey: String, createdAt: Instant): Long
+
+    fun countByTargetHostAndCreatedAtAfter(targetHost: String, createdAt: Instant): Long
 }

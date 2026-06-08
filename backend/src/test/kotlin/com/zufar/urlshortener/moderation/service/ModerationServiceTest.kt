@@ -72,6 +72,43 @@ class ModerationServiceTest {
     }
 
     @Test
+    fun `reportAbuse requires safety interstitial after report threshold`() {
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping()))
+        whenever(clientIpResolver.resolve(httpRequest)).thenReturn("127.0.0.1")
+        whenever(abuseReportRepository.save(any<AbuseReport>())).thenAnswer {
+            (it.arguments[0] as AbuseReport).copy(id = "report-1")
+        }
+        whenever(abuseReportRepository.countByUrlHashAndCreatedAtAfter(any(), any())).thenReturn(1)
+        whenever(urlRepository.save(any<UrlMapping>())).thenAnswer { it.arguments[0] }
+
+        service().reportAbuse(AbuseReportRequest("abc12345", "phishing"), httpRequest)
+
+        val captor = argumentCaptor<UrlMapping>()
+        verify(urlRepository).save(captor.capture())
+        assertEquals(true, captor.firstValue.safetyInterstitialRequired)
+        assertEquals("abuse_reported", captor.firstValue.safetyInterstitialReason)
+    }
+
+    @Test
+    fun `reportAbuse disables mapping after report threshold`() {
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping()))
+        whenever(clientIpResolver.resolve(httpRequest)).thenReturn("127.0.0.1")
+        whenever(abuseReportRepository.save(any<AbuseReport>())).thenAnswer {
+            (it.arguments[0] as AbuseReport).copy(id = "report-1")
+        }
+        whenever(abuseReportRepository.countByUrlHashAndCreatedAtAfter(any(), any())).thenReturn(3)
+        whenever(urlRepository.save(any<UrlMapping>())).thenAnswer { it.arguments[0] }
+
+        service().reportAbuse(AbuseReportRequest("abc12345", "phishing"), httpRequest)
+
+        val captor = argumentCaptor<UrlMapping>()
+        verify(urlRepository).save(captor.capture())
+        assertEquals(true, captor.firstValue.disabled)
+        assertEquals("abuse_report_threshold", captor.firstValue.disabledReason)
+        assertEquals(Instant.parse("2024-01-01T10:15:30Z"), captor.firstValue.disabledAt)
+    }
+
+    @Test
     fun `disableUrlMapping rejects non-admin user`() {
         whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("normal-user")
 

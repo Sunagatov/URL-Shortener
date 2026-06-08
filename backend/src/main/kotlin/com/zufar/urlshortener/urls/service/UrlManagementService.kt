@@ -128,6 +128,7 @@ class UrlManagementService(
         val updated = urlRepository.save(
             urlMapping.copy(
                 originalUrl = trimmedUrl,
+                targetHost = urlCreationProtectionService.targetHost(trimmedUrl),
                 safetyInterstitialRequired = interstitial.required,
                 safetyInterstitialReason = interstitial.reason
             )
@@ -151,6 +152,29 @@ class UrlManagementService(
 
     fun getActiveUrlMapping(urlHash: String): UrlMapping =
         urlMappingAccessService.getActiveUrlMapping(urlHash)
+
+    fun ensureSafeRedirectDestination(urlMapping: UrlMapping) {
+        try {
+            urlValidator.validateUrl(urlMapping.originalUrl)
+        } catch (ex: ApplicationException) {
+            val disabled = urlMapping.copy(
+                disabled = true,
+                disabledReason = "destination_failed_redirect_validation",
+                disabledAt = Instant.now(clock)
+            )
+            urlRepository.save(disabled)
+            urlMappingAccessService.evictUrlMapping(urlMapping.urlHash)
+            auditLogService.record(
+                "short_url_redirect_destination_blocked",
+                "blocked",
+                urlMapping.userId,
+                urlMapping.urlHash,
+                urlMapping.originalUrl,
+                ex.code
+            )
+            throw ApplicationException.notFound("URL_NOT_FOUND", "URL mapping not found")
+        }
+    }
 
     fun getOwnedActiveUrlMapping(urlHash: String, accessDeniedMessage: String): UrlMapping =
         urlMappingAccessService.getOwnedActiveUrlMapping(urlHash, accessDeniedMessage)
@@ -177,6 +201,7 @@ class UrlManagementService(
             requestIpHash = PrivacyHasher.sha256(protection.clientIp),
             userAgentHash = PrivacyHasher.sha256(userAgent),
             creatorKey = protection.creatorKey,
+            targetHost = urlCreationProtectionService.targetHost(request.originalUrl),
             userId = userId,
             safetyInterstitialRequired = protection.safetyInterstitialRequired,
             safetyInterstitialReason = protection.safetyInterstitialReason
@@ -219,6 +244,9 @@ class UrlManagementService(
         if (alias.lowercase() in RESERVED_ALIASES) {
             throw ApplicationException.conflict("ALIAS_RESERVED", "This alias is reserved and cannot be used")
         }
+        if (RESERVED_ALIAS_PREFIXES.any { alias.lowercase().startsWith(it) }) {
+            throw ApplicationException.conflict("ALIAS_RESERVED", "This alias is reserved and cannot be used")
+        }
     }
 
     companion object {
@@ -228,6 +256,11 @@ class UrlManagementService(
             "analytics", "admin", "api", "health", "docs",
             "about", "terms", "privacy", "contact", "help", "support",
             "favicon.ico", "robots.txt", "sitemap.xml"
+        )
+        private val RESERVED_ALIAS_PREFIXES = setOf(
+            "login-", "signin-", "verify-", "account-", "support-", "security-",
+            "paypal-", "google-", "apple-", "microsoft-", "facebook-", "instagram-",
+            "whatsapp-", "telegram-", "binance-", "coinbase-"
         )
     }
 

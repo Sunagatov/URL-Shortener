@@ -47,6 +47,7 @@ class UrlRedirectController(
     ): ResponseEntity<*> {
         val urlMapping = urlManagementService.getActiveUrlMapping(urlHash)
         val isQrScan = qr != null
+        urlManagementService.ensureSafeRedirectDestination(urlMapping)
 
         if (urlMapping.safetyInterstitialRequired && continueRedirect != "1") {
             return safetyInterstitial(urlHash, urlMapping.originalUrl, isQrScan)

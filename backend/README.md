@@ -163,6 +163,18 @@ src/main/kotlin/com/zufar/urlshortener/
 | `APP_URLS_PAGINATION_DEFAULT_SIZE` | ❌ | Defaults to `10` |
 | `APP_URLS_PAGINATION_MAX_SIZE` | ❌ | Defaults to `100` |
 | `APP_URLS_REDIRECT_MAX_CACHE_SECONDS` | ❌ | Defaults to `3600` |
+| `APP_URLS_PROTECTION_ANONYMOUS_DAILY_QUOTA` | ❌ | Defaults to `25` |
+| `APP_URLS_PROTECTION_AUTHENTICATED_DAILY_QUOTA` | ❌ | Defaults to `250` |
+| `APP_URLS_PROTECTION_DESTINATION_HOST_DAILY_QUOTA` | ❌ | Defaults to `500` |
+| `APP_URLS_PROTECTION_SAFETY_INTERSTITIAL_FOR_ANONYMOUS` | ❌ | Defaults to `true` |
+| `APP_URLS_PROTECTION_SAFETY_INTERSTITIAL_FOR_IP_DESTINATIONS` | ❌ | Defaults to `true` |
+| `APP_URLS_PROTECTION_SAFETY_INTERSTITIAL_FOR_HTTP_DESTINATIONS` | ❌ | Defaults to `true` |
+| `APP_URLS_PROTECTION_SAFETY_INTERSTITIAL_FOR_SUSPICIOUS_DESTINATIONS` | ❌ | Defaults to `true` |
+| `APP_URLS_PROTECTION_BLOCKED_HOSTS` | ❌ | Comma-separated destination hosts to block, including subdomains. |
+| `APP_MODERATION_ADMIN_USER_IDS` | ❌ | Comma-separated user IDs allowed to disable reported links manually. |
+| `APP_MODERATION_AUTO_INTERSTITIAL_REPORT_THRESHOLD` | ❌ | Defaults to `1` report in the auto-action window. |
+| `APP_MODERATION_AUTO_DISABLE_REPORT_THRESHOLD` | ❌ | Defaults to `3` reports in the auto-action window. |
+| `APP_MODERATION_AUTO_ACTION_WINDOW_HOURS` | ❌ | Defaults to `24` |
 | `CORS_ALLOWED_ORIGINS` | ❌ | Defaults to `http://localhost:3000` |
 | `RATE_LIMIT_ENABLED` | ❌ | Defaults to `true` |
 | `RATE_LIMIT_TRUSTED_PROXIES` | ❌ | Comma-separated trusted proxy CIDRs/IPs for `X-Forwarded-For` handling |

@@ -82,6 +82,14 @@ class CustomAliasTest {
     }
 
     @Test
+    fun `custom alias rejects impersonation prefixes`() {
+        val ex = assertThrows<ApplicationException> {
+            service().shorten(ShortenUrlRequest("https://example.com", null, "paypal-support"), httpRequest)
+        }
+        assertEquals("ALIAS_RESERVED", ex.code)
+    }
+
+    @Test
     fun `custom alias conflict returns ALIAS_TAKEN`() {
         whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
         whenever(urlRepository.insert(any<UrlMapping>())).thenThrow(DuplicateKeyException("dup"))

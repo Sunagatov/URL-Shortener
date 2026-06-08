@@ -94,6 +94,18 @@ class UrlShortenEdgeCasesTest {
     }
 
     @Test
+    fun `shorten stores normalized destination host for abuse quotas`() {
+        whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
+        whenever(urlRepository.insert(any<UrlMapping>())).thenAnswer { it.arguments[0] }
+
+        service().shorten(ShortenUrlRequest("https://Example.COM./path", null), httpRequest)
+
+        val captor = argumentCaptor<UrlMapping>()
+        verify(urlRepository).insert(captor.capture())
+        assertEquals("example.com", captor.firstValue.targetHost)
+    }
+
+    @Test
     fun `shorten associates userId for authenticated user`() {
         whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
         whenever(authenticatedUserContext.findAuthenticatedUserIdOrNull()).thenReturn("user-123")

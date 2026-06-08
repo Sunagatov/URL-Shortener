@@ -26,6 +26,8 @@ data class UrlMapping(
     val userAgentHash: String? = null,
     @Indexed(name = "creator_key_idx")
     val creatorKey: String? = null,
+    @Indexed(name = "target_host_idx")
+    val targetHost: String? = null,
 
     @Indexed(name = "user_id_idx")
     val userId: String?,

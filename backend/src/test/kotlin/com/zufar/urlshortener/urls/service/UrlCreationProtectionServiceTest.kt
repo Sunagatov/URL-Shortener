@@ -98,6 +98,30 @@ class UrlCreationProtectionServiceTest {
         assertEquals("URL_DAILY_QUOTA_EXCEEDED", ex.code)
     }
 
+    @Test
+    fun `prepareCreation blocks when destination host quota is reached`() {
+        whenever(clientIpResolver.resolve(request)).thenReturn("127.0.0.1")
+        whenever(urlRepository.countByTargetHostAndCreatedAtAfter("example.com", now.minus(1, java.time.temporal.ChronoUnit.DAYS)))
+            .thenReturn(2)
+
+        val ex = assertThrows<ApplicationException> {
+            service(UrlProtectionProperties(destinationHostDailyQuota = 2))
+                .prepareCreation("https://example.com/path", "user-123", request, now)
+        }
+
+        assertEquals("URL_DESTINATION_QUOTA_EXCEEDED", ex.code)
+    }
+
+    @Test
+    fun `prepareCreation requires interstitial for suspicious destination host`() {
+        whenever(clientIpResolver.resolve(request)).thenReturn("127.0.0.1")
+
+        val result = service().prepareCreation("https://secure-login.example.zip", "user-123", request, now)
+
+        assertEquals(true, result.safetyInterstitialRequired)
+        assertEquals("suspicious_destination", result.safetyInterstitialReason)
+    }
+
     private fun service(
         properties: UrlProtectionProperties = UrlProtectionProperties()
     ) = UrlCreationProtectionService(
