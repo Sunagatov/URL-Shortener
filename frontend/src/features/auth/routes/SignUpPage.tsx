@@ -35,6 +35,9 @@ import { authInputClassName } from '@/features/auth/ui/authStyles';
 import { PasswordToggle, usePasswordVisibility } from '@/features/auth/ui/PasswordToggle';
 import { GoogleSignInButton } from '@/features/auth/ui/GoogleSignInButton';
 import { getPasswordStrength, passwordChecks } from '@/shared/lib/passwordStrength';
+import { features } from '@/shared/config/features';
+import { useTurnstileVerification } from '@/shared/hooks/useTurnstileVerification';
+import { TurnstileWidget } from '@/shared/ui';
 
 const signUpBrandPanel = (
   <AuthBrandPanel
@@ -69,6 +72,7 @@ const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
   const { login, updateUser } = useAuth();
   const { execute, loading, error } = useApi<SignUpResponse>();
+  const turnstile = useTurnstileVerification(features.authTurnstile);
   const destination = getAuthDestination(location.state);
   const {
     control,
@@ -98,6 +102,10 @@ const SignUpPage: React.FC = () => {
   );
 
   const onSubmit = async (data: SignUpFormData) => {
+    if (!turnstile.requireVerified()) {
+      return;
+    }
+
     const result = await execute(() =>
       signUp({
         firstName: data.firstName.trim(),
@@ -106,8 +114,12 @@ const SignUpPage: React.FC = () => {
         password: data.password,
         country: data.country.trim(),
         age: data.age,
+        ...(features.authTurnstile ? { turnstileToken: turnstile.token } : {}),
       }),
-      { action: 'auth.sign_up' },
+      {
+        action: 'auth.sign_up',
+        onError: () => turnstile.resetChallenge(),
+      },
     );
 
     if (!result) {
@@ -310,6 +322,16 @@ const SignUpPage: React.FC = () => {
 
         {error ? (
           <AuthAlert>{error.errorMessage}</AuthAlert>
+        ) : null}
+        {turnstile.error ? <AuthAlert>{turnstile.error}</AuthAlert> : null}
+
+        {features.authTurnstile ? (
+          <TurnstileWidget
+            action="signup"
+            onClear={turnstile.clearToken}
+            onVerify={turnstile.handleVerify}
+            widgetRef={turnstile.widgetRef}
+          />
         ) : null}
 
         <Button type="submit" loading={loading} shake={hasValidationErrors} className="w-full" size="lg">

@@ -23,6 +23,7 @@ export interface RefreshTokenResponse {
 export interface SignInRequest {
   email: string;
   password: string;
+  turnstileToken?: string;
 }
 
 export interface SignUpRequest {
@@ -32,4 +33,5 @@ export interface SignUpRequest {
   lastName: string;
   country: string;
   age: number;
+  turnstileToken?: string;
 }

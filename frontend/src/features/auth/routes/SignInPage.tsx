@@ -19,6 +19,9 @@ import { AuthAlert } from '@/features/auth/ui/AuthFlowElements';
 import { AuthPageShell } from '@/features/auth/ui/AuthPageShell';
 import { AuthBrandPanel } from '@/features/auth/ui/AuthBrandPanel';
 import { authInputClassName } from '@/features/auth/ui/authStyles';
+import { features } from '@/shared/config/features';
+import { useTurnstileVerification } from '@/shared/hooks/useTurnstileVerification';
+import { TurnstileWidget } from '@/shared/ui';
 
 const signInBrandPanel = (
   <AuthBrandPanel
@@ -51,6 +54,7 @@ const SignInPage: React.FC = () => {
   const navigate = useNavigate();
   const { login, updateUser } = useAuth();
   const { execute, loading, error } = useApi<AuthTokens>();
+  const turnstile = useTurnstileVerification(features.authTurnstile);
   const destination = getAuthDestination(location.state);
   const {
     register,
@@ -77,9 +81,18 @@ const SignInPage: React.FC = () => {
   );
 
   const onSubmit = async (data: SignInFormData) => {
-    const result = await execute(() => signIn(data), {
+    if (!turnstile.requireVerified()) {
+      return;
+    }
+
+    const result = await execute(() => signIn({
+      ...data,
+      ...(features.authTurnstile ? { turnstileToken: turnstile.token } : {}),
+    }), {
       action: 'auth.sign_in',
       onError: (apiError) => {
+        turnstile.resetChallenge();
+
         if (apiError.code !== 'EMAIL_NOT_VERIFIED') {
           return;
         }
@@ -176,6 +189,16 @@ const SignInPage: React.FC = () => {
 
         {error ? (
           <AuthAlert>{error.errorMessage}</AuthAlert>
+        ) : null}
+        {turnstile.error ? <AuthAlert>{turnstile.error}</AuthAlert> : null}
+
+        {features.authTurnstile ? (
+          <TurnstileWidget
+            action="signin"
+            onClear={turnstile.clearToken}
+            onVerify={turnstile.handleVerify}
+            widgetRef={turnstile.widgetRef}
+          />
         ) : null}
 
         <Button type="submit" loading={loading} shake={hasValidationErrors} className="w-full" size="lg">

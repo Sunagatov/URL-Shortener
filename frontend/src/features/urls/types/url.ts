@@ -20,4 +20,5 @@ export interface CreateUrlRequest {
   originalUrl: string;
   daysCount?: number | undefined;
   customAlias?: string | undefined;
+  turnstileToken?: string | undefined;
 }

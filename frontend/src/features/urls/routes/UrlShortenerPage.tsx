@@ -7,6 +7,7 @@ import { createUrl } from '@/features/urls/api/urlsApi';
 import { urlCopyMessages } from '@/features/urls/lib/urlMessages';
 import { useAuth } from '@/shared/auth/useAuth';
 import { createUrlSchema, type CreateUrlFormData } from '@/features/urls/model/urlValidation';
+import type { CreateUrlRequest } from '@/features/urls/types/url';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { LandingFeaturesSection } from '@/features/urls/ui/landing/LandingFeaturesSection';
 import { LandingGuestCtaSection } from '@/features/urls/ui/landing/LandingGuestCtaSection';
@@ -15,7 +16,9 @@ import { UrlShortenerInputField } from '@/features/urls/ui/landing/UrlShortenerI
 import { UrlShortenerForm, UrlShortenerHero } from '@/features/urls/ui/landing/UrlShortenerHero';
 import { useClipboard } from '@/shared/lib/useClipboard';
 import { useApi } from '@/shared/api/useApi';
-import { useToast } from '@/shared/ui';
+import { TurnstileWidget, useToast } from '@/shared/ui';
+import { features } from '@/shared/config/features';
+import { useTurnstileVerification } from '@/shared/hooks/useTurnstileVerification';
 
 type CreateUrlFormInput = z.input<typeof createUrlSchema>;
 
@@ -25,6 +28,7 @@ const UrlShortenerPage: React.FC = () => {
   const { copiedValue, copyValue, clearCopiedValue } = useClipboard();
   const { execute, error, loading } = useApi<{ shortUrl: string }>();
   const toast = useToast();
+  const turnstile = useTurnstileVerification(features.urlCreateTurnstile);
   const [shortUrl, setShortUrl] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const {
@@ -43,13 +47,24 @@ const UrlShortenerPage: React.FC = () => {
   }, [error, toast]);
 
   const onSubmit = async (data: CreateUrlFormData) => {
-    const payload: CreateUrlFormData = { originalUrl: data.originalUrl };
+    if (!turnstile.requireVerified()) {
+      return;
+    }
+
+    const payload: CreateUrlRequest = {
+      originalUrl: data.originalUrl,
+      ...(features.urlCreateTurnstile ? { turnstileToken: turnstile.token } : {}),
+    };
     if (data.customAlias) payload.customAlias = data.customAlias;
     if (data.daysCount) payload.daysCount = data.daysCount;
-    const result = await execute(() => createUrl(payload), { action: 'urls.create_short_url' });
+    const result = await execute(() => createUrl(payload), {
+      action: 'urls.create_short_url',
+      onError: () => turnstile.resetChallenge(),
+    });
 
     if (result) {
       setShortUrl(result.shortUrl);
+      turnstile.resetChallenge();
     }
   };
 
@@ -80,6 +95,21 @@ const UrlShortenerPage: React.FC = () => {
         onCopy={handleCopyShortUrl}
       >
         <UrlShortenerForm onSubmit={handleSubmit(onSubmit)} isLoading={loading}
+          challenge={
+            features.urlCreateTurnstile ? (
+              <div className="mt-2">
+                {turnstile.error ? (
+                  <p className="mb-2 text-xs text-[color:var(--danger-text)]">{turnstile.error}</p>
+                ) : null}
+                <TurnstileWidget
+                  action="url_create"
+                  onClear={turnstile.clearToken}
+                  onVerify={turnstile.handleVerify}
+                  widgetRef={turnstile.widgetRef}
+                />
+              </div>
+            ) : null
+          }
           advancedOptions={
             <div className="mt-2 px-1.5">
               <button type="button" onClick={() => setShowAdvanced(v => !v)}

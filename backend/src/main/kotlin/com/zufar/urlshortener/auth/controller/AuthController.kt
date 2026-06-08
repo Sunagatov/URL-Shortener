@@ -39,7 +39,6 @@ class AuthController(
     fun authenticateWithGoogle(
         @Valid @RequestBody googleAuthRequest: GoogleAuthRequest
     ): ResponseEntity<AuthResponse> {
-        verifyAuthTurnstile(googleAuthRequest.turnstileToken)
         return ResponseEntity.ok(googleAuthService.authenticate(googleAuthRequest.code))
     }
 

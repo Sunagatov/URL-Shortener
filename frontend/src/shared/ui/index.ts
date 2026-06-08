@@ -5,3 +5,4 @@ export { Input } from './Input';
 export { AppErrorBoundary } from './AppErrorBoundary';
 export { ToastProvider, useToast } from './Toast';
 export { Tooltip } from './Tooltip';
+export { TurnstileWidget } from './TurnstileWidget';
