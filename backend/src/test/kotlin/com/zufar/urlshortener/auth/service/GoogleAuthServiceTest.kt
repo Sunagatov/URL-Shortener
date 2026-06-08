@@ -116,7 +116,8 @@ class GoogleAuthServiceTest {
             authProvider = AuthProvider.LOCAL,
             emailVerified = false,
             emailVerificationCodeHash = "challenge-hash",
-            emailVerificationCodeExpiresAt = Instant.parse("2024-01-01T10:20:30Z")
+            emailVerificationCodeExpiresAt = Instant.parse("2024-01-01T10:20:30Z"),
+            emailVerificationCodeSentAt = Instant.parse("2024-01-01T10:10:30Z")
         )
         val restTemplate = mockRestTemplate(
             tokenResponse = mapOf("access_token" to "google-access-token"),
@@ -137,6 +138,7 @@ class GoogleAuthServiceTest {
         assertEquals(Instant.parse("2024-01-01T10:15:30Z"), captor.firstValue.emailVerifiedAt)
         assertEquals(null, captor.firstValue.emailVerificationCodeHash)
         assertEquals(null, captor.firstValue.emailVerificationCodeExpiresAt)
+        assertEquals(null, captor.firstValue.emailVerificationCodeSentAt)
     }
 
     @Test
