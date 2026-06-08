@@ -2,7 +2,6 @@ package com.zufar.urlshortener.auth.controller
 
 import com.zufar.urlshortener.auth.dto.AuthResponse
 import com.zufar.urlshortener.auth.dto.ForgotPasswordRequest
-import com.zufar.urlshortener.auth.dto.GoogleAuthRequest
 import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
 import com.zufar.urlshortener.auth.dto.RefreshTokenResponse
 import com.zufar.urlshortener.auth.dto.ResendVerificationRequest
@@ -44,20 +43,6 @@ class AuthControllerTest {
             secretKey = if (authTurnstileEnabled) "test-secret" else ""
         )
     )
-
-    @Test
-    fun `authenticateWithGoogle verifies Turnstile token when auth protection is enabled`() {
-        val controller = controller(authTurnstileEnabled = true)
-        val request = GoogleAuthRequest("google-code", "turnstile-token")
-        val response = AuthResponse("access-token", "refresh-token")
-        whenever(googleAuthService.authenticate("google-code")).thenReturn(response)
-
-        val result = controller.authenticateWithGoogle(request)
-
-        verify(turnstileVerifier).verify("turnstile-token", setOf("google_signin"))
-        verify(googleAuthService).authenticate("google-code")
-        assertEquals(response, result.body)
-    }
 
     @Test
     fun `authenticateUser delegates to auth service`() {

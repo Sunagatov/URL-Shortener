@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RestController
 
 private const val TURNSTILE_ACTION_FORGOT_PASSWORD = "forgot_password"
 private const val TURNSTILE_ACTION_FORGOT_PASSWORD_RESEND = "forgot_password_resend"
-private const val TURNSTILE_ACTION_GOOGLE_SIGNIN = "google_signin"
 private const val TURNSTILE_ACTION_RESET_PASSWORD = "reset_password"
 private const val TURNSTILE_ACTION_SIGNIN = "signin"
 private const val TURNSTILE_ACTION_SIGNUP = "signup"
@@ -47,7 +46,6 @@ class AuthController(
     fun authenticateWithGoogle(
         @Valid @RequestBody googleAuthRequest: GoogleAuthRequest
     ): ResponseEntity<AuthResponse> {
-        verifyAuthTurnstile(googleAuthRequest.turnstileToken, TURNSTILE_ACTION_GOOGLE_SIGNIN)
         return ResponseEntity.ok(googleAuthService.authenticate(googleAuthRequest.code))
     }
 

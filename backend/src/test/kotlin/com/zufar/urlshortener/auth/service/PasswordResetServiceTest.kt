@@ -47,9 +47,11 @@ class PasswordResetServiceTest {
 
         val captor = argumentCaptor<UserAccountDocument>()
         verify(userAccountRepository).save(captor.capture())
+        val tokenCaptor = argumentCaptor<String>()
+        verify(passwordEncoder).encode(tokenCaptor.capture())
         assertEquals("hashed-token", captor.firstValue.passwordResetTokenHash)
-        assertNotNull(captor.firstValue.passwordResetTokenId)
-        assertNotEquals("abcdefghijklmnop", captor.firstValue.passwordResetTokenId)
+        assertEquals(PrivacyHasher.sha256(tokenCaptor.firstValue)!!.take(16), captor.firstValue.passwordResetTokenId)
+        assertNotEquals(tokenCaptor.firstValue.take(16), captor.firstValue.passwordResetTokenId)
         assertNotNull(captor.firstValue.passwordResetTokenExpiresAt)
     }
 
