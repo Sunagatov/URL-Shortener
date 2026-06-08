@@ -59,9 +59,13 @@ class UrlCreationProtectionService(
         userId?.let { "user:$it" } ?: "ip:${PrivacyHasher.sha256(clientIp) ?: "unknown"}"
 
     fun classifySafetyInterstitial(originalUrl: String, userId: String?): UrlSafetyInterstitial {
-        val host = runCatching { URI(originalUrl).host.orEmpty() }.getOrDefault("")
+        val uri = runCatching { URI(originalUrl) }.getOrNull()
+        val host = uri?.host.orEmpty()
         if (protectionProperties.safetyInterstitialForIpDestinations && host.isIpLiteral()) {
             return UrlSafetyInterstitial(true, "ip_destination")
+        }
+        if (protectionProperties.safetyInterstitialForHttpDestinations && uri?.scheme.equals("http", ignoreCase = true)) {
+            return UrlSafetyInterstitial(true, "http_destination")
         }
         if (protectionProperties.safetyInterstitialForAnonymous && userId == null) {
             return UrlSafetyInterstitial(true, "anonymous_creator")

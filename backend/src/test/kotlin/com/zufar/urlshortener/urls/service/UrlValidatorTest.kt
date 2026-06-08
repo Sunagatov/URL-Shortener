@@ -54,6 +54,18 @@ class UrlValidatorTest {
     }
 
     @Test
+    fun `single label hostnames are rejected`() {
+        val validator = validator(
+            "https://short.example.com",
+            resolver = stubResolver("intranet" to listOf("93.184.216.34"))
+        )
+
+        assertThrows<ApplicationException> {
+            validator.validateUrl("http://intranet/login")
+        }
+    }
+
+    @Test
     fun `loopback hosts are rejected`() {
         val validator = validator("https://short.example.com")
 

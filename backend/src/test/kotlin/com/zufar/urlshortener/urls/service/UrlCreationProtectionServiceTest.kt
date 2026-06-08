@@ -56,6 +56,27 @@ class UrlCreationProtectionServiceTest {
     }
 
     @Test
+    fun `prepareCreation requires interstitial for insecure http destinations`() {
+        whenever(clientIpResolver.resolve(request)).thenReturn("127.0.0.1")
+
+        val result = service().prepareCreation("http://example.com/login", "user-123", request, now)
+
+        assertEquals(true, result.safetyInterstitialRequired)
+        assertEquals("http_destination", result.safetyInterstitialReason)
+    }
+
+    @Test
+    fun `prepareCreation does not require http interstitial when disabled`() {
+        whenever(clientIpResolver.resolve(request)).thenReturn("127.0.0.1")
+
+        val result = service(
+            UrlProtectionProperties(safetyInterstitialForHttpDestinations = false)
+        ).prepareCreation("http://example.com/login", "user-123", request, now)
+
+        assertEquals(false, result.safetyInterstitialRequired)
+    }
+
+    @Test
     fun `prepareCreation prioritizes IP destination reason over anonymous creator reason`() {
         whenever(clientIpResolver.resolve(request)).thenReturn("127.0.0.1")
 
@@ -77,10 +98,12 @@ class UrlCreationProtectionServiceTest {
         assertEquals("URL_DAILY_QUOTA_EXCEEDED", ex.code)
     }
 
-    private fun service() = UrlCreationProtectionService(
+    private fun service(
+        properties: UrlProtectionProperties = UrlProtectionProperties()
+    ) = UrlCreationProtectionService(
         urlRepository = urlRepository,
         clientIpResolver = clientIpResolver,
-        protectionProperties = UrlProtectionProperties(),
+        protectionProperties = properties,
         auditLogService = AuditLogService()
     )
 }

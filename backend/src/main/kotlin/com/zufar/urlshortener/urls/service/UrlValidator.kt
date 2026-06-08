@@ -81,12 +81,17 @@ class UrlValidator(
             .toSet()
 
     private fun isBlockedHostName(host: String): Boolean =
-        host in blockedHosts || host.endsWith(".localhost")
+        host in blockedHosts ||
+            host.endsWith(".localhost") ||
+            !host.isIpLiteral() && !host.contains(".")
 
     private fun String.normalizeHost(): String =
         lowercase().trimEnd('.')
 
     private fun parseUri(value: String): URI = URI(value)
+
+    private fun String.isIpLiteral(): Boolean =
+        matches(Regex("^\\d{1,3}(\\.\\d{1,3}){3}$")) || contains(":")
 
     private fun isBlockedResolvedAddress(address: InetAddress): Boolean {
         if (address.isAnyLocalAddress ||
