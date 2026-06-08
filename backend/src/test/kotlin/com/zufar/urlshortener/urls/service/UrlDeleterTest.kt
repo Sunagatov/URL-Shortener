@@ -43,6 +43,8 @@ class UrlDeleterTest {
             urlValidator = mock(),
             authenticatedUserContext = authenticatedUserContext,
             urlMappingAccessService = UrlMappingAccessService(urlRepository, authenticatedUserContext, clock),
+            urlCreationProtectionService = testUrlCreationProtectionService(urlRepository),
+            auditLogService = testAuditLogService(),
             baseUrl = "http://localhost:8080",
             defaultExpirationDays = 365,
             maxCodeGenerationAttempts = 10,

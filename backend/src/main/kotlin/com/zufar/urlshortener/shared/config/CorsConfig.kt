@@ -40,7 +40,7 @@ class CorsConfig(
         )
         configuration.allowCredentials = true
         configuration.maxAge = TimeUnit.HOURS.toSeconds(1)
-        
+
         val source = UrlBasedCorsConfigurationSource()
         source.registerCorsConfiguration("/**", configuration)
         return source

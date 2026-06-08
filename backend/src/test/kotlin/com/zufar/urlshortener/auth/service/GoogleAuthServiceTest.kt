@@ -86,7 +86,7 @@ class GoogleAuthServiceTest {
     }
 
     @Test
-    fun `authenticate auto-links existing LOCAL user to Google`() {
+    fun `authenticate rejects existing LOCAL user instead of implicitly linking account`() {
         val existing = UserAccountDocument(
             id = "local-id", firstName = "Jane", lastName = "Doe",
             email = "user@gmail.com", password = "hashed", authProvider = AuthProvider.LOCAL
@@ -96,15 +96,13 @@ class GoogleAuthServiceTest {
             userInfoResponse = mapOf("email" to "user@gmail.com", "email_verified" to true, "given_name" to "Jane", "family_name" to "Doe")
         )
         whenever(userAccountRepository.findByEmailIgnoreCase("user@gmail.com")).thenReturn(existing)
-        whenever(userAccountRepository.save(any<UserAccountDocument>())).thenAnswer { it.arguments[0] }
-        whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access-token")
-        whenever(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh-token")
 
-        service(restTemplate).authenticate("auth-code")
+        val ex = assertThrows<ApplicationException> {
+            service(restTemplate).authenticate("auth-code")
+        }
 
-        val captor = argumentCaptor<UserAccountDocument>()
-        verify(userAccountRepository).save(captor.capture())
-        assertEquals(AuthProvider.GOOGLE, captor.firstValue.authProvider)
+        assertEquals("GOOGLE_ACCOUNT_LINK_REQUIRED", ex.code)
+        verify(userAccountRepository, never()).save(any())
     }
 
     @Test

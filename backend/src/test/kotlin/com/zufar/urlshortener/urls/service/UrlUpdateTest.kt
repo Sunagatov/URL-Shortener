@@ -32,6 +32,8 @@ class UrlUpdateTest {
         urlValidator = urlValidator,
         authenticatedUserContext = authenticatedUserContext,
         urlMappingAccessService = UrlMappingAccessService(urlRepository, authenticatedUserContext, clock),
+        urlCreationProtectionService = testUrlCreationProtectionService(urlRepository),
+        auditLogService = testAuditLogService(),
         baseUrl = "https://localhost:8080",
         defaultExpirationDays = 365,
         maxCodeGenerationAttempts = 10,

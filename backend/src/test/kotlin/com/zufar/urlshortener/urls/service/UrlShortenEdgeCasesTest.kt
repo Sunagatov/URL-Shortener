@@ -36,6 +36,8 @@ class UrlShortenEdgeCasesTest {
         urlValidator = urlValidator,
         authenticatedUserContext = authenticatedUserContext,
         urlMappingAccessService = UrlMappingAccessService(urlRepository, authenticatedUserContext, clock),
+        urlCreationProtectionService = testUrlCreationProtectionService(urlRepository),
+        auditLogService = testAuditLogService(),
         baseUrl = "https://localhost:8080",
         defaultExpirationDays = defaultDays,
         maxCodeGenerationAttempts = 10,

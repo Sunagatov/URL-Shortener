@@ -6,6 +6,8 @@ import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Component
+import java.time.Clock
+import java.time.Instant
 import java.util.Date
 import javax.crypto.SecretKey
 
@@ -16,7 +18,8 @@ private const val TOKEN_VERSION_CLAIM = "tokenVersion"
 class JwtTokenProvider(
     @Value($$"${jwt.secret}") private val jwtSecret: String,
     @Value($$"${jwt.accessTokenExpiration}") private val jwtExpirationInMs: Long,
-    @Value(/* value = */ $$"${jwt.refreshTokenExpiration}") private val jwtRefreshExpirationInMs: Long
+    @Value(/* value = */ $$"${jwt.refreshTokenExpiration}") private val jwtRefreshExpirationInMs: Long,
+    private val clock: Clock = Clock.systemUTC()
 ) {
     companion object {
         private const val TOKEN_TYPE_CLAIM = "type"
@@ -59,7 +62,7 @@ class JwtTokenProvider(
     fun validateRefreshToken(token: String): Boolean = validateTokenByType(token, REFRESH_TOKEN_TYPE)
 
     private fun generateToken(userDetails: UserDetails, expirationMs: Long, tokenType: String): String {
-        val now = Date()
+        val now = Date.from(Instant.now(clock))
         val expiryDate = Date(now.time + expirationMs)
         val tokenVersion = extractTokenVersion(userDetails)
 

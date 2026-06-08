@@ -16,13 +16,6 @@ private const val CONTENT_SECURITY_POLICY =
 @Component
 @Order(1)
 class SecurityHeadersFilter : OncePerRequestFilter() {
-    override fun shouldNotFilter(request: HttpServletRequest): Boolean {
-        val path = request.requestURI
-        return path.startsWith(ACTUATOR_PATH_PREFIX) ||
-            path.startsWith(DOCS_PATH_PREFIX) ||
-            path.startsWith(API_DOCS_PATH_PREFIX)
-    }
-
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
@@ -33,7 +26,14 @@ class SecurityHeadersFilter : OncePerRequestFilter() {
         response.setHeader("Referrer-Policy", "strict-origin-when-cross-origin")
         response.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()")
         response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload")
-        response.setHeader("Content-Security-Policy", CONTENT_SECURITY_POLICY)
+        if (!isInteractiveToolPath(request.requestURI)) {
+            response.setHeader("Content-Security-Policy", CONTENT_SECURITY_POLICY)
+        }
         filterChain.doFilter(request, response)
     }
+
+    private fun isInteractiveToolPath(path: String): Boolean =
+        path.startsWith(ACTUATOR_PATH_PREFIX) ||
+            path.startsWith(DOCS_PATH_PREFIX) ||
+            path.startsWith(API_DOCS_PATH_PREFIX)
 }

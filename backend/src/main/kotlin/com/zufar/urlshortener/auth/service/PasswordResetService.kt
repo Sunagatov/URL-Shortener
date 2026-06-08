@@ -4,6 +4,7 @@ import com.zufar.urlshortener.auth.dto.ForgotPasswordRequest
 import com.zufar.urlshortener.auth.dto.ResetPasswordRequest
 import com.zufar.urlshortener.shared.exception.ApplicationException
 import com.zufar.urlshortener.shared.logging.LogSanitizer
+import com.zufar.urlshortener.shared.security.PrivacyHasher
 import com.zufar.urlshortener.users.entity.AuthProvider
 import com.zufar.urlshortener.users.repository.UserAccountRepository
 import org.slf4j.LoggerFactory
@@ -42,7 +43,7 @@ class PasswordResetService(
         }
 
         val token = generateToken()
-        val tokenId = token.take(TOKEN_ID_LENGTH)
+        val tokenId = resetTokenId(token)
         val tokenHash = passwordEncoder.encode(token)
         val now = Instant.now(clock)
 
@@ -59,7 +60,7 @@ class PasswordResetService(
     }
 
     fun resetPassword(request: ResetPasswordRequest) {
-        val tokenId = request.token.take(TOKEN_ID_LENGTH)
+        val tokenId = resetTokenId(request.token)
         val now = Instant.now(clock)
 
         val user = userAccountRepository.findByPasswordResetTokenId(tokenId)
@@ -86,4 +87,8 @@ class PasswordResetService(
         secureRandom.nextBytes(bytes)
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
     }
+
+    private fun resetTokenId(token: String): String =
+        requireNotNull(PrivacyHasher.sha256(token)) { "Password reset token must not be blank" }
+            .take(TOKEN_ID_LENGTH)
 }

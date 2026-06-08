@@ -33,6 +33,8 @@ class UrlShortenerTest {
         urlValidator = urlValidator,
         authenticatedUserContext = authenticatedUserContext,
         urlMappingAccessService = UrlMappingAccessService(urlRepository, authenticatedUserContext, clock),
+        urlCreationProtectionService = testUrlCreationProtectionService(urlRepository),
+        auditLogService = testAuditLogService(),
         baseUrl = baseUrl,
         defaultExpirationDays = 365,
         maxCodeGenerationAttempts = 10,

@@ -14,10 +14,5 @@ data class AbuseReport(
     val reason: String?,
     val reporterIpHash: String?,
     val reporterUserAgentHash: String?,
-    val createdAt: Instant,
-    val status: AbuseReportStatus = AbuseReportStatus.OPEN
+    val createdAt: Instant
 )
-
-enum class AbuseReportStatus {
-    OPEN
-}

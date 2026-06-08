@@ -23,6 +23,7 @@ import java.time.Instant
 private const val GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
 private const val GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v3/userinfo"
 private const val GOOGLE_AUTH_FAILED_CODE = "GOOGLE_AUTH_FAILED"
+private const val GOOGLE_ACCOUNT_LINK_REQUIRED_CODE = "GOOGLE_ACCOUNT_LINK_REQUIRED"
 
 @Service
 class GoogleAuthService(
@@ -38,12 +39,12 @@ class GoogleAuthService(
 
     fun authenticate(code: String): AuthResponse {
         val googleUser = exchangeCodeForUserInfo(code)
-        val user = findOrCreateUser(googleUser)
+        val result = findOrCreateUser(googleUser)
         log.info(
             "google_auth_succeeded userId={} emailDomain={} isNewUser={}",
-            user.id, LogSanitizer.emailDomain(user.email), googleUser.isNew
+            result.user.id, LogSanitizer.emailDomain(result.user.email), result.isNewUser
         )
-        return issueTokens(user)
+        return issueTokens(result.user)
     }
 
     private fun exchangeCodeForUserInfo(code: String): GoogleUserInfo {
@@ -100,17 +101,19 @@ class GoogleAuthService(
         )
     }
 
-    private fun findOrCreateUser(googleUser: GoogleUserInfo): UserAccountDocument {
+    private fun findOrCreateUser(googleUser: GoogleUserInfo): GoogleAuthUserResult {
         val existing = userAccountRepository.findByEmailIgnoreCase(googleUser.email)
         if (existing != null) {
-            if (existing.authProvider == AuthProvider.GOOGLE) return existing
-            // Auto-link: existing LOCAL user signs in with Google
-            val linked = existing.copy(authProvider = AuthProvider.GOOGLE, updatedAt = Instant.now(clock))
-            return userAccountRepository.save(linked)
+            if (existing.authProvider == AuthProvider.GOOGLE) {
+                return GoogleAuthUserResult(existing, isNewUser = false)
+            }
+            throw ApplicationException.conflict(
+                GOOGLE_ACCOUNT_LINK_REQUIRED_CODE,
+                "An account already exists for this email. Sign in with your password first."
+            )
         }
-        googleUser.isNew = true
         val now = Instant.now(clock)
-        return userAccountRepository.save(
+        val user = userAccountRepository.save(
             UserAccountDocument(
                 firstName = googleUser.firstName,
                 lastName = googleUser.lastName,
@@ -122,6 +125,7 @@ class GoogleAuthService(
                 updatedAt = now
             )
         )
+        return GoogleAuthUserResult(user, isNewUser = true)
     }
 
     private fun issueTokens(user: UserAccountDocument): AuthResponse {
@@ -138,7 +142,11 @@ class GoogleAuthService(
     private data class GoogleUserInfo(
         val email: String,
         val firstName: String,
-        val lastName: String,
-        var isNew: Boolean = false
+        val lastName: String
+    )
+
+    private data class GoogleAuthUserResult(
+        val user: UserAccountDocument,
+        val isNewUser: Boolean
     )
 }

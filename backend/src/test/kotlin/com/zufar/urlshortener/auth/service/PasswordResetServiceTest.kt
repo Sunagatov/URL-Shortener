@@ -3,6 +3,7 @@ package com.zufar.urlshortener.auth.service
 import com.zufar.urlshortener.auth.dto.ForgotPasswordRequest
 import com.zufar.urlshortener.auth.dto.ResetPasswordRequest
 import com.zufar.urlshortener.shared.exception.ApplicationException
+import com.zufar.urlshortener.shared.security.PrivacyHasher
 import com.zufar.urlshortener.users.entity.AuthProvider
 import com.zufar.urlshortener.users.entity.UserAccountDocument
 import com.zufar.urlshortener.users.repository.UserAccountRepository
@@ -24,6 +25,7 @@ import java.time.ZoneOffset
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertNotEquals
 
 @ExtendWith(MockitoExtension::class)
 class PasswordResetServiceTest {
@@ -47,6 +49,7 @@ class PasswordResetServiceTest {
         verify(userAccountRepository).save(captor.capture())
         assertEquals("hashed-token", captor.firstValue.passwordResetTokenHash)
         assertNotNull(captor.firstValue.passwordResetTokenId)
+        assertNotEquals("abcdefghijklmnop", captor.firstValue.passwordResetTokenId)
         assertNotNull(captor.firstValue.passwordResetTokenExpiresAt)
     }
 
@@ -74,11 +77,11 @@ class PasswordResetServiceTest {
     fun `resetPassword updates password and increments tokenVersion`() {
         val user = localUser().copy(
             passwordResetTokenHash = "hashed-token",
-            passwordResetTokenId = "abcdefghijklmnop",
+            passwordResetTokenId = PrivacyHasher.sha256("abcdefghijklmnopQRSTUVWXYZ123456")!!.take(16),
             passwordResetTokenExpiresAt = Instant.parse("2024-01-01T10:30:00Z"),
             tokenVersion = 3
         )
-        whenever(userAccountRepository.findByPasswordResetTokenId("abcdefghijklmnop")).thenReturn(user)
+        whenever(userAccountRepository.findByPasswordResetTokenId(PrivacyHasher.sha256("abcdefghijklmnopQRSTUVWXYZ123456")!!.take(16))).thenReturn(user)
         whenever(passwordEncoder.matches(any<String>(), any<String>())).thenReturn(true)
         whenever(passwordEncoder.encode("NewSecurePassword1")).thenReturn("new-hashed-pw")
         whenever(userAccountRepository.save(any<UserAccountDocument>())).thenAnswer { it.arguments[0] }
@@ -98,10 +101,10 @@ class PasswordResetServiceTest {
     fun `resetPassword rejects expired token`() {
         val user = localUser().copy(
             passwordResetTokenHash = "hashed-token",
-            passwordResetTokenId = "abcdefghijklmnop",
+            passwordResetTokenId = PrivacyHasher.sha256("abcdefghijklmnopQRSTUVWXYZ123456")!!.take(16),
             passwordResetTokenExpiresAt = Instant.parse("2024-01-01T10:00:00Z") // before clock time
         )
-        whenever(userAccountRepository.findByPasswordResetTokenId("abcdefghijklmnop")).thenReturn(user)
+        whenever(userAccountRepository.findByPasswordResetTokenId(PrivacyHasher.sha256("abcdefghijklmnopQRSTUVWXYZ123456")!!.take(16))).thenReturn(user)
 
         val ex = assertThrows<ApplicationException> {
             service().resetPassword(ResetPasswordRequest("abcdefghijklmnopQRSTUVWXYZ123456", "NewSecurePassword1"))
@@ -113,10 +116,10 @@ class PasswordResetServiceTest {
     fun `resetPassword rejects invalid token hash`() {
         val user = localUser().copy(
             passwordResetTokenHash = "hashed-token",
-            passwordResetTokenId = "abcdefghijklmnop",
+            passwordResetTokenId = PrivacyHasher.sha256("abcdefghijklmnopWRONG_TOKEN_HERE")!!.take(16),
             passwordResetTokenExpiresAt = Instant.parse("2024-01-01T10:30:00Z")
         )
-        whenever(userAccountRepository.findByPasswordResetTokenId("abcdefghijklmnop")).thenReturn(user)
+        whenever(userAccountRepository.findByPasswordResetTokenId(PrivacyHasher.sha256("abcdefghijklmnopWRONG_TOKEN_HERE")!!.take(16))).thenReturn(user)
         whenever(passwordEncoder.matches(any<String>(), any<String>())).thenReturn(false)
 
         val ex = assertThrows<ApplicationException> {
