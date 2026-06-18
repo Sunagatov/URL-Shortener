@@ -21,6 +21,7 @@ import java.time.Clock
 import java.time.Instant
 import java.time.ZoneOffset
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @ExtendWith(MockitoExtension::class)
 class UrlShortenEdgeCasesTest {
@@ -186,6 +187,45 @@ class UrlShortenEdgeCasesTest {
         verify(urlRepository).insert(captor.capture())
         assertEquals("user:user-123", captor.firstValue.creatorKey)
         assertEquals(false, captor.firstValue.safetyInterstitialRequired)
+    }
+
+    @Test
+    fun `shorten stores creation risk metadata for automation user agents`() {
+        whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
+        whenever(httpRequest.getHeader("X-Forwarded-For")).thenReturn(null)
+        whenever(httpRequest.getHeader("User-Agent")).thenReturn("HeadlessChrome/126.0 Playwright")
+        whenever(authenticatedUserContext.findAuthenticatedUserIdOrNull()).thenReturn("user-123")
+        whenever(urlRepository.insert(any<UrlMapping>())).thenAnswer { it.arguments[0] }
+
+        service().shorten(ShortenUrlRequest("https://example.com", null), httpRequest)
+
+        val captor = argumentCaptor<UrlMapping>()
+        verify(urlRepository).insert(captor.capture())
+        assertEquals(40, captor.firstValue.creationRiskScore)
+        assertEquals(com.zufar.urlshortener.analytics.entity.BotCategory.GENERIC_AUTOMATION, captor.firstValue.creationBotCategory)
+        assertEquals(1, captor.firstValue.recentCreationCount)
+        assertTrue(captor.firstValue.creationRiskReasons.contains("automation_user_agent"))
+        assertEquals(true, captor.firstValue.safetyInterstitialRequired)
+        assertEquals("automation_detected", captor.firstValue.safetyInterstitialReason)
+    }
+
+    @Test
+    fun `shorten does not flag curl client as abusive automation`() {
+        whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
+        whenever(httpRequest.getHeader("X-Forwarded-For")).thenReturn(null)
+        whenever(httpRequest.getHeader("User-Agent")).thenReturn("curl/8.7.1")
+        whenever(authenticatedUserContext.findAuthenticatedUserIdOrNull()).thenReturn("user-123")
+        whenever(urlRepository.insert(any<UrlMapping>())).thenAnswer { it.arguments[0] }
+
+        service().shorten(ShortenUrlRequest("https://example.com", null), httpRequest)
+
+        val captor = argumentCaptor<UrlMapping>()
+        verify(urlRepository).insert(captor.capture())
+        assertEquals(0, captor.firstValue.creationRiskScore)
+        assertEquals(null, captor.firstValue.creationBotCategory)
+        assertEquals(emptyList(), captor.firstValue.creationRiskReasons)
+        assertEquals(false, captor.firstValue.safetyInterstitialRequired)
+        assertEquals(null, captor.firstValue.safetyInterstitialReason)
     }
 
     @Test

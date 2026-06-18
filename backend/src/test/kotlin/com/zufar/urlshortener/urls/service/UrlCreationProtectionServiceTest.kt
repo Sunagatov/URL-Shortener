@@ -15,6 +15,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import java.time.Instant
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @ExtendWith(MockitoExtension::class)
 class UrlCreationProtectionServiceTest {
@@ -122,12 +123,59 @@ class UrlCreationProtectionServiceTest {
         assertEquals("suspicious_destination", result.safetyInterstitialReason)
     }
 
+    @Test
+    fun `prepareCreation marks automation user agents as elevated risk`() {
+        whenever(clientIpResolver.resolve(request)).thenReturn("127.0.0.1")
+        whenever(request.getHeader("User-Agent")).thenReturn("HeadlessChrome/126.0 Playwright")
+
+        val result = service().prepareCreation("https://example.com", "user-123", request, now)
+
+        assertEquals(true, result.safetyInterstitialRequired)
+        assertEquals("automation_detected", result.safetyInterstitialReason)
+        assertEquals(40, result.creationRiskScore)
+        assertEquals(com.zufar.urlshortener.analytics.entity.BotCategory.GENERIC_AUTOMATION, result.creationBotCategory)
+        assertTrue(result.creationRiskReasons.contains("automation_user_agent"))
+        assertEquals(1, result.recentCreationCount)
+    }
+
+    @Test
+    fun `prepareCreation blocks automated burst traffic for authenticated users`() {
+        whenever(clientIpResolver.resolve(request)).thenReturn("127.0.0.1")
+        whenever(request.getHeader("User-Agent")).thenReturn("HeadlessChrome/126.0 Playwright")
+
+        val ex = assertThrows<ApplicationException> {
+            val service = service()
+            repeat(5) {
+                service.prepareCreation("https://example.com", "user-123", request, now.plusSeconds(it.toLong()))
+            }
+        }
+
+        assertEquals("URL_CREATION_RISK_TOO_HIGH", ex.code)
+    }
+
+    @Test
+    fun `prepareCreation does not flag curl client as automation on its own`() {
+        whenever(clientIpResolver.resolve(request)).thenReturn("127.0.0.1")
+        whenever(request.getHeader("User-Agent")).thenReturn("curl/8.7.1")
+
+        val result = service().prepareCreation("https://example.com", "user-123", request, now)
+
+        assertEquals(false, result.safetyInterstitialRequired)
+        assertEquals(null, result.safetyInterstitialReason)
+        assertEquals(0, result.creationRiskScore)
+        assertEquals(null, result.creationBotCategory)
+        assertEquals(emptyList(), result.creationRiskReasons)
+    }
+
     private fun service(
         properties: UrlProtectionProperties = UrlProtectionProperties()
     ) = UrlCreationProtectionService(
         urlRepository = urlRepository,
         clientIpResolver = clientIpResolver,
         protectionProperties = properties,
-        auditLogService = AuditLogService()
+        auditLogService = AuditLogService(),
+        userAgentParser = com.zufar.urlshortener.analytics.service.UserAgentParserService(),
+        botDetectionService = com.zufar.urlshortener.analytics.service.BotDetectionService(),
+        creationBurstGuard = InMemoryTestCreationBurstGuard()
     )
 }

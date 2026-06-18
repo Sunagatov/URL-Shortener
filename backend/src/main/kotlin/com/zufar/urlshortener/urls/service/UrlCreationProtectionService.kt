@@ -1,5 +1,8 @@
 package com.zufar.urlshortener.urls.service
 
+import com.zufar.urlshortener.analytics.entity.BotCategory
+import com.zufar.urlshortener.analytics.service.BotDetectionService
+import com.zufar.urlshortener.analytics.service.UserAgentParserService
 import com.zufar.urlshortener.shared.exception.ApplicationException
 import com.zufar.urlshortener.shared.http.ClientIpResolver
 import com.zufar.urlshortener.shared.security.AuditLogService
@@ -17,7 +20,10 @@ class UrlCreationProtectionService(
     private val urlRepository: UrlRepository,
     private val clientIpResolver: ClientIpResolver,
     private val protectionProperties: UrlProtectionProperties,
-    private val auditLogService: AuditLogService
+    private val auditLogService: AuditLogService,
+    private val userAgentParser: UserAgentParserService,
+    private val botDetectionService: BotDetectionService,
+    private val creationBurstGuard: CreationBurstGuard
 ) {
     fun prepareCreation(
         originalUrl: String,
@@ -27,15 +33,35 @@ class UrlCreationProtectionService(
     ): UrlCreationProtection {
         val clientIp = clientIpResolver.resolve(request)
         val creatorKey = creatorKey(userId, clientIp)
+        val userAgent = request.getHeader("User-Agent")
         enforceDailyQuota(creatorKey, userId, now)
         enforceDestinationHostQuota(originalUrl, now)
 
         val interstitial = classifySafetyInterstitial(originalUrl, userId)
+        val risk = assessCreationRisk(creatorKey, userAgent, now, interstitial)
+        if (risk.score >= protectionProperties.creationRiskBlockThreshold) {
+            auditLogService.record(
+                "short_url_creation_blocked_by_risk",
+                "blocked",
+                userId,
+                reason = risk.reasons.joinToString(",")
+            )
+            throw ApplicationException.tooManyRequests(
+                "URL_CREATION_RISK_TOO_HIGH",
+                "URL creation temporarily blocked due to elevated abuse risk",
+                retryAfterSeconds = protectionProperties.rapidCreationBurstWindowSeconds
+            )
+        }
+
         return UrlCreationProtection(
             clientIp = clientIp,
             creatorKey = creatorKey,
-            safetyInterstitialRequired = interstitial.required,
-            safetyInterstitialReason = interstitial.reason
+            safetyInterstitialRequired = risk.interstitialRequired,
+            safetyInterstitialReason = risk.interstitialReason,
+            creationRiskScore = risk.score,
+            creationRiskReasons = risk.reasons,
+            creationBotCategory = risk.botCategory,
+            recentCreationCount = risk.recentCreationCount
         )
     }
 
@@ -81,6 +107,88 @@ class UrlCreationProtectionService(
         return UrlSafetyInterstitial(false, null)
     }
 
+    private fun assessCreationRisk(
+        creatorKey: String,
+        userAgent: String?,
+        now: Instant,
+        interstitial: UrlSafetyInterstitial
+    ): CreationRiskAssessment {
+        val reasons = linkedSetOf<String>()
+        var score = 0
+
+        val botInfo = botDetectionService.detect(userAgent, userAgentParser.parse(userAgent).deviceType)
+        val highRiskAutomation = isHighRiskCreationAutomation(userAgent, botInfo.category)
+        if (highRiskAutomation) {
+            reasons += "automation_user_agent"
+            score += 40
+        }
+
+        val recentCreationCount = creationBurstGuard.recordAndCount(
+            creatorKey,
+            now,
+            protectionProperties.rapidCreationBurstWindowSeconds
+        )
+        if (recentCreationCount >= protectionProperties.rapidCreationBurstThreshold) {
+            reasons += "rapid_creation_burst"
+            score += 35
+        }
+
+        when (interstitial.reason) {
+            "ip_destination" -> {
+                reasons += "ip_destination"
+                score += 30
+            }
+            "http_destination" -> {
+                reasons += "http_destination"
+                score += 20
+            }
+            "suspicious_destination" -> {
+                reasons += "suspicious_destination"
+                score += 25
+            }
+            "anonymous_creator" -> {
+                reasons += "anonymous_creator"
+                score += 15
+            }
+        }
+
+        val automationInterstitial = protectionProperties.safetyInterstitialForAutomation && highRiskAutomation
+        val burstInterstitial = recentCreationCount >= protectionProperties.rapidCreationBurstThreshold
+        val interstitialReason = when {
+            interstitial.reason != null -> interstitial.reason
+            automationInterstitial -> "automation_detected"
+            burstInterstitial -> "rapid_creation_burst"
+            else -> null
+        }
+
+        return CreationRiskAssessment(
+            score = score,
+            reasons = reasons.toList(),
+            botCategory = if (highRiskAutomation) botInfo.category ?: BotCategory.UNKNOWN_BOT else null,
+            recentCreationCount = recentCreationCount,
+            interstitialRequired = interstitial.required || automationInterstitial || burstInterstitial,
+            interstitialReason = interstitialReason
+        )
+    }
+
+    private fun isHighRiskCreationAutomation(userAgent: String?, botCategory: BotCategory?): Boolean {
+        if (userAgent.isNullOrBlank()) return botCategory == BotCategory.UNKNOWN_BOT
+
+        val ua = userAgent.lowercase()
+        if (HIGH_RISK_AUTOMATION_MARKERS.any { ua.contains(it) }) {
+            return true
+        }
+
+        return when (botCategory) {
+            BotCategory.SEARCH_CRAWLER,
+            BotCategory.SOCIAL_PREVIEW,
+            BotCategory.UPTIME_MONITOR,
+            BotCategory.UNKNOWN_BOT -> true
+            BotCategory.GENERIC_AUTOMATION,
+            null -> false
+        }
+    }
+
     private fun enforceDestinationHostQuota(originalUrl: String, now: Instant) {
         val host = targetHost(originalUrl) ?: return
         val count = urlRepository.countByTargetHostAndCreatedAtAfter(host, now.minus(1, ChronoUnit.DAYS))
@@ -112,6 +220,9 @@ class UrlCreationProtectionService(
 
     companion object {
         private val HIGH_RISK_TLDS = setOf("zip", "mov")
+        private val HIGH_RISK_AUTOMATION_MARKERS = setOf(
+            "headlesschrome", "phantomjs", "selenium", "puppeteer", "playwright", "scrapy", "mechanize"
+        )
     }
 }
 
@@ -121,5 +232,18 @@ data class UrlCreationProtection(
     val clientIp: String,
     val creatorKey: String,
     val safetyInterstitialRequired: Boolean,
-    val safetyInterstitialReason: String?
+    val safetyInterstitialReason: String?,
+    val creationRiskScore: Int,
+    val creationRiskReasons: List<String>,
+    val creationBotCategory: BotCategory?,
+    val recentCreationCount: Long
+)
+
+data class CreationRiskAssessment(
+    val score: Int,
+    val reasons: List<String>,
+    val botCategory: BotCategory?,
+    val recentCreationCount: Long,
+    val interstitialRequired: Boolean,
+    val interstitialReason: String?
 )

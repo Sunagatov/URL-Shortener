@@ -203,6 +203,10 @@ class UrlManagementService(
             creatorKey = protection.creatorKey,
             targetHost = urlCreationProtectionService.targetHost(request.originalUrl),
             userId = userId,
+            creationRiskScore = protection.creationRiskScore,
+            creationRiskReasons = protection.creationRiskReasons,
+            creationBotCategory = protection.creationBotCategory,
+            recentCreationCount = protection.recentCreationCount,
             safetyInterstitialRequired = protection.safetyInterstitialRequired,
             safetyInterstitialReason = protection.safetyInterstitialReason
         )

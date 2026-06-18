@@ -1,11 +1,18 @@
 package com.zufar.urlshortener.urls.entity
 
+import com.zufar.urlshortener.analytics.entity.BotCategory
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.CompoundIndex
+import org.springframework.data.mongodb.core.index.CompoundIndexes
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 
 @Document(collection = "url_mappings")
+@CompoundIndexes(
+    CompoundIndex(name = "creator_key_created_at_idx", def = "{'creatorKey': 1, 'createdAt': -1}"),
+    CompoundIndex(name = "target_host_created_at_idx", def = "{'targetHost': 1, 'createdAt': -1}")
+)
 data class UrlMapping(
 
     @Id
@@ -31,6 +38,11 @@ data class UrlMapping(
 
     @Indexed(name = "user_id_idx")
     val userId: String?,
+
+    val creationRiskScore: Int = 0,
+    val creationRiskReasons: List<String> = emptyList(),
+    val creationBotCategory: BotCategory? = null,
+    val recentCreationCount: Long = 1,
 
     val safetyInterstitialRequired: Boolean = false,
     val safetyInterstitialReason: String? = null,
