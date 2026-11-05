@@ -9,7 +9,8 @@ on:
 jobs:
   run-tests:
     name: Run backend tests
-    runs-on: ubuntu-latest
+    # MongoDB 8.0 rejects the kernel currently shipped by ubuntu-latest.
+    runs-on: ubuntu-22.04
     services:
       mongo:
         image: mongo:8.0
