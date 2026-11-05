@@ -71,10 +71,10 @@ export default defineConfig(({ mode }) => ({
     outDir: 'build',
     rollupOptions: {
       output: {
-        entryFileNames: 'assets/app.js',
+        entryFileNames: 'assets/app-[hash].js',
         assetFileNames(assetInfo) {
           if (assetInfo.names.some(name => name.endsWith('.css'))) {
-            return 'assets/app.css';
+            return 'assets/app-[hash].css';
           }
 
           return 'assets/[name]-[hash][extname]';

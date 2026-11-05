@@ -9,10 +9,11 @@ import com.zufar.urlshortener.analytics.service.UserAgentParserService
 import com.zufar.urlshortener.urls.config.UrlProtectionProperties
 import com.zufar.urlshortener.urls.repository.UrlRepository
 import java.time.Instant
+import org.mockito.kotlin.mock
 
-fun testUrlCreationProtectionService(urlRepository: UrlRepository): UrlCreationProtectionService =
+fun testUrlCreationProtectionService(urlRepository: UrlRepository, creationQuota: UrlCreationQuotaService = mock()): UrlCreationProtectionService =
     UrlCreationProtectionService(
-        urlRepository = urlRepository,
+        creationQuota = creationQuota,
         clientIpResolver = ClientIpResolver(RateLimitConfig(RateLimitProperties())),
         protectionProperties = UrlProtectionProperties(),
         auditLogService = AuditLogService(),

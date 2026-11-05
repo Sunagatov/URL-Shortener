@@ -18,6 +18,9 @@ RUN npm ci
 
 COPY . .
 RUN test -n "$VITE_BACKEND_REST_API_URL" || (echo "VITE_BACKEND_REST_API_URL build arg is required" >&2; exit 1)
+RUN if [ "$VITE_TURNSTILE_AUTH_ENABLED" = "true" ] || [ "$VITE_TURNSTILE_URL_CREATE_ENABLED" = "true" ]; then \
+      test -n "$VITE_TURNSTILE_SITE_KEY" || (echo "Turnstile site key is required when protection is enabled" >&2; exit 1); \
+    fi
 RUN npm run build
 
 FROM nginx:1.27-alpine

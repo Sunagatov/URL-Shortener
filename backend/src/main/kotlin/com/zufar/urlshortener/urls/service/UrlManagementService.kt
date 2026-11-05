@@ -124,15 +124,13 @@ class UrlManagementService(
         val trimmedUrl = newOriginalUrl.trim()
         urlValidator.validateUrl(trimmedUrl)
         val urlMapping = urlMappingAccessService.getOwnedActiveUrlMapping(urlHash, ACCESS_URL_MAPPING_DENIED_MESSAGE)
+        urlCreationProtectionService.reserveDestinationChange(urlMapping.targetHost ?: urlCreationProtectionService.targetHost(urlMapping.originalUrl), trimmedUrl, clock.instant())
         val interstitial = urlCreationProtectionService.classifySafetyInterstitial(trimmedUrl, urlMapping.userId)
-        val updated = urlRepository.save(
-            urlMapping.copy(
-                originalUrl = trimmedUrl,
-                targetHost = urlCreationProtectionService.targetHost(trimmedUrl),
-                safetyInterstitialRequired = interstitial.required,
-                safetyInterstitialReason = interstitial.reason
-            )
-        )
+        urlRepository.updateDestination(urlHash, trimmedUrl, urlCreationProtectionService.targetHost(trimmedUrl),
+            interstitial.required, interstitial.reason)
+        // A no-op PUT has modifiedCount=0 too. Reload to distinguish an unchanged
+        // active link from a concurrent disable/delete, without overwriting state.
+        val updated = urlMappingAccessService.getActiveUrlMapping(urlHash)
         urlMappingAccessService.evictUrlMapping(urlHash)
         log.info("short_url_updated urlHash={} targetHost={}", urlHash, LogSanitizer.safeUrlHost(trimmedUrl))
         auditLogService.record("short_url_updated", "success", urlMapping.userId, urlHash, trimmedUrl)

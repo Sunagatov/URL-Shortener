@@ -131,7 +131,7 @@ class RateLimitFilterTest {
 
     @Test
     fun `X-Forwarded-For header is used when remote address is trusted proxy`() {
-        rateLimitConfig = createRateLimitConfig(trustedProxies = "10.0.0.99")
+        rateLimitConfig = createRateLimitConfig(trustedProxies = "10.0.0.99,10.0.0.1")
         filter = createFilter(rateLimitConfig)
         val request = MockHttpServletRequest("GET", "/abc12345").apply {
             requestURI = "/abc12345"

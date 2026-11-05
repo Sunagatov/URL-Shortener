@@ -8,16 +8,14 @@ import com.zufar.urlshortener.shared.http.ClientIpResolver
 import com.zufar.urlshortener.shared.security.AuditLogService
 import com.zufar.urlshortener.shared.security.PrivacyHasher
 import com.zufar.urlshortener.urls.config.UrlProtectionProperties
-import com.zufar.urlshortener.urls.repository.UrlRepository
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.stereotype.Service
 import java.net.URI
 import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 @Service
 class UrlCreationProtectionService(
-    private val urlRepository: UrlRepository,
+    private val creationQuota: UrlCreationQuotaService,
     private val clientIpResolver: ClientIpResolver,
     private val protectionProperties: UrlProtectionProperties,
     private val auditLogService: AuditLogService,
@@ -34,8 +32,6 @@ class UrlCreationProtectionService(
         val clientIp = clientIpResolver.resolve(request)
         val creatorKey = creatorKey(userId, clientIp)
         val userAgent = request.getHeader("User-Agent")
-        enforceDailyQuota(creatorKey, userId, now)
-        enforceDestinationHostQuota(originalUrl, now)
 
         val interstitial = classifySafetyInterstitial(originalUrl, userId)
         val risk = assessCreationRisk(creatorKey, userAgent, now, interstitial)
@@ -53,6 +49,7 @@ class UrlCreationProtectionService(
             )
         }
 
+        creationQuota.reserveCreation(creatorKey, userId, targetHost(originalUrl), now)
         return UrlCreationProtection(
             clientIp = clientIp,
             creatorKey = creatorKey,
@@ -65,21 +62,9 @@ class UrlCreationProtectionService(
         )
     }
 
-    private fun enforceDailyQuota(creatorKey: String, userId: String?, now: Instant) {
-        val limit = if (userId == null) {
-            protectionProperties.anonymousDailyQuota
-        } else {
-            protectionProperties.authenticatedDailyQuota
-        }
-        val count = urlRepository.countByCreatorKeyAndCreatedAtAfter(creatorKey, now.minus(1, ChronoUnit.DAYS))
-        if (count >= limit) {
-            auditLogService.record("short_url_create_quota_exceeded", "blocked", userId)
-            throw ApplicationException.tooManyRequests(
-                "URL_DAILY_QUOTA_EXCEEDED",
-                "Daily URL creation quota exceeded",
-                retryAfterSeconds = ChronoUnit.DAYS.duration.seconds
-            )
-        }
+    fun reserveDestinationChange(previousHost: String?, originalUrl: String, now: Instant) {
+        val host = targetHost(originalUrl)
+        if (host != previousHost?.lowercase()?.trimEnd('.')) creationQuota.reserveDestination(host, now)
     }
 
     private fun creatorKey(userId: String?, clientIp: String): String =
@@ -186,19 +171,6 @@ class UrlCreationProtectionService(
             BotCategory.UNKNOWN_BOT -> true
             BotCategory.GENERIC_AUTOMATION,
             null -> false
-        }
-    }
-
-    private fun enforceDestinationHostQuota(originalUrl: String, now: Instant) {
-        val host = targetHost(originalUrl) ?: return
-        val count = urlRepository.countByTargetHostAndCreatedAtAfter(host, now.minus(1, ChronoUnit.DAYS))
-        if (count >= protectionProperties.destinationHostDailyQuota) {
-            auditLogService.record("short_url_destination_quota_exceeded", "blocked", targetId = host)
-            throw ApplicationException.tooManyRequests(
-                "URL_DESTINATION_QUOTA_EXCEEDED",
-                "Daily URL creation quota exceeded for this destination",
-                retryAfterSeconds = ChronoUnit.DAYS.duration.seconds
-            )
         }
     }
 

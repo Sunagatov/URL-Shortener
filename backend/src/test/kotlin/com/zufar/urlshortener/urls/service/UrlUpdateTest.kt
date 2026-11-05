@@ -44,33 +44,29 @@ class UrlUpdateTest {
     @Test
     fun `updateOriginalUrl saves new URL for owned mapping`() {
         val mapping = activeMapping()
-        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping))
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping), Optional.of(mapping.copy(originalUrl = "https://new-url.com")))
         whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("user-123")
-        whenever(urlRepository.save(any<UrlMapping>())).thenAnswer { it.arguments[0] }
+        whenever(urlRepository.updateDestination("abc12345", "https://new-url.com", "new-url.com", false, null)).thenReturn(1)
 
         val result = service().updateOriginalUrl("abc12345", "https://new-url.com")
 
         assertEquals("https://new-url.com", result.originalUrl)
-        val captor = argumentCaptor<UrlMapping>()
-        verify(urlRepository).save(captor.capture())
-        assertEquals("https://new-url.com", captor.firstValue.originalUrl)
+        verify(urlRepository).updateDestination("abc12345", "https://new-url.com", "new-url.com", false, null)
     }
 
     @Test
     fun `updateOriginalUrl recomputes safety interstitial for risky destination`() {
         val mapping = activeMapping()
-        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping))
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping), Optional.of(mapping.copy(
+            originalUrl = "https://93.184.216.34/login", safetyInterstitialRequired = true, safetyInterstitialReason = "ip_destination")))
         whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("user-123")
-        whenever(urlRepository.save(any<UrlMapping>())).thenAnswer { it.arguments[0] }
+        whenever(urlRepository.updateDestination("abc12345", "https://93.184.216.34/login", "93.184.216.34", true, "ip_destination")).thenReturn(1)
 
         val result = service().updateOriginalUrl("abc12345", "https://93.184.216.34/login")
 
         assertEquals(true, result.safetyInterstitialRequired)
         assertEquals("ip_destination", result.safetyInterstitialReason)
-        val captor = argumentCaptor<UrlMapping>()
-        verify(urlRepository).save(captor.capture())
-        assertEquals(true, captor.firstValue.safetyInterstitialRequired)
-        assertEquals("ip_destination", captor.firstValue.safetyInterstitialReason)
+        verify(urlRepository).updateDestination("abc12345", "https://93.184.216.34/login", "93.184.216.34", true, "ip_destination")
     }
 
     @Test
@@ -79,30 +75,36 @@ class UrlUpdateTest {
             safetyInterstitialRequired = true,
             safetyInterstitialReason = "ip_destination"
         )
-        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping))
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping), Optional.of(mapping.copy(
+            originalUrl = "https://example.org", safetyInterstitialRequired = false, safetyInterstitialReason = null)))
         whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("user-123")
-        whenever(urlRepository.save(any<UrlMapping>())).thenAnswer { it.arguments[0] }
+        whenever(urlRepository.updateDestination("abc12345", "https://example.org", "example.org", false, null)).thenReturn(1)
 
         val result = service().updateOriginalUrl("abc12345", "https://example.org")
 
         assertEquals(false, result.safetyInterstitialRequired)
         assertEquals(null, result.safetyInterstitialReason)
-        val captor = argumentCaptor<UrlMapping>()
-        verify(urlRepository).save(captor.capture())
-        assertEquals(false, captor.firstValue.safetyInterstitialRequired)
-        assertEquals(null, captor.firstValue.safetyInterstitialReason)
+        verify(urlRepository).updateDestination("abc12345", "https://example.org", "example.org", false, null)
     }
 
     @Test
     fun `updateOriginalUrl trims whitespace from new URL`() {
         val mapping = activeMapping()
-        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping))
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping), Optional.of(mapping.copy(originalUrl = "https://new-url.com")))
         whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("user-123")
-        whenever(urlRepository.save(any<UrlMapping>())).thenAnswer { it.arguments[0] }
+        whenever(urlRepository.updateDestination("abc12345", "https://new-url.com", "new-url.com", false, null)).thenReturn(1)
 
         val result = service().updateOriginalUrl("abc12345", "  https://new-url.com  ")
 
         assertEquals("https://new-url.com", result.originalUrl)
+    }
+
+    @Test
+    fun `saving an unchanged destination succeeds when Mongo reports zero modifications`() {
+        val mapping = activeMapping().copy(targetHost = "example.com")
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping))
+        whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("user-123")
+        assertEquals("https://example.com", service().updateOriginalUrl("abc12345", "https://example.com").originalUrl)
     }
 
     @Test

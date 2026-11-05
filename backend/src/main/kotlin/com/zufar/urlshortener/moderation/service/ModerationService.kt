@@ -18,6 +18,7 @@ import com.zufar.urlshortener.urls.repository.UrlRepository
 import com.zufar.urlshortener.urls.service.UrlMappingAccessService
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.stereotype.Service
+import org.springframework.dao.DuplicateKeyException
 import java.net.URI
 import java.time.Clock
 import java.time.Instant
@@ -44,15 +45,21 @@ class ModerationService(
         val mapping = urlRepository.findByUrlHash(urlHash)
             .orElseThrow { ApplicationException.notFound(URL_NOT_FOUND_CODE, "URL mapping not found") }
 
-        val report = abuseReportRepository.save(
-            AbuseReport(
+        val reporterIpHash = PrivacyHasher.sha256(clientIpResolver.resolve(httpRequest))
+        val reportId = PrivacyHasher.sha256("$urlHash:$reporterIpHash")!!
+        val report = try {
+            abuseReportRepository.insert(AbuseReport(
+                id = reportId,
                 urlHash = urlHash,
                 reason = request.reason?.trim()?.takeIf(String::isNotEmpty),
-                reporterIpHash = PrivacyHasher.sha256(clientIpResolver.resolve(httpRequest)),
+                reporterIpHash = reporterIpHash,
                 reporterUserAgentHash = PrivacyHasher.sha256(httpRequest.getHeader("User-Agent")),
                 createdAt = Instant.now(clock)
-            )
-        )
+            ))
+        } catch (_: DuplicateKeyException) {
+            // A reporter has one vote per link, including simultaneous requests.
+            return AbuseReportResponse(reportId, urlHash)
+        }
         applyReportAutoAction(urlHash, mapping)
         auditLogService.record("abuse_report_created", "success", targetId = urlHash, reason = report.reason)
         return AbuseReportResponse(report.id, urlHash)
@@ -120,28 +127,15 @@ class ModerationService(
             Instant.now(clock).minus(moderationProperties.autoActionWindowHours, ChronoUnit.HOURS)
         )
 
-        when {
-            reportCount >= moderationProperties.autoDisableReportThreshold -> {
-                val disabled = urlRepository.save(
-                    mapping.copy(
-                        disabled = true,
-                        disabledReason = "abuse_report_threshold",
-                        disabledAt = Instant.now(clock)
-                    )
-                )
-                urlMappingAccessService.evictUrlMapping(urlHash)
-                auditLogService.record("short_url_auto_disabled", "blocked", disabled.userId, urlHash, disabled.originalUrl)
-            }
-            reportCount >= moderationProperties.autoInterstitialReportThreshold && !mapping.safetyInterstitialRequired -> {
-                val flagged = urlRepository.save(
-                    mapping.copy(
-                        safetyInterstitialRequired = true,
-                        safetyInterstitialReason = "abuse_reported"
-                    )
-                )
-                urlMappingAccessService.evictUrlMapping(urlHash)
-                auditLogService.record("short_url_auto_interstitial_required", "success", flagged.userId, urlHash, flagged.originalUrl)
-            }
+        if (reportCount >= moderationProperties.autoDisableReportThreshold) {
+            // Public reports request review; only an authorized moderator disables links.
+            auditLogService.record("short_url_report_review_required", "pending", targetId = urlHash)
+        }
+        if (reportCount >= moderationProperties.autoInterstitialReportThreshold &&
+            (!mapping.safetyInterstitialRequired || mapping.safetyInterstitialReason != "abuse_reported")) {
+            urlRepository.requireSafetyInterstitial(urlHash)
+            urlMappingAccessService.evictUrlMapping(urlHash)
+            auditLogService.record("short_url_auto_interstitial_required", "success", mapping.userId, urlHash, mapping.originalUrl)
         }
     }
 }

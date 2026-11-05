@@ -12,6 +12,7 @@ data class TurnstileProperties(
     val authEnabled: Boolean = false,
     val urlCreateEnabled: Boolean = false,
     val secretKey: String = "",
+    val expectedHostnames: Set<String> = emptySet(),
     val connectTimeout: Duration = Duration.ofSeconds(2),
     val readTimeout: Duration = Duration.ofSeconds(3)
 ) {
@@ -22,6 +23,10 @@ data class TurnstileProperties(
     @AssertTrue(message = "turnstile.secret-key must be configured when turnstile.enabled=true")
     fun isSecretConfigurationValid(): Boolean =
         !enabled || secretKey.isNotBlank()
+
+    @AssertTrue(message = "turnstile.expected-hostnames must be configured when turnstile.enabled=true")
+    fun isHostnameConfigurationValid(): Boolean =
+        !enabled || expectedHostnames.isNotEmpty() && expectedHostnames.all { it.isNotBlank() }
 
     @AssertTrue(message = "turnstile.connect-timeout must be positive")
     fun isConnectTimeoutValid(): Boolean =

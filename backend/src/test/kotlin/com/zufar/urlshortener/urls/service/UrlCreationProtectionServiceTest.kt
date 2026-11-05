@@ -20,6 +20,7 @@ import kotlin.test.assertTrue
 @ExtendWith(MockitoExtension::class)
 class UrlCreationProtectionServiceTest {
     @Mock private lateinit var urlRepository: UrlRepository
+    @Mock private lateinit var creationQuota: UrlCreationQuotaService
     @Mock private lateinit var clientIpResolver: ClientIpResolver
     @Mock private lateinit var request: HttpServletRequest
     private val now = Instant.parse("2024-01-01T10:15:30Z")
@@ -90,7 +91,8 @@ class UrlCreationProtectionServiceTest {
     @Test
     fun `prepareCreation blocks when quota is reached`() {
         whenever(clientIpResolver.resolve(request)).thenReturn("127.0.0.1")
-        whenever(urlRepository.countByCreatorKeyAndCreatedAtAfter(any(), any())).thenReturn(25)
+        org.mockito.kotlin.doThrow(ApplicationException.tooManyRequests("URL_DAILY_QUOTA_EXCEEDED", "quota"))
+            .whenever(creationQuota).reserveCreation(any(), org.mockito.kotlin.isNull(), any(), any())
 
         val ex = assertThrows<ApplicationException> {
             service().prepareCreation("https://example.com", null, request, now)
@@ -102,8 +104,8 @@ class UrlCreationProtectionServiceTest {
     @Test
     fun `prepareCreation blocks when destination host quota is reached`() {
         whenever(clientIpResolver.resolve(request)).thenReturn("127.0.0.1")
-        whenever(urlRepository.countByTargetHostAndCreatedAtAfter("example.com", now.minus(1, java.time.temporal.ChronoUnit.DAYS)))
-            .thenReturn(2)
+        org.mockito.kotlin.doThrow(ApplicationException.tooManyRequests("URL_DESTINATION_QUOTA_EXCEEDED", "quota"))
+            .whenever(creationQuota).reserveCreation(any(), any(), any(), any())
 
         val ex = assertThrows<ApplicationException> {
             service(UrlProtectionProperties(destinationHostDailyQuota = 2))
@@ -170,7 +172,7 @@ class UrlCreationProtectionServiceTest {
     private fun service(
         properties: UrlProtectionProperties = UrlProtectionProperties()
     ) = UrlCreationProtectionService(
-        urlRepository = urlRepository,
+        creationQuota = creationQuota,
         clientIpResolver = clientIpResolver,
         protectionProperties = properties,
         auditLogService = AuditLogService(),

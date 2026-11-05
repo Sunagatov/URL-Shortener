@@ -10,6 +10,7 @@ import org.springframework.validation.annotation.Validated
 data class RateLimitProperties(
     val enabled: Boolean = true,
     val trustedProxies: String = "",
+    val trustedProxyHosts: String = "",
     @field:Valid val bucketCache: BucketCacheProperties = BucketCacheProperties(),
     @field:Valid val auth: BucketPolicyProperties = BucketPolicyProperties(capacity = 20, refillTokens = 20, refillMinutes = 1),
     @field:Valid val publicCreate: BucketPolicyProperties = BucketPolicyProperties(capacity = 30, refillTokens = 30, refillMinutes = 1),

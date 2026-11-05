@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated
 @ConfigurationProperties(prefix = "app.urls.protection")
 @Validated
 data class UrlProtectionProperties(
+    @field:Min(0) val globalDailyQuota: Long = 2000,
     @field:Min(1) val anonymousDailyQuota: Long = 25,
     @field:Min(1) val authenticatedDailyQuota: Long = 250,
     @field:Min(1) val destinationHostDailyQuota: Long = 500,

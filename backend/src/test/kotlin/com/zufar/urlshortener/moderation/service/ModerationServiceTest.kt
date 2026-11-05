@@ -54,7 +54,7 @@ class ModerationServiceTest {
         whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping()))
         whenever(clientIpResolver.resolve(httpRequest)).thenReturn("127.0.0.1")
         whenever(httpRequest.getHeader("User-Agent")).thenReturn("JUnit")
-        whenever(abuseReportRepository.save(any<AbuseReport>())).thenAnswer {
+        whenever(abuseReportRepository.insert(any<AbuseReport>())).thenAnswer {
             (it.arguments[0] as AbuseReport).copy(id = "report-1")
         }
 
@@ -64,7 +64,7 @@ class ModerationServiceTest {
         )
 
         val captor = argumentCaptor<AbuseReport>()
-        verify(abuseReportRepository).save(captor.capture())
+        verify(abuseReportRepository).insert(captor.capture())
         assertEquals("report-1", response.reportId)
         assertEquals("abc12345", response.urlHash)
         assertEquals(64, captor.firstValue.reporterIpHash?.length)
@@ -75,37 +75,55 @@ class ModerationServiceTest {
     fun `reportAbuse requires safety interstitial after report threshold`() {
         whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping()))
         whenever(clientIpResolver.resolve(httpRequest)).thenReturn("127.0.0.1")
-        whenever(abuseReportRepository.save(any<AbuseReport>())).thenAnswer {
+        whenever(abuseReportRepository.insert(any<AbuseReport>())).thenAnswer {
             (it.arguments[0] as AbuseReport).copy(id = "report-1")
         }
         whenever(abuseReportRepository.countByUrlHashAndCreatedAtAfter(any(), any())).thenReturn(1)
-        whenever(urlRepository.save(any<UrlMapping>())).thenAnswer { it.arguments[0] }
 
         service().reportAbuse(AbuseReportRequest("abc12345", "phishing"), httpRequest)
 
-        val captor = argumentCaptor<UrlMapping>()
-        verify(urlRepository).save(captor.capture())
-        assertEquals(true, captor.firstValue.safetyInterstitialRequired)
-        assertEquals("abuse_reported", captor.firstValue.safetyInterstitialReason)
+        verify(urlRepository).requireSafetyInterstitial("abc12345")
+        verify(urlRepository, never()).save(any<UrlMapping>())
     }
 
     @Test
-    fun `reportAbuse disables mapping after report threshold`() {
+    fun `reportAbuse never permanently disables mapping after report threshold`() {
         whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping()))
         whenever(clientIpResolver.resolve(httpRequest)).thenReturn("127.0.0.1")
-        whenever(abuseReportRepository.save(any<AbuseReport>())).thenAnswer {
+        whenever(abuseReportRepository.insert(any<AbuseReport>())).thenAnswer {
             (it.arguments[0] as AbuseReport).copy(id = "report-1")
         }
         whenever(abuseReportRepository.countByUrlHashAndCreatedAtAfter(any(), any())).thenReturn(3)
-        whenever(urlRepository.save(any<UrlMapping>())).thenAnswer { it.arguments[0] }
 
         service().reportAbuse(AbuseReportRequest("abc12345", "phishing"), httpRequest)
 
-        val captor = argumentCaptor<UrlMapping>()
-        verify(urlRepository).save(captor.capture())
-        assertEquals(true, captor.firstValue.disabled)
-        assertEquals("abuse_report_threshold", captor.firstValue.disabledReason)
-        assertEquals(Instant.parse("2024-01-01T10:15:30Z"), captor.firstValue.disabledAt)
+        verify(urlRepository, never()).save(any<UrlMapping>())
+        verify(urlRepository).requireSafetyInterstitial("abc12345")
+    }
+
+    @Test
+    fun `duplicate report is acknowledged without adding another vote`() {
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping()))
+        whenever(clientIpResolver.resolve(httpRequest)).thenReturn("203.0.113.5")
+        whenever(abuseReportRepository.insert(any<AbuseReport>()))
+            .thenThrow(org.springframework.dao.DuplicateKeyException("duplicate reporter"))
+
+        val response = service().reportAbuse(AbuseReportRequest("abc12345", "phishing"), httpRequest)
+
+        assertEquals("abc12345", response.urlHash)
+        verify(abuseReportRepository, never()).countByUrlHashAndCreatedAtAfter(any(), any())
+        verify(urlRepository, never()).requireSafetyInterstitial(any())
+    }
+
+    @Test
+    fun `report protection is recorded even when destination already has a warning`() {
+        whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping().copy(
+            safetyInterstitialRequired = true, safetyInterstitialReason = "http_destination")))
+        whenever(clientIpResolver.resolve(httpRequest)).thenReturn("203.0.113.5")
+        whenever(abuseReportRepository.insert(any<AbuseReport>())).thenAnswer { it.arguments[0] }
+        whenever(abuseReportRepository.countByUrlHashAndCreatedAtAfter(any(), any())).thenReturn(1)
+        service().reportAbuse(AbuseReportRequest("abc12345", "phishing"), httpRequest)
+        verify(urlRepository).requireSafetyInterstitial("abc12345")
     }
 
     @Test

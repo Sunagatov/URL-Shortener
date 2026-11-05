@@ -30,6 +30,7 @@ class UrlShortenEdgeCasesTest {
     @Mock private lateinit var urlValidator: UrlValidator
     @Mock private lateinit var authenticatedUserContext: AuthenticatedUserContextService
     @Mock private lateinit var httpRequest: HttpServletRequest
+    @Mock private lateinit var creationQuota: UrlCreationQuotaService
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
 
     private fun service(defaultDays: Long = 365) = UrlManagementService(
@@ -37,7 +38,7 @@ class UrlShortenEdgeCasesTest {
         urlValidator = urlValidator,
         authenticatedUserIdProvider = authenticatedUserContext,
         urlMappingAccessService = UrlMappingAccessService(urlRepository, authenticatedUserContext, clock),
-        urlCreationProtectionService = testUrlCreationProtectionService(urlRepository),
+        urlCreationProtectionService = testUrlCreationProtectionService(urlRepository, creationQuota),
         auditLogService = testAuditLogService(),
         baseUrl = "https://localhost:8080",
         defaultExpirationDays = defaultDays,
@@ -135,7 +136,6 @@ class UrlShortenEdgeCasesTest {
     @Test
     fun `shorten stores hashed creator metadata instead of raw client metadata`() {
         whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
-        whenever(httpRequest.getHeader("X-Forwarded-For")).thenReturn(null)
         whenever(httpRequest.getHeader("User-Agent")).thenReturn("JUnit")
         whenever(urlRepository.insert(any<UrlMapping>())).thenAnswer { it.arguments[0] }
 
@@ -153,7 +153,8 @@ class UrlShortenEdgeCasesTest {
     @Test
     fun `shorten blocks anonymous creator after daily quota is reached`() {
         whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
-        whenever(urlRepository.countByCreatorKeyAndCreatedAtAfter(any(), any())).thenReturn(25)
+        org.mockito.kotlin.doThrow(ApplicationException.tooManyRequests("URL_DAILY_QUOTA_EXCEEDED", "quota"))
+            .whenever(creationQuota).reserveCreation(any(), org.mockito.kotlin.isNull(), any(), any())
 
         val ex = assertThrows<ApplicationException> {
             service().shorten(ShortenUrlRequest("https://example.com", null), httpRequest)
@@ -192,7 +193,6 @@ class UrlShortenEdgeCasesTest {
     @Test
     fun `shorten stores creation risk metadata for automation user agents`() {
         whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
-        whenever(httpRequest.getHeader("X-Forwarded-For")).thenReturn(null)
         whenever(httpRequest.getHeader("User-Agent")).thenReturn("HeadlessChrome/126.0 Playwright")
         whenever(authenticatedUserContext.findAuthenticatedUserIdOrNull()).thenReturn("user-123")
         whenever(urlRepository.insert(any<UrlMapping>())).thenAnswer { it.arguments[0] }
@@ -212,7 +212,6 @@ class UrlShortenEdgeCasesTest {
     @Test
     fun `shorten does not flag curl client as abusive automation`() {
         whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
-        whenever(httpRequest.getHeader("X-Forwarded-For")).thenReturn(null)
         whenever(httpRequest.getHeader("User-Agent")).thenReturn("curl/8.7.1")
         whenever(authenticatedUserContext.findAuthenticatedUserIdOrNull()).thenReturn("user-123")
         whenever(urlRepository.insert(any<UrlMapping>())).thenAnswer { it.arguments[0] }

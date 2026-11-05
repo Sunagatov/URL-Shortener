@@ -26,7 +26,7 @@ class TurnstileVerifierTest {
             .andExpect(method(HttpMethod.POST))
             .andExpect(content().string(org.hamcrest.Matchers.containsString("secret=test-secret")))
             .andExpect(content().string(org.hamcrest.Matchers.containsString("response=token-123")))
-            .andRespond(withSuccess("""{"success":true,"action":"signin"}""", MediaType.APPLICATION_JSON))
+            .andRespond(withSuccess("""{"success":true,"action":"signin","hostname":"zuf.uk"}""", MediaType.APPLICATION_JSON))
 
         verifier.verify("token-123", setOf("signin"))
 
@@ -86,9 +86,21 @@ class TurnstileVerifierTest {
         server.verify()
     }
 
+    @Test
+    fun `verify rejects missing hostname and tokens issued for another site`() {
+        for (hostname in listOf("", ",\"hostname\":\"other.example\"")) {
+            val builder = RestClient.builder()
+            val server = MockRestServiceServer.bindTo(builder).build()
+            server.expect(requestTo(VERIFY_URL)).andRespond(withSuccess(
+                """{"success":true,"action":"signin"$hostname}""", MediaType.APPLICATION_JSON))
+            assertFailsWith<TurnstileVerificationException> { verifier(builder).verify("token", setOf("signin")) }
+            server.verify()
+        }
+    }
+
     private fun verifier(builder: RestClient.Builder): TurnstileVerifier =
         TurnstileVerifier(
-            TurnstileProperties(enabled = true, secretKey = "test-secret"),
+            TurnstileProperties(enabled = true, secretKey = "test-secret", expectedHostnames = setOf("zuf.uk", "www.zuf.uk")),
             builder.build()
         )
 }

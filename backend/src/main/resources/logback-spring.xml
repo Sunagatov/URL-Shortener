@@ -9,6 +9,7 @@
     <springProperty scope="context" name="http_access_log_level" source="logging.level.http.access" defaultValue="WARN"/>
     <springProperty scope="context" name="log_max_file_size" source="logging.logback.rollingpolicy.max-file-size" defaultValue="10MB"/>
     <springProperty scope="context" name="log_max_history" source="logging.logback.rollingpolicy.max-history" defaultValue="30"/>
+    <springProperty scope="context" name="log_total_size_cap" source="logging.logback.rollingpolicy.total-size-cap" defaultValue="100MB"/>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS,UTC} level=%-5level logger=%logger{36} correlationId=%X{correlationId} requestId=%X{requestId} userId=%X{userId} clientTraceId=%X{clientTraceId} - %msg%n</pattern>
@@ -24,6 +25,7 @@
             <fileNamePattern>logs/application-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>${log_max_file_size}</maxFileSize>
             <maxHistory>${log_max_history}</maxHistory>
+            <totalSizeCap>${log_total_size_cap}</totalSizeCap>
         </rollingPolicy>
     </appender>
 
@@ -36,6 +38,7 @@
             <fileNamePattern>logs/frontend-events-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>${log_max_file_size}</maxFileSize>
             <maxHistory>${log_max_history}</maxHistory>
+            <totalSizeCap>${log_total_size_cap}</totalSizeCap>
         </rollingPolicy>
     </appender>
 

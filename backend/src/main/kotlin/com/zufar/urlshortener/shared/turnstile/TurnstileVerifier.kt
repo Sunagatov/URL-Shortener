@@ -58,6 +58,9 @@ class TurnstileVerifier internal constructor(
                 )
                 throw TurnstileVerificationException("Turnstile verification failed")
             }
+            if (result.hostname?.lowercase() !in properties.expectedHostnames.map(String::lowercase)) {
+                throw TurnstileVerificationException("Turnstile verification failed")
+            }
         } catch (ex: TurnstileVerificationException) {
             throw ex
         } catch (ex: Exception) {
@@ -70,6 +73,7 @@ class TurnstileVerifier internal constructor(
     private data class TurnstileResponse(
         @JsonProperty("success") val success: Boolean = false,
         @JsonProperty("action") val action: String? = null,
+        @JsonProperty("hostname") val hostname: String? = null,
         @JsonProperty("error-codes") val errorCodes: List<String> = emptyList()
     )
 

@@ -7,7 +7,6 @@ import com.zufar.urlshortener.urls.api.UrlHashFormat
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpMethod
 import org.springframework.security.web.util.matcher.OrRequestMatcher
-import org.springframework.security.web.util.matcher.RegexRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher.withDefaults
 
@@ -34,7 +33,11 @@ object ApplicationRoutes {
     private val abuseReportsMatcher = withDefaults().matcher(HttpMethod.POST, ABUSE_REPORTS_BASE_PATH)
     private val publicCreateMatcher = withDefaults().matcher(HttpMethod.POST, URLS_BASE_PATH)
     private val faviconMatcher = withDefaults().matcher(HttpMethod.GET, FAVICON_PATH)
-    private val publicRedirectMatcher = RegexRequestMatcher(UrlHashFormat.SECURITY_REGEX, HttpMethod.GET.name())
+    private val publicRedirectPathRegex = Regex(UrlHashFormat.SECURITY_REGEX)
+    private val publicRedirectMatcher = RequestMatcher { request ->
+        val path = request.servletPath.ifEmpty { request.requestURI.removePrefix(request.contextPath) }
+        request.method == HttpMethod.GET.name() && publicRedirectPathRegex.matches(path)
+    }
     private val healthMatcher = withDefaults().matcher(HEALTH_BASE_PATH)
     private val authMatcher = OrRequestMatcher(
         withDefaults().matcher(AUTH_BASE_PATH),

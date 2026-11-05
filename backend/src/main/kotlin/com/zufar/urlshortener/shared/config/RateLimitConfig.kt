@@ -5,6 +5,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.web.util.matcher.IpAddressMatcher
 import java.time.Duration
+import java.net.InetAddress
+import com.github.benmanes.caffeine.cache.Caffeine
 
 data class RateLimitPolicy(val name: String,
                            val subjectKey: RateLimitSubjectKey,
@@ -24,6 +26,14 @@ class RateLimitConfig(
         .map(String::trim)
         .filter(String::isNotEmpty)
         .map(::IpAddressMatcher)
+    private val trustedProxyHosts = rateLimitProperties.trustedProxyHosts.split(',')
+        .map(String::trim).filter(String::isNotEmpty).also { hosts ->
+            require(hosts.size <= 16 && hosts.all { it.matches(Regex("[a-zA-Z0-9][a-zA-Z0-9_.-]{0,252}")) }) {
+                "Trusted proxy hosts must be operator-controlled DNS hostnames"
+            }
+        }
+    private val proxyAddresses = Caffeine.newBuilder().maximumSize(16)
+        .expireAfterWrite(Duration.ofSeconds(30)).build<String, Set<String>>()
 
     private val policiesByRoute = mapOf(
         RateLimitedRoute.AUTH to policy("auth", rateLimitProperties.auth, RateLimitSubjectKey.CLIENT_IP),
@@ -38,11 +48,15 @@ class RateLimitConfig(
     fun policyFor(route: RateLimitedRoute): RateLimitPolicy? = policiesByRoute[route]
 
     fun isTrustedProxy(remoteAddress: String?): Boolean {
-        if (remoteAddress.isNullOrBlank() || trustedProxyMatchers.isEmpty()) {
+        if (remoteAddress.isNullOrBlank()) {
             return false
         }
 
-        return trustedProxyMatchers.any { it.matches(remoteAddress) }
+        return trustedProxyMatchers.any { it.matches(remoteAddress) } || trustedProxyHosts.any { host ->
+            remoteAddress in proxyAddresses.get(host) {
+                runCatching { InetAddress.getAllByName(host).map { it.hostAddress }.toSet() }.getOrDefault(emptySet())
+            }
+        }
     }
 
     private fun policy(name: String,
