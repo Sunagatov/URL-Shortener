@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { FaCheck, FaTimes, FaExclamationTriangle, FaInfoCircle } from 'react-icons/fa';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -156,11 +156,14 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   }, []);
 
-  const api: ToastContextValue = {
-    success: message => push('success', message),
-    error: message => push('error', message),
-    info: message => push('info', message),
-  };
+  const api = useMemo<ToastContextValue>(
+    () => ({
+      success: message => push('success', message),
+      error: message => push('error', message),
+      info: message => push('info', message),
+    }),
+    [push]
+  );
 
   return (
     <ToastContext.Provider value={api}>

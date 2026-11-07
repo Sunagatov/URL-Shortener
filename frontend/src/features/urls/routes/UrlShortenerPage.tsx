@@ -31,6 +31,7 @@ const UrlShortenerPage: React.FC = () => {
   const turnstile = useTurnstileVerification(features.urlCreateTurnstile);
   const [shortUrl, setShortUrl] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [verificationStarted, setVerificationStarted] = useState(false);
   const {
     register,
     handleSubmit,
@@ -47,6 +48,7 @@ const UrlShortenerPage: React.FC = () => {
   }, [error, toast]);
 
   const onSubmit = async (data: CreateUrlFormData) => {
+    setVerificationStarted(true);
     if (!turnstile.requireVerified()) {
       return;
     }
@@ -70,6 +72,8 @@ const UrlShortenerPage: React.FC = () => {
 
   const handleClear = () => {
     reset();
+    turnstile.resetChallenge();
+    setVerificationStarted(false);
     setShortUrl('');
     clearCopiedValue();
   };
@@ -98,7 +102,7 @@ const UrlShortenerPage: React.FC = () => {
           onSubmit={handleSubmit(onSubmit)}
           isLoading={loading}
           challenge={
-            features.urlCreateTurnstile ? (
+            features.urlCreateTurnstile && verificationStarted ? (
               <div className="mt-2">
                 {turnstile.error ? (
                   <p className="mb-2 text-xs text-[color:var(--danger-text)]">{turnstile.error}</p>
@@ -163,7 +167,11 @@ const UrlShortenerPage: React.FC = () => {
           }
         >
           <UrlShortenerInputField
-            registration={register('originalUrl')}
+            registration={register('originalUrl', {
+              onChange: event => {
+                if (event.target.value.trim()) setVerificationStarted(true);
+              },
+            })}
             error={errors.originalUrl}
           />
         </UrlShortenerForm>

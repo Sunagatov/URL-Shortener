@@ -1,4 +1,4 @@
-import type { RefObject } from 'react';
+import { useState, type RefObject } from 'react';
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 import { turnstileSiteKey } from '@/shared/config/features';
 import { useTheme } from '@/shared/theme/ThemeProvider';
@@ -26,6 +26,13 @@ export function TurnstileWidget({
   widgetRef,
 }: TurnstileWidgetProps) {
   const { theme } = useTheme();
+  const [error, setError] = useState('');
+  const [scriptFailed, setScriptFailed] = useState(false);
+
+  const handleFailure = () => {
+    onClear();
+    setError('Security check failed. Check your connection and try again.');
+  };
 
   if (!turnstileSiteKey) {
     return null;
@@ -33,25 +40,58 @@ export function TurnstileWidget({
 
   return (
     <div
-      className={`mx-auto flex max-w-full justify-center overflow-hidden rounded-xl bg-transparent ${className}`}
+      className={`mx-auto flex max-w-full flex-col items-center justify-center overflow-hidden rounded-xl bg-transparent ${className}`}
     >
       <Turnstile
         ref={widgetRef}
         siteKey={turnstileSiteKey}
-        onSuccess={onVerify}
+        onSuccess={token => {
+          setError('');
+          onVerify(token);
+        }}
         onExpire={onClear}
-        onError={onClear}
-        onTimeout={onClear}
-        onUnsupported={onClear}
+        onError={handleFailure}
+        onTimeout={handleFailure}
+        onUnsupported={() => {
+          onClear();
+          setError('Your browser could not run the security check. Try an updated browser.');
+        }}
+        scriptOptions={{
+          onError: () => {
+            onClear();
+            setScriptFailed(true);
+            setError('Security check could not load. Check your connection or content blocker.');
+          },
+        }}
         options={{
           action,
           appearance,
           refreshExpired: 'auto',
-          refreshTimeout: 'auto',
+          refreshTimeout: 'manual',
+          retry: 'never',
           size,
           theme,
         }}
       />
+      {error ? (
+        <div className="mt-2 text-center text-xs text-[color:var(--danger-text)]">
+          <p role="alert">{error}</p>
+          <button
+            type="button"
+            className="mt-1 rounded px-2 py-1 font-medium underline"
+            onClick={() => {
+              if (scriptFailed) {
+                window.location.reload();
+                return;
+              }
+              setError('');
+              widgetRef.current?.reset();
+            }}
+          >
+            {scriptFailed ? 'Reload page' : 'Retry security check'}
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
