@@ -4,6 +4,7 @@ import { routes } from '@/app/routes';
 import { accountNavigationItems } from '@/features/account/config/navigation';
 import type { User } from '@/shared/auth/types';
 import { useTheme } from '@/shared/theme/ThemeProvider';
+import { CoffeeSupportLink } from '@/app/layout/CoffeeSupportLink';
 
 interface LayoutHeaderProps {
   isAuthenticated: boolean;
@@ -55,6 +56,7 @@ export const LayoutHeader = ({
         </Link>
 
         <div className="ml-auto flex shrink-0 items-center gap-2 md:gap-3">
+          <CoffeeSupportLink compact />
           <div className="hidden sm:block">
             <ThemeToggle />
           </div>

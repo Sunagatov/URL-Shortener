@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { FaLink } from 'react-icons/fa';
 import { footerSocialLinks } from '@/app/config/footerSocialLinks';
 import { routes } from '@/app/routes';
+import { CoffeeSupportLink } from '@/app/layout/CoffeeSupportLink';
 
 const linkClass =
   'block text-sm text-[color:var(--text-muted)] transition-colors hover:text-[color:var(--text-primary)]';
@@ -28,6 +29,9 @@ export const LayoutFooter = ({ isAuthenticated }: { isAuthenticated: boolean }) 
           <p className="mt-2 text-sm leading-relaxed text-[color:var(--text-muted)]">
             Fast, secure link shortening with built-in analytics.
           </p>
+          <div className="mt-4">
+            <CoffeeSupportLink />
+          </div>
         </div>
 
         {/* Nav columns */}
