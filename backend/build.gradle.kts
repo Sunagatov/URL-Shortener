@@ -1,9 +1,9 @@
 plugins {
-    kotlin("jvm") version "2.3.21"
-    kotlin("plugin.spring") version "2.3.21"
-    id("org.springframework.boot") version "4.0.6"
+    kotlin("jvm") version "2.4.21"
+    kotlin("plugin.spring") version "2.4.21"
+    id("org.springframework.boot") version "4.1.2"
     id("io.spring.dependency-management") version "1.1.7"
-    id("org.sonarqube") version "7.3.0.8198"
+    id("org.sonarqube") version "7.5.0.8588"
     jacoco
 }
 
@@ -20,17 +20,17 @@ repositories {
     mavenCentral()
 }
 
-val mockitoVersion = "5.23.0"
-val mockitoKotlinVersion = "6.3.0"
-val springdocVersion = "3.0.3"
-val commonsValidatorVersion = "1.10.1"
-val caffeineVersion = "3.2.3"
-val bucket4jVersion = "8.10.1"
+val mockitoVersion = "5.24.0"
+val mockitoKotlinVersion = "6.4.0"
+val springdocVersion = "3.2.0"
+val commonsValidatorVersion = "1.11.0"
+val caffeineVersion = "3.3.1"
+val bucket4jVersion = "8.22.0"
 val jjwtApiVersion = "0.13.0"
 val logstashLogbackEncoderVersion = "9.0"
 val uaParserVersion = "1.6.1"
-val maxmindGeoipVersion = "4.2.1"
-val maxmindDbReaderVersion = "3.1.0"
+val maxmindGeoipVersion = "5.2.0"
+val maxmindDbReaderVersion = "4.2.0"
 
 
 dependencies {
@@ -75,7 +75,7 @@ dependencies {
     implementation("com.github.ben-manes.caffeine:caffeine:$caffeineVersion")
 
     // Rate Limiting
-    implementation("com.bucket4j:bucket4j-core:$bucket4jVersion")
+    implementation("com.bucket4j:bucket4j_jdk17-core:$bucket4jVersion")
 
     // Monitoring
     implementation("io.micrometer:micrometer-registry-prometheus")
@@ -130,7 +130,7 @@ tasks.named("sonarqube") {
 }
 
 jacoco {
-    toolVersion = "0.8.14"
+    toolVersion = "0.8.16"
 }
 tasks.jacocoTestReport {
     reports {

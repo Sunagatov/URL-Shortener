@@ -34,12 +34,12 @@ This project communicates with the Shorty URL backend via REST API.
 
 | Category               | Technology                |
 | ---------------------- | ------------------------- |
-| Language               | TypeScript 5              |
+| Language               | TypeScript 6              |
 | Framework              | React 19                  |
 | Routing                | React Router 7            |
 | Forms and Validation   | React Hook Form 7 + Zod 4 |
 | HTTP                   | Axios                     |
-| Styling                | Tailwind CSS 3            |
+| Styling                | Tailwind CSS 4            |
 | Icons                  | React Icons               |
 | Build Tool             | Vite 8                    |
 | Unit / Component Tests | Vitest + Testing Library  |
@@ -116,7 +116,7 @@ e2e/                        # Playwright tests
 
 ## Requirements
 
-- Node.js 20+ recommended
+- Node.js 22.22.2+ (Node.js 26 LTS is used in CI and Docker)
 - npm
 - Shorty URL backend running and reachable
 
@@ -139,6 +139,16 @@ VITE_BACKEND_REST_API_URL=http://localhost:8080
 Never commit real environment values.
 
 ---
+
+## Dependency compatibility
+
+Dependencies track stable releases. TypeScript stays on `~6.0.3` because the
+latest `typescript-eslint` requires TypeScript `<6.1.0`; TypeScript 7 cannot be
+installed with that supported peer range. Recheck that constraint before upgrading.
+
+The `minimatch` override selects the patched 11.x release for the ESLint toolchain
+(GHSA-g3hv-75wg-m249). Keep lint and the dependency audit passing when changing it.
+Vitest matchers are registered through `@testing-library/jest-dom/vitest`.
 
 ## Local development
 

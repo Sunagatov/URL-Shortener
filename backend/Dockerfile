@@ -1,14 +1,14 @@
 # =============================================================================
 # BUILD STAGE
 # =============================================================================
-FROM gradle:jdk25 AS build
+FROM eclipse-temurin:25-jdk-alpine AS build
 
 WORKDIR /app
-COPY build.gradle.kts settings.gradle.kts ./
+COPY build.gradle.kts settings.gradle.kts gradle.properties ./
 COPY gradle ./gradle/
 COPY gradlew ./
 COPY src ./src/
-RUN gradle bootJar --no-daemon -x test
+RUN chmod +x gradlew && ./gradlew bootJar --no-daemon -x test
 
 # =============================================================================
 # RUNTIME STAGE

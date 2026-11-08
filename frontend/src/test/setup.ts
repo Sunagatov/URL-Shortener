@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import { vi } from 'vitest';
 
 vi.stubEnv('VITE_BACKEND_REST_API_URL', 'http://localhost:8080');
