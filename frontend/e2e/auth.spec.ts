@@ -14,11 +14,11 @@ test.describe('Authentication Flow', () => {
     await page.goto('/signup');
     
     // Check if sign up form is visible
-    await expect(page.getByRole('heading', { name: /create account/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /create your account/i })).toBeVisible();
     await expect(page.getByLabel(/first name/i)).toBeVisible();
     await expect(page.getByLabel(/last name/i)).toBeVisible();
     await expect(page.getByLabel(/email/i)).toBeVisible();
-    await expect(page.getByLabel(/password/i)).toBeVisible();
+    await expect(page.getByLabel(/^password$/i)).toBeVisible();
   });
 
   test('should validate required fields on sign up', async ({ page }) => {
@@ -42,7 +42,7 @@ test.describe('Authentication Flow', () => {
     await page.getByLabel(/email/i).fill(uniqueEmail);
     await page.getByLabel(/country/i).fill('United States');
     await page.getByLabel(/age/i).fill('25');
-    await page.getByLabel(/password/i).fill('TestPassword123!');
+    await page.getByLabel(/^password$/i).fill('TestPassword123!');
     
     // Check the terms checkbox
     await page.getByRole('checkbox').check();
@@ -78,7 +78,7 @@ test.describe('Authentication Flow', () => {
     await page.getByLabel(/email/i).fill(uniqueEmail);
     await page.getByLabel(/country/i).fill('United States');
     await page.getByLabel(/age/i).fill('25');
-    await page.getByLabel(/password/i).fill('TestPassword123!');
+    await page.getByLabel(/^password$/i).fill('TestPassword123!');
     await page.getByRole('checkbox').check();
     await page.getByRole('button', { name: /create account/i }).click();
     
@@ -94,7 +94,7 @@ test.describe('Authentication Flow', () => {
     
     // Now sign in
     await page.getByLabel(/email/i).fill(uniqueEmail);
-    await page.getByLabel(/password/i).fill('TestPassword123!');
+    await page.getByLabel(/^password$/i).fill('TestPassword123!');
     await page.getByRole('button', { name: /sign in/i }).click();
     
     // Verify we're back on home page
@@ -106,7 +106,7 @@ test.describe('Authentication Flow', () => {
     
     // Try to sign in with invalid credentials
     await page.getByLabel(/email/i).fill('nonexistent@example.com');
-    await page.getByLabel(/password/i).fill('WrongPassword123!');
+    await page.getByLabel(/^password$/i).fill('WrongPassword123!');
     await page.getByRole('button', { name: /sign in/i }).click();
     
     // Wait for error message

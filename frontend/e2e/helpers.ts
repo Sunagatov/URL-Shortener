@@ -12,7 +12,7 @@ export async function signUpUser(page: Page, email?: string) {
   await page.getByLabel(/email/i).fill(uniqueEmail);
   await page.getByLabel(/country/i).fill('United States');
   await page.getByLabel(/age/i).fill('25');
-  await page.getByLabel(/password/i).fill('TestPassword123!');
+  await page.getByLabel(/^password$/i).fill('TestPassword123!');
   await page.getByRole('checkbox').check();
   await page.getByRole('button', { name: /create account/i }).click();
   
@@ -27,7 +27,7 @@ export async function signUpUser(page: Page, email?: string) {
 export async function signInUser(page: Page, email: string, password: string = 'TestPassword123!') {
   await page.goto('/signin');
   await page.getByLabel(/email/i).fill(email);
-  await page.getByLabel(/password/i).fill(password);
+  await page.getByLabel(/^password$/i).fill(password);
   await page.getByRole('button', { name: /sign in/i }).click();
   
   await page.waitForURL('**/', { timeout: 10000 });

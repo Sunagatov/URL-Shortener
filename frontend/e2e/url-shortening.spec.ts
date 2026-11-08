@@ -22,13 +22,18 @@ test.describe('URL Shortening Flow', () => {
     const urlInput = page.locator('input[type="text"], input[type="url"]').first();
     await urlInput.fill(longUrl);
     
-    // Click shorten button
+    const created = page.waitForResponse(response =>
+      response.request().method() === 'POST' && new URL(response.url()).pathname === '/api/v1/urls'
+    );
     await page.getByRole('button', { name: /shorten/i }).click();
-    
-    // Wait for result (with timeout for API call)
-    await page.waitForTimeout(3000);
-    
-    // Verify some response is shown
-    await expect(page.locator('body')).toContainText(/http|short|success/i, { timeout: 5000 });
+    const response = await created;
+    expect(response.ok()).toBeTruthy();
+    const { shortUrl } = await response.json();
+    await expect(page.getByRole('link', { name: shortUrl, exact: true })).toBeVisible();
+
+    // Check the saved redirect without following it to an external website.
+    const redirect = await page.request.get(shortUrl, { maxRedirects: 0 });
+    expect(redirect.status()).toBe(302);
+    expect(redirect.headers().location).toBe(longUrl);
   });
 });
