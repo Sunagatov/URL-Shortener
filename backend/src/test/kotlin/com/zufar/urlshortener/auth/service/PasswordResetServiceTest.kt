@@ -32,21 +32,22 @@ class PasswordResetServiceTest {
 
     @Mock private lateinit var userAccountRepository: UserAccountRepository
     @Mock private lateinit var passwordEncoder: PasswordEncoder
+    @Mock private lateinit var passwordResetNotifier: PasswordResetNotifier
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
 
-    private fun service() = PasswordResetService(userAccountRepository, passwordEncoder, clock)
+    private fun service() = PasswordResetService(userAccountRepository, passwordEncoder, clock, passwordResetNotifier)
 
     @Test
     fun `requestReset generates token and saves hash for local user`() {
         val user = localUser()
         whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
         whenever(passwordEncoder.encode(any<String>())).thenReturn("hashed-token")
-        whenever(userAccountRepository.save(any<UserAccountDocument>())).thenAnswer { it.arguments[0] }
+        whenever(userAccountRepository.updateAccount(any(), any<UserAccountDocument>())).thenAnswer { it.arguments[1] }
 
         service().requestReset(ForgotPasswordRequest("user@example.com"))
 
         val captor = argumentCaptor<UserAccountDocument>()
-        verify(userAccountRepository).save(captor.capture())
+        verify(userAccountRepository).updateAccount(any(), captor.capture())
         val tokenCaptor = argumentCaptor<String>()
         verify(passwordEncoder).encode(tokenCaptor.capture())
         assertEquals("hashed-token", captor.firstValue.passwordResetTokenHash)
@@ -60,19 +61,21 @@ class PasswordResetServiceTest {
         whenever(userAccountRepository.findByEmailIgnoreCase("unknown@example.com")).thenReturn(null)
 
         assertDoesNotThrow { service().requestReset(ForgotPasswordRequest("unknown@example.com")) }
-        verify(userAccountRepository, never()).save(any())
+        verify(userAccountRepository, never()).updateAccount(any(), any())
     }
 
     @Test
-    fun `requestReset skips Google-only user without password`() {
+    fun `Google-only users can establish a local password through mailbox recovery`() {
         val googleUser = UserAccountDocument(
             id = "g-1", firstName = "G", lastName = "User", email = "g@example.com",
             authProvider = AuthProvider.GOOGLE, password = null
         )
         whenever(userAccountRepository.findByEmailIgnoreCase("g@example.com")).thenReturn(googleUser)
+        whenever(passwordEncoder.encode(any<String>())).thenReturn("hashed-token")
+        whenever(userAccountRepository.updateAccount(any(), any())).thenAnswer { it.arguments[1] }
 
         assertDoesNotThrow { service().requestReset(ForgotPasswordRequest("g@example.com")) }
-        verify(userAccountRepository, never()).save(any())
+        verify(passwordResetNotifier).sendResetLink(org.mockito.kotlin.eq("g@example.com"), any(), org.mockito.kotlin.eq(15L))
     }
 
     @Test
@@ -86,12 +89,12 @@ class PasswordResetServiceTest {
         whenever(userAccountRepository.findByPasswordResetTokenId(PrivacyHasher.sha256("abcdefghijklmnopQRSTUVWXYZ123456")!!.take(16))).thenReturn(user)
         whenever(passwordEncoder.matches(any<String>(), any<String>())).thenReturn(true)
         whenever(passwordEncoder.encode("NewSecurePassword1")).thenReturn("new-hashed-pw")
-        whenever(userAccountRepository.save(any<UserAccountDocument>())).thenAnswer { it.arguments[0] }
+        whenever(userAccountRepository.updateAccount(any(), any<UserAccountDocument>())).thenAnswer { it.arguments[1] }
 
         service().resetPassword(ResetPasswordRequest("abcdefghijklmnopQRSTUVWXYZ123456", "NewSecurePassword1"))
 
         val captor = argumentCaptor<UserAccountDocument>()
-        verify(userAccountRepository).save(captor.capture())
+        verify(userAccountRepository).updateAccount(any(), captor.capture())
         assertEquals("new-hashed-pw", captor.firstValue.password)
         assertEquals(4, captor.firstValue.tokenVersion)
         assertNull(captor.firstValue.passwordResetTokenHash)

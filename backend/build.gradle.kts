@@ -52,6 +52,7 @@ dependencies {
 
     // Password Encoding
     implementation("org.springframework.security:spring-security-crypto")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.86")
 
     // Logging
     implementation("org.springframework.boot:spring-boot-starter-logging")

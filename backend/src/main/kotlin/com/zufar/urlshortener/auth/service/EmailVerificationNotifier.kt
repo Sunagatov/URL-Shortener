@@ -60,8 +60,7 @@ class EmailVerificationNotifier(
                 LOG_DELIVERY_MODE,
                 ex.javaClass.simpleName,
                 maskedEmail,
-                emailDomain,
-                ex
+                emailDomain
             )
             LOG_DELIVERY_MODE
         }

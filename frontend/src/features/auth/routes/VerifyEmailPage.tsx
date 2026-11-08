@@ -144,8 +144,7 @@ const VerifyEmailPage: React.FC = () => {
           <p>Code expires in {Math.max(1, Math.ceil(expiresInSeconds / 60))} minute(s).</p>
           {deliveryMode === 'log' ? (
             <p className="mt-1 text-amber-200/80">
-              Local development mode is active. The latest verification code is written to the
-              backend logs.
+              The email could not be delivered. Please try resending the code later.
             </p>
           ) : null}
         </div>

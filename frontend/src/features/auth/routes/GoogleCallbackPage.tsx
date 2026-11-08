@@ -5,6 +5,7 @@ import { getUserProfile } from '@/shared/api/profileApi';
 import { routes } from '@/app/routes';
 import { useAuth } from '@/shared/auth/useAuth';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
+import { consumeGoogleTransaction } from '@/features/auth/lib/googleOAuth';
 
 export default function GoogleCallbackPage() {
   usePageTitle('Signing in…');
@@ -18,7 +19,6 @@ export default function GoogleCallbackPage() {
     const code = searchParams.get('code');
     const errorParam = searchParams.get('error');
     const state = searchParams.get('state');
-    const destination = state || routes.dashboard;
 
     if (errorParam) {
       setError(
@@ -32,7 +32,9 @@ export default function GoogleCallbackPage() {
     }
 
     try {
-      const tokens = await googleAuth(code);
+      const { codeVerifier, destination } = consumeGoogleTransaction(state);
+      window.history.replaceState(null, '', window.location.pathname);
+      const tokens = await googleAuth(code, codeVerifier);
       login(tokens, null);
       try {
         const profile = await getUserProfile();

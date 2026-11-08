@@ -97,6 +97,8 @@ describe('Security', () => {
       currentPassword: 'OldPassword123!',
       newPassword: 'correct horse battery staple',
     });
+    expect(logout).toHaveBeenCalledOnce();
+    expect(await screen.findByText('Sign In Destination')).toBeInTheDocument();
   });
 
   it('does not force logout or redirect on a non-401 password change failure', async () => {

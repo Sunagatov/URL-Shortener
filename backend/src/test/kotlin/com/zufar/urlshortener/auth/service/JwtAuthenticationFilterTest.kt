@@ -44,6 +44,7 @@ class JwtAuthenticationFilterTest {
         val userDetails = User("user@example.com", "password", emptyList())
             .withTokenVersion(tokenVersion = 1, userId = "user-123")
         whenever(jwtTokenProvider.getUsernameFromValidAccessToken(token)).thenReturn("user@example.com")
+        whenever(jwtTokenProvider.getTokenVersionFromJWT(token)).thenReturn(1)
         whenever(customUserDetailsService.loadUserByUsername("user@example.com")).thenReturn(userDetails)
         val request = requestWithBearerToken(token)
 
@@ -59,6 +60,7 @@ class JwtAuthenticationFilterTest {
         val userDetails = User("user@example.com", "password", emptyList())
             .withTokenVersion(tokenVersion = 1, userId = "user-123")
         whenever(jwtTokenProvider.getUsernameFromValidAccessToken(token)).thenReturn("user@example.com")
+        whenever(jwtTokenProvider.getTokenVersionFromJWT(token)).thenReturn(1)
         whenever(customUserDetailsService.loadUserByUsername("user@example.com")).thenReturn(userDetails)
         val request = requestWithBearerToken(token)
 
@@ -107,6 +109,22 @@ class JwtAuthenticationFilterTest {
 
         assertNull(SecurityContextHolder.getContext().authentication)
         verifyNoInteractions(jwtTokenProvider, customUserDetailsService)
+    }
+
+    @Test
+    fun `old or missing token version never establishes a principal or request user id`() {
+        val token = "old-token"
+        val user = User("user@example.com", "password", emptyList()).withTokenVersion(2, "user-123")
+        whenever(jwtTokenProvider.getUsernameFromValidAccessToken(token)).thenReturn("user@example.com")
+        whenever(customUserDetailsService.loadUserByUsername("user@example.com")).thenReturn(user)
+        for (version in listOf(1, null)) {
+            whenever(jwtTokenProvider.getTokenVersionFromJWT(token)).thenReturn(version)
+            filter.doFilter(requestWithBearerToken(token), MockHttpServletResponse()) { request, _ ->
+                assertNull(SecurityContextHolder.getContext().authentication)
+                assertNull(request.getAttribute("authenticatedUserId"))
+                assertNull(MDC.get("userId"))
+            }
+        }
     }
 
     private fun requestWithBearerToken(token: String): MockHttpServletRequest {

@@ -153,8 +153,9 @@ class AuthServiceVerificationTest {
             emailVerificationCodeSentAt = Instant.parse("2024-01-01T10:15:30Z")
         )
         whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
+        whenever(userAccountRepository.claimVerificationAttempt(any(), any(), any(), any())).thenReturn(user.copy(accountRevision = 1, emailVerificationAttempts = 1))
         whenever(passwordEncoder.matches("123456", "verification-hash")).thenReturn(true)
-        whenever(userAccountRepository.save(any<UserAccountDocument>())).thenAnswer { it.arguments[0] }
+        whenever(userAccountRepository.updateAccount(any(), any<UserAccountDocument>())).thenAnswer { it.arguments[1] }
         whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access-token")
         whenever(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh-token")
 
@@ -163,7 +164,7 @@ class AuthServiceVerificationTest {
         assertEquals("access-token", response.accessToken)
         assertEquals("refresh-token", response.refreshToken)
         val captor = argumentCaptor<UserAccountDocument>()
-        verify(userAccountRepository).save(captor.capture())
+        verify(userAccountRepository).updateAccount(any(), captor.capture())
         assertTrue(captor.firstValue.emailVerified)
         assertNull(captor.firstValue.emailVerificationCodeHash)
         assertNull(captor.firstValue.emailVerificationCodeExpiresAt)
@@ -173,6 +174,7 @@ class AuthServiceVerificationTest {
     @Test
     fun `verify email rejects invalid code`() {
         val user = UserAccountDocument(
+            id = "user-1",
             firstName = "User",
             lastName = "Test",
             email = "user@example.com",
@@ -183,6 +185,7 @@ class AuthServiceVerificationTest {
             emailVerificationCodeExpiresAt = Instant.parse("2024-01-01T10:25:30Z")
         )
         whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
+        whenever(userAccountRepository.claimVerificationAttempt(any(), any(), any(), any())).thenReturn(user.copy(accountRevision = 1, emailVerificationAttempts = 1))
         whenever(passwordEncoder.matches("123456", "verification-hash")).thenReturn(false)
 
         val ex = assertThrows<ApplicationException> {

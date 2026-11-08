@@ -24,7 +24,8 @@ private const val INVALID_TOKEN_CODE = "INVALID_RESET_TOKEN"
 class PasswordResetService(
     private val userAccountRepository: UserAccountRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val clock: Clock
+    private val clock: Clock,
+    private val passwordResetNotifier: PasswordResetNotifier
 ) {
     private val log = LoggerFactory.getLogger(PasswordResetService::class.java)
     private val secureRandom = SecureRandom()
@@ -37,17 +38,12 @@ class PasswordResetService(
             log.info("password_reset_requested_unknown_email emailDomain={}", LogSanitizer.emailDomain(email))
             return
         }
-        if (user.authProvider == AuthProvider.GOOGLE && user.password == null) {
-            log.info("password_reset_skipped_google_user userId={}", user.id)
-            return
-        }
-
         val token = generateToken()
         val tokenId = resetTokenId(token)
         val tokenHash = passwordEncoder.encode(token)
         val now = Instant.now(clock)
 
-        userAccountRepository.save(
+        val saved = userAccountRepository.updateAccount(user,
             user.copy(
                 passwordResetTokenHash = tokenHash,
                 passwordResetTokenId = tokenId,
@@ -56,7 +52,8 @@ class PasswordResetService(
             )
         )
 
-        log.info("password_reset_token_generated userId={} emailDomain={}", user.id, LogSanitizer.emailDomain(email))
+        if (saved != null) passwordResetNotifier.sendResetLink(email, token, TOKEN_LIFETIME_MINUTES)
+        log.info("password_reset_requested emailDomain={}", LogSanitizer.emailDomain(email))
     }
 
     fun resetPassword(request: ResetPasswordRequest) {
@@ -68,9 +65,13 @@ class PasswordResetService(
             ?.takeIf { passwordEncoder.matches(request.token, it.passwordResetTokenHash) }
             ?: throw ApplicationException.badRequest(INVALID_TOKEN_CODE, "Invalid or expired reset token")
 
-        userAccountRepository.save(
+        val saved = userAccountRepository.updateAccount(user,
             user.copy(
                 password = passwordEncoder.encode(request.newPassword),
+                passwordEmailVerified = true,
+                authProvider = AuthProvider.LOCAL,
+                emailVerified = true,
+                emailVerifiedAt = user.emailVerifiedAt ?: now,
                 passwordResetTokenHash = null,
                 passwordResetTokenId = null,
                 passwordResetTokenExpiresAt = null,
@@ -79,6 +80,7 @@ class PasswordResetService(
             )
         )
 
+        if (saved == null) throw ApplicationException.badRequest(INVALID_TOKEN_CODE, "Invalid or expired reset token")
         log.info("password_reset_completed userId={}", user.id)
     }
 

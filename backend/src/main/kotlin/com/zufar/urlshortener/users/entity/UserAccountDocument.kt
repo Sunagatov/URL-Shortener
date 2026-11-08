@@ -23,11 +23,16 @@ data class UserAccountDocument(
 
     val emailVerified: Boolean = false,
     val emailVerifiedAt: Instant? = null,
+    // Unlike the historical emailVerified flag, this requires actual mailbox proof for a local password.
+    val passwordEmailVerified: Boolean = false,
     val emailVerificationCodeHash: String? = null,
     val emailVerificationCodeExpiresAt: Instant? = null,
     val emailVerificationCodeSentAt: Instant? = null,
+    val emailVerificationAttempts: Int = 0,
+    val emailVerificationAttemptsResetAt: Instant? = null,
 
     val tokenVersion: Int = 0,
+    val accountRevision: Long = 0,
 
     val passwordResetTokenHash: String? = null,
     val passwordResetTokenId: String? = null,

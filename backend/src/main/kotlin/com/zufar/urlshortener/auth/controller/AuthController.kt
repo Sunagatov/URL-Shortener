@@ -46,7 +46,7 @@ class AuthController(
     fun authenticateWithGoogle(
         @Valid @RequestBody googleAuthRequest: GoogleAuthRequest
     ): ResponseEntity<AuthResponse> {
-        return ResponseEntity.ok(googleAuthService.authenticate(googleAuthRequest.code))
+        return ResponseEntity.ok(googleAuthService.authenticate(googleAuthRequest.code, googleAuthRequest.codeVerifier))
     }
 
     @PostMapping("/signin")

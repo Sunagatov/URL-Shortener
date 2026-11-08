@@ -7,6 +7,7 @@ import com.zufar.urlshortener.users.dto.UpdateProfileRequest
 import com.zufar.urlshortener.users.dto.UserDetailsDto
 import com.zufar.urlshortener.users.entity.UserAccountDocument
 import com.zufar.urlshortener.users.repository.UserAccountRepository
+import com.zufar.urlshortener.users.repository.updateAccountOrConflict
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.Clock
@@ -39,7 +40,7 @@ class UserAccountService(
 
     fun updateProfile(request: UpdateProfileRequest): UserDetailsDto {
         val user = requireCurrentUser()
-        val updated = userAccountRepository.save(
+        val updated = userAccountRepository.updateAccountOrConflict(user,
             user.copy(
                 firstName = request.firstName,
                 lastName = request.lastName,
@@ -72,10 +73,13 @@ class UserAccountService(
             "Password encoder returned null during password change"
         }
 
-        userAccountRepository.save(
+        userAccountRepository.updateAccountOrConflict(user,
             user.copy(
                 password = encodedPassword,
                 tokenVersion = user.tokenVersion + 1,
+                passwordResetTokenHash = null,
+                passwordResetTokenId = null,
+                passwordResetTokenExpiresAt = null,
                 updatedAt = Instant.now(clock)
             )
         )

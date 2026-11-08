@@ -81,6 +81,12 @@ class AuthService(
             throw ApplicationException.forbidden(EMAIL_NOT_VERIFIED_CODE, EMAIL_NOT_VERIFIED_MESSAGE)
         }
 
+        if (existingUser?.password != null && passwordEncoder.upgradeEncoding(existingUser.password)) {
+            val upgraded = existingUser.copy(password = passwordEncoder.encode(request.password))
+            if (userAccountRepository.updateAccount(existingUser, upgraded) == null) {
+                throw ApplicationException.unauthorized("INVALID_CREDENTIALS", "Account changed. Please sign in again.")
+            }
+        }
         log.info("auth_sign_in_succeeded userId={}", principal.userId ?: "unknown")
         return issueAuthentication(principal)
     }

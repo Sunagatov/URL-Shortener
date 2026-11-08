@@ -10,6 +10,7 @@ import org.slf4j.MDC
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.AuthenticationException
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import org.springframework.stereotype.Component
@@ -37,6 +38,10 @@ class JwtAuthenticationFilter(
                 val username = jwtTokenProvider.getUsernameFromValidAccessToken(jwt)
                 if (username != null) {
                     val userDetails: UserDetails = customUserDetailsService.loadUserByUsername(username)
+                    val currentUser = userDetails as? UserDetailsWithTokenVersion
+                    if (currentUser == null || jwtTokenProvider.getTokenVersionFromJWT(jwt) != currentUser.tokenVersion) {
+                        throw BadCredentialsException("Session has been revoked")
+                    }
                     val authentication = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
                     authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
                     SecurityContextHolder.getContext().authentication = authentication

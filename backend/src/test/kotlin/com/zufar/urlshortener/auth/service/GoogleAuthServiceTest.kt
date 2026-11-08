@@ -56,10 +56,13 @@ class GoogleAuthServiceTest {
         whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access-token")
         whenever(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh-token")
 
-        val response = service(restTemplate).authenticate("auth-code")
+        val response = service(restTemplate).authenticate("auth-code", "v".repeat(43))
 
         assertEquals("access-token", response.accessToken)
         val captor = argumentCaptor<UserAccountDocument>()
+        val exchange = argumentCaptor<HttpEntity<*>>()
+        verify(restTemplate).postForEntity(any<String>(), exchange.capture(), any<Class<*>>())
+        assertEquals(listOf("v".repeat(43)), (exchange.firstValue.body as Map<*, *>)["code_verifier"])
         verify(userAccountRepository).save(captor.capture())
         assertEquals(AuthProvider.GOOGLE, captor.firstValue.authProvider)
         assertTrue(captor.firstValue.emailVerified)
@@ -80,7 +83,7 @@ class GoogleAuthServiceTest {
         whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access-token")
         whenever(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh-token")
 
-        service(restTemplate).authenticate("auth-code")
+        service(restTemplate).authenticate("auth-code", "v".repeat(43))
 
         verify(userAccountRepository, never()).save(any())
     }
@@ -89,7 +92,7 @@ class GoogleAuthServiceTest {
     fun `authenticate returns existing LOCAL user when Google proves the same verified email`() {
         val existing = UserAccountDocument(
             id = "local-id", firstName = "Jane", lastName = "Doe",
-            email = "user@gmail.com", password = "hashed", authProvider = AuthProvider.LOCAL, emailVerified = true
+            email = "user@gmail.com", password = "hashed", authProvider = AuthProvider.LOCAL, emailVerified = true, passwordEmailVerified = true
         )
         val restTemplate = mockRestTemplate(
             tokenResponse = mapOf("access_token" to "google-access-token"),
@@ -99,14 +102,14 @@ class GoogleAuthServiceTest {
         whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access-token")
         whenever(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh-token")
 
-        val response = service(restTemplate).authenticate("auth-code")
+        val response = service(restTemplate).authenticate("auth-code", "v".repeat(43))
 
         assertEquals("access-token", response.accessToken)
         verify(userAccountRepository, never()).save(any())
     }
 
     @Test
-    fun `authenticate verifies existing LOCAL user when Google proves the same verified email`() {
+    fun `authenticate removes a password planted before email verification`() {
         val existing = UserAccountDocument(
             id = "local-id",
             firstName = "Jane",
@@ -124,21 +127,43 @@ class GoogleAuthServiceTest {
             userInfoResponse = mapOf("email" to "user@gmail.com", "email_verified" to true, "given_name" to "Jane", "family_name" to "Doe")
         )
         whenever(userAccountRepository.findByEmailIgnoreCase("user@gmail.com")).thenReturn(existing)
-        whenever(userAccountRepository.save(any<UserAccountDocument>())).thenAnswer { it.arguments[0] }
+        whenever(userAccountRepository.updateAccount(any(), any<UserAccountDocument>())).thenAnswer { it.arguments[1] }
         whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access-token")
         whenever(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh-token")
 
-        service(restTemplate).authenticate("auth-code")
+        service(restTemplate).authenticate("auth-code", "v".repeat(43))
 
         val captor = argumentCaptor<UserAccountDocument>()
-        verify(userAccountRepository).save(captor.capture())
-        assertEquals(AuthProvider.LOCAL, captor.firstValue.authProvider)
-        assertEquals("hashed", captor.firstValue.password)
+        verify(userAccountRepository).updateAccount(any(), captor.capture())
+        assertEquals(AuthProvider.GOOGLE, captor.firstValue.authProvider)
+        kotlin.test.assertNull(captor.firstValue.password)
+        assertEquals(existing.tokenVersion + 1, captor.firstValue.tokenVersion)
         assertEquals(true, captor.firstValue.emailVerified)
         assertEquals(Instant.parse("2024-01-01T10:15:30Z"), captor.firstValue.emailVerifiedAt)
         assertEquals(null, captor.firstValue.emailVerificationCodeHash)
         assertEquals(null, captor.firstValue.emailVerificationCodeExpiresAt)
         assertEquals(null, captor.firstValue.emailVerificationCodeSentAt)
+    }
+
+    @Test
+    fun `Google adoption clears passwords and sessions auto-verified by disabled or legacy verification`() {
+        val existing = UserAccountDocument(id = "legacy-local", firstName = "Jane", lastName = "Doe",
+            email = "user@gmail.com", password = "attacker-planted-hash", emailVerified = true,
+            emailVerifiedAt = Instant.now(clock), tokenVersion = 4,
+            passwordResetTokenHash = "old-reset", passwordResetTokenId = "old-id")
+        val restTemplate = mockRestTemplate(mapOf("access_token" to "google-token"),
+            mapOf("email" to existing.email, "email_verified" to true))
+        whenever(userAccountRepository.findByEmailIgnoreCase(existing.email)).thenReturn(existing)
+        whenever(userAccountRepository.updateAccount(any(), any())).thenAnswer { it.arguments[1] }
+        whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access")
+        whenever(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh")
+        service(restTemplate).authenticate("code", "v".repeat(43))
+        val changed = argumentCaptor<UserAccountDocument>()
+        verify(userAccountRepository).updateAccount(org.mockito.kotlin.eq(existing), changed.capture())
+        kotlin.test.assertNull(changed.firstValue.password)
+        kotlin.test.assertNull(changed.firstValue.passwordResetTokenHash)
+        assertEquals(5, changed.firstValue.tokenVersion)
+        assertEquals(AuthProvider.GOOGLE, changed.firstValue.authProvider)
     }
 
     @Test
@@ -148,7 +173,7 @@ class GoogleAuthServiceTest {
             userInfoResponse = mapOf("email" to "user@gmail.com", "email_verified" to false, "given_name" to "Jane", "family_name" to "Doe")
         )
 
-        val ex = assertThrows<ApplicationException> { service(restTemplate).authenticate("auth-code") }
+        val ex = assertThrows<ApplicationException> { service(restTemplate).authenticate("auth-code", "v".repeat(43)) }
         assertEquals("GOOGLE_AUTH_FAILED", ex.code)
     }
 
@@ -160,7 +185,7 @@ class GoogleAuthServiceTest {
             stubUserInfo = false
         )
 
-        val ex = assertThrows<ApplicationException> { service(restTemplate).authenticate("bad-code") }
+        val ex = assertThrows<ApplicationException> { service(restTemplate).authenticate("bad-code", "v".repeat(43)) }
         assertEquals("GOOGLE_AUTH_FAILED", ex.code)
     }
 
@@ -171,7 +196,7 @@ class GoogleAuthServiceTest {
             userInfoResponse = mapOf("given_name" to "Jane")
         )
 
-        val ex = assertThrows<ApplicationException> { service(restTemplate).authenticate("auth-code") }
+        val ex = assertThrows<ApplicationException> { service(restTemplate).authenticate("auth-code", "v".repeat(43)) }
         assertEquals("GOOGLE_AUTH_FAILED", ex.code)
     }
 

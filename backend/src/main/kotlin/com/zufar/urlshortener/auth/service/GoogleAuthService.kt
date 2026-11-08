@@ -8,6 +8,7 @@ import com.zufar.urlshortener.shared.logging.LogSanitizer
 import com.zufar.urlshortener.users.entity.AuthProvider
 import com.zufar.urlshortener.users.entity.UserAccountDocument
 import com.zufar.urlshortener.users.repository.UserAccountRepository
+import com.zufar.urlshortener.users.repository.updateAccountOrConflict
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
@@ -36,8 +37,11 @@ class GoogleAuthService(
     private val log = LoggerFactory.getLogger(GoogleAuthService::class.java)
     private val restTemplate = RestTemplate()
 
-    fun authenticate(code: String): AuthResponse {
-        val googleUser = exchangeCodeForUserInfo(code)
+    fun authenticate(code: String, codeVerifier: String): AuthResponse {
+        if (!codeVerifier.matches(Regex("[A-Za-z0-9._~-]{43,128}"))) {
+            throw ApplicationException.unauthorized(GOOGLE_AUTH_FAILED_CODE, "Invalid sign-in transaction")
+        }
+        val googleUser = exchangeCodeForUserInfo(code, codeVerifier)
         val result = findOrCreateUser(googleUser)
         log.info(
             "google_auth_succeeded userId={} emailDomain={} isNewUser={}",
@@ -46,14 +50,15 @@ class GoogleAuthService(
         return issueTokens(result.user)
     }
 
-    private fun exchangeCodeForUserInfo(code: String): GoogleUserInfo {
-        val tokens = exchangeCodeForTokens(code)
+    private fun exchangeCodeForUserInfo(code: String, codeVerifier: String): GoogleUserInfo {
+        val tokens = exchangeCodeForTokens(code, codeVerifier)
         return fetchUserInfo(tokens.accessToken)
     }
 
-    private fun exchangeCodeForTokens(code: String): GoogleTokenResponse {
+    private fun exchangeCodeForTokens(code: String, codeVerifier: String): GoogleTokenResponse {
         val params = LinkedMultiValueMap<String, String>().apply {
             add("code", code)
+            add("code_verifier", codeVerifier)
             add("client_id", clientId)
             add("client_secret", clientSecret)
             add("redirect_uri", redirectUri)
@@ -63,7 +68,7 @@ class GoogleAuthService(
         val response = try {
             restTemplate.postForEntity(GOOGLE_TOKEN_URL, HttpEntity(params, headers), Map::class.java)
         } catch (e: Exception) {
-            log.error("google_token_exchange_failed error={}", e.message)
+            log.error("google_token_exchange_failed errorType={}", e.javaClass.simpleName)
             throw ApplicationException.unauthorized(GOOGLE_AUTH_FAILED_CODE, "Failed to exchange Google authorization code")
         }
         val body = response.body
@@ -82,7 +87,7 @@ class GoogleAuthService(
                 HttpEntity<Void>(headers), Map::class.java
             )
         } catch (e: Exception) {
-            log.error("google_userinfo_failed error={}", e.message)
+            log.error("google_userinfo_failed errorType={}", e.javaClass.simpleName)
             throw ApplicationException.unauthorized(GOOGLE_AUTH_FAILED_CODE, "Failed to fetch Google user info")
         }
         val body = response.body
@@ -122,7 +127,8 @@ class GoogleAuthService(
     }
 
     private fun verifyExistingAccountFromGoogle(user: UserAccountDocument): UserAccountDocument {
-        if (user.emailVerified &&
+        val removeUntrustedPassword = user.password != null && !user.passwordEmailVerified
+        if (user.emailVerified && !removeUntrustedPassword &&
             user.emailVerificationCodeHash == null &&
             user.emailVerificationCodeExpiresAt == null &&
             user.emailVerificationCodeSentAt == null
@@ -131,8 +137,14 @@ class GoogleAuthService(
         }
 
         val now = Instant.now(clock)
-        return userAccountRepository.save(
+        return userAccountRepository.updateAccountOrConflict(user,
             user.copy(
+                password = if (removeUntrustedPassword) null else user.password,
+                authProvider = if (removeUntrustedPassword) AuthProvider.GOOGLE else user.authProvider,
+                tokenVersion = if (removeUntrustedPassword) user.tokenVersion + 1 else user.tokenVersion,
+                passwordResetTokenHash = null,
+                passwordResetTokenId = null,
+                passwordResetTokenExpiresAt = null,
                 emailVerified = true,
                 emailVerifiedAt = user.emailVerifiedAt ?: now,
                 emailVerificationCodeHash = null,

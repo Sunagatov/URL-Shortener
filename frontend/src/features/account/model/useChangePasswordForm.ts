@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/shared/auth/useAuth';
 import { changePassword } from '@/features/account/api/accountApi';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 import { useToast } from '@/shared/ui';
@@ -13,6 +15,8 @@ export function useChangePasswordForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
   const passwordStrength = getPasswordStrength(newPassword);
   const passwordsMatch = confirmPassword.length === 0 || newPassword === confirmPassword;
@@ -40,8 +44,10 @@ export function useChangePasswordForm() {
 
     try {
       await changePassword({ currentPassword, newPassword });
-      toast.success('Password changed successfully.');
+      toast.success('Password changed. Please sign in again.');
       resetForm();
+      logout();
+      navigate('/signin', { replace: true });
       return true;
     } catch (error: unknown) {
       toast.error(getApiErrorMessage(error, 'Error changing password.'));

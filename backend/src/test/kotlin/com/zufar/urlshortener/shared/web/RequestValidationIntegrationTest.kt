@@ -18,6 +18,14 @@ class RequestValidationIntegrationTest {
     private lateinit var mockMvc: MockMvc
 
     @Test
+    fun `Google login requires a valid PKCE verifier before exchanging any code`() {
+        for (body in listOf("""{"code":"unbound"}""", """{"code":"unbound","codeVerifier":"short"}""")) {
+            mockMvc.perform(post("/api/v1/auth/google").contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isBadRequest)
+        }
+    }
+
+    @Test
     fun `invalid shorten url request returns 400 instead of 500`() {
         mockMvc.perform(
             post("/api/v1/urls")

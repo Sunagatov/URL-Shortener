@@ -84,6 +84,13 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 ---
 
+## Authentication security
+
+See [Authentication security lifecycle](docs/features/auth-security-lifecycle.md)
+for password-hash compatibility, one-use emailed recovery, session revocation,
+Google linking/PKCE, atomic account updates and verification attempt limits.
+Production SMTP and reset-link configuration are managed in Vault.
+
 ## 🤔 What is this?
 
 URL Shortener Backend is a REST API that generates short URLs from long ones, handles redirects, and manages user authentication with JWT tokens. Built with Kotlin and Spring Boot, it features caching, rate limiting, and MongoDB for storage.

@@ -133,7 +133,7 @@ class EmailVerificationEdgeCasesTest {
         )
         whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
         whenever(passwordEncoder.encode(org.mockito.kotlin.any<String>())).thenReturn("new-hash")
-        whenever(userAccountRepository.save(org.mockito.kotlin.any<UserAccountDocument>())).thenAnswer { it.arguments[0] }
+        whenever(userAccountRepository.updateAccount(org.mockito.kotlin.any(), org.mockito.kotlin.any<UserAccountDocument>())).thenAnswer { it.arguments[1] }
         whenever(emailVerificationNotifier.sendCode(org.mockito.kotlin.any(), org.mockito.kotlin.any(), org.mockito.kotlin.any())).thenReturn("log")
 
         val response = workflow().resendVerificationCode(ResendVerificationRequest("user@example.com"))

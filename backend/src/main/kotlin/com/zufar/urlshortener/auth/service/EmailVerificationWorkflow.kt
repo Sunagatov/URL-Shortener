@@ -8,6 +8,7 @@ import com.zufar.urlshortener.shared.exception.ApplicationException
 import com.zufar.urlshortener.shared.logging.LogSanitizer
 import com.zufar.urlshortener.users.entity.UserAccountDocument
 import com.zufar.urlshortener.users.repository.UserAccountRepository
+import com.zufar.urlshortener.users.repository.updateAccountOrConflict
 import org.slf4j.LoggerFactory
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.security.SecureRandom
@@ -24,6 +25,7 @@ private const val VERIFICATION_RESEND_TOO_SOON_CODE = "VERIFICATION_RESEND_TOO_S
 private const val EMAIL_VERIFICATION_DISABLED_MESSAGE = "Email verification is currently disabled"
 private const val USER_NOT_FOUND_CODE = "USER_NOT_FOUND"
 private const val VERIFICATION_CODE_BOUND = 1_000_000
+private const val VERIFICATION_ATTEMPT_LIMIT = 5
 
 internal class EmailVerificationWorkflow(
     private val userAccountRepository: UserAccountRepository,
@@ -42,12 +44,16 @@ internal class EmailVerificationWorkflow(
         val codeHash = requireNotNull(passwordEncoder.encode(code)) {
             "Password encoder returned null during email verification code generation"
         }
+        val attemptsResetAt = user.emailVerificationAttemptsResetAt ?: user.emailVerificationCodeExpiresAt
+        val keepBudget = attemptsResetAt?.isAfter(now) == true
         return user.copy(
             emailVerified = false,
             emailVerifiedAt = null,
             emailVerificationCodeHash = codeHash,
             emailVerificationCodeExpiresAt = now.plusSeconds(verificationExpirationMinutes * 60),
             emailVerificationCodeSentAt = now,
+            emailVerificationAttempts = if (keepBudget) user.emailVerificationAttempts else 0,
+            emailVerificationAttemptsResetAt = if (keepBudget) attemptsResetAt else now.plusSeconds(verificationExpirationMinutes * 60),
             updatedAt = now
         ) to code
     }
@@ -59,13 +65,17 @@ internal class EmailVerificationWorkflow(
             code = request.code.trim()
         )
 
-        val user = userAccountRepository.findByEmailIgnoreCase(normalizedRequest.email)
+        val existing = userAccountRepository.findByEmailIgnoreCase(normalizedRequest.email)
             ?: throw ApplicationException.notFound(USER_NOT_FOUND_CODE, "User not found")
-        if (user.emailVerified) {
+        if (existing.emailVerified) {
             throw ApplicationException.badRequest(INVALID_AUTH_REQUEST_CODE, EMAIL_ALREADY_VERIFIED_MESSAGE)
         }
 
         val now = Instant.now(clock)
+        val challengeHash = existing.emailVerificationCodeHash
+            ?: throw ApplicationException.badRequest(INVALID_VERIFICATION_CODE, INVALID_OR_EXPIRED_VERIFICATION_CODE_MESSAGE)
+        val user = userAccountRepository.claimVerificationAttempt(requireNotNull(existing.id), challengeHash, now, VERIFICATION_ATTEMPT_LIMIT)
+            ?: throw ApplicationException.badRequest(INVALID_VERIFICATION_CODE, INVALID_OR_EXPIRED_VERIFICATION_CODE_MESSAGE)
         val isValidCode = user.emailVerificationCodeHash != null &&
             user.emailVerificationCodeExpiresAt != null &&
             !user.emailVerificationCodeExpiresAt.isBefore(now) &&
@@ -74,9 +84,10 @@ internal class EmailVerificationWorkflow(
             throw ApplicationException.badRequest(INVALID_VERIFICATION_CODE, INVALID_OR_EXPIRED_VERIFICATION_CODE_MESSAGE)
         }
 
-        val verifiedUser = userAccountRepository.save(
+        val verifiedUser = userAccountRepository.updateAccountOrConflict(user,
             user.copy(
                 emailVerified = true,
+                passwordEmailVerified = true,
                 emailVerifiedAt = now,
                 emailVerificationCodeHash = null,
                 emailVerificationCodeExpiresAt = null,
@@ -113,7 +124,7 @@ internal class EmailVerificationWorkflow(
         }
 
         val (updatedUser, verificationCode) = createChallenge(user, now)
-        val savedUser = userAccountRepository.save(updatedUser)
+        val savedUser = userAccountRepository.updateAccountOrConflict(user, updatedUser)
         val deliveryMode = sendVerificationCode(savedUser.email, verificationCode)
         log.info(
             "auth_email_verification_resent userId={} deliveryMode={} emailDomain={}",

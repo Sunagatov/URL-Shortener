@@ -43,7 +43,7 @@ class UserPasswordChangerTest {
         whenever(userAccountRepository.findById("user-1")).thenReturn(Optional.of(user))
         whenever(passwordEncoder.matches("OldPassword1!", "old-hash")).thenReturn(true)
         whenever(passwordEncoder.encode("NewPassword1!")).thenReturn("new-hash")
-        whenever(userAccountRepository.save(any<UserAccountDocument>())).thenAnswer { it.arguments[0] }
+        whenever(userAccountRepository.updateAccount(any(), any<UserAccountDocument>())).thenAnswer { it.arguments[1] }
 
         UserAccountService(
             authenticatedUserIdProvider,
@@ -57,7 +57,7 @@ class UserPasswordChangerTest {
             )
         )
 
-        verify(userAccountRepository).save(argThat {
+        verify(userAccountRepository).updateAccount(any(), argThat {
             password == "new-hash" &&
                 tokenVersion == 5 &&
                 updatedAt == Instant.parse("2024-01-01T10:15:30Z")
@@ -96,6 +96,6 @@ class UserPasswordChangerTest {
         }
         assertEquals("INVALID_USER_REQUEST", ex.code)
 
-        verify(userAccountRepository, never()).save(any<UserAccountDocument>())
+        verify(userAccountRepository, never()).updateAccount(any(), any<UserAccountDocument>())
     }
 }
