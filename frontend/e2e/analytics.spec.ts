@@ -8,7 +8,7 @@ test('renders analytics data and refreshes the chart when the event filter chang
 
   await page.route('**/api/v1/analytics/**', async route => {
     const url = new URL(route.request().url());
-    const resource = url.pathname.split('/').at(-1);
+    const resource = url.pathname.split('/').pop();
     const count = url.searchParams.get('eventType') === 'QR_SCAN' ? 3 : 12;
     const response = resource === 'summary'
       ? {
