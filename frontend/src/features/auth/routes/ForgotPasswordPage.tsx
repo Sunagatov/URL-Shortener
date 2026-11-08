@@ -33,7 +33,7 @@ const forgotPasswordBrandPanel = (
     description="We'll email you a one-time reset link. It takes less than a minute to regain access."
     features={[
       { icon: FaLock, text: 'Private, one-time recovery link' },
-      { icon: FaClock, text: 'Latest link wins automatically' },
+      { icon: FaClock, text: 'One active recovery link at a time' },
       { icon: FaShieldAlt, text: 'Neutral responses protect your privacy' },
     ]}
     stats={[
@@ -44,11 +44,11 @@ const forgotPasswordBrandPanel = (
   />
 );
 
-const RESEND_COOLDOWN_SECONDS = 30;
+const RESEND_COOLDOWN_SECONDS = 60;
 
 const recoveryHints = [
   'Look in your inbox, spam, and promotions folders',
-  'The newest recovery link automatically replaces older ones',
+  'Recent requests may keep your current recovery link active',
   'Keep this tab open while you check your email',
 ];
 
@@ -104,7 +104,9 @@ const ForgotPasswordPage: React.FC = () => {
       }
       completeSubmission(
         targetEmail,
-        mode === 'resend' ? 'If that account exists, we sent a fresh recovery email.' : ''
+        mode === 'resend'
+          ? 'If delivery is allowed, recovery instructions are on the way. Keep using your current link if an email was sent recently.'
+          : ''
       );
       turnstile.resetChallenge();
     } catch (requestError: unknown) {
@@ -113,7 +115,9 @@ const ForgotPasswordPage: React.FC = () => {
       if (getApiErrorStatus(requestError) !== undefined) {
         completeSubmission(
           targetEmail,
-          mode === 'resend' ? 'If that account exists, we sent a fresh recovery email.' : ''
+          mode === 'resend'
+            ? 'Recovery requests are limited. Keep using your current link if you received an email recently.'
+            : ''
         );
         return;
       }

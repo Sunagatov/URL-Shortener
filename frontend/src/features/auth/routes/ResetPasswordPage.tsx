@@ -39,7 +39,7 @@ const resetPasswordBrandPanel = (
     features={[
       { icon: FaLock, text: '15+ characters supported' },
       { icon: FaShieldAlt, text: 'Passphrases and password managers welcome' },
-      { icon: FaKey, text: 'Only the latest recovery link stays active' },
+      { icon: FaKey, text: 'One active, single-use recovery link' },
     ]}
     stats={[
       { value: '64 char', label: 'Password support' },

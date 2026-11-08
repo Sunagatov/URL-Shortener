@@ -20,5 +20,7 @@ data class ShortenUrlRequest(
     val customAlias: String? = null,
 
     @field:Size(max = 2048, message = "Turnstile token is too long")
-    val turnstileToken: String? = null
+    val turnstileToken: String? = null,
+
+    val expirationReminder: Boolean = false
 )

@@ -30,6 +30,7 @@ export interface CreateUrlRequest {
   daysCount?: number | undefined;
   customAlias?: string | undefined;
   turnstileToken?: string | undefined;
+  expirationReminder?: boolean | undefined;
 }
 
 export interface AbuseReportRequest {

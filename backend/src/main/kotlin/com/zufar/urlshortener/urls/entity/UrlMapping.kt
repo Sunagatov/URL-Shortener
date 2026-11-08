@@ -11,7 +11,9 @@ import java.time.Instant
 @Document(collection = "url_mappings")
 @CompoundIndexes(
     CompoundIndex(name = "creator_key_created_at_idx", def = "{'creatorKey': 1, 'createdAt': -1}"),
-    CompoundIndex(name = "target_host_created_at_idx", def = "{'targetHost': 1, 'createdAt': -1}")
+    CompoundIndex(name = "target_host_created_at_idx", def = "{'targetHost': 1, 'createdAt': -1}"),
+    CompoundIndex(name = "expiration_reminder_due_idx",
+        def = "{'expirationReminderEnabled': 1, 'expirationDate': 1}")
 )
 data class UrlMapping(
 
@@ -48,5 +50,13 @@ data class UrlMapping(
     val safetyInterstitialReason: String? = null,
     val disabled: Boolean = false,
     val disabledReason: String? = null,
-    val disabledAt: Instant? = null
+    val disabledAt: Instant? = null,
+
+    // Opt-in is persisted atomically with creation; historical mappings remain opted out.
+    val expirationReminderEnabled: Boolean = false,
+    val expirationReminderSentAt: Instant? = null,
+    val expirationReminderAttempts: Int = 0,
+    val expirationReminderLease: String? = null,
+    val expirationReminderLeaseUntil: Instant? = null,
+    val expirationReminderNextAttemptAt: Instant? = null
 )

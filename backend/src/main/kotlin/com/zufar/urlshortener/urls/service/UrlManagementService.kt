@@ -36,7 +36,8 @@ class UrlManagementService(
     @Value($$"${app.urls.expiration.default-days:365}") private val defaultExpirationDays: Long,
     @Value($$"${app.urls.short-code.max-generation-attempts:10}") private val maxCodeGenerationAttempts: Int,
     @Value($$"${app.urls.pagination.max-size:100}") private val maxPageSize: Int,
-    private val clock: Clock
+    private val clock: Clock,
+    private val expirationReminderPolicy: ExpirationReminderPolicy
 ) {
     private val log = LoggerFactory.getLogger(UrlManagementService::class.java)
 
@@ -51,6 +52,7 @@ class UrlManagementService(
         }
         val now = Instant.now(clock)
         val userId = authenticatedUserIdProvider.findAuthenticatedUserIdOrNull()
+        if (normalizedRequest.expirationReminder) expirationReminderPolicy.requireVerifiedOwner(userId)
         val protection = urlCreationProtectionService.prepareCreation(
             normalizedRequest.originalUrl,
             userId,
@@ -206,7 +208,8 @@ class UrlManagementService(
             creationBotCategory = protection.creationBotCategory,
             recentCreationCount = protection.recentCreationCount,
             safetyInterstitialRequired = protection.safetyInterstitialRequired,
-            safetyInterstitialReason = protection.safetyInterstitialReason
+            safetyInterstitialReason = protection.safetyInterstitialReason,
+            expirationReminderEnabled = request.expirationReminder
         )
 
         return mapping
@@ -257,6 +260,7 @@ class UrlManagementService(
             "account", "auth", "dashboard", "settings", "profile", "security",
             "analytics", "admin", "api", "health", "docs",
             "about", "terms", "privacy", "contact", "help", "support",
+            "abuse", "forgot-password", "reset-password", "verify-email", "assets",
             "favicon.ico", "robots.txt", "sitemap.xml"
         )
         private val RESERVED_ALIAS_PREFIXES = setOf(

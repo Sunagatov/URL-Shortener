@@ -51,7 +51,7 @@ const signUpBrandPanel = (
     }
     description="Free forever. No credit card required. Start shortening and tracking your links in seconds."
     features={[
-      { icon: FaRocket, text: 'Create unlimited short links' },
+      { icon: FaRocket, text: 'Create and manage short links' },
       { icon: FaShieldAlt, text: 'Track clicks and performance' },
       { icon: FaShieldAlt, text: 'Secure & reliable infrastructure' },
       { icon: FaShieldAlt, text: 'Export your data anytime' },

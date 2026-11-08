@@ -1,5 +1,7 @@
 import type { AuthTokens, User } from '@/shared/auth/types';
 
+export const AUTH_SESSION_CHANGED_EVENT = 'shorty:auth-session-changed';
+const notifySessionChanged = () => window.dispatchEvent(new Event(AUTH_SESSION_CHANGED_EVENT));
 export const STORAGE_KEYS = {
   ACCESS_TOKEN: 'accessToken',
   REFRESH_TOKEN: 'refreshToken',
@@ -30,6 +32,7 @@ export const storage = {
   setUser: (user: User | null): void => {
     if (user) selectedStorage().setItem(STORAGE_KEYS.USER, JSON.stringify(user));
     else selectedStorage().removeItem(STORAGE_KEYS.USER);
+    notifySessionChanged();
   },
   isPersistent: (): boolean => selectedStorage() === localStorage,
   setTokens: (tokens: AuthTokens, rememberMe?: boolean): void => {
@@ -45,6 +48,7 @@ export const storage = {
       Object.values(STORAGE_KEYS).forEach(key => target.removeItem(key));
       target.removeItem(MODE_KEY);
     }
+    notifySessionChanged();
   },
   hasValidTokens: (): boolean => !!(storage.getAccessToken() && storage.getRefreshToken()),
 };

@@ -3,13 +3,13 @@
 **A modern React frontend for URL shortening: fast, type-safe, and production-ready.**
 
 [Community](https://t.me/zufarexplained) |
-[Good First Issues](https://github.com/Sunagatov/Shorty-URL-Frontend/issues?q=is%3Aopen+label%3A%22good+first+issue%22) |
-[Issues](https://github.com/Sunagatov/Shorty-URL-Frontend/issues)
+[Good First Issues](https://github.com/Sunagatov/URL-Shortener/issues?q=is%3Aopen+label%3A%22good+first+issue%22) |
+[Issues](https://github.com/Sunagatov/URL-Shortener/issues)
 
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/license-CC%20BY--NC%204.0-lightgrey.svg)](LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/Sunagatov/Shorty-URL-Frontend)](https://github.com/Sunagatov/Shorty-URL-Frontend/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/Sunagatov/Shorty-URL-Frontend?style=social)](https://github.com/Sunagatov/Shorty-URL-Frontend/network/members)
-[![Contributors](https://img.shields.io/github/contributors/Sunagatov/Shorty-URL-Frontend)](https://github.com/Sunagatov/Shorty-URL-Frontend/graphs/contributors)
+[![GitHub Stars](https://img.shields.io/github/stars/Sunagatov/URL-Shortener)](https://github.com/Sunagatov/URL-Shortener/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/Sunagatov/URL-Shortener?style=social)](https://github.com/Sunagatov/URL-Shortener/network/members)
+[![Contributors](https://img.shields.io/github/contributors/Sunagatov/URL-Shortener)](https://github.com/Sunagatov/URL-Shortener/graphs/contributors)
 
 ---
 
@@ -71,10 +71,11 @@ This project communicates with the Shorty URL backend via REST API.
 | Protected account routes | Implemented     | `/account/*` routes are guarded                           |
 | URL shortening           | Implemented     | Public home page supports shortening                      |
 | User URL list            | Implemented     | Pagination and deletion flow                              |
-| URL details page         | Implemented     | Uses canonical `expiresAt` field                          |
+| URL details page         | Implemented     | Uses canonical `expirationDate` field                          |
 | Token refresh flow       | Implemented     | Axios-based refresh handling                              |
 | Docker production image  | Implemented     | Nginx serves built assets                                 |
-| Google/GitHub auth       | Not implemented | Buttons are intentionally disabled and marked coming soon |
+| Google sign-in           | Implemented     | State/S256 PKCE callback and explicit account linking; provider setup belongs in Vault |
+| Expiration reminders     | Implemented     | Optional verified-owner email within 24 hours of expiry; delivery requires SMTP |
 
 ---
 
@@ -274,7 +275,7 @@ docker build -f frontend/Dockerfile --build-arg VITE_BACKEND_REST_API_URL=http:/
 
 ## Known limitations
 
-- Google OAuth and GitHub OAuth are not wired yet
+- Google OAuth is implemented; callback/client configuration belongs in Vault. GitHub OAuth is not implemented.
 - profile editing is not fully implemented
 - some feature documentation may still lag behind the code and should be updated incrementally
 - full E2E success depends on a compatible running backend
@@ -306,7 +307,7 @@ Free for educational and personal use with attribution. Commercial use requires 
 
 - Telegram community: [Zufar Explained IT](https://t.me/zufarexplained)
 - Email: [zufar.sunagatov@gmail.com](mailto:zufar.sunagatov@gmail.com)
-- Issues: [GitHub Issues](https://github.com/Sunagatov/Shorty-URL-Frontend/issues)
+- Issues: [GitHub Issues](https://github.com/Sunagatov/URL-Shortener/issues)
 
 ## Browser diagnostics
 

@@ -44,7 +44,8 @@ class UrlShortenEdgeCasesTest {
         defaultExpirationDays = defaultDays,
         maxCodeGenerationAttempts = 10,
         maxPageSize = 100,
-        clock = clock
+        clock = clock,
+        expirationReminderPolicy = org.mockito.kotlin.mock()
     )
 
     @Test

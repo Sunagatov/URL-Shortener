@@ -59,6 +59,7 @@ const UrlShortenerPage: React.FC = () => {
     };
     if (data.customAlias) payload.customAlias = data.customAlias;
     if (data.daysCount) payload.daysCount = data.daysCount;
+    if (isAuthenticated && data.expirationReminder) payload.expirationReminder = true;
     const result = await execute(() => createUrl(payload), {
       action: 'urls.create_short_url',
       onError: () => turnstile.resetChallenge(),
@@ -149,6 +150,7 @@ const UrlShortenerPage: React.FC = () => {
                     <FaClock className="pointer-events-none absolute left-3 top-1/2 h-3 w-3 -translate-y-1/2 text-[color:var(--text-muted)]" />
                     <select
                       {...register('daysCount')}
+                      aria-label="Link expiration"
                       defaultValue=""
                       className="w-full appearance-none rounded-xl border border-[color:var(--border)] bg-[var(--input-bg)] py-2.5 pl-9 pr-3 text-sm text-[color:var(--text-primary)] focus:border-[color:var(--accent-border)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-ring)]"
                     >
@@ -161,6 +163,19 @@ const UrlShortenerPage: React.FC = () => {
                       <option value="365">1 year</option>
                     </select>
                   </div>
+                  {isAuthenticated ? (
+                    <label className="flex items-start gap-2 text-xs text-[color:var(--text-muted)] sm:col-span-2">
+                      <input
+                        type="checkbox"
+                        {...register('expirationReminder')}
+                        className="mt-0.5"
+                      />
+                      <span>
+                        Email me a reminder within 24 hours before this link expires. Requires a
+                        verified email. Delete the link in My URLs to cancel.
+                      </span>
+                    </label>
+                  ) : null}
                 </div>
               )}
             </div>

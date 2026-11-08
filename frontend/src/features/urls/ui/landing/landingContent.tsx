@@ -65,7 +65,7 @@ export const landingStats = [
 export const heroHighlights = [
   { label: 'No account needed', color: 'bg-emerald-400' },
   { label: 'Free to use', color: 'bg-blue-400' },
-  { label: 'Links never expire', color: 'bg-purple-400' },
+  { label: 'Links last up to 1 year', color: 'bg-purple-400' },
 ] as const;
 
 export const heroBadgeIcon = FaBolt;

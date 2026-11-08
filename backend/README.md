@@ -4,7 +4,7 @@
   <p><strong>A Kotlin + Spring Boot backend for URL shortening — fast, secure, and scalable.</strong></p>
   <p>
     <a href="https://t.me/zufarexplained">💬 Community</a> ·
-    <a href="https://116.203.197.65:3000/">🚀 Live Demo</a> ·
+    <a href="https://zuf.uk/">🚀 Live Demo</a> ·
     <a href="https://github.com/Sunagatov/URL-Shortener/issues?q=is%3Aopen+label%3A%22good+first+issue%22">🟢 Good First Issues</a> ·
     <a href="https://github.com/Sunagatov/URL-Shortener/issues">🐛 Issues</a>
   </p>
@@ -20,7 +20,7 @@
 
 ## 🚀 Quick Start
 
-**📋 Prerequisites:** Java 21+, Gradle 8.5+, MongoDB 7+, Docker Desktop
+**📋 Prerequisites:** Java 25, the checked-in Gradle wrapper, MongoDB 7+, Docker Desktop
 
 ```bash
 # 1. 📥 Clone
@@ -101,9 +101,9 @@ URL Shortener Backend is a REST API that generates short URLs from long ones, ha
 
 | 📂 Category | 🔧 Technology |
 |---|---|
-| 💻 Language | Kotlin 2.1 |
-| ☕ JVM | Java 21 (LTS) |
-| 🏗️ Framework | Spring Boot 3.5, Spring Security, Spring Actuator |
+| 💻 Language | Kotlin 2.4.21 |
+| ☕ JVM | Java 25 (LTS) |
+| 🏗️ Framework | Spring Boot 4.1.2, Spring Security, Spring Actuator |
 | 🗄️ Database | MongoDB 7 |
 | 🔐 Auth | JWT (access + refresh tokens) |
 | ⚡ Caching | Caffeine (1 hour TTL) |

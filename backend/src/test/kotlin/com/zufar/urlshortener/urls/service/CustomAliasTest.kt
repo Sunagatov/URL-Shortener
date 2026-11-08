@@ -41,7 +41,8 @@ class CustomAliasTest {
         defaultExpirationDays = 365,
         maxCodeGenerationAttempts = 10,
         maxPageSize = 100,
-        clock = clock
+        clock = clock,
+        expirationReminderPolicy = org.mockito.kotlin.mock()
     )
 
     @Test
@@ -79,6 +80,16 @@ class CustomAliasTest {
             service().shorten(ShortenUrlRequest("https://example.com", null, "SignIn"), httpRequest)
         }
         assertEquals("ALIAS_RESERVED", ex.code)
+    }
+
+    @Test
+    fun `recovery verification abuse and asset routes cannot be claimed as aliases`() {
+        listOf("abuse", "forgot-password", "reset-password", "verify-email", "assets").forEach { alias ->
+            val ex = assertThrows<ApplicationException> {
+                service().shorten(ShortenUrlRequest("https://example.com", null, alias), httpRequest)
+            }
+            assertEquals("ALIAS_RESERVED", ex.code)
+        }
     }
 
     @Test

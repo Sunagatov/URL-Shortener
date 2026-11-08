@@ -65,6 +65,12 @@ mode, and late refresh results cannot restore a logged-out or replaced session.
 Browser-readable tokens remain an architectural tradeoff; HttpOnly cookie/BFF
 migration and passkeys are separate optional work, not included in this patch.
 
+Storage changes now notify the authentication provider, including refresh failure
+on a public route. Persistent sessions also reconcile browser storage events and
+focus, so a cleared session does not leave a stale signed-in header. A delayed
+logout acknowledgement cannot erase a replacement login. Server/network errors
+still retain a retryable session rather than claiming revocation succeeded.
+
 ## Account updates and verification
 
 Every existing-account writer uses field-scoped updates with an atomic

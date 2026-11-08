@@ -4,6 +4,7 @@ import { getPublicShortUrlBase } from '@/features/urls/lib/urlMappings';
 const unsafeDestinationMessage = 'This destination URL is not allowed for security reasons';
 
 export const createUrlSchema = z.object({
+  expirationReminder: z.boolean().optional(),
   originalUrl: z
     .string()
     .min(1, 'URL is required')
