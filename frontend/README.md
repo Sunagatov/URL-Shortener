@@ -307,3 +307,13 @@ Free for educational and personal use with attribution. Commercial use requires 
 - Telegram community: [Zufar Explained IT](https://t.me/zufarexplained)
 - Email: [zufar.sunagatov@gmail.com](mailto:zufar.sunagatov@gmail.com)
 - Issues: [GitHub Issues](https://github.com/Sunagatov/Shorty-URL-Frontend/issues)
+
+## Browser diagnostics
+
+Set `VITE_FARO_URL` at build time to enable optional, self-hosted Faro telemetry.
+The SDK loads separately after startup and collects error types/script locations,
+Core Web Vitals and numeric outcomes for failed or slow requests. It does not
+collect error message text, request URLs, headers, bodies, form values, user IDs
+or session IDs. Each page has a 60-signal/minute limit; telemetry failures do
+not change application requests. Server routing, ingestion limits and dashboard
+configuration belong to Vault.

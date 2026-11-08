@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@grafana/faro-web-sdk": "2.13.0",
     "@marsidev/react-turnstile": "^1.6.3",
     "axios": "^1.21.0",
     "qrcode.react": "^4.2.0",

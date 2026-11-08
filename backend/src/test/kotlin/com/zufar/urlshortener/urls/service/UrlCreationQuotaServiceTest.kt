@@ -11,7 +11,8 @@ import kotlin.test.assertEquals
 class UrlCreationQuotaServiceTest {
     private val now = Instant.parse("2026-11-05T12:00:00Z")
     private val store: MongoUrlQuotaStore = mock()
-    private val service = UrlCreationQuotaService(store, UrlProtectionProperties())
+    private val registry = io.micrometer.core.instrument.simple.SimpleMeterRegistry()
+    private val service = UrlCreationQuotaService(store, UrlProtectionProperties(), registry)
 
     @Test
     fun `creation reserves creator global and destination allowances`() {
@@ -28,6 +29,8 @@ class UrlCreationQuotaServiceTest {
         whenever(store.tryReserve(eq("global"), any(), any())).thenReturn(false)
         val ex = assertThrows<ApplicationException> { service.reserveCreation("user:new", "new", "other.example", now) }
         assertEquals("URL_GLOBAL_QUOTA_EXCEEDED", ex.code)
+        assertEquals(1.0, registry.get("url.quota.decisions").tags("scope", "global", "outcome", "blocked").counter().count())
+        kotlin.test.assertFalse(registry.meters.flatMap { it.id.tags }.any { it.value.contains("user:") || it.value.contains("example") })
     }
 
     @Test

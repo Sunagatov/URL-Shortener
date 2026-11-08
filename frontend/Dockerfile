@@ -21,6 +21,8 @@ RUN test -n "$VITE_BACKEND_REST_API_URL" || (echo "VITE_BACKEND_REST_API_URL bui
 RUN if [ "$VITE_TURNSTILE_AUTH_ENABLED" = "true" ] || [ "$VITE_TURNSTILE_URL_CREATE_ENABLED" = "true" ]; then \
       test -n "$VITE_TURNSTILE_SITE_KEY" || (echo "Turnstile site key is required when protection is enabled" >&2; exit 1); \
     fi
+ARG VITE_FARO_URL
+ENV VITE_FARO_URL=$VITE_FARO_URL
 RUN npm run build
 
 FROM nginx:1.30.6-alpine

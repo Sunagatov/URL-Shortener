@@ -1,3 +1,4 @@
+import {startBrowserTelemetry} from '@/shared/browserTelemetry'
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
@@ -15,3 +16,5 @@ root.render(
     </AppErrorBoundary>
   </StrictMode>
 );
+
+void startBrowserTelemetry(import.meta.env.VITE_FARO_URL, 'url-shortener-frontend')
