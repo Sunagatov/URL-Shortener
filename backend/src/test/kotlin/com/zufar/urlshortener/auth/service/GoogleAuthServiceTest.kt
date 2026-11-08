@@ -32,6 +32,11 @@ class GoogleAuthServiceTest {
     @Mock private lateinit var jwtTokenProvider: JwtTokenProvider
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
 
+    @org.junit.jupiter.api.BeforeEach
+    fun defaultAccountUpdates() {
+        org.mockito.Mockito.lenient().`when`(userAccountRepository.updateAccount(any(), any())).thenAnswer { it.arguments[1] }
+    }
+
     private fun service(restTemplate: RestTemplate = RestTemplate()) = GoogleAuthService(
         userAccountRepository = userAccountRepository,
         jwtTokenProvider = jwtTokenProvider,
@@ -49,7 +54,7 @@ class GoogleAuthServiceTest {
     fun `authenticate creates new user from Google profile`() {
         val restTemplate = mockRestTemplate(
             tokenResponse = mapOf("access_token" to "google-access-token"),
-            userInfoResponse = mapOf("email" to "user@gmail.com", "email_verified" to true, "given_name" to "Jane", "family_name" to "Doe")
+            userInfoResponse = mapOf("email" to "user@gmail.com", "sub" to "google-subject", "email_verified" to true, "given_name" to "Jane", "family_name" to "Doe")
         )
         whenever(userAccountRepository.findByEmailIgnoreCase("user@gmail.com")).thenReturn(null)
         whenever(userAccountRepository.save(any<UserAccountDocument>())).thenAnswer { (it.arguments[0] as UserAccountDocument).copy(id = "new-id") }
@@ -77,7 +82,7 @@ class GoogleAuthServiceTest {
         )
         val restTemplate = mockRestTemplate(
             tokenResponse = mapOf("access_token" to "google-access-token"),
-            userInfoResponse = mapOf("email" to "user@gmail.com", "email_verified" to true, "given_name" to "Jane", "family_name" to "Doe")
+            userInfoResponse = mapOf("email" to "user@gmail.com", "sub" to "google-subject", "email_verified" to true, "given_name" to "Jane", "family_name" to "Doe")
         )
         whenever(userAccountRepository.findByEmailIgnoreCase("user@gmail.com")).thenReturn(existing)
         whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access-token")
@@ -96,7 +101,7 @@ class GoogleAuthServiceTest {
         )
         val restTemplate = mockRestTemplate(
             tokenResponse = mapOf("access_token" to "google-access-token"),
-            userInfoResponse = mapOf("email" to "user@gmail.com", "email_verified" to true, "given_name" to "Jane", "family_name" to "Doe")
+            userInfoResponse = mapOf("email" to "user@gmail.com", "sub" to "google-subject", "email_verified" to true, "given_name" to "Jane", "family_name" to "Doe")
         )
         whenever(userAccountRepository.findByEmailIgnoreCase("user@gmail.com")).thenReturn(existing)
         whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access-token")
@@ -124,7 +129,7 @@ class GoogleAuthServiceTest {
         )
         val restTemplate = mockRestTemplate(
             tokenResponse = mapOf("access_token" to "google-access-token"),
-            userInfoResponse = mapOf("email" to "user@gmail.com", "email_verified" to true, "given_name" to "Jane", "family_name" to "Doe")
+            userInfoResponse = mapOf("email" to "user@gmail.com", "sub" to "google-subject", "email_verified" to true, "given_name" to "Jane", "family_name" to "Doe")
         )
         whenever(userAccountRepository.findByEmailIgnoreCase("user@gmail.com")).thenReturn(existing)
         whenever(userAccountRepository.updateAccount(any(), any<UserAccountDocument>())).thenAnswer { it.arguments[1] }
@@ -152,7 +157,7 @@ class GoogleAuthServiceTest {
             emailVerifiedAt = Instant.now(clock), tokenVersion = 4,
             passwordResetTokenHash = "old-reset", passwordResetTokenId = "old-id")
         val restTemplate = mockRestTemplate(mapOf("access_token" to "google-token"),
-            mapOf("email" to existing.email, "email_verified" to true))
+            mapOf("email" to existing.email, "sub" to "google-subject", "email_verified" to true))
         whenever(userAccountRepository.findByEmailIgnoreCase(existing.email)).thenReturn(existing)
         whenever(userAccountRepository.updateAccount(any(), any())).thenAnswer { it.arguments[1] }
         whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access")
@@ -198,6 +203,96 @@ class GoogleAuthServiceTest {
 
         val ex = assertThrows<ApplicationException> { service(restTemplate).authenticate("auth-code", "v".repeat(43)) }
         assertEquals("GOOGLE_AUTH_FAILED", ex.code)
+    }
+
+    @Test
+    fun `historical third-party email cannot enter or create an account without proof`() {
+        val existing = UserAccountDocument(id = "victim", firstName = "Jane", lastName = "Doe",
+            email = "owner@third-party.test", password = "victim-hash", emailVerified = true, passwordEmailVerified = true)
+        whenever(userAccountRepository.findByEmailIgnoreCase(existing.email)).thenReturn(existing, null)
+        repeat(2) {
+            val transport = mockRestTemplate(mapOf("access_token" to "google-token"),
+                mapOf("sub" to "former-owner", "email" to existing.email, "email_verified" to true))
+            assertEquals("GOOGLE_LINK_REQUIRES_PROOF", assertThrows<ApplicationException> {
+                service(transport).authenticate("code", "v".repeat(43))
+            }.code)
+        }
+        verify(userAccountRepository, never()).save(any())
+        verify(userAccountRepository, never()).updateAccount(any(), any())
+        verify(jwtTokenProvider, never()).generateAccessToken(any())
+    }
+
+    @Test
+    fun `established Google subject remains bound when the provider email changes`() {
+        val existing = UserAccountDocument(id = "bound", firstName = "Jane", lastName = "Doe",
+            email = "original@example.test", googleSubject = "stable-subject", emailVerified = true)
+        whenever(userAccountRepository.findByGoogleSubject("stable-subject")).thenReturn(existing)
+        whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access")
+        whenever(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh")
+        val transport = mockRestTemplate(mapOf("access_token" to "google-token"),
+            mapOf("sub" to "stable-subject", "email" to "changed@third-party.test", "email_verified" to true))
+        assertEquals("access", service(transport).authenticate("code", "v".repeat(43)).accessToken)
+        verify(userAccountRepository, never()).findByEmailIgnoreCase(any())
+    }
+
+    @Test
+    fun `same email cannot rebind a different established subject`() {
+        val existing = UserAccountDocument(id = "bound", firstName = "Jane", lastName = "Doe",
+            email = "owner@gmail.com", googleSubject = "original-owner", emailVerified = true)
+        whenever(userAccountRepository.findByEmailIgnoreCase(existing.email)).thenReturn(existing)
+        val transport = mockRestTemplate(mapOf("access_token" to "google-token"),
+            mapOf("sub" to "different-owner", "email" to existing.email, "email_verified" to true))
+        assertThrows<ApplicationException> { service(transport).authenticate("code", "v".repeat(43)) }
+        verify(userAccountRepository, never()).updateAccount(any(), any())
+    }
+
+    @Test
+    fun `third-party Google identity can be explicitly linked from fresh mailbox-proven local authentication`() {
+        val existing = UserAccountDocument(id = "local", firstName = "Jane", lastName = "Doe",
+            email = "Owner@Third-Party.Test", password = "proven-local-hash", emailVerified = true,
+            passwordEmailVerified = true, tokenVersion = 4)
+        whenever(userAccountRepository.findByEmailIgnoreCase(EmailNormalizer.normalize(existing.email))).thenReturn(existing)
+        whenever(jwtTokenProvider.isRecentAccessToken("local-proof", 300)).thenReturn(true)
+        whenever(jwtTokenProvider.getTokenVersionFromJWT("local-proof")).thenReturn(4)
+        whenever(jwtTokenProvider.getUsernameFromJWT("local-proof")).thenReturn(existing.email)
+        whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access")
+        whenever(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh")
+        val transport = mockRestTemplate(mapOf("access_token" to "google-token"),
+            mapOf("sub" to "stable-owner", "email" to existing.email, "email_verified" to true))
+        assertEquals("access", service(transport).authenticate("code", "v".repeat(43), "local-proof").accessToken)
+        val changed = argumentCaptor<UserAccountDocument>()
+        verify(userAccountRepository).updateAccount(org.mockito.kotlin.eq(existing), changed.capture())
+        assertEquals("stable-owner", changed.firstValue.googleSubject)
+        assertEquals(existing.password, changed.firstValue.password)
+    }
+
+    @Test
+    fun `linking refuses old or unproven local sessions`() {
+        val existing = UserAccountDocument(id = "local", firstName = "Jane", lastName = "Doe",
+            email = "owner@third-party.test", password = "local", emailVerified = true)
+        whenever(userAccountRepository.findByEmailIgnoreCase(existing.email)).thenReturn(existing)
+        val transport = mockRestTemplate(mapOf("access_token" to "google-token"),
+            mapOf("sub" to "stable-owner", "email" to existing.email, "email_verified" to true))
+        assertThrows<ApplicationException> { service(transport).authenticate("code", "v".repeat(43), "stale-proof") }
+        verify(userAccountRepository, never()).updateAccount(any(), any())
+    }
+
+    @Test
+    fun `missing provider subject fails before any account lookup`() {
+        val transport = mockRestTemplate(mapOf("access_token" to "google-token"),
+            mapOf("email" to "owner@gmail.com", "email_verified" to true))
+        assertThrows<ApplicationException> { service(transport).authenticate("code", "v".repeat(43)) }
+        verify(userAccountRepository, never()).findByEmailIgnoreCase(any())
+    }
+
+    @Test
+    fun `verified Workspace domain can establish a first binding`() {
+        whenever(userAccountRepository.save(any<UserAccountDocument>())).thenAnswer { (it.arguments[0] as UserAccountDocument).copy(id = "workspace") }
+        whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("access")
+        whenever(jwtTokenProvider.generateRefreshToken(any())).thenReturn("refresh")
+        val transport = mockRestTemplate(mapOf("access_token" to "google-token"),
+            mapOf("sub" to "workspace-subject", "email" to "owner@workspace.test", "hd" to "workspace.test", "email_verified" to true))
+        assertEquals("access", service(transport).authenticate("code", "v".repeat(43)).accessToken)
     }
 
     @Suppress("UNCHECKED_CAST")

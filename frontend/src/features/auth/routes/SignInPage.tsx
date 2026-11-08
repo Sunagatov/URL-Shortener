@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -50,6 +50,7 @@ const signInBrandPanel = (
 const SignInPage: React.FC = () => {
   usePageTitle('Sign In');
   const pw = usePasswordVisibility();
+  const [rememberMe, setRememberMe] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { login, updateUser } = useAuth();
@@ -66,7 +67,7 @@ const SignInPage: React.FC = () => {
   const hasValidationErrors = Object.keys(errors).length > 0;
   const completeAuth = useCallback(
     async (tokens: AuthTokens, targetDestination: string) => {
-      login(tokens, null);
+      login(tokens, null, rememberMe);
 
       try {
         const profile = await getUserProfile();
@@ -77,7 +78,7 @@ const SignInPage: React.FC = () => {
 
       navigate(targetDestination, { replace: true });
     },
-    [login, navigate, updateUser]
+    [login, navigate, updateUser, rememberMe]
   );
 
   const onSubmit = async (data: SignInFormData) => {
@@ -176,6 +177,8 @@ const SignInPage: React.FC = () => {
               <input
                 id="remember-me"
                 type="checkbox"
+                checked={rememberMe}
+                onChange={event => setRememberMe(event.target.checked)}
                 className="peer absolute inset-0 h-full w-full cursor-pointer opacity-0"
               />
               <span className="flex h-5 w-5 items-center justify-center rounded-md border border-[color:var(--border-strong)] bg-[color:var(--surface-raised)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-all duration-200 peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--accent-ring)] peer-checked:border-[color:var(--accent-border)] peer-checked:bg-[linear-gradient(135deg,var(--accent)_0%,var(--accent-strong)_100%)] peer-checked:shadow-[0_10px_22px_rgba(6,182,212,0.2)]" />
@@ -227,7 +230,7 @@ const SignInPage: React.FC = () => {
         <div className="h-px flex-1 bg-[var(--border)]" />
       </div>
 
-      <GoogleSignInButton state={destination} />
+      <GoogleSignInButton state={destination} rememberMe={rememberMe} />
 
       <p className="mt-8 text-center text-sm text-[color:var(--text-muted)]">
         Don't have an account?{' '}

@@ -197,5 +197,95 @@ class AuthSecurityIntegrationTest {
         assertNotNull(SecurityContextHolder.getContext().authentication)
     }
 
+    @Test
+    fun `account-wide logout revokes copied access and refresh credentials and tolerates repeated calls`() {
+        val saved = repository.save(user().copy(password = encoder.encode("unique river comet phrase"), emailVerified = true))
+        val details = CustomUserDetailsService(repository)
+        val auth = AuthService(mock(), repository, encoder, jwt, mock(), true, 10, 60, clock)
+        val principal = details.loadUserByUsername(saved.email)
+        val access = jwt.generateAccessToken(principal)
+        val refresh = jwt.generateRefreshToken(principal)
+        auth.logout(LogoutRequest(refresh, access))
+        auth.logout(LogoutRequest(refresh, access))
+        assertEquals(1, repository.findById(saved.id!!).orElseThrow().tokenVersion)
+        assertFailsWith<ApplicationException> { auth.refreshAccessToken(RefreshTokenRequest(refresh)) }
+        JwtAuthenticationFilter(details, jwt).doFilter(MockHttpServletRequest().apply { addHeader("Authorization", "Bearer $access") },
+            MockHttpServletResponse(), MockFilterChain())
+        assertNull(SecurityContextHolder.getContext().authentication)
+        assertNotNull(auth.refreshAccessToken(RefreshTokenRequest(jwt.generateRefreshToken(details.loadUserByUsername(saved.email)))).accessToken)
+        val newAccess = jwt.generateAccessToken(details.loadUserByUsername(saved.email))
+        // A stale but unexpired refresh credential must not mask the current access credential.
+        auth.logout(LogoutRequest(refresh, newAccess))
+        assertEquals(2, repository.findById(saved.id).orElseThrow().tokenVersion)
+    }
+
+    @Test
+    fun `logout revokes a final refreshed access token after its refresh token expires`() {
+        val saved = repository.save(user().copy(emailVerified = true))
+        val details = CustomUserDetailsService(repository)
+        val key = "isolated-auth-test-signing-key-2026-abcdef"
+        // JWT verification uses the wall clock; create the expired refresh in the past.
+        val before = JwtTokenProvider(key, 3600000, 1000, Clock.fixed(now.minusSeconds(3), ZoneOffset.UTC))
+        val expiredRefresh = before.generateRefreshToken(details.loadUserByUsername(saved.email))
+        val access = jwt.generateAccessToken(details.loadUserByUsername(saved.email))
+        assertFalse(jwt.validateRefreshToken(expiredRefresh))
+        assertTrue(jwt.validateAccessToken(access))
+        val auth = AuthService(mock(), repository, encoder, jwt, mock(), true, 10, 60, clock)
+        auth.logout(LogoutRequest(expiredRefresh, access))
+        assertEquals(1, repository.findById(saved.id!!).orElseThrow().tokenVersion)
+        JwtAuthenticationFilter(details, jwt).doFilter(MockHttpServletRequest().apply { addHeader("Authorization", "Bearer $access") },
+            MockHttpServletResponse(), MockFilterChain())
+        assertNull(SecurityContextHolder.getContext().authentication)
+    }
+
+    @Test
+    fun `parallel recovery requests across service instances send one mail and keep the same link`() {
+        val saved = repository.save(user())
+        val notifier: PasswordResetNotifier = mock()
+        val services = List(2) { PasswordResetService(repository, encoder, clock, notifier) }
+        val pool = Executors.newFixedThreadPool(8)
+        try {
+            pool.invokeAll((0..15).map { i -> Callable { services[i % 2].requestReset(ForgotPasswordRequest("  JANE@EXAMPLE.TEST  ")) } })
+                .forEach { it.get() }
+        } finally { pool.shutdownNow() }
+        verify(notifier, times(1)).sendResetLink(eq(saved.email), any(), eq(15L))
+        val challenge = repository.findById(saved.id!!).orElseThrow()
+        services[0].requestReset(ForgotPasswordRequest(saved.email))
+        assertEquals(challenge.passwordResetTokenId, repository.findById(saved.id).orElseThrow().passwordResetTokenId)
+        for (i in 1..5) PasswordResetService(repository, encoder,
+            Clock.fixed(now.plusSeconds(i * 61L), ZoneOffset.UTC), notifier).requestReset(ForgotPasswordRequest(saved.email))
+        verify(notifier, times(5)).sendResetLink(eq(saved.email), any(), eq(15L))
+        val fullBudget = repository.findById(saved.id).orElseThrow()
+        assertEquals(5, fullBudget.passwordResetMessages)
+        PasswordResetService(repository, encoder, Clock.fixed(now.plusSeconds(3601), ZoneOffset.UTC), notifier)
+            .requestReset(ForgotPasswordRequest(saved.email))
+        verify(notifier, times(6)).sendResetLink(eq(saved.email), any(), eq(15L))
+    }
+
+    @Test
+    fun `normalized account attempt budget is shared across concurrent service instances and expires`() {
+        val saved = repository.save(user())
+        val manager: org.springframework.security.authentication.AuthenticationManager = mock()
+        whenever(manager.authenticate(any())).thenThrow(org.springframework.security.authentication.BadCredentialsException("invalid"))
+        val services = List(2) { AuthService(manager, repository, encoder, jwt, mock(), true, 10, 60, clock) }
+        val pool = Executors.newFixedThreadPool(8)
+        try {
+            pool.invokeAll((0..39).map { i -> Callable { runCatching {
+                services[i % 2].signIn(SignInRequest("  JANE@EXAMPLE.TEST  ", "wrong"))
+            } } }).forEach { it.get() }
+        } finally { pool.shutdownNow() }
+        val budget = repository.findById(saved.id!!).orElseThrow()
+        assertEquals(10, budget.signInAttempts)
+        verify(manager, times(10)).authenticate(any())
+        assertEquals("SIGN_IN_THROTTLED", assertFailsWith<ApplicationException> {
+            services[0].signIn(SignInRequest(saved.email, "wrong"))
+        }.code)
+        assertFailsWith<org.springframework.security.authentication.BadCredentialsException> {
+            AuthService(manager, repository, encoder, jwt, mock(), true, 10, 60,
+                Clock.fixed(now.plusSeconds(901), ZoneOffset.UTC)).signIn(SignInRequest(saved.email, "wrong"))
+        }
+        assertEquals(1, repository.findById(saved.id).orElseThrow().signInAttempts)
+    }
+
     private fun user() = UserAccountDocument(id = "user-1", firstName = "Jane", lastName = "Doe", email = "jane@example.test", password = "old hash")
 }

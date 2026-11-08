@@ -22,6 +22,8 @@ import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { Button, TurnstileWidget } from '@/shared/ui';
 import { features } from '@/shared/config/features';
 import { useTurnstileVerification } from '@/shared/hooks/useTurnstileVerification';
+import { useAuth } from '@/shared/auth/useAuth';
+import { getNewPasswordError, passwordLength } from '@/shared/lib/passwordPolicy';
 
 const resetPasswordBrandPanel = (
   <AuthBrandPanel
@@ -49,6 +51,7 @@ const resetPasswordBrandPanel = (
 
 const ResetPasswordPage: React.FC = () => {
   usePageTitle('Reset Password');
+  const { clearSession } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [token] = useState(() => searchParams.get('token')?.trim() ?? '');
   const [newPassword, setNewPassword] = useState('');
@@ -85,7 +88,7 @@ const ResetPasswordPage: React.FC = () => {
     }
 
     if (isWeakPassword) {
-      setError('Use at least 15 characters. A passphrase or password manager works well.');
+      setError(getNewPasswordError(newPassword) ?? 'Choose a unique passphrase.');
       return;
     }
 
@@ -101,6 +104,7 @@ const ResetPasswordPage: React.FC = () => {
         newPassword,
         ...(features.authTurnstile ? { turnstileToken: turnstile.token } : {}),
       });
+      clearSession();
       setSuccess(true);
     } catch (submitError: unknown) {
       setError(
@@ -222,7 +226,7 @@ const ResetPasswordPage: React.FC = () => {
               className="mt-2 flex items-center justify-between text-xs text-[color:var(--text-muted)]"
             >
               <span>Long passphrases and password-manager generated passwords are supported.</span>
-              <span>{newPassword.length}/64</span>
+              <span>{passwordLength(newPassword)}/64</span>
             </div>
 
             {newPassword ? (

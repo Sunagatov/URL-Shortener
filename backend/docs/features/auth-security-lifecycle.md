@@ -6,27 +6,64 @@ Production configuration, SMTP credentials and release procedures belong in Vaul
 ## Passwords and recovery
 
 New password and challenge hashes use Argon2id (19 MiB, two iterations, one lane),
-with a format prefix. Existing unprefixed bcrypt hashes remain readable. A
+with an `argon2id-nfc` format prefix. Existing unprefixed/prefixed bcrypt and
+`argon2id` hashes remain readable with their original, unnormalized input. A
 successful password login upgrades an old password hash without changing its
 session version. The 15–64 character policy supports Unicode passwords exceeding
-bcrypt's former 72-byte limit; passwords are never truncated.
+bcrypt's former 72-byte limit; passwords are never truncated. New passwords are
+normalized to NFC and counted by Unicode code points. Signup, recovery and
+password change share a bundled common-password blocklist and exact account/service
+name checks. Existing passwords are not rejected by the new policy during login.
+See the [blocklist provenance](../../src/main/resources/security/README.md).
 
 `POST /api/v1/auth/forgot-password` sends a 15-minute, random one-use link through
 the configured SMTP provider. Configure `APP_AUTH_PASSWORD_RESET_URL` as the
 trusted frontend reset route, with HTTPS outside loopback development. Request
 headers never determine the link destination. Set `MAIL_HOST`, `MAIL_PORT`,
 `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_SMTP_AUTH`,
-`MAIL_SMTP_STARTTLS_ENABLE` and `APP_AUTH_EMAIL_VERIFICATION_MAIL_FROM` for the
+`MAIL_SMTP_STARTTLS_ENABLE`, `MAIL_SMTP_STARTTLS_REQUIRED` and `APP_AUTH_EMAIL_VERIFICATION_MAIL_FROM` for the
 provider. The local profile defaults the reset route to port 3000; the sample env
 file supplies the same route for Compose. Delivery failures log only metadata,
 never the token, link or SMTP exception body. Public forgot-password responses
 remain generic for known and unknown addresses.
+
+Remote SMTP requires STARTTLS by default, validates server identity and has finite
+timeouts. Explicitly disable the TLS requirement only for isolated loopback test
+mail servers. Recovery has an atomic per-account 60-second resend cooldown and
+five-message hourly budget, shared across processes and IPs. Suppressed requests
+keep the usable token and return the same generic success. Completing recovery
+does not reset the mail budget.
 
 Recovery also lets Google-only users establish a local password after mailbox
 proof. Completion marks the local credential mailbox-verified, makes local login
 available, clears the challenge and increments `tokenVersion`. Password changes
 also clear outstanding recovery challenges. Both old access and refresh JWTs
 are then rejected; the frontend signs out after a successful password change.
+Recovery pages are reachable with or without existing browser credentials, and
+successful reset clears the browser session before the next sign-in.
+
+## Login and logout
+
+Password login reserves one of ten attempts per normalized account in a fixed
+15-minute window before authentication. The MongoDB CAS makes this budget shared
+and concurrency-safe; IP limits and Turnstile remain additional controls. A
+successful login clears its reserved budget only if the account has not changed.
+Blocked attempts do not extend the window. Recovery remains available and resets
+the login budget after successful mailbox proof.
+
+`POST /api/v1/auth/logout` accepts a refresh token and access token in its body,
+explicitly validates either live credential (including when refresh has expired)
+and atomically increments the account token version. Logout signs out **all
+devices**, including copied access and refresh credentials. Repeated logout of an
+already revoked token is harmless. CAS conflicts retry, and unresolved failure is
+reported rather than claiming success. The UI waits for acknowledgement and
+retains a retryable session on network failure.
+
+Unchecked Remember me stores credentials only in sessionStorage; checked uses
+localStorage. Login switches clear both stores, refresh retains the selected
+mode, and late refresh results cannot restore a logged-out or replaced session.
+Browser-readable tokens remain an architectural tradeoff; HttpOnly cookie/BFF
+migration and passkeys are separate optional work, not included in this patch.
 
 ## Account updates and verification
 
@@ -58,6 +95,18 @@ it before exchanging the code. `POST /api/v1/auth/google` requires both `code` a
 `codeVerifier`; there is no code-only compatibility bypass. The backend forwards
 the verifier to Google's token endpoint. Return destinations are stored separately
 and restricted to the application's origin.
+
+The backend requires Google's stable `sub`, stores it in a unique sparse MongoDB
+index and resolves established subjects before email. Provider email changes do
+not move an existing binding or change the local email. A different bound subject
+cannot be replaced by a matching email. First automatic binding requires verified
+Gmail or a verified Workspace email matching its `hd` domain. Other third-party
+Google addresses must first sign up/verify locally or use mailbox recovery, then
+sign in with a password and choose Link Google account in Security. Legacy
+third-party Google-only accounts without a subject follow the same recovery path.
+An explicit link requires the same mailbox-proven local account and authentication
+within five minutes. JWT `authTime` preserves the original authentication time
+through refresh; legacy JWTs without that claim cannot be used as linking proof.
 
 ## Verification
 

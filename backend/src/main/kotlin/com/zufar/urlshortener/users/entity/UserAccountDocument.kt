@@ -20,6 +20,8 @@ data class UserAccountDocument(
     val email: String,
 
     val authProvider: AuthProvider = AuthProvider.LOCAL,
+    @Indexed(unique = true, sparse = true)
+    val googleSubject: String? = null,
 
     val emailVerified: Boolean = false,
     val emailVerifiedAt: Instant? = null,
@@ -33,10 +35,15 @@ data class UserAccountDocument(
 
     val tokenVersion: Int = 0,
     val accountRevision: Long = 0,
+    val signInAttempts: Int = 0,
+    val signInWindowExpiresAt: Instant? = null,
 
     val passwordResetTokenHash: String? = null,
     val passwordResetTokenId: String? = null,
     val passwordResetTokenExpiresAt: Instant? = null,
+    val passwordResetSentAt: Instant? = null,
+    val passwordResetWindowExpiresAt: Instant? = null,
+    val passwordResetMessages: Int = 0,
 
     val createdAt: Instant? = null,
     val updatedAt: Instant? = null

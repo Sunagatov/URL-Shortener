@@ -5,6 +5,7 @@ import { changePassword } from '@/features/account/api/accountApi';
 import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 import { useToast } from '@/shared/ui';
 import { getPasswordStrength } from '@/shared/lib/passwordStrength';
+import { getNewPasswordError } from '@/shared/lib/passwordPolicy';
 
 export function useChangePasswordForm() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -15,7 +16,7 @@ export function useChangePasswordForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const toast = useToast();
-  const { logout } = useAuth();
+  const { clearSession } = useAuth();
   const navigate = useNavigate();
 
   const passwordStrength = getPasswordStrength(newPassword);
@@ -37,7 +38,7 @@ export function useChangePasswordForm() {
     }
 
     if (passwordStrength.strength === 'Weak') {
-      toast.error('Use at least 15 characters. A passphrase or password manager works well.');
+      toast.error(getNewPasswordError(newPassword) ?? 'Choose a unique passphrase.');
       setIsLoading(false);
       return false;
     }
@@ -46,7 +47,7 @@ export function useChangePasswordForm() {
       await changePassword({ currentPassword, newPassword });
       toast.success('Password changed. Please sign in again.');
       resetForm();
-      logout();
+      clearSession();
       navigate('/signin', { replace: true });
       return true;
     } catch (error: unknown) {

@@ -42,7 +42,7 @@ class UserPasswordChangerTest {
         whenever(authenticatedUserIdProvider.requireAuthenticatedUserId()).thenReturn("user-1")
         whenever(userAccountRepository.findById("user-1")).thenReturn(Optional.of(user))
         whenever(passwordEncoder.matches("OldPassword1!", "old-hash")).thenReturn(true)
-        whenever(passwordEncoder.encode("NewPassword1!")).thenReturn("new-hash")
+        whenever(passwordEncoder.encode("New password phrase 2026!")).thenReturn("new-hash")
         whenever(userAccountRepository.updateAccount(any(), any<UserAccountDocument>())).thenAnswer { it.arguments[1] }
 
         UserAccountService(
@@ -53,7 +53,7 @@ class UserPasswordChangerTest {
         ).changePassword(
             ChangePasswordRequest(
                 currentPassword = "OldPassword1!",
-                newPassword = "NewPassword1!"
+                newPassword = "New password phrase 2026!"
             )
         )
 
@@ -90,7 +90,7 @@ class UserPasswordChangerTest {
             ).changePassword(
                 ChangePasswordRequest(
                     currentPassword = "WrongPassword1!",
-                    newPassword = "NewPassword1!"
+                    newPassword = "New password phrase 2026!"
                 )
             )
         }

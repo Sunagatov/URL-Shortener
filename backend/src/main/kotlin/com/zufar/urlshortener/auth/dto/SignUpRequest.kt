@@ -3,6 +3,7 @@ package com.zufar.urlshortener.auth.dto
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
+import com.zufar.urlshortener.shared.security.NewPassword
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
@@ -34,8 +35,7 @@ data class SignUpRequest(
     val email: String,
 
     @field:NotBlank(message = PASSWORD_MUST_NOT_BE_EMPTY)
-    @field:Size(min = 15, message = PASSWORD_MUST_BE_AT_LEAST_15_CHARACTERS_LONG)
-    @field:Size(max = 64, message = PASSWORD_IS_TOO_LONG)
+    @field:NewPassword
     val password: String,
 
     @field:Size(max = 2048, message = "Turnstile token is too long")

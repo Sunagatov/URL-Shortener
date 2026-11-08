@@ -30,6 +30,7 @@ describe('placeholder flows', () => {
       isAuthenticated: false,
       login: vi.fn(),
       logout: vi.fn(),
+      clearSession: vi.fn(),
       updateUser: vi.fn(),
       user: null,
     });
@@ -116,6 +117,7 @@ describe('placeholder flows', () => {
       isAuthenticated: true,
       login: vi.fn(),
       logout: vi.fn(),
+      clearSession: vi.fn(),
       updateUser: vi.fn(),
       user: { email: 'test@example.com' },
     });

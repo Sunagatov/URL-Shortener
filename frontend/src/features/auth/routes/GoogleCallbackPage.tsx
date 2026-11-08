@@ -6,6 +6,8 @@ import { routes } from '@/app/routes';
 import { useAuth } from '@/shared/auth/useAuth';
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { consumeGoogleTransaction } from '@/features/auth/lib/googleOAuth';
+import { storage } from '@/shared/auth/storage';
+import { getApiErrorMessage } from '@/shared/lib/apiErrors';
 
 export default function GoogleCallbackPage() {
   usePageTitle('Signing in…');
@@ -32,10 +34,15 @@ export default function GoogleCallbackPage() {
     }
 
     try {
-      const { codeVerifier, destination } = consumeGoogleTransaction(state);
+      const { codeVerifier, destination, linkAccount, rememberMe } =
+        consumeGoogleTransaction(state);
       window.history.replaceState(null, '', window.location.pathname);
-      const tokens = await googleAuth(code, codeVerifier);
-      login(tokens, null);
+      const linkToken = linkAccount ? storage.getAccessToken() : null;
+      if (linkAccount && !linkToken) throw new Error('Sign in with email before linking Google.');
+      const tokens = linkToken
+        ? await googleAuth(code, codeVerifier, linkToken)
+        : await googleAuth(code, codeVerifier);
+      login(tokens, null, linkAccount ? storage.isPersistent() : rememberMe === true);
       try {
         const profile = await getUserProfile();
         updateUser(profile);
@@ -43,8 +50,10 @@ export default function GoogleCallbackPage() {
         /* best-effort profile hydration */
       }
       navigate(destination, { replace: true });
-    } catch {
-      setError('Failed to sign in with Google. Please try again.');
+    } catch (callbackError) {
+      setError(
+        getApiErrorMessage(callbackError, 'Failed to sign in with Google. Please try again.')
+      );
     }
   }, [searchParams, login, updateUser, navigate]);
 

@@ -30,6 +30,11 @@ class AuthServiceSignInEdgeCasesTest {
     @Mock private lateinit var emailVerificationNotifier: EmailVerificationNotifier
     private val clock: Clock = Clock.fixed(Instant.parse("2024-01-01T10:15:30Z"), ZoneOffset.UTC)
 
+    @org.junit.jupiter.api.BeforeEach
+    fun defaultAccountUpdates() {
+        org.mockito.Mockito.lenient().`when`(userAccountRepository.updateAccount(org.mockito.kotlin.any(), org.mockito.kotlin.any())).thenAnswer { it.arguments[1] }
+    }
+
     private fun authService() = AuthService(
         authenticationManager = authenticationManager,
         userAccountRepository = userAccountRepository,

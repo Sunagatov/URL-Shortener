@@ -5,6 +5,7 @@ import { LayoutHeader } from '@/app/layout/LayoutHeader';
 import { MobileTabBar } from '@/app/layout/MobileTabBar';
 import { routes } from '@/app/routes';
 import { useAuth } from '@/shared/auth/useAuth';
+import { useToast } from '@/shared/ui';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -21,6 +22,7 @@ const AUTH_ROUTES = new Set<string>([
 
 export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { isAuthenticated, logout, user } = useAuth();
+  const toast = useToast();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -35,10 +37,14 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     isAccountRoute || isAuthRoute || isHomeRoute ? '' : 'flex items-center justify-center',
   ].join(' ');
 
-  const handleLogout = () => {
-    logout();
-    navigate(routes.home);
-    setIsUserMenuOpen(false);
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate(routes.home);
+      setIsUserMenuOpen(false);
+    } catch {
+      toast.error('Could not sign out on the server. Check your connection and try again.');
+    }
   };
 
   return (

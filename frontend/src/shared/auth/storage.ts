@@ -5,60 +5,46 @@ export const STORAGE_KEYS = {
   REFRESH_TOKEN: 'refreshToken',
   USER: 'user',
 } as const;
+const MODE_KEY = 'shorty.auth.persistence';
+const selectedStorage = (): Storage =>
+  sessionStorage.getItem(MODE_KEY) === 'session' ? sessionStorage : localStorage;
 
 export const storage = {
-  getAccessToken: (): string | null => {
-    return localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
-  },
-
+  getAccessToken: (): string | null => selectedStorage().getItem(STORAGE_KEYS.ACCESS_TOKEN),
   setAccessToken: (token: string): void => {
-    localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
+    selectedStorage().setItem(STORAGE_KEYS.ACCESS_TOKEN, token);
   },
-
-  getRefreshToken: (): string | null => {
-    return localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
-  },
-
+  getRefreshToken: (): string | null => selectedStorage().getItem(STORAGE_KEYS.REFRESH_TOKEN),
   setRefreshToken: (token: string): void => {
-    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, token);
+    selectedStorage().setItem(STORAGE_KEYS.REFRESH_TOKEN, token);
   },
-
   getUser: (): User | null => {
-    const rawUser = localStorage.getItem(STORAGE_KEYS.USER);
-
-    if (!rawUser || rawUser === 'undefined') {
-      return null;
-    }
-
+    const raw = selectedStorage().getItem(STORAGE_KEYS.USER);
     try {
-      return JSON.parse(rawUser) as User;
+      return raw && raw !== 'undefined' ? (JSON.parse(raw) as User) : null;
     } catch {
-      localStorage.removeItem(STORAGE_KEYS.USER);
+      selectedStorage().removeItem(STORAGE_KEYS.USER);
       return null;
     }
   },
-
   setUser: (user: User | null): void => {
-    if (user) {
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
-      return;
-    }
-
-    localStorage.removeItem(STORAGE_KEYS.USER);
+    if (user) selectedStorage().setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+    else selectedStorage().removeItem(STORAGE_KEYS.USER);
   },
-
-  setTokens: (tokens: AuthTokens): void => {
+  isPersistent: (): boolean => selectedStorage() === localStorage,
+  setTokens: (tokens: AuthTokens, rememberMe?: boolean): void => {
+    if (rememberMe !== undefined) {
+      storage.clearAll();
+      sessionStorage.setItem(MODE_KEY, rememberMe ? 'local' : 'session');
+    }
     storage.setAccessToken(tokens.accessToken);
     storage.setRefreshToken(tokens.refreshToken);
   },
-
   clearAll: (): void => {
-    localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.USER);
+    for (const target of [localStorage, sessionStorage]) {
+      Object.values(STORAGE_KEYS).forEach(key => target.removeItem(key));
+      target.removeItem(MODE_KEY);
+    }
   },
-
-  hasValidTokens: (): boolean => {
-    return !!(storage.getAccessToken() && storage.getRefreshToken());
-  },
+  hasValidTokens: (): boolean => !!(storage.getAccessToken() && storage.getRefreshToken()),
 };

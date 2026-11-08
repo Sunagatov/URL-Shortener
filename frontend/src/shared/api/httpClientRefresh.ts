@@ -10,9 +10,15 @@ export type RetryableRequestConfig = InternalAxiosRequestConfig & {
   _retry?: boolean;
 };
 
-let refreshTokenRequest: Promise<AuthTokens> | null = null;
+const refreshTokenRequests = new Map<string, Promise<AuthTokens>>();
 
-export async function refreshFailedSession(path?: string, error?: unknown) {
+export async function refreshFailedSession(
+  path?: string,
+  error?: unknown,
+  expectedRefreshToken?: string | null
+) {
+  if (expectedRefreshToken !== undefined && storage.getRefreshToken() !== expectedRefreshToken)
+    return;
   if (error) {
     logger.error('frontend.auth.refresh_failed', {
       error: error instanceof Error ? error : new Error('Token refresh failed'),
@@ -46,6 +52,13 @@ export async function refreshAccessTokenForRequest(
     refreshToken
   );
 
+  const currentRefreshToken = storage.getRefreshToken();
+  if (
+    currentRefreshToken !== refreshToken &&
+    (!newRefreshToken || currentRefreshToken !== newRefreshToken)
+  )
+    throw new Error('Session changed while refreshing');
+
   if (!newAccessToken) {
     logger.error('frontend.auth.refresh_missing_access_token', {
       path: originalRequest.url,
@@ -71,12 +84,15 @@ export async function refreshAccessTokenForRequest(
 }
 
 function refreshTokens(rawAxios: AxiosInstance, refreshToken: string): Promise<AuthTokens> {
-  refreshTokenRequest ??= rawAxios
+  const pending = refreshTokenRequests.get(refreshToken);
+  if (pending) return pending;
+  const request = rawAxios
     .post(endpoints.auth.refresh, { refreshToken })
     .then(response => response.data as AuthTokens)
     .finally(() => {
-      refreshTokenRequest = null;
+      refreshTokenRequests.delete(refreshToken);
     });
 
-  return refreshTokenRequest;
+  refreshTokenRequests.set(refreshToken, request);
+  return request;
 }

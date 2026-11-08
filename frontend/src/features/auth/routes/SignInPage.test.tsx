@@ -107,7 +107,8 @@ describe('SignIn', () => {
     expect(await screen.findByText('Profile Destination')).toBeInTheDocument();
     expect(login).toHaveBeenCalledWith(
       { accessToken: 'access-token', refreshToken: 'refresh-token' },
-      null
+      null,
+      false
     );
     await waitFor(() =>
       expect(mockSignIn).toHaveBeenCalledWith({
@@ -118,15 +119,21 @@ describe('SignIn', () => {
     await waitFor(() => expect(mockGetUserProfile).toHaveBeenCalled());
   });
 
-  it('falls back to home after successful sign-in without a preserved route', async () => {
+  it('persists a checked Remember me choice and falls back home without a preserved route', async () => {
     const user = userEvent.setup();
     renderSignInWithRoutes();
+    await user.click(screen.getByRole('checkbox', { name: /remember me/i }));
 
     await user.type(screen.getByLabelText(/email address/i), 'test@example.com');
     await user.type(screen.getByLabelText(/^password$/i), 'TestPassword123!');
     await user.click(screen.getByRole('button', { name: /sign in/i }));
 
     expect(await screen.findByText('Home Destination')).toBeInTheDocument();
+    expect(login).toHaveBeenCalledWith(
+      { accessToken: 'access-token', refreshToken: 'refresh-token' },
+      null,
+      true
+    );
   });
 
   it('redirects unverified users into the verification flow', async () => {

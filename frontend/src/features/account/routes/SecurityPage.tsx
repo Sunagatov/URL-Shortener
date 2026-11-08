@@ -6,12 +6,30 @@ import { AccountPageHeader, AccountPageLayout } from '@/app/layout/AccountPageLa
 import { usePageTitle } from '@/shared/lib/usePageTitle';
 import { useAuth } from '@/shared/auth/useAuth';
 import { FcGoogle } from 'react-icons/fc';
+import {
+  getGoogleOAuthUrl,
+  getGoogleRedirectUri,
+  googleOAuthClientId,
+} from '@/shared/auth/googleOAuth';
+import { storage } from '@/shared/auth/storage';
+import { useToast } from '@/shared/ui';
 
 const SecurityPage: React.FC = () => {
   usePageTitle('Security');
   const form = useChangePasswordForm();
   const { user } = useAuth();
   const isGoogleOnly = user?.authProvider === 'GOOGLE';
+  const toast = useToast();
+  const linkGoogle = async () => {
+    try {
+      window.location.href = await getGoogleOAuthUrl(getGoogleRedirectUri(), '/account/security', {
+        linkAccount: true,
+        rememberMe: storage.isPersistent(),
+      });
+    } catch {
+      toast.error('Unable to start Google linking. Please try again.');
+    }
+  };
 
   return (
     <AccountPageLayout>
@@ -43,6 +61,23 @@ const SecurityPage: React.FC = () => {
           <PasswordChangeForm {...form} onSubmit={form.submit} />
         )}
       </div>
+      {!isGoogleOnly && googleOAuthClientId ? (
+        <section className="mt-5 rounded-2xl border border-[color:var(--card-border)] p-6">
+          <h2 className="font-semibold">Link Google sign-in</h2>
+          <p className="my-3 text-sm text-[color:var(--text-muted)]">
+            Sign in with your email and password first, then link the Google account using the same
+            email within five minutes. If your email has not been verified, reset your password
+            first.
+          </p>
+          <button
+            type="button"
+            onClick={linkGoogle}
+            className="font-semibold text-[color:var(--accent)]"
+          >
+            Link Google account
+          </button>
+        </section>
+      ) : null}
     </AccountPageLayout>
   );
 };

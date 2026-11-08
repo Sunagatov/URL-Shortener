@@ -1,6 +1,7 @@
 package com.zufar.urlshortener.auth.service
 
 import com.zufar.urlshortener.auth.dto.AuthResponse
+import com.zufar.urlshortener.auth.dto.LogoutRequest
 import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
 import com.zufar.urlshortener.auth.dto.RefreshTokenResponse
 import com.zufar.urlshortener.auth.dto.ResendVerificationRequest
@@ -28,6 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.Clock
 import java.time.Instant
+import com.zufar.urlshortener.shared.security.PasswordPolicy
 
 private const val INVALID_REFRESH_TOKEN_MESSAGE = "Invalid or expired refresh token"
 private const val INVALID_TOKEN_CODE = "INVALID_TOKEN"
@@ -63,7 +65,7 @@ class AuthService(
     fun signIn(request: SignInRequest): AuthResponse {
         val normalizedRequest = request.copy(email = EmailNormalizer.normalize(request.email))
 
-        val existingUser = userAccountRepository.findByEmailIgnoreCase(normalizedRequest.email)
+        val existingUser = reserveSignInAttempt(normalizedRequest.email)
         if (existingUser != null && existingUser.password == null) {
             throw ApplicationException.forbidden("GOOGLE_ONLY_ACCOUNT", "This account uses Google sign-in. Please use the Google button.")
         }
@@ -81,8 +83,12 @@ class AuthService(
             throw ApplicationException.forbidden(EMAIL_NOT_VERIFIED_CODE, EMAIL_NOT_VERIFIED_MESSAGE)
         }
 
-        if (existingUser?.password != null && passwordEncoder.upgradeEncoding(existingUser.password)) {
-            val upgraded = existingUser.copy(password = passwordEncoder.encode(request.password))
+        if (existingUser != null) {
+            val upgraded = existingUser.copy(
+                password = if (existingUser.password != null && passwordEncoder.upgradeEncoding(existingUser.password))
+                    passwordEncoder.encode(request.password) else existingUser.password,
+                signInAttempts = 0, signInWindowExpiresAt = null
+            )
             if (userAccountRepository.updateAccount(existingUser, upgraded) == null) {
                 throw ApplicationException.unauthorized("INVALID_CREDENTIALS", "Account changed. Please sign in again.")
             }
@@ -93,6 +99,7 @@ class AuthService(
 
     fun signUp(request: SignUpRequest): SignUpResponse {
         val normalizedRequest = request.copy(email = EmailNormalizer.normalize(request.email))
+        PasswordPolicy.requireAcceptable(normalizedRequest.password, normalizedRequest.email)
         ensureEmailIsAvailable(normalizedRequest.email)
 
         val now = Instant.now(clock)
@@ -149,7 +156,46 @@ class AuthService(
             throw ApplicationException.unauthorized(INVALID_TOKEN_CODE, INVALID_REFRESH_TOKEN_MESSAGE)
         }
 
-        return RefreshTokenResponse(issueAccessToken(user))
+        return RefreshTokenResponse(jwtTokenProvider.generateRefreshedAccessToken(user.toSecurityUser(), refreshToken))
+    }
+
+    /** Account-wide logout deliberately reuses the revocation check enforced on both JWT types. */
+    fun logout(request: LogoutRequest) {
+        val credentials = listOfNotNull(
+            request.refreshToken?.takeIf { jwtTokenProvider.validateRefreshToken(it) },
+            request.accessToken?.takeIf { jwtTokenProvider.validateAccessToken(it) }
+        )
+        credentials.forEach { token ->
+            val version = jwtTokenProvider.getTokenVersionFromJWT(token) ?: return@forEach
+            val email = EmailNormalizer.normalize(jwtTokenProvider.getUsernameFromJWT(token))
+            repeat(8) {
+                val user = userAccountRepository.findByEmailIgnoreCase(email) ?: return@forEach
+                if (user.tokenVersion != version) return@forEach
+                if (userAccountRepository.updateAccount(user, user.copy(
+                        tokenVersion = user.tokenVersion + 1, updatedAt = Instant.now(clock)
+                    )) != null) return
+            }
+            throw ApplicationException.conflict("ACCOUNT_CHANGED", "Could not finish signing out. Please try again.")
+        }
+    }
+
+    private fun reserveSignInAttempt(email: String): UserAccountDocument? {
+        val now = Instant.now(clock)
+        repeat(8) {
+            val user = userAccountRepository.findByEmailIgnoreCase(email) ?: return null
+            if (user.password == null) return user
+            val activeWindow = user.signInWindowExpiresAt?.isAfter(now) == true
+            if (activeWindow && user.signInAttempts >= 10) {
+                throw ApplicationException.tooManyRequests("SIGN_IN_THROTTLED", "Please wait before trying this account again, or use password recovery.",
+                    java.time.Duration.between(now, user.signInWindowExpiresAt).seconds.coerceAtLeast(1))
+            }
+            val reserved = userAccountRepository.updateAccount(user, user.copy(
+                signInAttempts = if (activeWindow) user.signInAttempts + 1 else 1,
+                signInWindowExpiresAt = if (activeWindow) user.signInWindowExpiresAt else now.plusSeconds(900)
+            ))
+            if (reserved != null) return reserved
+        }
+        throw ApplicationException.tooManyRequests("SIGN_IN_THROTTLED", "Please wait and try again.", 1)
     }
 
     fun verifyEmail(request: VerifyEmailRequest): AuthResponse {
@@ -187,9 +233,6 @@ class AuthService(
 
     private fun issueAuthentication(userDetails: UserAccountDocument): AuthResponse =
         issueAuthentication(userDetails.toSecurityUser())
-
-    private fun issueAccessToken(userDetails: UserAccountDocument): String =
-        jwtTokenProvider.generateAccessToken(userDetails.toSecurityUser())
 
     private fun UserAccountDocument.toSecurityUser(): SecurityUserDetails =
         User(email, password, emptyList()).withTokenVersion(tokenVersion, id, emailVerified)

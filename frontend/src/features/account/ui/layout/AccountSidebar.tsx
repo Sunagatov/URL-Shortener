@@ -4,6 +4,7 @@ import { routes } from '@/app/routes';
 import { accountNavigationItems } from '@/features/account/config/navigation';
 import { useAuth } from '@/shared/auth/useAuth';
 import { FaHome, FaSignOutAlt } from 'react-icons/fa';
+import { useToast } from '@/shared/ui';
 
 interface SidePanelProps {
   desktopVisible?: boolean;
@@ -13,10 +14,15 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
+  const toast = useToast();
 
-  const handleLogout = () => {
-    logout();
-    navigate(routes.home);
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate(routes.home);
+    } catch {
+      toast.error('Could not sign out on the server. Check your connection and try again.');
+    }
   };
 
   const isActive = (path: string) => location.pathname === path;
@@ -101,12 +107,12 @@ const AccountSidebar: React.FC<SidePanelProps> = ({ desktopVisible = true }) => 
           </Link>
           <button
             type="button"
-            aria-label="Sign out"
+            aria-label="Sign out on all devices"
             onClick={handleLogout}
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-[color:var(--danger-text)] transition-all duration-200 hover:bg-[var(--danger-bg)] hover:text-[color:var(--danger-text)]"
           >
             <FaSignOutAlt className="h-4 w-4" />
-            <span className="text-sm font-medium">Sign Out</span>
+            <span className="text-sm font-medium">Sign Out All Devices</span>
           </button>
         </div>
       </div>

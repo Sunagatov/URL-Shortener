@@ -22,8 +22,6 @@ const guestRoutes = [
   { path: routes.signIn, element: <SignInPage /> },
   { path: routes.signUp, element: <SignUpPage /> },
   { path: routes.verifyEmail, element: <VerifyEmailPage /> },
-  { path: routes.forgotPassword, element: <ForgotPasswordPage /> },
-  { path: routes.resetPassword, element: <ResetPasswordPage /> },
 ] as const;
 
 const protectedRoutes = [
@@ -45,6 +43,8 @@ function AppRoutes() {
           <Route path={routes.home} element={<UrlShortenerPage />} />
           <Route path={routes.abuse} element={<AbuseReportPage />} />
           <Route path={routes.googleCallback} element={<GoogleCallbackPage />} />
+          <Route path={routes.forgotPassword} element={<ForgotPasswordPage />} />
+          <Route path={routes.resetPassword} element={<ResetPasswordPage />} />
           {guestRoutes.map(({ path, element }) => (
             <Route
               key={path}

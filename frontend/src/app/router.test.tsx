@@ -38,10 +38,22 @@ const authValue = (overrides: Partial<AuthContextType>): AuthContextType => ({
   login: vi.fn(),
   updateUser: vi.fn(),
   logout: vi.fn(),
+  clearSession: vi.fn(),
   ...overrides,
 });
 
 describe('App routes', () => {
+  it('allows reset and forgot-password pages with persisted browser authentication', async () => {
+    mockUseAuth.mockReturnValue(authValue({ isAuthenticated: true }));
+    window.history.pushState({}, '', '/reset-password?token=synthetic-token');
+    const page = render(<App />);
+    expect(await screen.findByLabelText(/^new password$/i)).toBeInTheDocument();
+    expect(screen.queryByText('Dashboard Page')).not.toBeInTheDocument();
+    page.unmount();
+    window.history.pushState({}, '', '/forgot-password');
+    render(<App />);
+    expect(await screen.findByRole('button', { name: /email recovery link/i })).toBeInTheDocument();
+  });
   it('redirects unauthenticated account routes to sign in', async () => {
     mockUseAuth.mockReturnValue(authValue({ isAuthenticated: false }));
     window.history.pushState({}, '', '/account/dashboard');

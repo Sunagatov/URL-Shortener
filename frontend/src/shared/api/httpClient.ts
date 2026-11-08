@@ -62,7 +62,7 @@ axiosInstance.interceptors.response.use(
     }
 
     if (!refreshToken) {
-      await refreshFailedSession(originalRequest.url, error);
+      await refreshFailedSession(originalRequest.url, error, refreshToken);
       return Promise.reject(error);
     }
 
@@ -79,7 +79,7 @@ axiosInstance.interceptors.response.use(
 
       return retriedResponse;
     } catch (refreshError) {
-      await refreshFailedSession(originalRequest.url, refreshError);
+      await refreshFailedSession(originalRequest.url, refreshError, refreshToken);
       return Promise.reject(refreshError);
     }
   }

@@ -12,7 +12,7 @@ class AccountPasswordEncoderTest {
     fun `long Unicode passwords remain distinct beyond bcrypt byte limit`() {
         val password = "ж".repeat(40)
         val hash = encoder.encode(password)
-        assertTrue(hash.startsWith("{argon2id}"))
+        assertTrue(hash.startsWith("{argon2id-nfc}"))
         assertTrue(encoder.matches(password, hash))
         assertFalse(encoder.matches("ж".repeat(39) + "я", hash))
         assertFalse(encoder.matches("ж".repeat(36), hash))

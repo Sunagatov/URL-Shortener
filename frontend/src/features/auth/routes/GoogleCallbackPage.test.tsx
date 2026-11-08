@@ -33,9 +33,7 @@ describe('Google callback', () => {
       throw new Error('unbound');
     });
     showCallback();
-    expect(
-      await screen.findByText('Failed to sign in with Google. Please try again.')
-    ).toBeInTheDocument();
+    expect(await screen.findByText('unbound')).toBeInTheDocument();
     expect(googleAuth).not.toHaveBeenCalled();
     expect(login).not.toHaveBeenCalled();
   });
@@ -49,6 +47,10 @@ describe('Google callback', () => {
     showCallback();
     await waitFor(() => expect(googleAuth).toHaveBeenCalledWith('code', 'v'.repeat(43)));
     expect(await screen.findByText('Account destination')).toBeInTheDocument();
-    expect(login).toHaveBeenCalledWith({ accessToken: 'access', refreshToken: 'refresh' }, null);
+    expect(login).toHaveBeenCalledWith(
+      { accessToken: 'access', refreshToken: 'refresh' },
+      null,
+      false
+    );
   });
 });

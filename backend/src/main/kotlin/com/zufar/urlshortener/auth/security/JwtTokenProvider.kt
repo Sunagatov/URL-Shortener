@@ -43,6 +43,10 @@ class JwtTokenProvider(
     fun generateRefreshToken(userDetails: UserDetails): String =
         generateToken(userDetails, jwtRefreshExpirationInMs, REFRESH_TOKEN_TYPE)
 
+    fun generateRefreshedAccessToken(userDetails: UserDetails, refreshToken: String): String =
+        generateToken(userDetails, jwtExpirationInMs, ACCESS_TOKEN_TYPE,
+            (parseClaims(refreshToken)["authTime"] as? Number)?.toLong())
+
     fun getUsernameFromJWT(token: String): String = parseClaims(token).subject
 
     fun getTokenVersionFromJWT(token: String): Int? =
@@ -61,15 +65,25 @@ class JwtTokenProvider(
 
     fun validateRefreshToken(token: String): Boolean = validateTokenByType(token, REFRESH_TOKEN_TYPE)
 
-    private fun generateToken(userDetails: UserDetails, expirationMs: Long, tokenType: String): String {
+    fun isRecentAccessToken(token: String, maxAgeSeconds: Long): Boolean {
+        val claims = parseClaimsOrNull(token) ?: return false
+        val issuedAt = (claims["authTime"] as? Number)?.toLong()?.let(Instant::ofEpochSecond) ?: return false
+        val age = java.time.Duration.between(issuedAt, Instant.now(clock)).seconds
+        return claims[TOKEN_TYPE_CLAIM] == ACCESS_TOKEN_TYPE && age in 0..maxAgeSeconds
+    }
+
+    private fun generateToken(userDetails: UserDetails, expirationMs: Long, tokenType: String,
+        authTime: Long? = Instant.now(clock).epochSecond): String {
         val now = Date.from(Instant.now(clock))
         val expiryDate = Date(now.time + expirationMs)
         val tokenVersion = extractTokenVersion(userDetails)
 
         return Jwts.builder()
+            .id(java.util.UUID.randomUUID().toString())
             .subject(userDetails.username)
             .claim(TOKEN_TYPE_CLAIM, tokenType)
             .claim(TOKEN_VERSION_CLAIM, tokenVersion)
+            .claim("authTime", authTime)
             .issuedAt(now)
             .expiration(expiryDate)
             .signWith(secretKey)

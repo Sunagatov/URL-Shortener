@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.Clock
 import java.time.Instant
+import com.zufar.urlshortener.shared.security.PasswordPolicy
 
 private const val INVALID_USER_REQUEST_CODE = "INVALID_USER_REQUEST"
 private const val USER_NOT_FOUND_CODE = "USER_NOT_FOUND"
@@ -69,6 +70,7 @@ class UserAccountService(
         if (!passwordEncoder.matches(request.currentPassword, user.password)) {
             throw ApplicationException.badRequest(INVALID_USER_REQUEST_CODE, "Current password is incorrect")
         }
+        PasswordPolicy.requireAcceptable(request.newPassword, user.email)
         val encodedPassword = requireNotNull(passwordEncoder.encode(request.newPassword)) {
             "Password encoder returned null during password change"
         }

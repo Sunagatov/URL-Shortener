@@ -4,6 +4,9 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import * as passwordResetApi from '@/features/auth/api/passwordResetApi';
 import ResetPasswordPage from '@/features/auth/routes/ResetPasswordPage';
 
+const clearSession = vi.fn();
+vi.mock('@/shared/auth/useAuth', () => ({ useAuth: () => ({ clearSession }) }));
+
 vi.mock('@/features/auth/api/passwordResetApi', () => ({
   resetPassword: vi.fn(),
 }));
@@ -34,6 +37,7 @@ describe('ResetPasswordPage', () => {
     await user.click(screen.getByRole('button', { name: /save new password/i }));
 
     expect(await screen.findByText(/password updated/i)).toBeInTheDocument();
+    expect(clearSession).toHaveBeenCalledOnce();
     await waitFor(() =>
       expect(passwordResetApi.resetPassword).toHaveBeenCalledWith({
         token: 'test-token',

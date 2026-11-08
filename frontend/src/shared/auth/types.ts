@@ -17,7 +17,8 @@ export interface AuthTokens {
 export interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
-  login: (tokens: AuthTokens, user: User | null) => void;
+  login: (tokens: AuthTokens, user: User | null, rememberMe?: boolean) => void;
   updateUser: (user: User) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
+  clearSession: () => void;
 }

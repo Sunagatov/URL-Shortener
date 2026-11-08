@@ -37,12 +37,12 @@ class GoogleAuthService(
     private val log = LoggerFactory.getLogger(GoogleAuthService::class.java)
     private val restTemplate = RestTemplate()
 
-    fun authenticate(code: String, codeVerifier: String): AuthResponse {
+    fun authenticate(code: String, codeVerifier: String, linkAccessToken: String? = null): AuthResponse {
         if (!codeVerifier.matches(Regex("[A-Za-z0-9._~-]{43,128}"))) {
             throw ApplicationException.unauthorized(GOOGLE_AUTH_FAILED_CODE, "Invalid sign-in transaction")
         }
         val googleUser = exchangeCodeForUserInfo(code, codeVerifier)
-        val result = findOrCreateUser(googleUser)
+        val result = findOrCreateUser(googleUser, linkAccessToken)
         log.info(
             "google_auth_succeeded userId={} emailDomain={} isNewUser={}",
             result.user.id, LogSanitizer.emailDomain(result.user.email), result.isNewUser
@@ -98,18 +98,37 @@ class GoogleAuthService(
         if (!emailVerified) {
             throw ApplicationException.unauthorized(GOOGLE_AUTH_FAILED_CODE, "Google email is not verified")
         }
+        val subject = (body["sub"] as? String)?.takeIf { it.isNotBlank() && it.length <= 255 }
+            ?: throw ApplicationException.unauthorized(GOOGLE_AUTH_FAILED_CODE, "Missing Google account identifier")
+        val normalizedEmail = EmailNormalizer.normalize(email)
+        val hostedDomain = (body["hd"] as? String)?.lowercase()?.takeIf { it.isNotBlank() }
         return GoogleUserInfo(
-            email = EmailNormalizer.normalize(email),
+            email = normalizedEmail,
+            subject = subject,
+            authoritativeEmail = normalizedEmail.endsWith("@gmail.com") ||
+                (hostedDomain != null && normalizedEmail.substringAfterLast('@') == hostedDomain),
             firstName = (body["given_name"] as? String) ?: "",
             lastName = (body["family_name"] as? String) ?: ""
         )
     }
 
-    private fun findOrCreateUser(googleUser: GoogleUserInfo): GoogleAuthUserResult {
+    private fun findOrCreateUser(googleUser: GoogleUserInfo, linkAccessToken: String?): GoogleAuthUserResult {
+        userAccountRepository.findByGoogleSubject(googleUser.subject)?.let { bound ->
+            if (!bound.emailVerified) throw linkingProofRequired()
+            // A provider email change never reassigns an established subject binding.
+            if (linkAccessToken != null) requireLinkProof(bound, linkAccessToken)
+            return GoogleAuthUserResult(bound, isNewUser = false)
+        }
         val existing = userAccountRepository.findByEmailIgnoreCase(googleUser.email)
         if (existing != null) {
-            return GoogleAuthUserResult(verifyExistingAccountFromGoogle(existing), isNewUser = false)
+            if (existing.googleSubject != null) throw linkingProofRequired()
+            if (linkAccessToken != null) requireLinkProof(existing, linkAccessToken)
+            else if (!googleUser.authoritativeEmail) throw linkingProofRequired()
+            return GoogleAuthUserResult(verifyExistingAccountFromGoogle(existing, googleUser.subject), isNewUser = false)
         }
+        // Third-party Google email verification can be historical. Establish mailbox ownership
+        // through ordinary email signup/recovery, then explicitly link from a fresh local session.
+        if (!googleUser.authoritativeEmail || linkAccessToken != null) throw linkingProofRequired()
         val now = Instant.now(clock)
         val user = userAccountRepository.save(
             UserAccountDocument(
@@ -117,6 +136,7 @@ class GoogleAuthService(
                 lastName = googleUser.lastName,
                 email = googleUser.email,
                 authProvider = AuthProvider.GOOGLE,
+                googleSubject = googleUser.subject,
                 emailVerified = true,
                 emailVerifiedAt = now,
                 createdAt = now,
@@ -126,9 +146,22 @@ class GoogleAuthService(
         return GoogleAuthUserResult(user, isNewUser = true)
     }
 
-    private fun verifyExistingAccountFromGoogle(user: UserAccountDocument): UserAccountDocument {
+    private fun requireLinkProof(user: UserAccountDocument, token: String) {
+        if (!jwtTokenProvider.isRecentAccessToken(token, 300) ||
+            jwtTokenProvider.getTokenVersionFromJWT(token) != user.tokenVersion ||
+            EmailNormalizer.normalize(jwtTokenProvider.getUsernameFromJWT(token)) != EmailNormalizer.normalize(user.email) ||
+            !user.emailVerified || !user.passwordEmailVerified || user.password == null
+        ) throw linkingProofRequired()
+    }
+
+    private fun linkingProofRequired() = ApplicationException.forbidden(
+        "GOOGLE_LINK_REQUIRES_PROOF",
+        "Sign up or sign in with email first. If needed, reset your password. Then link Google from Security within five minutes of signing in."
+    )
+
+    private fun verifyExistingAccountFromGoogle(user: UserAccountDocument, subject: String): UserAccountDocument {
         val removeUntrustedPassword = user.password != null && !user.passwordEmailVerified
-        if (user.emailVerified && !removeUntrustedPassword &&
+        if (user.googleSubject == subject && user.emailVerified && !removeUntrustedPassword &&
             user.emailVerificationCodeHash == null &&
             user.emailVerificationCodeExpiresAt == null &&
             user.emailVerificationCodeSentAt == null
@@ -139,6 +172,7 @@ class GoogleAuthService(
         val now = Instant.now(clock)
         return userAccountRepository.updateAccountOrConflict(user,
             user.copy(
+                googleSubject = subject,
                 password = if (removeUntrustedPassword) null else user.password,
                 authProvider = if (removeUntrustedPassword) AuthProvider.GOOGLE else user.authProvider,
                 tokenVersion = if (removeUntrustedPassword) user.tokenVersion + 1 else user.tokenVersion,
@@ -168,6 +202,8 @@ class GoogleAuthService(
 
     private data class GoogleUserInfo(
         val email: String,
+        val subject: String,
+        val authoritativeEmail: Boolean,
         val firstName: String,
         val lastName: String
     )

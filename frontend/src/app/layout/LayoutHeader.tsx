@@ -155,7 +155,7 @@ export const LayoutHeader = ({
                     className="flex w-full items-center space-x-3 px-4 py-2.5 text-[color:var(--danger-text)] transition-colors duration-200 hover:bg-[var(--danger-hover-bg)] hover:text-[color:var(--danger-text)]"
                   >
                     <FaSignOutAlt className="h-3.5 w-3.5" />
-                    <span className="text-sm font-medium">Sign Out</span>
+                    <span className="text-sm font-medium">Sign Out All Devices</span>
                   </button>
                 </div>
               </div>

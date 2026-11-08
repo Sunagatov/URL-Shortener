@@ -4,7 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import * as accountApi from '@/features/account/api/accountApi';
 import SecurityPage from '@/features/account/routes/SecurityPage';
 
-const logout = vi.fn();
+const clearSession = vi.fn();
 
 vi.mock('@/features/account/api/accountApi', () => ({
   changePassword: vi.fn(),
@@ -12,7 +12,8 @@ vi.mock('@/features/account/api/accountApi', () => ({
 
 vi.mock('@/shared/auth/useAuth', () => ({
   useAuth: () => ({
-    logout,
+    clearSession,
+    logout: vi.fn(),
     login: vi.fn(),
     updateUser: vi.fn(),
     isAuthenticated: true,
@@ -97,7 +98,7 @@ describe('Security', () => {
       currentPassword: 'OldPassword123!',
       newPassword: 'correct horse battery staple',
     });
-    expect(logout).toHaveBeenCalledOnce();
+    expect(clearSession).toHaveBeenCalledOnce();
     expect(await screen.findByText('Sign In Destination')).toBeInTheDocument();
   });
 
@@ -127,6 +128,6 @@ describe('Security', () => {
 
     expect(screen.getByRole('heading', { name: 'Security' })).toBeInTheDocument();
     expect(screen.queryByText('Sign In Destination')).not.toBeInTheDocument();
-    expect(logout).not.toHaveBeenCalled();
+    expect(clearSession).not.toHaveBeenCalled();
   });
 });

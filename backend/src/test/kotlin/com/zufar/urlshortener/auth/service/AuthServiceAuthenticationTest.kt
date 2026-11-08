@@ -93,7 +93,7 @@ class AuthServiceAuthenticationTest {
         whenever(jwtTokenProvider.getUsernameFromJWT("refresh-token")).thenReturn("  User@Example.COM  ")
         whenever(jwtTokenProvider.getTokenVersionFromJWT("refresh-token")).thenReturn(0)
         whenever(userAccountRepository.findByEmailIgnoreCase("user@example.com")).thenReturn(user)
-        whenever(jwtTokenProvider.generateAccessToken(any())).thenReturn("new-access-token")
+        whenever(jwtTokenProvider.generateRefreshedAccessToken(any(), any())).thenReturn("new-access-token")
 
         val response = authService().refreshAccessToken(RefreshTokenRequest("refresh-token"))
 

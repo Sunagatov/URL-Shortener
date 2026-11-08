@@ -3,6 +3,7 @@ package com.zufar.urlshortener.auth.controller
 import com.zufar.urlshortener.auth.dto.AuthResponse
 import com.zufar.urlshortener.auth.dto.ForgotPasswordRequest
 import com.zufar.urlshortener.auth.dto.GoogleAuthRequest
+import com.zufar.urlshortener.auth.dto.LogoutRequest
 import com.zufar.urlshortener.auth.dto.RefreshTokenRequest
 import com.zufar.urlshortener.auth.dto.RefreshTokenResponse
 import com.zufar.urlshortener.auth.dto.ResendVerificationRequest
@@ -46,7 +47,7 @@ class AuthController(
     fun authenticateWithGoogle(
         @Valid @RequestBody googleAuthRequest: GoogleAuthRequest
     ): ResponseEntity<AuthResponse> {
-        return ResponseEntity.ok(googleAuthService.authenticate(googleAuthRequest.code, googleAuthRequest.codeVerifier))
+        return ResponseEntity.ok(googleAuthService.authenticate(googleAuthRequest.code, googleAuthRequest.codeVerifier, googleAuthRequest.linkAccessToken))
     }
 
     @PostMapping("/signin")
@@ -70,6 +71,12 @@ class AuthController(
         @Valid @RequestBody refreshTokenRequest: RefreshTokenRequest
     ): ResponseEntity<RefreshTokenResponse> =
         ResponseEntity.ok(authService.refreshAccessToken(refreshTokenRequest))
+
+    @PostMapping("/logout")
+    fun logout(@Valid @RequestBody request: LogoutRequest): ResponseEntity<Void> {
+        authService.logout(request)
+        return ResponseEntity.noContent().build()
+    }
 
     @PostMapping("/verify-email")
     fun verifyEmail(

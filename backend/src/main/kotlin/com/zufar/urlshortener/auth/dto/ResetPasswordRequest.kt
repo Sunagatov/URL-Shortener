@@ -1,5 +1,6 @@
 package com.zufar.urlshortener.auth.dto
 
+import com.zufar.urlshortener.shared.security.NewPassword
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 
@@ -9,8 +10,7 @@ data class ResetPasswordRequest(
     val token: String,
 
     @field:NotBlank(message = PASSWORD_MUST_NOT_BE_EMPTY)
-    @field:Size(min = 15, message = PASSWORD_MUST_BE_AT_LEAST_15_CHARACTERS_LONG)
-    @field:Size(max = 64, message = PASSWORD_IS_TOO_LONG)
+    @field:NewPassword
     val newPassword: String,
 
     @field:Size(max = 2048, message = "Turnstile token is too long")

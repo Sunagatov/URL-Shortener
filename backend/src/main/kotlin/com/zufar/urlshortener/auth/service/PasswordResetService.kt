@@ -14,6 +14,7 @@ import java.security.SecureRandom
 import java.time.Clock
 import java.time.Instant
 import java.util.Base64
+import com.zufar.urlshortener.shared.security.PasswordPolicy
 
 private const val TOKEN_BYTES = 32
 private const val TOKEN_ID_LENGTH = 16
@@ -38,16 +39,22 @@ class PasswordResetService(
             log.info("password_reset_requested_unknown_email emailDomain={}", LogSanitizer.emailDomain(email))
             return
         }
+        val now = Instant.now(clock)
+        val activeWindow = user.passwordResetWindowExpiresAt?.isAfter(now) == true
+        if (user.passwordResetSentAt?.plusSeconds(60)?.isAfter(now) == true ||
+            (activeWindow && user.passwordResetMessages >= 5)) return
         val token = generateToken()
         val tokenId = resetTokenId(token)
         val tokenHash = passwordEncoder.encode(token)
-        val now = Instant.now(clock)
 
         val saved = userAccountRepository.updateAccount(user,
             user.copy(
                 passwordResetTokenHash = tokenHash,
                 passwordResetTokenId = tokenId,
                 passwordResetTokenExpiresAt = now.plusSeconds(TOKEN_LIFETIME_MINUTES * 60),
+                passwordResetSentAt = now,
+                passwordResetMessages = if (activeWindow) user.passwordResetMessages + 1 else 1,
+                passwordResetWindowExpiresAt = if (activeWindow) user.passwordResetWindowExpiresAt else now.plusSeconds(3600),
                 updatedAt = now
             )
         )
@@ -65,6 +72,8 @@ class PasswordResetService(
             ?.takeIf { passwordEncoder.matches(request.token, it.passwordResetTokenHash) }
             ?: throw ApplicationException.badRequest(INVALID_TOKEN_CODE, "Invalid or expired reset token")
 
+        PasswordPolicy.requireAcceptable(request.newPassword, user.email)
+
         val saved = userAccountRepository.updateAccount(user,
             user.copy(
                 password = passwordEncoder.encode(request.newPassword),
@@ -76,6 +85,8 @@ class PasswordResetService(
                 passwordResetTokenId = null,
                 passwordResetTokenExpiresAt = null,
                 tokenVersion = user.tokenVersion + 1,
+                signInAttempts = 0,
+                signInWindowExpiresAt = null,
                 updatedAt = now
             )
         )

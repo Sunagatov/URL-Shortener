@@ -7,7 +7,13 @@ import {
   getGoogleRedirectUri,
 } from '@/features/auth/lib/googleOAuth';
 
-export function GoogleSignInButton({ state }: { state?: string }) {
+export function GoogleSignInButton({
+  state,
+  rememberMe = false,
+}: {
+  state?: string;
+  rememberMe?: boolean;
+}) {
   const [pending, setPending] = useState(false);
   const toast = useToast();
   if (!googleOAuthClientId) return null;
@@ -16,7 +22,7 @@ export function GoogleSignInButton({ state }: { state?: string }) {
     if (pending) return;
     setPending(true);
     try {
-      window.location.href = await getGoogleOAuthUrl(getGoogleRedirectUri(), state);
+      window.location.href = await getGoogleOAuthUrl(getGoogleRedirectUri(), state, { rememberMe });
     } catch {
       toast.error('Unable to start Google sign-in. Please try again.');
       setPending(false);
