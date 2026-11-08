@@ -79,6 +79,7 @@ dependencies {
 
     // Monitoring
     implementation("io.micrometer:micrometer-registry-prometheus")
+    implementation("org.springframework.boot:spring-boot-starter-opentelemetry")
 
     // User-Agent Parsing
     implementation("com.github.ua-parser:uap-java:$uaParserVersion")
