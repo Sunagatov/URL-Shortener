@@ -7,6 +7,23 @@ import org.junit.jupiter.api.assertThrows
 import java.net.InetAddress
 
 class UrlValidatorTest {
+    @Test
+    fun `uppercase schemes and Unicode hosts resolve and validate using the ASCII authority`() {
+        val validator = validator("https://zuf.uk", resolver = stubResolver(
+            "example.com" to listOf("93.184.216.34"),
+            "xn--bcher-kva.de" to listOf("93.184.216.34")))
+        assertDoesNotThrow { validator.validateUrl("HTTPS://EXAMPLE.COM/a") }
+        assertDoesNotThrow { validator.validateUrl("https://bücher.de/a") }
+    }
+
+    @Test
+    fun `normalization still rejects uppercase credential and self-link destinations`() {
+        val validator = validator("https://zuf.uk")
+        for (value in listOf("HTTPS://user:secret@example.com/a", "HTTPS://ZUF.UK/a", "HTTPS://127.0.0.1/a")) {
+            assertThrows<ApplicationException> { validator.validateUrl(value) }
+        }
+    }
+
 
     @Test
     fun `same host as configured base url is rejected`() {

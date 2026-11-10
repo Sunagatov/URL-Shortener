@@ -9,7 +9,8 @@ export const createUrlSchema = z.object({
     .string()
     .min(1, 'URL is required')
     .url('Please enter a valid URL')
-    .refine(isSafeDestinationUrl, unsafeDestinationMessage),
+    .refine(isSafeDestinationUrl, unsafeDestinationMessage)
+    .transform(value => new URL(value).href),
   daysCount: z.preprocess(
     value => (value === '' ? undefined : value),
     z.coerce.number().int().min(1).max(365).optional()

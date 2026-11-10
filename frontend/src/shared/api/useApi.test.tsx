@@ -67,6 +67,20 @@ function UseApiHarness() {
 }
 
 describe('useApi', () => {
+  it.each(['Resolve next', 'Reject next'])(
+    'ignores a pending request after reset: %s',
+    async completion => {
+      const user = userEvent.setup();
+      render(<UseApiHarness />);
+      await user.click(screen.getByRole('button', { name: 'Execute' }));
+      await user.click(screen.getByRole('button', { name: 'Reset' }));
+      await user.click(screen.getByRole('button', { name: completion }));
+      expect(screen.getByTestId('loading')).toHaveTextContent('idle');
+      expect(screen.getByTestId('data')).toHaveTextContent('empty');
+      expect(screen.getByTestId('error')).toHaveTextContent('none');
+    }
+  );
+
   it('ignores stale request failures after a newer request succeeds', async () => {
     const user = userEvent.setup();
     render(<UseApiHarness />);

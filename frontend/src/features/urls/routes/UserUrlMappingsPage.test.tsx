@@ -36,6 +36,43 @@ describe('getVisiblePages', () => {
 });
 
 describe('UserUrlMappings', () => {
+  it('removes successful bulk deletions and retries only failed mappings', async () => {
+    mockGetAllUserUrls.mockResolvedValue([
+      { ...mapping, urlHash: 'deleted', shortUrl: 'https://sho.rt/deleted' },
+      { ...mapping, urlHash: 'retry', shortUrl: 'https://sho.rt/retry' },
+    ]);
+    mockDeleteUrl.mockImplementation(hash =>
+      hash === 'deleted'
+        ? Promise.resolve()
+        : Promise.reject({
+            response: { status: 503, data: { errorMessage: 'Temporary failure' } },
+          })
+    );
+    render(
+      <MemoryRouter>
+        <UserUrlMappingsPage />
+      </MemoryRouter>
+    );
+    await userEvent.click(await screen.findByRole('button', { name: 'Select' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Select all' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Delete 2' }));
+    await userEvent.click(
+      within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete 2' })
+    );
+    await waitFor(() => expect(screen.getByText('1 link')).toBeInTheDocument());
+    expect(
+      screen.queryByLabelText('Open short URL https://sho.rt/deleted')
+    ).not.toBeInTheDocument();
+    expect(screen.getByText('1 selected')).toBeInTheDocument();
+    mockDeleteUrl.mockResolvedValue(undefined);
+    await userEvent.click(
+      within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete 1' })
+    );
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(mockDeleteUrl.mock.calls.filter(([hash]) => hash === 'deleted')).toHaveLength(1);
+    expect(mockDeleteUrl.mock.calls.filter(([hash]) => hash === 'retry')).toHaveLength(2);
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
   });

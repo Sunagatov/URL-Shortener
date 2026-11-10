@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import UrlShortenerPage from './UrlShortenerPage';
@@ -51,7 +51,7 @@ describe('homepage verification', () => {
     await user.click(screen.getByRole('button', { name: 'Shorten' }));
     await waitFor(() => expect(createUrl).toHaveBeenCalledOnce());
     expect(createUrl).toHaveBeenCalledWith({
-      originalUrl: 'https://example.com',
+      originalUrl: 'https://example.com/',
       turnstileToken: 'test-token',
     });
     await user.click(await screen.findByRole('button', { name: 'Clear' }));
@@ -83,11 +83,71 @@ describe('homepage verification', () => {
     await user.click(screen.getByRole('button', { name: 'Shorten' }));
     await waitFor(() =>
       expect(createUrl).toHaveBeenCalledWith({
-        originalUrl: 'https://example.com',
+        originalUrl: 'https://example.com/',
         daysCount: 1,
         expirationReminder: true,
         turnstileToken: 'test-token',
       })
     );
+  });
+
+  it('removes the previous success when the next creation fails', async () => {
+    vi.mocked(createUrl).mockResolvedValueOnce({ shortUrl: 'https://zuf.uk/previous' });
+    vi.mocked(createUrl).mockRejectedValueOnce({
+      response: { status: 409, data: { errorMessage: 'Alias taken' } },
+    });
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <ToastProvider>
+          <UrlShortenerPage />
+        </ToastProvider>
+      </MemoryRouter>
+    );
+    const input = screen.getByPlaceholderText('Paste your long URL here…');
+    await user.type(input, 'https://example.com/first');
+    await user.click(screen.getByRole('button', { name: 'Verify test challenge' }));
+    await user.click(screen.getByRole('button', { name: 'Shorten' }));
+    await screen.findByRole('link', { name: 'https://zuf.uk/previous' });
+    await user.clear(input);
+    await user.type(input, 'https://example.com/second');
+    await user.click(screen.getByRole('button', { name: 'Verify test challenge' }));
+    await user.click(screen.getByRole('button', { name: 'Shorten' }));
+    await screen.findByText('Alias taken');
+    expect(screen.queryByText('Your link is ready!')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'https://zuf.uk/previous' })).not.toBeInTheDocument();
+  });
+
+  it.each(['success', 'failure'])('keeps Clear authoritative after a delayed %s', async outcome => {
+    let resolve!: (value: { shortUrl: string }) => void;
+    let reject!: (reason: unknown) => void;
+    vi.mocked(createUrl).mockImplementationOnce(
+      () =>
+        new Promise((res, rej) => {
+          resolve = res;
+          reject = rej;
+        })
+    );
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <ToastProvider>
+          <UrlShortenerPage />
+        </ToastProvider>
+      </MemoryRouter>
+    );
+    const input = screen.getByPlaceholderText('Paste your long URL here…');
+    await user.type(input, 'https://example.com/pending');
+    await user.click(screen.getByRole('button', { name: 'Verify test challenge' }));
+    await user.click(screen.getByRole('button', { name: 'Shorten' }));
+    await user.click(await screen.findByRole('button', { name: 'Clear' }));
+    await act(async () => {
+      if (outcome === 'success') resolve({ shortUrl: 'https://zuf.uk/late-result' });
+      else reject({ response: { status: 500, data: { errorMessage: 'Stale failure' } } });
+    });
+    expect(input).toHaveValue('');
+    expect(screen.queryByText('Your link is ready!')).not.toBeInTheDocument();
+    expect(screen.queryByText('Stale failure')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Shorten' })).toBeEnabled();
   });
 });

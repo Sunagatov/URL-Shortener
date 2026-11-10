@@ -140,16 +140,19 @@ const UserUrlMappingsPage: React.FC = () => {
   };
 
   const handleBulkDelete = async (hashes: string[]) => {
-    try {
-      await Promise.all(hashes.map(hash => deleteUrl(hash)));
-      toast.success(`${hashes.length} URL${hashes.length !== 1 ? 's' : ''} deleted.`);
-      updateMappingsAfterDelete(hashes);
-      return true;
-    } catch (error: unknown) {
-      const message = getApiErrorMessage(error, urlDeleteMessages.failedBatch);
-      toast.error(message);
+    const results = await Promise.allSettled(hashes.map(hash => deleteUrl(hash)));
+    const deleted = hashes.filter((_, index) => results[index].status === 'fulfilled');
+    if (deleted.length > 0) {
+      updateMappingsAfterDelete(deleted);
+    }
+    const failures = results.filter(result => result.status === 'rejected');
+    if (failures.length > 0) {
+      const message = getApiErrorMessage(failures[0].reason, urlDeleteMessages.failedBatch);
+      toast.error(`${deleted.length} deleted; ${failures.length} failed. ${message}`);
       return false;
     }
+    toast.success(`${deleted.length} URL${deleted.length !== 1 ? 's' : ''} deleted.`);
+    return true;
   };
 
   const handleCopyUrl = async (url: string) => {

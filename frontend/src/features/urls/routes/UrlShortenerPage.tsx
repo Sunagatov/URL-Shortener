@@ -26,7 +26,7 @@ const UrlShortenerPage: React.FC = () => {
   usePageTitle();
   const { isAuthenticated } = useAuth();
   const { copiedValue, copyValue, clearCopiedValue } = useClipboard();
-  const { execute, error, loading } = useApi<{ shortUrl: string }>();
+  const { execute, error, loading, reset: resetRequest } = useApi<{ shortUrl: string }>();
   const toast = useToast();
   const turnstile = useTurnstileVerification(features.urlCreateTurnstile);
   const [shortUrl, setShortUrl] = useState('');
@@ -48,6 +48,8 @@ const UrlShortenerPage: React.FC = () => {
   }, [error, toast]);
 
   const onSubmit = async (data: CreateUrlFormData) => {
+    setShortUrl('');
+    clearCopiedValue();
     setVerificationStarted(true);
     if (!turnstile.requireVerified()) {
       return;
@@ -72,6 +74,7 @@ const UrlShortenerPage: React.FC = () => {
   };
 
   const handleClear = () => {
+    resetRequest();
     reset();
     turnstile.resetChallenge();
     setVerificationStarted(false);
@@ -121,6 +124,15 @@ const UrlShortenerPage: React.FC = () => {
           }
           advancedOptions={
             <div className="mt-2 px-1.5">
+              {loading ? (
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="mb-2 text-xs text-[color:var(--text-muted)]"
+                >
+                  Clear
+                </button>
+              ) : null}
               <button
                 type="button"
                 onClick={() => setShowAdvanced(v => !v)}

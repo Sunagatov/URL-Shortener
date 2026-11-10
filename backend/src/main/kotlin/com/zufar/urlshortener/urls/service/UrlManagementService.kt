@@ -123,7 +123,7 @@ class UrlManagementService(
     }
 
     fun updateOriginalUrl(urlHash: String, newOriginalUrl: String): UrlMappingDto {
-        val trimmedUrl = newOriginalUrl.trim()
+        val trimmedUrl = UrlDestinationNormalizer.normalize(newOriginalUrl.trim())
         urlValidator.validateUrl(trimmedUrl)
         val urlMapping = urlMappingAccessService.getOwnedActiveUrlMapping(urlHash, ACCESS_URL_MAPPING_DENIED_MESSAGE)
         urlCreationProtectionService.reserveDestinationChange(urlMapping.targetHost ?: urlCreationProtectionService.targetHost(urlMapping.originalUrl), trimmedUrl, clock.instant())
@@ -271,7 +271,7 @@ class UrlManagementService(
     }
 
     private fun normalize(request: ShortenUrlRequest): ShortenUrlRequest {
-        val trimmedOriginalUrl = request.originalUrl.trim()
+        val trimmedOriginalUrl = UrlDestinationNormalizer.normalize(request.originalUrl.trim())
         return if (trimmedOriginalUrl == request.originalUrl) {
             request
         } else {

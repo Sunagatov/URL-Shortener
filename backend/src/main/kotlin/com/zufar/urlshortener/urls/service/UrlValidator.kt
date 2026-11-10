@@ -28,9 +28,10 @@ class UrlValidator(
         validate(!url.contains(" "), "URL must not contain spaces.")
         validate(url.length <= MAX_ALLOWED_URL_LENGTH, "URL exceeds the maximum allowed length of $MAX_ALLOWED_URL_LENGTH characters.")
         validate(hasValidProtocol(url), "URL must have a proper scheme (http or https).")
-        validate(validator.isValid(url), "URL is not valid. Please ensure it has the correct format and syntax.")
+        val normalizedUrl = UrlDestinationNormalizer.normalize(url)
+        validate(validator.isValid(normalizedUrl), "URL is not valid. Please ensure it has the correct format and syntax.")
 
-        val uri = parseUri(url)
+        val uri = parseUri(normalizedUrl)
         validate(uri.userInfo == null, "URL must not contain embedded user credentials.")
         validate(
             isValidHost(uri),
@@ -45,7 +46,7 @@ class UrlValidator(
     }
 
     private fun hasValidProtocol(url: String): Boolean =
-        allowedProtocols.any { url.startsWith("$it://") }
+        allowedProtocols.any { url.startsWith("$it://", ignoreCase = true) }
 
     private fun isValidHost(uri: URI): Boolean {
         val host = uri.host?.normalizeHost()?.takeIf { it.isNotBlank() } ?: return false

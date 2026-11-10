@@ -2,6 +2,14 @@ import { createUrlSchema } from './urlValidation';
 
 describe('createUrlSchema', () => {
   it.each([
+    ['HTTPS://EXAMPLE.COM/path?x=%2F#part', 'https://example.com/path?x=%2F#part'],
+    ['https://bücher.de/path', 'https://xn--bcher-kva.de/path'],
+    ['https://faß.de/path', 'https://xn--fa-hia.de/path'],
+  ])('canonicalizes a valid destination %s', (originalUrl, expected) => {
+    expect(createUrlSchema.parse({ originalUrl }).originalUrl).toBe(expected);
+  });
+
+  it.each([
     'file:///etc/passwd',
     'javascript:alert(1)',
     'https://user:secret@example.com/path',

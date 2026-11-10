@@ -44,6 +44,18 @@ class UrlShortenerTest {
     )
 
     @Test
+    fun `persists the canonical destination and target host`() {
+        whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
+        whenever(urlRepository.insert(any<UrlMapping>())).thenAnswer { it.arguments[0] }
+        createShortener().shorten(ShortenUrlRequest("HTTPS://BÜCHER.de/a?x=%2F#part", null), httpRequest)
+        verify(urlValidator).validateUrl("https://xn--bcher-kva.de/a?x=%2F#part")
+        verify(urlRepository).insert(check<UrlMapping> {
+            kotlin.test.assertEquals("https://xn--bcher-kva.de/a?x=%2F#part", it.originalUrl)
+            kotlin.test.assertEquals("xn--bcher-kva.de", it.targetHost)
+        })
+    }
+
+    @Test
     fun `two different original URLs produce different short codes`() {
         whenever(httpRequest.remoteAddr).thenReturn("127.0.0.1")
         whenever(urlRepository.insert(any<UrlMapping>())).thenAnswer { it.arguments[0] }
