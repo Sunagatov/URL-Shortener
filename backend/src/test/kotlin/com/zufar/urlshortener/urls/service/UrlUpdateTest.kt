@@ -48,10 +48,10 @@ class UrlUpdateTest {
         val canonical = "https://xn--bcher-kva.de/a?x=%2F#Part"
         whenever(urlRepository.findByUrlHash("abc12345")).thenReturn(Optional.of(mapping), Optional.of(mapping.copy(originalUrl = canonical)))
         whenever(authenticatedUserContext.requireAuthenticatedUserId()).thenReturn("user-123")
-        whenever(urlRepository.updateDestination("abc12345", canonical, "xn--bcher-kva.de", false, null)).thenReturn(1)
+        whenever(urlRepository.updateDestination("abc12345", canonical, "xn--bcher-kva.de", true, "suspicious_destination")).thenReturn(1)
         val result = service().updateOriginalUrl("abc12345", "HTTPS://BÜCHER.de/a?x=%2F#Part")
         assertEquals(canonical, result.originalUrl)
-        verify(urlRepository).updateDestination("abc12345", canonical, "xn--bcher-kva.de", false, null)
+        verify(urlRepository).updateDestination("abc12345", canonical, "xn--bcher-kva.de", true, "suspicious_destination")
     }
 
     @Test
